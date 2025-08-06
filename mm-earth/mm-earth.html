@@ -1,0 +1,2615 @@
+<!-- mm earth3d - MM September,October 2022 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<!--<script src="ne_110m_land0.js"></script> -->
+<script src="ne_110m_admin_0_countries.js"></script>
+<script src="cities.js"></script>
+
+<script>
+tle_names=["demo","gnss","gps-ops","glonass","galileo","beidou","tdrss","ss","weather","earthres","geosync","intelsat","iridium","oneweb","starlink","cosmos-2251-debris","planet","science"];
+for(var i=0;i<tle_names.length;i++) {
+	window[tle_names[i].replaceAll("-","")]=0; // init variables from group names
+	window[tle_names[i].replaceAll("-","")+"_tle"]=''; // init *_tle variables from group names
+}
+</script>
+
+<script src="gnss.js"></script>
+<script src="gpsops.js"></script>
+<script src="glonass.js"></script>
+<script src="galileo.js"></script>
+<script src="beidou.js"></script>
+<script src="tdrss.js"></script>
+<script src="ss.js"></script>
+<script src="weather.js"></script>
+<script src="earthres.js"></script>
+<script src="geosync.js"></script>
+<script src="intelsat.js"></script>
+<script src="iridium.js"></script>
+<script src="oneweb.js"></script>
+<script src="starlink.js"></script>
+<script src="cosmos2251debris.js"></script>
+<script src="planet.js"></script>
+<script src="science.js"></script>
+
+<style>
+/* The Modal (background) */
+.modal {display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  padding-top: 8px; /* Location of the box */
+  left: 0;top: 0;width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+.modal-content {background-color: #fefefe;margin: auto;padding: 20px;border: 1px solid #888;width: 80%;}
+.close {color: #aaaaaa;float: right;font-size: 28px;font-weight: bold;}
+.close:hover, .close:focus {color: #000;text-decoration: none;cursor: pointer;}
+</style>
+
+
+<script>
+// globals
+var pi=Math.PI;
+var a=0.0, b=-0.3, c=0.0;     // 3D view angles
+var a11,a12,a13,a21,a22,a32;  // 2D projection coefficients
+var zoom = 1, xoff = 0, yoff = 0;
+var bkg1 = "#004488", bkg2 = "#0055aa";
+var wh=Math.max(window.innerHeight-150,400), bkg = bkg1; //"#000077"; // "#ffdd88"; "darkblue"; //
+var tle_id=-1; // last centered satellite
+var lat=-999,lon=-999;
+//var gnss=0,tdrss=0,ss=0,weather=0,earthres=0,geosync=0,iridium=0,oneweb=0,starlink=0,cosmos2251debris=0,planet=0;
+var celestrack=1;
+
+// init vars
+var utc = new Date();  // utc.setMonth(5);
+a = (12-(utc.getUTCHours()+utc.getUTCMinutes()/60))*pi/12; 
+b = -sun(utc)[1]*pi/180;
+c = 0; // -23.5*pi/180;
+ 
+function url_params() { // overwrite globals from url params
+    var s = window.location.search.substring(1);
+    var ss = s.split('&');
+    for (var i = 0; i < ss.length; i++) {
+        var sss = ss[i].split('=');
+		window[sss[0]] = sss.length>1?parseFloat(sss[1]):1;
+    }
+}
+
+function zoomin() {zoom*=2; xoff-=wh/4*zoom; yoff-=wh/4*zoom;}
+function zoomout() {if(zoom>1/8) {xoff+=wh/4*zoom; yoff+=wh/4*zoom; zoom/=2; }}
+
+function init_mouse() {
+	let delta=8,sX,sY,clk=0;
+	var el=document.getElementById("svg");
+	el.onmousedown = function (event) {sX = event.pageX; sY = event.pageY;  clk=1;}
+	el.onmouseup = function (event) {clk=0;}
+	el.onmousemove = function (event) {if(clk==0) return;
+		var dX = event.pageX-sX, dY = event.pageY-sY;
+		if (Math.abs(dX) < delta && Math.abs(dY) < delta) {return;} 
+		else {
+			if(Math.abs(dX)>Math.abs(dY)) {a -= dX/4*pi/180;} else {b -= dY/4*pi/180;}
+			tle_id=-1;
+			init();
+		}
+		sX = event.pageX; sY = event.pageY;
+	}
+}
+
+document.onkeydown = function(e) {
+/*
+  var el=document.getElementById("h_slider");
+  if(e.keyCode==37 ) { // left key
+     if(el.value>0) { e.preventDefault();
+	   el.value = parseFloat(el.value)-1; h_changed(el);}
+  }
+  if(e.keyCode==39 ) { // right key
+     if(el.value<24) {e.preventDefault();
+	  el.value = parseFloat(el.value)+1; h_changed(el);}
+  }
+*/
+  if(e.keyCode==86 ) { // v
+    if(e.metaKey) {
+//		  document.getElementById('ta').value='';
+//		  document.getElementById('ta').focus();
+	  }
+  }
+  if(e.keyCode==65 ) { // ctl A
+    if(e.ctrlKey) {e.preventDefault(); animate2(e); }
+  }
+  if(e.keyCode==66 ) { // ctl B
+	if(e.ctrlKey) {e.preventDefault(); 
+	  bkg = (bkg!==bkg1)?bkg1:bkg2;  
+	  el=document.getElementById("svgdiv");
+      if(el) {
+		el.setAttribute("style","background:"+bkg+";width:"+(wh+150));
+	  }
+    }
+  }
+  if(e.keyCode==82 ) { // ctl R
+	  if(e.ctrlKey) {e.preventDefault(); zoom=1; xoff=0; yoff=0;}
+  }
+  if(e.keyCode==187 ) { // ctl +
+	  zoomin();
+  }
+  if(e.keyCode==189 ) { // ctl -
+	  zoomout();
+  }
+  if(e.keyCode==37 ) { /* left key */
+     if(e.shiftKey && e.ctrlKey) {e.preventDefault(); xoff -= 20;}
+  }
+  if(e.keyCode==39 ) { // right key
+     if(e.shiftKey && e.ctrlKey) {e.preventDefault(); xoff += 20;}
+  }
+  if(e.keyCode==38 ) { /* up key */
+      if(e.shiftKey && e.ctrlKey) {e.preventDefault(); yoff -= 20;}
+  }
+  if(e.keyCode==40 ) { // down key
+      if(e.shiftKey && e.ctrlKey) {e.preventDefault(); yoff += 20;}
+  }	
+  update();  
+};
+
+document.oncopy = function(e) {
+  var ta = document.getElementById('ta');
+  if(ta) {
+	ta.value = document.getElementById("svg").outerHTML;
+    ta.select();
+    document.execCommand('copy');
+  }
+}
+
+function init_view() {
+  with(Math) {
+    a11=-cos(c)*sin(a)-sin(c)*cos(a)*sin(b);
+    a12=cos(c)*cos(a)-sin(c)*sin(a)*sin(b);
+    a13=-sin(c)*cos(b);
+    a21=cos(c)*cos(a)*sin(b)-sin(c)*sin(a);
+    a22=cos(c)*sin(a)*sin(b)+sin(c)*cos(a);
+    a23=cos(c)*cos(b);
+  }
+}
+
+function P(x, y, z) { if(x instanceof Array) {y=x[1];z=x[2];x=x[0];}
+  return [(a11*x+a12*y+a13*z),(a21*x+a22*y+a23*z)];
+}
+function V(xy) {
+  return [zoom*wh*(xy[0]/2+1/2)+xoff, zoom*wh*(-xy[1]/2+1/2)+yoff];	
+} 
+function A(az, el) { if(az instanceof Array) {el=az[1];az=az[0];} 
+  az*=pi/180; el*=pi/180;
+  return [Math.cos(-az)*Math.cos(el), Math.sin(-az)*Math.cos(el), Math.sin(el)];
+}
+function L(lon, lat, r) { r=r||1; 
+  if(lon instanceof Array) {lat=lon[1];lon=lon[0];} 
+  lon*=pi/180; lat*=pi/180;
+  with(Math) return [r*cos(lon)*cos(lat), r*sin(lon)*cos(lat), r*sin(lat)];
+}
+function X(x,y,z) { if(x instanceof Array) {y=x[1];z=x[2];x=x[0];} 
+  with(Math) return [atan2(y,x)*180/pi, asin(z)*180/pi, sqrt(x*x+y*y+z*z)];
+}
+function O(lon, lat) { if(lon instanceof Array) {lat=lon[1];lon=lon[0];} 
+  lon*=pi/180; lat*=pi/180; with(Math){
+  return[cos(lat)*sin(lon-a),cos(-b)*sin(lat)-sin(-b)*cos(lat)*sin(lon-a)];}
+}
+function SO(x,y,z,a1,a2,a3) { if(x instanceof Array) {y=x[1];z=x[2];x=x[0];} 
+  with(Math) {return [x*(cos(a1)*cos(a3)-sin(a1)*cos(a2)*sin(a3))
+   -y*(sin(a1)*cos(a2)*cos(a3)+cos(a1)*sin(a3))+z*sin(a1)*sin(a2),
+    x*(sin(a1)*cos(a3)+cos(a1)*cos(a2)*sin(a3))
+   +y*(cos(a1)*cos(a2)*cos(a3)-sin(a1)*sin(a3))-z*cos(a1)*sin(a2),
+	x*sin(a2)*sin(a3)+y*sin(a2)*cos(a3)+z*cos(a2)];}
+}
+
+function jd2000(now) {
+  var year   = now.getUTCFullYear();
+  var month  = now.getUTCMonth() + 1;
+  var day    = now.getUTCDate();
+  var hour   = now.getUTCHours();
+  var minute = now.getUTCMinutes();
+  var second = now.getUTCSeconds();
+
+  if ((month == 1)||(month == 2)) {year -= 1; month += 12;}
+  var a = Math.floor(year/100);
+  var b = 2 - a + Math.floor(a/4);
+  var c = Math.floor(365.25*year);
+  var d = Math.floor(30.6001*(month + 1));
+  return b + c + d - 730550.5 + day + (hour + minute/60.0 + second/3600.0)/24.0;
+}
+
+function sun(now) { with(Math) {
+  var n = jd2000(now);
+  var eps = (23.439-0.0000004*n)*pi/180;
+  var g = (357.528 + 0.9856003*n)*pi/180;
+  var lambda = (280.460 + 0.9856474*n + 1.915*sin(g)+0.020*sin(2*g))*pi/180;
+  var ra = atan2(cos(eps)*sin(lambda),cos(lambda));
+  var dec = asin(sin(eps)*sin(lambda));
+  return [ra*180/pi, dec*180/pi];
+}}
+
+var twopi = 2 * pi;
+var degs = 180 / pi;
+var rads = pi / 180;
+
+// FNday only works between 1901 to 2099 - see Meeus chapter 7
+// 367*y - 7 * (y + (m + 9) \ 12) \ 4 + 275 * m \ 9 + d - 730531.5 + h/24
+function FNday(y, m, d, h) { with(Math) {
+  return 367*y-floor(7*(y+floor((m+9)/12))/4)+floor(275*m/9)+d-730531.5+h/24;
+}}
+// returns the true integer part, even for negative numbers
+function FNrange(x) {with(Math) {return x - floor(x/twopi)*twopi;}}
+function FNatn2(y, x) {with(Math) {
+  var a = atan(y/x); if(x<0) a += pi; if((y<0)&&(x>0)) a += twopi; return a;
+}}
+//  Moon positions to a quarter of a degree on the sky
+//   From page D76 of Astronomical Almanac
+//   max RA error 97 (seconds of time), rms error 22 secs
+//  max dec error 811 arcseconds, rms error 224 arcseconds
+//	compared to Integrated Computer Ephemeris for 18.6 years
+//	either side of J2000
+function moon(utc) { with(Math) { var glat0=51.48, glong0=0;
+  var y=utc.getUTCFullYear(), m=utc.getUTCMonth()+1, day=utc.getUTCDate();
+  var h0=utc.getUTCHours(), mins=utc.getUTCMinutes();
+  var h = h0 + mins/60;
+  var d = FNday(y, m, day, h);
+  var t = d/36525;
+//  calculate the geocentric longitude
+//	writing the coefficients in the series as angles in rads
+//	would save 29 multiplications per position!
+var l = FNrange(rads * (218.32 + 481267.883*t));
+l = l + rads * 6.29*sin(FNrange((134.9 + 477198.85*t) * rads));
+l = l - rads * 1.27*sin(FNrange((259.2 - 413335.38*t) * rads));
+l = l + rads * .66*sin(FNrange((235.7 + 890534.23*t) * rads));
+l = l + rads * .21*sin(FNrange((269.9 + 954397.7*t) * rads));
+l = l - rads * .19*sin(FNrange((357.5 + 35999.05*t) * rads));
+l = l - rads * .11*sin(FNrange((186.6 + 966404.05*t) * rads));
+l = FNrange(l);
+//   calculate the geocentric latitude
+var bm = rads * 5.13*sin(FNrange((93.3 + 483202.03*t) * rads));
+bm = bm + rads * .28*sin(FNrange((228.2 + 960400.87*t) * rads));
+bm = bm - rads * .28*sin(FNrange((318.3 + 6003.18*t) * rads));
+bm = bm - rads * .17*sin(FNrange((217.6 - 407332.2*t) * rads));
+//   get the parallax
+var gp = .9508 * rads;
+gp = gp + rads * .0518*cos(FNrange((134.9 + 477198.85*t) * rads));
+gp = gp + rads * .0095*cos(FNrange((259.2 - 413335.38*t) * rads));
+gp = gp + rads * .0078*cos(FNrange((235.7 + 890534.23*t) * rads));
+gp = gp + rads * .0028*cos(FNrange((269.9 + 954397.7*t) * rads));
+//   from the parallax, get the semidiameter and the radius vector
+var sdia = .2725 * gp;
+var rm = 1 / sin(gp);
+var xg = rm * cos(l) * cos(bm);
+var yg = rm * sin(l) * cos(bm);
+var zg = rm * sin(bm);
+// rotate to equatorial coords,  obliquity of ecliptic
+var ecl = (23.4393 - 3.563E-07*d) * rads;
+var xe = xg;
+var ye = yg * cos(ecl) - zg * sin(ecl);
+var ze = yg * sin(ecl) + zg * cos(ecl);
+//geocentric RA and Decx
+var ra = FNatn2(ye, xe);
+var dec = atan(ze / sqrt(xe*xe + ye*ye));
+// topocentric RA and DEC (spherical earth) Local Siderial Time in degrees
+var lst = 100.46 + .985647352*d + h*15 + glong0;
+var glat = glat0 * rads;
+var glong = glong0 * rads;
+lst = FNrange(lst * rads);
+var xtop = xe - cos(glat)*cos(lst);
+var ytop = ye - cos(glat)*sin(lst);
+var ztop = ze - sin(glat);
+var rtop = sqrt(xtop*xtop + ytop*ytop + ztop*ztop);
+var ratop = FNatn2(ytop, xtop);
+var dectop = atan(ztop / sqrt(xtop*xtop + ytop*ytop));
+var rmtop = sqrt(xtop*xtop + ytop*ytop + ztop*ztop);    //topocentric distance
+/*
+PRINT USING pr2$; "days from J2000 ....................... "; d
+PRINT USING pr1$; "geocentric ecliptic coords (l,b) ...... "; l * degs; bm * degs
+PRINT USING pr2$; "lunar parallax (deg) .................. "; gp * degs
+PRINT USING pr2$; "diameter (arcmin) ..................... "; sdia * degs * 60 * 2
+PRINT USING pr2$; "geocentric distance (lun dia) ......... "; rm
+PRINT USING pr2$; "equator of date (deg) ................. "; ecl * degs
+PRINT USING pr1$; "geocentric equatorial coords (ra, dec). "; ra * degs / 15; dec * degs
+PRINT USING pr2$; "local siderial time (hrs) ............. "; lst * degs / 24
+PRINT USING pr1$; "topocentric equatorial coords (ra, dec) "; ratop * degs / 15; dectop * degs
+PRINT USING pr2$; "topocentric lunar distance (lun dia) .. "; rmtop
+*/
+//return [d, l*degs, bm*degs, gp*degs, sdia*degs*60*2, rm, ecl*degs, 
+//	    ra*degs/15, dec*degs, lst*degs/24, ratop*degs/15, dectop*degs, rmtop];
+return [ra*degs/15, dec*degs, lst*degs/15];
+}}
+
+function ph_moon(utc) { with(Math) {
+  function rang(x) { var b = x/360; var a=360*(b-floor(b)); return a>0?a:a+360;}  
+  var a,b,phi1,phi2,jdp,tzd,elm,ams,aml,asd;
+  var y=utc.getUTCFullYear(), m=utc.getUTCMonth()+1, d=utc.getUTCDate();
+  var h=utc.getUTCHours(), mins=utc.getUTCMinutes(), s=utc.getUTCSeconds();
+  if(m<=2) {m+=12;y-=1;}
+  a = floor(y/100);
+  b = 2 - a + floor(a/4);
+  jdp = floor(365.25 * (y + 4716)) + floor(30.6001 * (m+1)) + d + b + ((h + mins/60 + s/3600)/24) - 1524.5;
+  tzd = (jdp - 2451545)/36525;  
+  elm = rang(297.8502042 + 445267.1115168*tzd - 0.00163*tzd*tzd + tzd*tzd*tzd/545868 - tzd*tzd*tzd*tzd/113065000);
+  ams = rang(357.5291092 + 35999.0502909*tzd - 0.0001536*tzd*tzd + tzd*tzd*tzd/24490000);
+  aml = rang(134.9634114 + 477198.8676313*tzd - 0.008997*tzd*tzd + tzd*tzd*tzd/69699 - tzd*tzd*tzd*tzd/14712000);
+  asd = 180 - elm - (6.289 * sin(pi/180 * aml)) +
+                    (2.1 * sin(pi/180 * ams)) -
+                    (1.274 * sin(pi/180 * (2 * elm - aml) )) -
+                    (0.658 * sin(pi/180 * 2 * elm)) -
+                    (0.214 * sin(pi/180 * 2 * aml)) -
+                    (0.11 * sin(pi/180 * elm));
+  phi1 = (1 + cos(asd*pi/180))/2;
+  tzd = (jdp + (0.5/24) - 2451545)/36525;
+  elm = rang(297.8502042 + 445267.1115168*tzd - (0.00163*tzd*tzd) + tzd*tzd*tzd/545868 - tzd*tzd*tzd*tzd/113065000);
+  ams = rang(357.5291092 + 35999.0502909*tzd - 0.0001536*tzd*tzd + tzd*tzd*tzd / 24490000);
+  aml = rang(134.9634114 + 477198.8676313*tzd - 0.008997*tzd*tzd + tzd*tzd*tzd / 69699 - tzd*tzd*tzd*tzd/14712000);
+  asd = 180 - elm - (6.289 * sin((pi/180) * aml)) +
+                    (2.1 * sin( pi/180 * ams)) -
+                    (1.274 * sin( pi/180 * (2 * elm - aml))) -
+                    (0.658 * sin( pi/180 * 2 * elm)) -
+                    (0.214 * sin( pi/180 * 2 * aml)) -
+                    (0.11 * sin( pi/180 * elm));
+  phi2 = (1 + cos(asd*pi/180))/2;
+  if((phi2-phi1)<0) phi1 = -phi1;
+  return 100*phi1;
+}}
+
+/*
+function dayOfYear(date){
+  return (Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) 
+	    - Date.UTC(date.getFullYear(), 0, 0)) / 24 / 60 / 60 / 1000;
+}
+
+Date.prototype.dayOfYear= function() {
+  var d = new Date(this); d.setMonth(0, 0);
+  return Math.round((this-d)/8.64e7);
+}
+function sunrise(now,lat) {
+  var n = now.dayOfYear();
+  with(Math) {	
+	var et = -7.633 * sin(n * (2 * pi)/365.24) + 9.65 * sin((n - 78) * 180/92 * pi/180)
+	var a_sin = sin(23.433 * pi/180) * sin((2 * pi/366) * (n - 81))
+	var dec = asin(a_sin) * 180/pi;
+    var cos_omega = sin(-0.83 * pi/180) - tan(lat * pi/180) * tan(dec * pi/180)
+    semi_diurnal_arc = acos(cos_omega);
+  }
+  return semi_diurnal_arc*12/pi;  // in hours (= 24/2pi) 
+}
+*/
+
+// Compute the Mean Sidereal Time in units of degrees. 
+// Use lon := 0 to get the Greenwich MST. East longitudes are positive; West longitudes are negative
+function MST(now, lon) {
+  var jd = jd2000(now);
+  var jt = jd/36525.0;     // julian centuries since J2000.0
+  var mst = 280.46061837 + 360.98564736629*jd + 0.000387933*jt*jt 
+          - jt*jt*jt/38710000 + lon; 
+  if (mst > 0.0) while(mst > 360.0) mst -= 360.0;
+  else while(mst < 0.0) mst += 360.0;
+  return mst;
+}
+
+function read_tle(s,opt) {
+	//console.log("read_tle: "+ s?s.length:""); 
+	var tt0=read_tle0(s,opt);
+	var ss=s.replaceAll("\r","").split("\n");
+	var el=document.getElementById("ssform2");
+	if(el) {
+		el.innerHTML='';
+		for(var i=-1;i<Math.min(tt0.length,10000);i++) {
+		    var opt = document.createElement('option');
+		     opt.value = i;
+		     opt.innerHTML = i==-1?(""+tt0.length+" satellites: "):tt0[i][14]; // name
+			 opt.title = i==-1?"":ss[3*i]+"\n"+ss[3*i+1]+"\n"+ss[3*i+2];
+		     el.appendChild(opt);
+		}
+	}
+	return tt0;
+}
+
+function read_tle0(s,opt) { opt = opt || 0; // opt: 0-tle 1-alm
+  //console.log("read_tle: "+s);
+  var alm=[], tle=[];
+  var a=6378137,EARTH_RATE = 7.2921151467e-5,rad=pi/180;
+  var ss=s.split("\n");
+  for(var i=0,j=0;i<ss.length;i++) {
+    var prn,id,inc,raan,ecc,per,M0,n0,toa,a_sqr,Omega,Omega_dot,week,y,d,n0_dot,h;
+    if(ss[i].length>2) { var name;
+      if(j==0) {
+        name=ss[i];
+        var nam=name.substring(0,3);
+        h=(nam=="GPS"?1:nam=="COS"?2:nam=="GSA"?4:nam=="BEI"?8:0);
+        var sn=/\(PRN (.*)\)/.exec(name);
+        if(sn) {prn=parseInt(sn[1]);if(!prn) prn=1+(i+2)/3;} else prn=1+(i+2)/3;
+      } else if(j==1) {
+        id=parseInt(ss[i].substring(2,7));
+        y=parseInt(ss[i].substring(18,20)); y+=(y<70)?2000:1900;
+        d=parseFloat(ss[i].substring(20,32));
+        var dt=new Date(Date.UTC(y,0,d)); dt.setSeconds((d*86400)%86400);
+        var gps_epoch=(new Date(Date.UTC(1980,0,6))).getTime()/1000	;
+        toa=dt.getTime()/1000;
+        week=Math.floor((toa-gps_epoch)/86400/7)-1024;
+        toa = toa - gps_epoch - 7*86400*(week+1024);
+        n0_dot=parseFloat(ss[i].substring(33,43));
+      } else if(j==2) {
+        inc=parseFloat(ss[i].substring(8,16))*rad;
+        raan=parseFloat(ss[i].substring(17,25))*rad;
+        ecc=parseFloat('0.'+ss[i].substring(26,33));
+        per=parseFloat(ss[i].substring(34,42))*rad;
+        M0=parseFloat(ss[i].substring(43,51))*rad;
+        n0=parseFloat(ss[i].substring(52,63));
+        a_sqr=Math.pow(398600500000000/Math.pow(n0/86400*2*pi,2),1/6);
+        Omega_dot=-3/2*0.001081874*a*a/
+           Math.pow(a_sqr*a_sqr*(1-ecc*ecc),2)*n0/86400*2*pi*Math.cos(inc);
+        Omega=raan - Omega_dot*toa;
+        alm.push([id,prn,h,ecc,toa,inc,Omega_dot,a_sqr,Omega,per,M0,0,0,week]);
+        tle.push([id,prn,h,ecc,d,inc/rad,Omega_dot,a_sqr,raan/rad,per/rad,
+                  M0/rad,n0,n0_dot,y,name]);
+      }
+      j=(j+1)%3;
+    }
+  }
+  return(opt==0?tle:alm);
+}
+function Rev(n) { var x=n;
+  if(x>0.0) {while(x>360.0)x-=360.0;} else {while(x<0.0)x+=360.0;} 
+  return(x);
+}
+function tle2lla(now, tle) {with(Math){  // now in sec
+  var a = 6378135, rad = pi/180, deg = 180/pi;
+  var gmst = MST(new Date(now*1000), 0.0 );
+  var lla=[];
+  for(var i=0;i<tle.length;i++) { 
+    var rev = tle[i][11],    n_dot = tle[i][12],  e = tle[i][3],
+        M0 = tle[i][10]*rad, per = tle[i][9]*rad, raan = tle[i][8]*rad, 
+	    inc = tle[i][5]*rad, year = tle[i][13],   day = tle[i][4];
+    var epoch = new Date(Date.UTC(year,0,day));
+    epoch.setSeconds((day*86400)%86400);
+    var t = (now - epoch.getTime()/1000)/86400; // in days!
+    var T = 24/(rev + n_dot*t);                 // Period in hours
+    var r = 1000*pow(6028.9*60*T, 2/3);         // semi major axis in m
+    M0 +=  2*pi*(rev*t + n_dot*t*t/2);
+    var E0 = M0 + e*sin(M0) +  e*e*sin(2*M0)/2;
+    for(var err=1; abs(err)>0.00000001; E0 -= err) {err = E0 - e*sin(E0) - M0;}
+    // perifocal coordinate system
+    var x0 = r*(cos(E0)-e);          // r*Cos(trueanomaly)
+    var y0 = r*sqrt(1-e*e)*sin(E0);  // r*sin(trueanomaly)
+    var r0 = sqrt(x0*x0+y0*y0);      // distance
+    per += rad*4.97*t*pow(a/r,3.5)*(5*cos(inc)*cos(inc)-1)/((1-e*e)*(1-e*e));
+    raan -= rad*9.95*t*pow(a/r,3.5)*cos(inc)/((1-e*e)*(1-e*e));
+    var Px =  cos(per)*cos(raan)-sin(per)*sin(raan)*cos(inc);
+    var Py =  cos(per)*sin(raan)+sin(per)*cos(raan)*cos(inc);
+    var Pz =  sin(per)*sin(inc);
+    var Qx = -sin(per)*cos(raan)-cos(per)*sin(raan)*cos(inc);
+    var Qy = -sin(per)*sin(raan)+cos(per)*cos(raan)*cos(inc);
+    var Qz =  cos(per)*sin(inc);
+    var x = Px * x0 + Qx * y0;        // xyz ECI coordinate system (geocentric)
+    var y = Py * x0 + Qy * y0;
+    var z = Pz * x0 + Qz * y0;
+    var lat = atan2(z, sqrt(x*x+y*y) );
+    var lon = Rev(atan2(y,x)*deg-gmst)*rad;
+    if(lon>pi) lon-=2*pi;
+    var alt = r0 - a;
+    lla.push([lat,lon,alt, now, epoch.getTime()/1000, t, tle[i][14].trim(), T, tle[i], M0,per,raan ]);  
+  }
+  return(lla);
+}}
+
+// compute horizon coordinates hrz_altitude, hrz_azimuth from ra, dec, lat, lon, and utc
+// ra, dec, lat, lon in  degrees, utc is a Date object
+function H(utc, ra, dec, lat, lon) {
+// compute hour angle in degrees
+  var ha = MST(utc, lon) - ra;
+  hour_angle = ha;
+  if (ha < 0) ha += 360;
+// convert degrees to radians
+  ha  = ha*pi/180;
+  var dec = dec*pi/180;
+  var lat = lat*pi/180;
+// compute altitude in radians
+  var sin_alt = Math.sin(dec)*Math.sin(lat) 
+              + Math.cos(dec)*Math.cos(lat)*Math.cos(ha);
+  var alt = Math.asin(sin_alt);
+// compute azimuth in radians - divide by zero error at poles or if alt = 90 deg
+  var cos_az = (Math.sin(dec) 
+             - Math.sin(alt)*Math.sin(lat))/(Math.cos(alt)*Math.cos(lat));
+  var az  = Math.acos(cos_az);
+// convert radians to degrees
+  var hrz_altitude = alt*180/pi; 
+  var hrz_azimuth  = az*180/pi;    
+  if (Math.sin(ha) > 0) hrz_azimuth = 360 - hrz_azimuth;    // choose hemisphere	
+  return [hrz_azimuth,hrz_altitude];
+}
+
+function print(s) {document.getElementById("disp").innerHTML += s;} //+ "<br/>";}
+function clear(s) {document.getElementById("disp").innerHTML = "";}
+
+Array.prototype.myString = function() {
+  return " "+this[0].toFixed(1)+","+this[1].toFixed(1);
+}	
+
+function H(lon,lat, r) { r=r||1; 
+  if(lon instanceof Array) {lat=lon[1];lon=lon[0];} 
+  lon*=pi/180; lat*=pi/180; 
+  with(Math){return (sin(lat)*sin(-b)+cos(lat)*cos(-b)*cos(lon-a)<0);}
+}
+
+function draw_pcircle(p,id1,id2,r) { r=r||1;
+    var s, s1='',s2='', onoff=0;
+	for(var th=-180;th<=180;th+=1) {
+	  if(!H(th,p,1)) {
+		  s = V(P(L(th,p,r))).myString();
+		  if(onoff==0) onoff=1; if(onoff==1) s1 += s;
+		  if(onoff==2) onoff=3; if(onoff==3) s2 += s;
+	  } else {
+		  if(onoff==1) {onoff=2;} 
+		  if(onoff==3) {onoff=4;}
+	  }
+	}
+    document.getElementById(id1).setAttribute("points",s1); 
+    document.getElementById(id2).setAttribute("points",s2); 
+}
+
+function init_sphere() {
+    var xy,s,ss,el,onoff,p,r=9; 
+	
+	el = document.getElementById("plane");  
+	if(el) {
+	  el.setAttribute("cx",wh/2*zoom+xoff);
+	  el.setAttribute("cy",wh/2*zoom+yoff);
+	  el.setAttribute("r",wh/2*zoom);	
+    }
+    el = document.getElementById("plane_line");  
+	if(el) {
+	  el.setAttribute("cx",wh/2*zoom+xoff);
+	  el.setAttribute("cy",wh/2*zoom+yoff);
+	  el.setAttribute("r",wh/2*zoom);	
+    }
+	el = document.getElementById("skyplane");  
+	if(el) {
+	  el.setAttribute("cx",wh/2*zoom+xoff);
+	  el.setAttribute("cy",wh/2*zoom+yoff);
+	  el.setAttribute("r",r*wh/2*zoom);	
+    }
+  
+  // x-axis
+    //s=''; for(var t=-1;t<=1;t+=1) {s += V(P(t,0,0)).myString();}
+    //document.getElementById("a1").setAttribute("points",s);
+  // y-axis
+    //s=''; for(var t=-1;t<=1;t+=1) {s += V(P(0,t,0)).myString();}
+    //document.getElementById("a2").setAttribute("points",s);
+  // z-axis
+    //s=''; for(var t=-1;t<=1;t+=1) {s += V(P(0,0,t)).myString();}
+    //document.getElementById("a3").setAttribute("points",s);
+
+  // equator (a4)
+    s=''; for(var th=-180;th<=0;th+=1) {if(!H(th,0)) {s += V(P(L(th,0))).myString();}}
+	document.getElementById("a4").setAttribute("points",s);  
+    s='';for(var th=0;th<=180;th+=1) {if(!H(th,0)) {s += V(P(L(th,0))).myString();}}
+    document.getElementById("a4a").setAttribute("points",s); 
+
+  // prime meridian and date change (a5)
+    s=''; for(var th=-90;th<=90;th+=1) {if(!H(0,th)) {s += V(P(L(0,th))).myString();}}
+	document.getElementById("a5").setAttribute("points",s);  
+    s=''; for(var th=-90;th<=90;th+=1) {if(!H(180,th)) {s += V(P(L(180,th))).myString();}}
+    document.getElementById("a5a").setAttribute("points",s); 
+
+  // 90 and 270 meridians (a6) 
+    s=''; for(var th=-90;th<=90;th+=1) {if(!H(90,th)) s += V(P(L(90,th))).myString();}
+	document.getElementById("a6").setAttribute("points",s);  
+    s=''; for(var th=-90;th<=90;th+=1) {if(!H(270,th)) s += V(P(L(270,th))).myString();}
+    document.getElementById("a6a").setAttribute("points",s); 
+ 
+  // tropic of cancer (a7)
+	draw_pcircle(23.5,"a7","a7a");
+
+  // tropic of capricorn (a8)
+	draw_pcircle(-23.5,"a8","a8a");
+
+  // the northern Arctic Circle (a9)
+	draw_pcircle(66.5,"a9","a9a"); 	
+	
+  // the southern Arctic Circle (a10)
+	draw_pcircle(-66.5,"a10","a10a"); 	
+ 	
+  // north, east and zenith  
+    xy=V(P(L(0,0)));   
+    //el=document.getElementById("ae1");el.setAttribute("cx",xy[0]); el.setAttribute("cy",xy[1]); 
+    el=document.getElementById("ae1_label");
+    el.setAttribute("x",xy[0]+4); el.setAttribute("y",xy[1]-4);
+    el.innerHTML = H(0,0)?"":"0";
+  
+    xy=V(P(L(0,-90)));
+    //el=document.getElementById("ae2");el.setAttribute("cx",xy[0]); el.setAttribute("cy",xy[1]);
+    el=document.getElementById("ae2_label");
+    el.setAttribute("x",xy[0]+4); el.setAttribute("y",xy[1]-4);
+    el.innerHTML = H(0,-90)?"":"S";
+  
+    //el=document.getElementById("ae3");el.setAttribute("cx",xy[0]); el.setAttribute("cy",xy[1]); 
+	xy=V(P(L(0,90)));
+    el=document.getElementById("ae3_label");
+    el.setAttribute("x",xy[0]+4); el.setAttribute("y",xy[1]-4);
+    el.innerHTML = H(0,90)?"":"N";
+}
+
+function init_sky0(gmst,r) {
+  var t;	
+  var sradec=sun(utc);
+  var la=0; //sradec[1];
+  
+  var el = document.getElementById("b1");
+  if(el) {
+	var p=[]; if(bsky) for(t=0; t<=360; t+= 5) {p.push([t-gmst,0+la,r]);}
+    draw_llpoints(el,p);  
+  }
+  var el = document.getElementById("b2");
+  if(el) {
+	var p=[]; if(bsky) for(t=1; t<=r; t+= 0.1) {p.push([0-gmst,90+la,t]);}
+    draw_llpoints(el,p);  
+  }
+  var el = document.getElementById("b3");
+  if(el) {
+	var p=[]; if(bsky) for(t=1; t<=r; t+= 0.1) {p.push([0-gmst,-90+la,t]);}
+    draw_llpoints(el,p);  
+  }
+  var el = document.getElementById("b4");
+  if(el) {
+	var p=[]; if(bsky) for(t=0; t<=360; t+= 5) {p.push([0-gmst,t+la,r]);}
+    draw_llpoints(el,p);  
+  }
+  var el = document.getElementById("b5");
+  if(el) {
+	var p=[]; if(bsky) for(t=0; t<=360; t+= 5) {p.push([90-gmst,t+la,r]);}
+    draw_llpoints(el,p);  
+  }
+  var el = document.getElementById("b6");  // Aries axis
+  if(el) {
+	var p=[]; if(bsky) for(t=1; t<=r; t+= 0.01) {p.push([0-gmst,0+la,t]);}
+    draw_llpoints(el,p);  
+  }
+  var el = document.getElementById("b6a");  // Libra axis
+  if(el) {
+//    var p=[]; for(t=0;t<(r-1)*6378;t+=50) {p.push([180-gmst,0,(6378+t)/6378]);}
+	var p=[]; if(bsky) for(t=1; t<=r; t+= 0.01) {p.push([180-gmst,0+la,t]);}
+    draw_llpoints(el,p);  
+  }
+
+  var el = document.getElementById("b7");  // 90 axis
+  if(el) {
+	var p=[]; if(bsky) for(t=1; t<=r; t+= 0.01) {p.push([90-gmst,0+la,t]);}
+    draw_llpoints(el,p);  
+  }
+  var el = document.getElementById("b7a");  // 270 axis
+  if(el) {
+	var p=[]; if(bsky) for(t=1; t<=r; t+= 0.01) {p.push([270-gmst,0+la,t]);}
+    draw_llpoints(el,p);  
+  }
+  
+  var lo=0-gmst;
+  var xy = V(P(L(lo,la,r)));
+  el = document.getElementById("aries_label0");
+  el.setAttribute("x",bsky?xy[0]-6:-99); el.setAttribute("y",bsky?xy[1]+6:-99);
+
+  lo=180-gmst;
+  var xy = V(P(L(lo,la,r)));
+  el = document.getElementById("libra_label0");
+  el.setAttribute("x",bsky?xy[0]-6:-99); el.setAttribute("y",bsky?xy[1]+6:-99);
+
+  var lo=90-gmst;
+  var xy = V(P(L(lo,la+23.44,r)));
+  el = document.getElementById("cancer_label0");
+  el.setAttribute("x",bsky?xy[0]-6:-99); el.setAttribute("y",bsky?xy[1]+6:-99);
+
+  lo=270-gmst;
+  var xy = V(P(L(lo,la-23.44,r)));
+  el = document.getElementById("capricornus_label0");
+  el.setAttribute("x",bsky?xy[0]-6:-99); el.setAttribute("y",bsky?xy[1]+6:-99);
+
+}
+
+// Constelations
+var cons =[
+	["ursa_minor", [2.5,89.25], [17.5,86.5], [16.75,82.0], [15.73,77.75]
+	         ,[14.83,74.15], [15.33,71.83], [16.28,75.75], [15.73,77.75] ]
+   ,["ursa_major", [12.25,57.0], [11.0,61.75], [11.0,56.37], [11.88,53.38] 
+		     ,[12.25,57.0], [12.8,55.95], [13.38,54.92], [13.77,49.3] ]
+   ,["cassiopea", [0.15,59.15], [0.66,56.53], [0.93,60.72], [1.42,60.23]
+		     , [1.9,63.67] ]
+   ,["auriga", [5.27,45.99], [5.99,44.90], [5.99,54.28], [5.27,45.99] ]
+   ,["persei", [3.13,40.95], [3.4,49.85], [3.07,53.50], [3.4,49.85], [3.95,40.0] ]
+];
+
+cons_borders=[
+["auriga", [
+ [04+ 37/60+ 56.8650/3600, 30.9218750],
+ [04+ 38/60+ 17.7219/3600, 36.2547150],
+ [04+ 49/60+ 49.7625/3600, 36.2218513],
+ [04+ 51/60+ 21.6684/3600, 52.7196465],
+ [05+ 09/60+ 56.3429/3600, 52.6655540],
+ [05+ 10/60+ 25.6235/3600, 56.1648331],
+ [06+ 16/60+ 31.4613/3600, 55.9658089],
+ [06+ 16/60+ 13.7679/3600, 53.9662552],
+ [06+ 40/60+ 11.0475/3600, 53.8938293],
+ [06+ 39/60+ 40.6703/3600, 49.8945885],
+ [06+ 57/60+ 37.5261/3600, 49.8410034],
+ [06+ 57/60+  3.6727/3600, 44.3418388],
+ [07+ 30/60+ 56.1899/3600, 44.2435493],
+ [07+ 30/60+ 14.5725/3600, 35.2445297],
+ [06+ 40/60+ 21.6663/3600, 35.3905640],
+ [06+ 39/60+ 51.7579/3600, 27.8913116],
+ [06+ 00/60+ 53.0571/3600, 28.0092907],
+ [06+ 00/60+ 54.9367/3600, 28.5092430],
+ [04+ 52/60+ 50.9941/3600, 28.7124405],
+ [04+ 52/60+ 56.4823/3600, 30.2123089],
+ [04+ 37/60+ 54.4293/3600, 30.2552605]
+ ]]
+];
+
+
+function init_sky() {
+	var gmst = MST(utc,0), r = 9;
+
+// sky sphere	
+	init_sky0(gmst,r);
+	 
+// B0329+54: 3 32 59, 54 34 43	// var bra=15*(3+34/60),bdec=54+39/60;
+	var ra = 3.55, dec = 54.58; 
+    var lo = 15*ra-gmst, la = dec;		
+	var xy0 = P(L(lo,la,r));
+    var cc = H(lo,la,1) && (xy0[0]*xy0[0]+xy0[1]*xy0[1])>1;
+	var xy = V(xy0);
+    var el=document.getElementById("B0329+54");  // pulsar point
+    // el.setAttribute("cx",cc?xy[0]:-99);  
+    // el.setAttribute("cy",cc?xy[1]:-99);
+    el.setAttribute("lat",la);
+    el.setAttribute("lon",lo);
+    el.setAttribute("onclick","ll_onclick(this);");
+
+	var xyz2 = L(lo,la,1);
+    var cc2 = !H(lo,la,1);
+    var xy2 = V(P(xyz2));
+    var el2=document.getElementById("B0329+54a");  // subpulsar point
+	if(el2) {
+      el2.setAttribute("cx",cc2?xy2[0]:-99);  
+      el2.setAttribute("cy",cc2?xy2[1]:-99);
+      el2.setAttribute("lat",la);
+      el2.setAttribute("lon",lo);
+      el2.setAttribute("onclick","ll_onclick(this);");
+    }
+    var el4 = document.getElementById("B0329+54_line");
+    if(el4) {
+	  var p=[]; for(t=0;t<(r-1)*6378;t+=50) {p.push([lo,la,(6378+t)/6378]);}
+      draw_llpoints(el4,p);  
+    }
+    // el=document.getElementById("B0329+54_title");
+    // el.innerHTML="B0329+54&x#a;RA="+ra.toFixed(2)+"&x#a;DEC="+dec.toFixed(2);
+
+// constelations (stars)
+  for(var j=0;j<cons.length;j++) {  
+    var s='', radec=cons[j]; 
+    for(var i=0;i<radec.length;i++) {
+      var lo=15*radec[i][0]-gmst, la=radec[i][1];
+      var xy0 = P(L(lo,la,r));
+      var cc = H(lo,la,1) && (xy0[0]*xy0[0]+xy0[1]*xy0[1])>1 && bsky;
+      var xy = V(xy0);		
+      var el=document.getElementById(radec[0]+"_"+i+"_"+j);
+      if(!el) {
+        el = document.createElementNS("http://www.w3.org/2000/svg", 'circle'); 
+        el.setAttribute("id",radec[0]+"_"+i+"_"+j); el.setAttribute("r",3);
+        el.setAttribute("fill","white"); el.setAttribute("fill-opacity","0.7");
+        document.getElementById("gte").appendChild(el);		
+      }
+      el.setAttribute("cx",cc?xy[0]:-99); 
+      el.setAttribute("cy",cc?xy[1]:-99); 
+    }
+  }
+
+// constelations (connections)
+  for(var j=0;j<cons.length;j++) {
+    var s='', radec=cons[j]; 
+    if(bsky) for(var i=1;i<radec.length;i++) {
+	  var lo=15*radec[i][0]-gmst, la=radec[i][1];
+	  var xy0 = P(L(lo,la,r));
+	  var cc = H(lo,la,1) && (xy0[0]*xy0[0]+xy0[1]*xy0[1])>1;
+	  var xy = V(xy0);		
+      s += V(P(L(lo,la,r))).myString();
+    }
+	var el=document.getElementById(radec[0]);
+	if(!el) {
+      el = document.createElementNS("http://www.w3.org/2000/svg",'polyline'); 
+      el.setAttribute("id",radec[0]); 
+	  el.setAttribute("stroke","green");
+	  el.setAttribute("stroke-dasharray","2,2");
+      el.setAttribute("fill","none"); 
+	  el.setAttribute("fill-opacity","0.7");
+	  document.getElementById("gte").appendChild(el);		
+	}
+    el.setAttribute("points",s); 
+  }
+  
+// ecliptic
+  var s='';
+  if(bsky) for(var t=0;t<360;t++) {
+	var lo=t; 
+	var la=180/pi*Math.atan(Math.sin(lo*pi/180)*Math.tan(23.4372*pi/180));
+	lo -= gmst;
+	//var xy0 = P(L(lo,la,r));
+	//var cc = H(lo,la,1) && (xy0[0]*xy0[0]+xy0[1]*xy0[1])>1;
+	//var xy = V(xy0);		
+    s += V(P(L(lo,la,r))).myString();
+  }	
+  var ele=document.getElementById("ecliptic");
+  if(ele) ele.setAttribute("points",s); 
+}
+
+function init_earth() {
+    var i,j;
+    var svg = document.getElementById('gte'); 
+	lomin=-90+a*180/pi, lomax=90+a*180/pi;
+	lamin=-90-b*180/pi, lamax=90-b*180/pi;
+    for(i=0;i<ne_110m_land.length;i++) {
+	  var el = document.getElementById("e"+i);
+	  if(!el) {
+        el = document.createElementNS("http://www.w3.org/2000/svg", 'polygon'); 
+        el.setAttribute("id","e"+i);
+        el.setAttribute("fill","green"); el.setAttribute("fill-opacity","0.7");
+        svg.appendChild(el);	
+      }
+      var s='',s2='',cnt=0;
+      for(j=0;j<ne_110m_land[i].length;j++) {
+		var lo=lo2=ne_110m_land[i][j][0],la=la2=ne_110m_land[i][j][1];
+	    var lla=la*pi/180,llo=lo*pi/180;
+	    var cc = Math.sin(lla)*Math.sin(-b) +
+		         Math.cos(lla)*Math.cos(-b)*Math.cos(llo-a);
+		var xy = P(L(lo,la)); 			
+		if(cc<0) {
+	      var r = Math.sqrt(xy[0]*xy[0]+xy[1]*xy[1]); 
+		  xy[0]*=1/r; xy[1]*=1/r;
+		  cnt++;		  
+	    }  
+		s += V(xy).myString();		
+      }
+      el.setAttribute("points",(cnt!=ne_110m_land[i].length)?s:"");
+      el.setAttribute("stroke",(cnt!=ne_110m_land[i].length)?"forestgreen":"");
+	  //if(i==194) el.setAttribute("fill","olive");
+	  //if(ne_110m_land[i].length>60) el.setAttribute("fill","darkgreen");
+    }	
+}
+function init_cities() {
+    var i,j;
+    var svg = document.getElementById('gte2'); 
+    for(i=0; i<50/*cities.length*/;i++) {
+	  var el = document.getElementById("c"+i);
+	  if(!el) {
+        el = document.createElementNS("http://www.w3.org/2000/svg", 'circle'); 
+        el.setAttribute("id","c"+i); el.setAttribute("r",3);
+//		el.setAttribute("width",6); el.setAttribute("height",6);
+        el.setAttribute("fill","black"); el.setAttribute("fill-opacity","0.15");
+        svg.appendChild(el);	
+        var el2 = document.createElementNS("http://www.w3.org/2000/svg", 'title');
+		el2.setAttribute("id","c_title"+i);
+		el.appendChild(el2); 
+      }
+	  var la=cities[i][1],lo=cities[i][2];
+	  var xy = V(P(L(lo,la))); 			
+	  var cc = H(lo,la);
+//      el.setAttribute("x",cc?-99:(xy[0]-2));el.setAttribute("y",cc?-99:(xy[1]-2));
+      el.setAttribute("cx",cc?-99:xy[0]);el.setAttribute("cy",cc?-99:xy[1]);
+	  var el2 = document.getElementById("c_title"+i);
+	  if(el2) el2.innerHTML = cities[i][0]+" ("+ (cities[i][4]/1000000).toFixed(1)+ "mln)"
+    }		
+}
+
+var objects2 = [ ["id","lo","la"]
+ ,["Greenwich", 0.0,  51.48]
+ ,["Kiruna",   20.96, 67.85] 
+ ,["Svalbard", 13.4,  78.23]     
+ ,["Troll",    2.53, -72.02] 	
+];
+
+function update_object2() {  // objects on Earth surface
+  for(var i=1;i<objects2.length;i++) {
+	var lo = objects2[i][1], la = objects2[i][2], id = objects2[i][0]; 	
+	var cc = !H(lo,la,1);
+    var xy = V(P(L(lo,la)));
+    var el = document.getElementById(id);
+	if(!el) {
+      el = document.createElementNS("http://www.w3.org/2000/svg",'circle'); 
+      el.setAttribute("id",id); el.setAttribute("r",3);
+      el.setAttribute("fill","black");
+	  el.setAttribute("fill-opacity","0.15");		
+	}
+    el.setAttribute("onclick","ll_onclick(this);");
+    el.setAttribute("cx",(cc && bobjects)?xy[0]:-99);  
+    el.setAttribute("cy",(cc && bobjects)?xy[1]:-99); 
+  }	
+}
+
+function normalise(x){
+  x = x % (2*pi) ;       // difference modulo 2*pi
+  if (x < 0) x += 2*pi;  // rendre l'angle positif
+  if (x > pi) x -= 2*pi; // Set dlon between -pi to +pi regime
+  return x;
+}
+/********************************************************************
+* gclat  given starting point and bearing and the longitude of the
+* destination it calculates the latitude.  
+*  dest_lat = gclat(bearing, dest_lon, start_lon, start_lat)
+* all angles in radians
+********************************************************************/
+function gclat(bearing, endlon, startlon, startlat) {
+  var delta = normalise(endlon-startlon);
+  if (delta == 0) return startlat;
+  with(Math) {
+    return  atan(tan(startlat)*cos(delta)-sin(delta)/cos(startlat)/tan(bearing));
+}}
+
+function waypoints(lon1,lat1,lon2,lat2) {
+  if (lat1 == -pi/2 || lat1 == pi/2) lon1 = lon2; 
+  if (lat2 == -pi/2 || lat2 == pi/2) lon2 = lon1; 
+  var dlon = normalise(lon2 - lon1);
+  var bear = Math.atan( Math.sin(dlon)/
+              (Math.sin(lat1)*Math.cos(dlon)-Math.tan(lat2)*Math.cos(lat1)));
+  if (dlon>0) { if(bear>0) bear+=pi; } 
+  else { if(bear<0) bear+=pi; }  	
+  if (bear<0) bear+=2*pi;
+  var dist = 180/pi*Math.abs(Math.acos(
+	  Math.sin(lat1)*Math.sin(lat2)+Math.cos(lat1)*Math.cos(lat2)*Math.cos(dlon)));
+  var n=90;
+  var wplon = new Array(n), wplat = new Array(n);  
+  if ( dlon != 0) {
+    dlon /= (n+1);  //wplon[0]=lon1;
+    for(var i=0; i<n; i++) {
+      wplon[i] = lon1 + dlon*(i+1);
+      wplat[i] = gclat(bear, wplon[i], lon1, lat1); 
+    }
+  } else {
+    dlon = (lat2-lat1)/(n+1);
+    for(var i=0; i<n; i++){
+      wplon[i] = lon1;
+      wplat[i]= lat1 + dlon*(i+1);
+    }
+  }
+  wplon.unshift(lon1); wplon.push(lon2);
+  wplat.unshift(lat1); wplat.push(lat2);
+  return [wplon,wplat];
+}
+
+function part(lo1,lo2,la,sgn) {
+    var cnt1=0,cnt2=0;
+    var s2=""; 
+    for(var th=la;th<=la+89.9;th++) {
+  	    var xy = P(L(lo1,th*sgn)); cnt1++;
+  	    if(H(lo1,th*sgn)) { cnt2++;
+          var r = Math.sqrt(xy[0]*xy[0]+xy[1]*xy[1]); xy[0]*=1/r; xy[1]*=1/r;}    
+    	s2 += V(xy).myString();
+    }
+    for(var th=la+89.9;th>=la;th--) {
+    	var xy = P(L(lo2,th*sgn)); cnt1++;
+    	if(H(lo2,th*sgn)) { cnt2++;
+          var r = Math.sqrt(xy[0]*xy[0]+xy[1]*xy[1]); xy[0]*=1/r; xy[1]*=1/r;}    
+    	s2 += V(xy).myString();
+    }
+    for(var th=lo2;th>=lo1;th--) {
+    	var xy = P(L(th,la)); cnt1++;
+    	if(H(th,la)) { cnt2++;
+          var r = Math.sqrt(xy[0]*xy[0]+xy[1]*xy[1]); xy[0]*=1/r; xy[1]*=1/r;}    
+    	s2 += V(xy).myString();
+    }
+	return(cnt1-cnt2>0?s2:"");	
+}
+
+function update_moon2() { 
+// Moon
+  var mradec = moon(utc); // console.log("Moon: "+mradec);
+  var ph = ph_moon(utc); // console.log("Moon: "+ph);
+  var la = mradec[1];
+  var lo = 15*(mradec[0]-mradec[2]);
+  var slo = 15*(12-(utc.getUTCHours()+utc.getUTCMinutes()/60));
+  var cc = !H(lo,la);
+  var xy = V(P(L(lo,la)));
+// Moon phase circle  
+  var z = zoom>=1?1:zoom;
+  var elz=document.getElementById("gtm");  // group with scale  
+  elz.setAttribute("transform","scale("+z+") translate("+(cc?xy[0]/z:-99)+" "+(cc?xy[1]/z:-99)+")");  
+  var el=document.getElementById("Moon");  // black part
+  el.setAttribute("cx",cc?0:-99); //xy[0]  
+  el.setAttribute("cy",cc?0:-99); //xy[1]
+  el.setAttribute("lat",la.toFixed(1));
+  el.setAttribute("lon",lo.toFixed(1));
+  el.setAttribute("onclick","ll_onclick(this);");
+  var el=document.getElementById("Moon2");  // white part (phase)
+  var s='';
+  if(ph>=0 && ph<=50)    s="0 0 1  0 20   a "+((50-ph)/25) +" 2.0  1 1 0";
+  if(ph>=50 && ph<=100)  s="0 0 1  0 20   a "+((ph-50)/25) +" 2.0  0 0 1";
+  if(ph<=-50 && ph>=-100)s="0 0 0  0 20   a "+((-ph-50)/25)+" 2.0  1 1 0";
+  if(ph<=0 && ph>=-50)   s="0 0 0  0 20   a "+((50+ph)/25) +" 2.0  0 0 1";
+  el.setAttribute("d",cc? "M 0 0 m 0 -10 a 2.0 2.0 "+s+ " 0 -20 ":""); 
+  el.setAttribute("lat",la.toFixed(1));
+  el.setAttribute("lon",lo.toFixed(1));
+  el.setAttribute("onclick","ll_onclick(this);");
+// Moon description
+  var str="Moon: "+lo.toFixed(1)+", "+la.toFixed(1) 
+     +"&#xA;RA="+mradec[0].toFixed(1)+"&#xA;DEC="+mradec[1].toFixed(1)
+     +"&#xA;Phase="+ph.toFixed(1)+"%";   
+  el = document.getElementById("Moon_title");
+  if(el) el.innerHTML = str;
+  el = document.getElementById("Moon_title2");
+  if(el) el.innerHTML = str;
+
+  var id="Moon0";
+  var rr = 9;
+  var xy0 = P(L(lo,la,rr));
+  var cc = /*H(lo,la,1) && (xy0[0]*xy0[0]+xy0[1]*xy0[1])>1 &&*/ bsky && zoom<1;
+  var xy = V(xy0);		
+  var el=document.getElementById(id);
+  if(!el) {
+    el = document.createElementNS("http://www.w3.org/2000/svg", 'circle'); 
+    el.setAttribute("id",id); 
+	el.setAttribute("r",5);
+    el.setAttribute("fill","white");
+	el.setAttribute("fill-opacity","1");
+    document.getElementById("gt0").appendChild(el);
+    var el2=document.createElementNS("http://www.w3.org/2000/svg",'title'); 
+    el2.setAttribute("id",id+"_title");
+    el.appendChild(el2);		
+  }
+  el.setAttribute("cx",cc?xy[0]:-99); 
+  el.setAttribute("cy",cc?xy[1]:-99); 
+  var el2=document.getElementById(id+"_title");
+  el2.innerHTML = "Moon:" + 
+    "&#xA;RA="+(mradec[0]).toFixed(2)+" h"+
+    "&#xA;DEC="+(mradec[1]).toFixed(2)+"&deg;";
+}
+ 
+function update_sun2() { 
+// Sun
+  var sradec = sun(utc);  // console.log("Sun: "+sradec);
+  var la = sradec[1];
+  var lo = 15*(12-(utc.getUTCHours()+utc.getUTCMinutes()/60));
+  var cc = !H(lo,la);
+  var xy = V(P(L(lo,la)));    
+// the sun track around Earth
+  draw_pcircle(la,"a11","a11a"); 	
+// Sun
+  var el=document.getElementById("Sun");
+  el.setAttribute("r",zoom>=1?12:zoom<1/3?4:12*zoom);  
+  el.setAttribute("cx",cc?xy[0]:-99);  
+  el.setAttribute("cy",cc?xy[1]:-99);
+  el.setAttribute("lat",la.toFixed(1));
+  el.setAttribute("lon",lo.toFixed(1));
+  el.setAttribute("onclick","ll_onclick(this);");
+// Sun description  
+  el = document.getElementById("Sun_title")
+  if(el) el.innerHTML = "Sun: " + lo.toFixed(1)+", "+la.toFixed(1) + 
+	  "&#xA;RA=" +sradec[0].toFixed(1)+
+	  "&#xA;DEC=" +sradec[1].toFixed(1);
+// Sun line to ecliptic
+  var el4 = document.getElementById("Sun_to_ecliptic");
+  if(el4) { var rr=9;
+    var p=[]; for(var t=1;t<=rr;t+=0.01) {p.push([lo,la,t]);}
+    draw_llpoints(el4,p);
+	//console.log("Sun_to_ecliptic:"+lo.toFixed(1)+","+la.toFixed(1));
+  }
+  var id="Sun0";
+  var rr = 9;
+  var xy0 = P(L(lo,la,rr));
+  var cc = /*H(lo,la,1) && (xy0[0]*xy0[0]+xy0[1]*xy0[1])>1 &&*/ bsky && zoom<1;
+  var xy = V(xy0);		
+  var el=document.getElementById(id);
+  if(!el) {
+    el = document.createElementNS("http://www.w3.org/2000/svg", 'circle'); 
+    el.setAttribute("id",id); 
+	el.setAttribute("r",6);
+    el.setAttribute("fill","yellow");
+    el.setAttribute("stroke","gold");
+	el.setAttribute("stroke-width",4);
+	el.setAttribute("fill-opacity","1");
+    document.getElementById("gt0").appendChild(el);
+    var el2=document.createElementNS("http://www.w3.org/2000/svg",'title'); 
+    el2.setAttribute("id",id+"_title");
+    el.appendChild(el2);		
+  }
+  el.setAttribute("cx",cc?xy[0]:-99); 
+  el.setAttribute("cy",cc?xy[1]:-99); 
+  var el2=document.getElementById(id+"_title");
+  el2.innerHTML = "Sun:" + 
+    "&#xA;RA="+(sradec[0]).toFixed(2)+" h"+
+    "&#xA;DEC="+(sradec[1]).toFixed(2)+"&deg;";  
+  
+// Aries point on Earth surface
+  var gmst=MST(utc,0);
+  var arlo=lo-sradec[0];
+  arlo = -gmst; la=0;
+  cc = !H(arlo,la);
+  xy = V(P(L(arlo,la)));
+  el = document.getElementById("aries_label");
+  el.setAttribute("x",cc?xy[0]-6:-99); 
+  el.setAttribute("y",cc?xy[1]+6:-99);
+// Libra point on Earth surface
+  var lilo=lo-sradec[0]-180;
+  lilo = 180-gmst; la=0;
+  cc = !H(lilo,la);
+  xy = V(P(L(lilo,la)));
+  el = document.getElementById("libra_label");
+  el.setAttribute("x",cc?xy[0]-6:-99); 
+  el.setAttribute("y",cc?xy[1]+6:-99);
+// Sunlight area
+  sunlight();	
+}
+
+function Rx(p,t) {
+  with(Math){ return([p[0],p[1]*cos(t)-p[2]*sin(t),p[1]*sin(t)+p[2]*cos(t)]);}
+}
+function Ry(p,t) {
+  with(Math){ return([p[0]*cos(t)+p[2]*sin(t),p[1],-p[0]*sin(t)+p[2]*cos(t)]);}
+}
+function Rz(p,t) {
+  with(Math){ return([p[0]*cos(t)-p[1]*sin(t),p[0]*sin(t)+p[1]*cos(t),p[2]]);}
+}
+
+function sunlight() {
+  var sradec = sun(utc);
+  var lo0 = (15*(12-(utc.getUTCHours()+utc.getUTCMinutes()/60)))*pi/180;
+  var la0 = sradec[1]*pi/180;
+  var off = 30;
+  var pp = [];
+  for(var k=0;k<6;k++) { with(Math) {// six spherical triangles 
+    var d=[0,0,pi/3,pi/3,2*pi/3,2*pi/3][k],s=[1,-1,1,-1,1,-1][k];
+    var p=[];
+    for(var t=off;t<=90;t++) {
+	  xyz=[cos(t*s*pi/180), 0, sin(t*s*pi/180)];
+	  p.push( Rz(Ry(Rz( Rz(Rz(xyz,lo0-pi/2),d) ,-lo0),-la0),lo0) );
+    }
+    for(var t=90;t>=off;t--) {
+      xyz=[cos(t*s*pi/180), 0, sin(t*s*pi/180)];
+	  p.push( Rz(Ry(Rz( Rz(Rz(xyz,lo0-1*pi/6),d) ,-lo0),-la0),lo0) );
+    }
+    for(var t=0;t>=-90+off;t--) {
+	  xyz=[cos(t*pi/180), sin(t*pi/180), s*sin(off*pi/180)];
+	  p.push( Rz(Ry(Rz( Rz(Rz(xyz,lo0-1*pi/6),d) ,-lo0),-la0),lo0) );
+    }
+    pp.push(p);
+  }}
+  for(k=6;k<9;k++) { with(Math) { // three spherical quadrangles
+    var d=[0,pi/3,2*pi/3][k-6],s=[1,1,1][k-6];
+    var p=[];
+    for(var t=-off;t<=off;t++) {
+   	  xyz=[cos(t*s*pi/180), 0, sin(t*s*pi/180)];
+   	  p.push( Rz(Ry(Rz( Rz(Rz(xyz,lo0-pi/2),d) ,-lo0),-la0),lo0) );
+    }
+    for(var t=-90+off;t<=0;t++) {
+	  xyz=[cos(t*pi/180), sin(t*pi/180), s*sin(off*pi/180)];
+	  p.push( Rz(Ry(Rz( Rz(Rz(xyz,lo0-1*pi/6),d) ,-lo0),-la0),lo0) );
+    }
+    for(var t=off;t>=-off;t--) {
+	  xyz=[cos(t*s*pi/180), 0, sin(t*s*pi/180)];
+	  p.push( Rz(Ry(Rz( Rz(Rz(xyz,lo0-1*pi/6),d) ,-lo0),-la0),lo0) );
+    }
+    for(var t=0;t>=-90+off;t--) {
+	  xyz=[cos(t*pi/180), sin(t*pi/180), -s*sin(off*pi/180)];
+	  p.push( Rz(Ry(Rz( Rz(Rz(xyz,lo0-1*pi/6),d) ,-lo0),-la0),lo0) );
+    }
+    pp.push(p); 	
+  }} 
+  for(var k=0;k<pp.length;k++) {
+    var s='',cnt1=0,cnt2=0;
+    for(var i=0;i<pp[k].length;i++) {
+	  var ll = X(pp[k][i]);  // xyz to ll
+      var xy = P( L(ll) ); cnt1++;
+      if(H(ll)) { cnt2++;
+        var r = Math.sqrt(xy[0]*xy[0]+xy[1]*xy[1]); 
+	    xy[0]*=1/r; xy[1]*=1/r;
+	    // xy[0]*=2/r; xy[1]*=2/r;  
+      }    
+      s += V(xy).myString();
+    }
+  document.getElementById("Sun_line"+k).setAttribute("points",cnt1-cnt2>0?s:"");
+  }
+}
+
+function sunlight0() {
+//  var lo1=-90,lo2=-180,la1=0,la2=45; 
+
+  var sradec = sun(utc);
+  
+  var lo0 = 15*(12-(utc.getUTCHours()+utc.getUTCMinutes()/60));
+  var la0 = sradec[1];
+  var lo1 = lo0;
+  var la1 = la0;
+  var lo2 = lo1-45;
+  var la2 = la1;    
+  var wp = waypoints(lo1*pi/180,la1*pi/180,lo2*pi/180,la2*pi/180);
+/*  
+  var s='',cnt1=0,cnt2=0;
+  for(var i=0;i<wp[0].length;i++) {
+	  var lo=wp[0][i]*180/pi,la=wp[1][i]*180/pi;
+      var xy = P(L(lo,la)); cnt1++;
+      if(H(lo,la)) { cnt2++;
+        var r = Math.sqrt(xy[0]*xy[0]+xy[1]*xy[1]); xy[0]*=1/r; xy[1]*=1/r;}    
+      s += V(xy).myString();
+  }
+  //document.getElementById("test_line1").setAttribute("points",cnt1-cnt2>0?s:"");
+*/  
+  s='',cnt1=0,cnt2=0;
+  for(var i=0;i<wp[0].length;i++) {
+	var lo=wp[0][i]*180/pi,la=wp[1][i]*180/pi;
+    var xy = P(L(lo,la)); cnt1++;
+    if(H(lo,la)) { cnt2++;
+      var r = Math.sqrt(xy[0]*xy[0]+xy[1]*xy[1]); xy[0]*=1/r; xy[1]*=1/r;}    
+    s += V(xy).myString();
+  }
+  lo=lo1;la=la1;
+  lo1=lo2;la1=la2;
+  lo2=lo;la2=la+60;
+  if(la2>90) {la2=180-la2;lo2=180+lo2;} 
+  wp = waypoints(lo1*pi/180,la1*pi/180,lo2*pi/180,la2*pi/180);
+  for(var i=0;i<wp[0].length;i++) {
+	var lo=wp[0][i]*180/pi,la=wp[1][i]*180/pi;
+    var xy = P(L(lo,la)); cnt1++;
+    if(H(lo,la)) { cnt2++;
+      var r = Math.sqrt(xy[0]*xy[0]+xy[1]*xy[1]); xy[0]*=1/r; xy[1]*=1/r;}    
+    s += V(xy).myString();
+  }
+  lo1=lo2;la1=la2;
+  lo2=lo0;la2=la0;
+  console.log(lo+" "+la);
+  wp = waypoints(lo1*pi/180,la1*pi/180,lo2*pi/180,la2*pi/180);
+  for(var i=0;i<wp[0].length;i++) {
+	var lo=wp[0][i]*180/pi,la=wp[1][i]*180/pi;
+    var xy = P(L(lo,la)); cnt1++;
+    if(H(lo,la)) { cnt2++;
+      var r = Math.sqrt(xy[0]*xy[0]+xy[1]*xy[1]); xy[0]*=1/r; xy[1]*=1/r;}    
+    s += V(xy).myString();
+  }
+  document.getElementById("test_line2").setAttribute("points",cnt1-cnt2>0?s:"");
+  document.getElementById("test_line2").setAttribute("fill","orange");
+  document.getElementById("test_line2").setAttribute("fill-opacity","25%");
+}
+
+function sunlight2() {
+  var e=23.5;
+  var q=[ [[-90,e],[-90,90],[-90,90],[-30,e]] 
+	     ,[[-90,-e],[-90,e],[-30,e],[-30,-e]] 
+         ,[[-90,-90],[-90,-e],[-30,-e],[-30,-90]]
+        ]; // upper triangle, quadrangle, lower triangle
+  var sradec = sun(utc);
+  var lo0 = (15*(12-(utc.getUTCHours()+utc.getUTCMinutes()/60)));
+  var la0 = sradec[1];
+  var pp=[]; // polylines set
+  for(var j=0;j<3*q.length;j++) { // three times with shifting by 60deg
+	var p=[], i=j%3, m=Math.floor(j/3)*60+lo0;
+	for(var t=q[i][0][1];t<=q[i][1][1];t++) {p.push( [m+q[i][1][0],t] );}
+	for(var t=q[i][1][0];t<=q[i][2][0];t++) {p.push( [m+t,q[i][2][1]] );}
+	for(var t=q[i][2][1];t>=q[i][3][1];t--) {p.push( [m+q[i][3][0],t] );}
+	for(var t=q[i][3][0];t>=q[i][0][0];t--) {p.push( [m+t,q[i][0][1]] );}
+	pp.push(p);
+  }
+//  for(var i=0;i<pp.length;i++) {
+//    var s=''; for(var j=0;j<pp[i].length;j++) {s += V(P(L(pp[i][j]))).myString();}
+//    document.getElementById("test_line"+i).setAttribute("points",s);  
+//  }
+  for(var k=0;k<pp.length;k++) {
+   var s='', cnt1=0, cnt2=0;
+   for(var i=0;i<pp[k].length;i++) {
+     var ll = pp[k][i]; 
+     var xy = P( L(ll) ); cnt1++;
+     if(H(ll)) { cnt2++;
+       var r = Math.sqrt(xy[0]*xy[0]+xy[1]*xy[1]); xy[0]*=1/r; xy[1]*=1/r;
+     }    
+     s += V( xy ).myString();
+   }
+   document.getElementById("test_line"+k).setAttribute("points",cnt1-cnt2>0?s:"");
+  }
+}
+
+function cap0(name) {  // clear 6 elements of cap area
+  for (var k=0;k<6;k++) {
+    var el = document.getElementById(name+k);
+    if(el) {el.setAttribute("points","");}
+  }
+}
+
+function cap(lo,la,a,name) { lo0=lo||-90; la0=la||0; a=a||10; name=name||"test";
+  var e=90-a;
+  var q=[ [[0,e],[0,90],[0,90],[60,e]] ]; 
+  var pp=[]; // polylines set
+  for(var j=0;j<6;j++) { // three times with shifting by 60deg
+	var p=[], i=0, m=j*60;
+	for(var t=q[i][0][1];t<=q[i][1][1];t++) {p.push( [m+q[i][1][0],t] );}
+	for(var t=q[i][1][0];t<=q[i][2][0];t++) {p.push( [m+t,q[i][2][1]] );}
+	for(var t=q[i][2][1];t>=q[i][3][1];t--) {p.push( [m+q[i][3][0],t] );}
+	for(var t=q[i][3][0];t>=q[i][0][0];t--) {p.push( [m+t,q[i][0][1]] );}
+	pp.push(p);
+  }  
+  for(var k=0;k<pp.length;k++) {
+   var s='', cnt1=0, cnt2=0;
+   for(var i=0;i<pp[k].length;i++) {
+     var ll = X(  Rz(Ry(L( pp[k][i]),(90-la0)*pi/180),lo0*pi/180 ) ); 
+     var xy = P( L(ll) ); cnt1++;
+     if(H(ll)) { cnt2++;
+       var r = Math.sqrt(xy[0]*xy[0]+xy[1]*xy[1]); xy[0]*=1/r; xy[1]*=1/r;
+     }    
+     s += V( xy ).myString();
+   }
+   el = document.getElementById(name+k);
+   if(!el) {
+     el = document.createElementNS("http://www.w3.org/2000/svg", 'polygon'); 
+     el.setAttribute("id",name+k); el.setAttribute("fill","brown");
+     el.setAttribute("stroke","none"); 
+	 el.setAttribute("fill-opacity","15%");  
+     document.getElementById("gt").appendChild(el);	
+   }
+   el.setAttribute("points",cnt1-cnt2>0?s:"");
+  }
+}
+/*
+var lla_data = [
+ ["London-NewYork-BuenosAires",[0.0,51.48,0],[-74.0,40.71,0],[-58.38,-34.61,0]]
+];
+*/
+var lla_data = [     // Landsat WRS-2 ("path_row")
+ ["189-22",[19.22,55.50],[22.19,55.07],[21.34,53.51],[18.48,53.93],[19.22,55.5]]
+,["190-22",[17.68,55.51],[20.64,55.06],[19.80,53.51],[16.94,53.93],[17.68,55.5]]
+,["191-22",[16.13,55.50],[19.10,55.07],[18.25,53.51],[15.39,53.93],[16.19,55.5]]
+,["190-23",[17.01,54.09],[19.88,53.67],[19.08,52.1],[16.31,52.51],[17.01,54.09]]
+,["046-33",[-125.58403,39.95752],[-123.41786,39.55278],[-123.97365,37.83627],[-126.08835,38.23929],[-125.58403,39.95752]]
+,["041-34",[-118.27539,38.52637],[-116.157,38.12715],[-116.6955,36.40824],[-118.76589,36.80618],[-118.27539,38.52637]]
+,["041-35",[-118.68485,37.09386],[-116.60593,36.69872],[-117.12857,34.97804],[-119.16262,35.37228],[-118.68485,37.09386]]
+,["041-36",[-119.08437,35.66061],[-117.0406,35.26889],[-117.54862,33.54666],[-119.5504,33.93783],[-119.08437,35.66061]]
+,["043-31",[-120.06214,42.81543],[-117.80536,42.40111],[-118.40082,40.6886],[-120.59877,41.10022],[-120.06214,42.81543]]
+];
+
+function update_path() {
+  var lo1,lo2,la1,la2;
+  for(var k=0;k<lla_data.length;k++) {
+   for(var i=2;i<lla_data[k].length;i++) {
+    lo1=lla_data[k][i-1][0];la1=lla_data[k][i-1][1];
+    lo2=lla_data[k][i][0];  la2=lla_data[k][i][1];  
+    var p = waypoints(lo1*pi/180,la1*pi/180,lo2*pi/180,la2*pi/180);
+    var pp=[];
+    for(var j=0;j<p[0].length;j++) {
+	  pp.push([p[0][j]*180/pi,p[1][j]*180/pi,1]);
+    }
+    var el = document.getElementById("pp_"+k+"_"+i);
+    if(!el) {
+      el = document.createElementNS("http://www.w3.org/2000/svg", 'polyline'); 
+      el.setAttribute("id","pp_"+k+"_"+i); 
+	  el.setAttribute("points","");
+	  el.setAttribute("stroke","white");
+	  el.setAttribute("stroke-dasharray","2,2"); 
+	  el.setAttribute("fill","none"); 
+      document.getElementById("gt").appendChild(el);	
+      var el2=document.createElementNS("http://www.w3.org/2000/svg", 'title'); 
+	  el2.setAttribute("id","pp_"+k+"_"+i+"_title");
+	  el.appendChild(el2);
+    }
+    draw_llpoints(el,pp);
+	var el2=document.getElementById("pp_"+k+"_"+i+"_title");
+	el2.innerHTML=lla_data[k][0];
+   }
+  }
+}
+
+function demo_tle_update(s) {
+	var s0=s;
+	var s1=demo_tle.replaceAll("\r","").split("\n");
+	var s2=s.replaceAll("\r","").split("\n");
+	for(var i=1;i<s1.length-1;i+=3) { // demo_tle
+		for(var j=0;j<s2.length;j+=3) {
+			if(s1[i]==s2[j]) {
+				//console.log(s1[i]+"\n"+s1[i+1]+"\n"+s1[i+2]+"\n"); 
+				//s0 = s0.replace(s1[i+1],s2[j+1]).replace(s1[i+2],s2[j+2]);
+				stmp += "|"+s1[i]+"|"+s2[j]+"\n";
+			}
+		}
+	}
+	//console.log(stmp);
+	return(s0);
+}
+
+var demo_tle=`EUTELSAT HOTBIRD 13E    
+1 28946U 06007B   25083.89427175 -.00000127  00000+0  00000+0 0  9992
+2 28946   0.9334  91.7039 0004558 289.3483 107.4448  1.00271314 69820
+EDRS-C                  
+1 44475U 19049A   25083.40750706  .00000154  00000+0  00000+0 0  9992
+2 44475   0.0781 250.5910 0000788 111.2426 358.1570  1.00269893 20700
+GPS BIII-5  (PRN 11)    
+1 48859U 21054A   25081.59252480 -.00000083  00000+0  00000+0 0  9997
+2 48859  55.3345 350.5880 0018586 230.0868 344.0966  2.00569211 27697
+GPS BIIR-2  (PRN 13)    
+1 24876U 97035A   25083.48129071  .00000060  00000+0  00000+0 0  9995
+2 24876  55.7715 116.1664 0087703  53.8059 307.0759  2.00562571202934
+IOR-W (EGNOS/PRN 126)   
+1 28899U 05044A   25083.75044639 -.00000258  00000+0  00000+0 0  9999
+2 28899   4.5175  43.3205 0002522 344.1708 208.6291  1.00271906 71018
+ISS (ZARYA)             
+1 25544U 98067A   25084.07965278  .00033861  00000+0  59879-3 0  9994
+2 25544  51.6396   3.6030 0003529  50.4782 146.5284 15.49994558502117
+NOAA 18 [B]             
+1 28654U 05018A   22267.49972995  .00000186  00000+0  12385-3 0  9998
+2 28654  98.9414 337.8216 0014977  54.7658 305.4914 14.12779484893963
+WORLDVIEW-3 (WV-3)      
+1 40115U 14048A   25083.95197550  .00004003  00000+0  47613-3 0  9997
+2 40115  97.8633 159.4399 0005408  18.2601 341.8807 14.84934834575235
+LANDSAT 8               
+1 39084U 13008A   25083.92635597  .00001535  00000+0  35062-3 0  9992
+2 39084  98.1927 155.6404 0001120  81.0614 279.0711 14.57118925632473
+LANDSAT 9               
+1 49260U 21088A   25083.75482173  .00001556  00000+0  35537-3 0  9997
+2 49260  98.1955 155.5312 0001279  87.2087 272.9258 14.57109956185559
+SENTINEL-1A             
+1 39634U 14016A   25083.88193182  .00000772  00000+0  17353-3 0  9992
+2 39634  98.1825  92.9201 0001349  90.5227 269.6127 14.59203720584491
+SENTINEL-2A             
+1 40697U 15028A   25083.91391914  .00000576  00000+0  23642-3 0  9994
+2 40697  98.5650 160.1976 0001162  97.4457 262.6858 14.30829097509483
+SENTINEL-2B             
+1 42063U 17013A   25083.90684447  .00000568  00000+0  23316-3 0  9993
+2 42063  98.5681 160.1401 0001134 101.0236 259.1075 14.30820751420397
+SENTINEL-3A             
+1 41335U 16011A   25083.75404151  .00000521  00000+0  23316-3 0  9995
+2 41335  98.6325 152.5267 0001190  91.7441 268.3876 14.26741890473978
+SENTINEL-3B             
+1 43437U 18039A   25083.93750536  .00000548  00000+0  24425-3 0  9994
+2 43437  98.6225 152.8278 0001517 116.3072 243.8264 14.26736445360068
+SENTINEL-5P             
+1 42969U 17064A   25083.78527913  .00000356  00000+0  18968-3 0  9996
+2 42969  98.7515  25.1471 0001129  84.5305 275.6000 14.19536517385801
+SENTINEL-6              
+1 46984U 20086A   25083.75847430 -.00000086  00000+0 -10847-3 0  9991
+2 46984  66.0432 348.5233 0007851 271.6829  88.3287 12.80928447202766
+HST (HUBBLE)                    
+1 20580U 90037B   22281.07000444  .00004658  00000+0  26111-3 0  9994
+2 20580  28.4692 142.3744 0002447 165.3688 323.9299 15.10999173583533
+BRITE-PL2 (HEWELIUSZ)   
+1 40119U 14049B   25083.24491893  .00007269  00000+0  72071-3 0  9994
+2 40119  97.8826 188.3759 0015516 156.4365 203.7568 14.92003928574292
+ICESAT-2                
+1 43613U 18070A   25083.90446152  .00034096  00000+0  12301-2 0  9992
+2 43613  91.9972 170.1401 0006468 123.9194 236.2671 15.28379916363845
+MOLNIYA 3-50            
+1 25847U 99036A   22284.14209392 -.00000097  00000+0 -61951-3 0  9993
+2 25847  63.2550 316.6588 7359165 282.3090  10.7108  2.00671838170433
+`;
+
+function demo_tle_update(s) {
+	var s0=demo_tle;
+	var s1=demo_tle.replaceAll("\r","").split("\n");
+	var s2=s.replaceAll("\r","").split("\n");
+	for(var i=0;i<s1.length-1;i+=3) { // demo_tle
+		for(var j=0;j<s2.length;j+=3) {
+			if(s1[i]==s2[j]) {
+				//console.log(s1[i]+"\n"+s1[i+1]+"\n"+s1[i+2]+"\n"); 
+				s0 = s0.replace(s1[i+1],s2[j+1]).replace(s1[i+2],s2[j+2]);
+			}
+		}
+	}
+	demo_tle=s0;
+	//tle_tab[0]=demo_tle;
+	if(tle_idx==0) {
+		//tt=read_tle(tle_tab[tle_idx]); 
+		tt=read_tle(window[tle_names[tle_idx]+"_tle"]);
+	}
+	return(s0);
+}
+
+
+function tle_hide() {
+    var t0 = new Date().getTime(); 
+	var els=document.querySelectorAll("circle[name=tle1]"); //getElementsByName("tle1");
+	//console.log("tle_hide: "+els.length);
+	for(var i=els.length-1;i>=0;i--) {els[i].setAttribute("cx",-99); els[i].setAttribute("cy",-99); cap0("tle0_"+i+"_");}
+		// els[i].style.visibility='hidden'; // els[i].setAttribute("visibility","hidden"); //els[i].style.display='none';
+	var els=document.querySelectorAll("circle[name=tle2]"); //.getElementsByName("tle2");
+	for(var i=els.length-1;i>=0;i--) {els[i].setAttribute("cx",-99); els[i].setAttribute("cy",-99);}
+		//els[i].style.visibility='hidden'; // els[i].setAttribute("visibility","hidden"); //els[i].style.display='none';	
+	var els=document.querySelectorAll("polyline[name=tle4]"); //.getElementsByName("tle4");
+	for(var i=els.length-1;i>=0;i--) {els[i].setAttribute("points","");}
+		//els[i].style.visibility='hidden'; // els[i].setAttribute("visibility","hidden"); //els[i].style.display='none';	
+	var els=document.querySelectorAll("polyline[name=tle5]"); //.getElementsByName("tle5");
+	for(var i=els.length-1;i>=0;i--) {els[i].setAttribute("points","");}
+		//els[i].style.visibility='hidden'; // els[i].setAttribute("visibility","hidden"); //els[i].style.display='none';	
+	var els=document.querySelectorAll("polyline[name=tle1track]"); //.getElementsByName("tle1track");
+	for(var i=els.length-1;i>=0;i--) {els[i].setAttribute("points","");}
+		// els[i].style.visibility='hidden'; // els[i].setAttribute("visibility","hidden"); //els[i].style.display='none';	
+	var els=document.querySelectorAll("polyline[name=tle6track]"); //.getElementsByName("tle6track");
+	for(var i=els.length-1;i>=0;i--) {els[i].setAttribute("points","");}
+		// els[i].style.visibility='hidden'; // els[i].setAttribute("visibility","hidden"); //els[i].style.display='none';	
+}
+function ss2_change(idx) {
+	if(idx!=undefined) {
+		tle_id = idx;
+		if(idx!=-1) {
+			var tsec=utc.getTime()/1000;
+	    	var lla = tle2lla(tsec,[tt[tle_id]]);
+			a =  lla[0][1];  // lo
+			b = -lla[0][0];  // la			
+			init();
+		}
+	}
+}
+tle_idx=0;
+function get_tle(tlename,varname) {
+	var url = "https://celestrak.org/NORAD/elements/gp.php?GROUP="+ tlename + "&FORMAT=tle";
+	let v = (varname||tlename.replaceAll("-",""))+"_tle";
+	fetch(url,{cache:'force-cache'}) // ,headers:{'Cache-Control':'max-age=14400'}})
+	.then(response => {return response.text();})
+	.then(s => { if((!s.match(/Not Found/))&&(!s.match(/Access is denied/))) {
+		window[v] = s; demo_tle_update(s); 	// global variable with "_tle" ending
+	}}); 
+}
+function init_tle() {
+	if(celestrack) {
+		get_tle("gnss");
+		get_tle("gps-ops");
+		get_tle("glo-ops","glonass");
+		get_tle("galileo");
+		get_tle("beidou");
+		get_tle("tdrss");
+		get_tle("stations","ss");
+		get_tle("weather");
+		get_tle("resource","earthres");
+		get_tle("geo","geosync");
+		get_tle("intelsat");
+		get_tle("iridium-NEXT","iridium");
+		get_tle("oneweb");
+		get_tle("starlink");	
+		get_tle("cosmos-2251-debris");	
+		get_tle("planet");	
+		get_tle("science");	
+	}
+}
+function ss_change(idx) {
+	if(idx!=undefined) tle_idx = idx-1;
+	tle_idx = (tle_idx+1)%tle_names.length;
+	var el=document.getElementById("ssform");
+	if(el && (el.value!=tle_idx) ) el.value=tle_idx;
+	tt=read_tle(window[tle_names[tle_idx].replace("-","")+"_tle"]); //tle_tab[tle_idx]);
+	tle_hide();
+	update();
+	var title="Click to change satellite group from: "+tle_names[tle_idx]+" to: "+ tle_names[(tle_idx+1)%tle_names.length];
+	var el=document.getElementById("disp");
+	if(el) el.title=title;
+}
+function tle() {
+	return ((typeof gnss_tle!="undefined")&&(gnss==1))?gnss_tle:
+	       ((typeof gpsops_tle!="undefined")&&(gpsops==1))?gpsops_tle:
+	       ((typeof glonass_tle!="undefined")&&(glonass==1))?glonass_tle:
+	       ((typeof galileo_tle!="undefined")&&(galileo==1))?galileo_tle:
+	       ((typeof beidou_tle!="undefined")&&(beidou==1))?beidou_tle:
+	       ((typeof tdrss_tle!="undefined")&&(tdrss==1))?tdrss_tle:
+	       ((typeof ss_tle!="undefined")&&(ss==1))?ss_tle:
+	       ((typeof weather_tle!="undefined")&&(weather==1))?weather_tle:
+	       ((typeof earthres_tle!="undefined")&&(earthres==1))?earthres_tle:
+	       ((typeof geosync_tle!="undefined")&&(geosync==1))?geosync_tle:
+	       ((typeof intelsat_tle!="undefined")&&(intelsat==1))?intelsat_tle:
+	       ((typeof iridium_tle!="undefined")&&(iridium==1))?iridium_tle:
+	       ((typeof oneweb_tle!="undefined")&&(oneweb==1))?oneweb_tle:
+		   ((typeof starlink_tle!="undefined")&&(starlink==1))?starlink_tle:
+		   ((typeof cosmos2251debris_tle!="undefined")&&(cosmos2251debris==1))?cosmos2251debris_tle:
+		   ((typeof planet_tle!="undefined")&&(planet==1))?planet_tle:
+		   ((typeof science_tle!="undefined")&&(science==1))?science_tle:
+	       tle0();
+}
+
+function tle0() { return demo_tle;}
+
+//var tt=read_tle(tle());  // global init 
+var colors=["blue","red","brown","darkorchid","slateblue"
+            ,"indianred","steelblue","crimson","cornflowerblue"
+            ,"red","red","red","red"];
+
+function update_tle2() {   //  var tt=read_tle(tle());
+  var tsec=utc.getTime()/1000;
+  var lla = tle2lla(tsec,tt);
+  if(!btle) {  // hide 
+	for(var i=0;i<lla.length;i++) {
+	  var el = document.getElementById("tle1_"+i);
+      if(el) {el.setAttribute("cx",-99); el.setAttribute("cy",-99);}
+	  cap0("tle0_"+i+"_");	
+	  var el2 = document.getElementById("tle2_"+i);
+      if(el2) { el2.setAttribute("cx",-99); el2.setAttribute("cy",-99);}
+      var el3 = document.getElementById("tle1track_"+i);
+      if(el3) {el3.setAttribute("points","");}
+      var el4 = document.getElementById("tle4_"+i);
+      if(el4) {el4.setAttribute("points","");}
+      var el5 = document.getElementById("tle5_"+i);
+      if(el5) {el5.setAttribute("points",""); }
+      var el6 = document.getElementById("tle6track_"+i); // satellite orbit
+      if(el6) {el6.setAttribute("points",""); }
+   	}
+	return;
+  }
+  for(var i=0;i<lla.length;i++) {
+	var la=lla[i][0], lo=lla[i][1], alt=lla[i][2], sname=lla[i][6];
+	var ecc=lla[i][8][3], inc=lla[i][8][5];
+	var M0=lla[i][8][10], omega=lla[i][8][9], Omega=lla[i][8][8];
+	var col=colors[i%colors.length]; // color from color table
+/*	var snames=["GPS","COSM","GSAT","BEID"];  // set specific satellite color
+	var cnames=["cyan","red","green","yellow"];
+	for(var j=0;j<snames.length;j++) {
+		if(sname.startsWith(snames[j])) {
+			col=cnames[j];
+		}
+	} */
+	console.log("update_tle2: "+sname+"/"+col);
+    var cc = Math.sin(la)*Math.sin(-b)+Math.cos(la)*Math.cos(-b)*Math.cos(lo-a);
+	if(btle3) {  // satellite visibility area
+ 	  var angle =
+        90-(10+Math.asin(6378135/(6378135+alt)*Math.cos(10*pi/180))*180/pi);
+	  cap(lo*180/pi,la*180/pi, angle ,"tle0_"+i+"_");
+    } else {
+	  cap0("tle0_"+i+"_");
+    }
+    var xy = V(P(L(lo*180/pi,la*180/pi)));
+    var el = document.getElementById("tle1_"+i);
+    if(!el) {
+      el = document.createElementNS("http://www.w3.org/2000/svg",'circle'); 
+      el.setAttribute("id","tle1_"+i);
+      el.setAttribute("name","tle1");
+	  el.setAttribute("fill",col);
+	  el.setAttribute("r",4); 
+	  el.setAttribute("fill-opacity","50%");
+	  el.setAttribute("stroke-width","2");
+      el.setAttribute("onclick","ll_onclick(this);");
+      document.getElementById("gte2").appendChild(el);	
+      var el1=document.createElementNS("http://www.w3.org/2000/svg",'title'); 
+	  el1.setAttribute("id","tle1_title"+i);
+	  el1.setAttribute("name","tle1_title");
+      el.appendChild(el1);	
+      var el2=document.createElementNS("http://www.w3.org/2000/svg",'circle'); 
+      el2.setAttribute("id","tle2_"+i);
+      el2.setAttribute("name","tle2");
+	  el2.setAttribute("fill",col);
+	  el2.setAttribute("r",3); 
+	  el2.setAttribute("cx",-99); 
+	  el2.setAttribute("cy",-99);
+      el2.setAttribute("onclick","ll_onclick(this);");
+      document.getElementById("gte2").appendChild(el2);	
+      var el3=document.createElementNS("http://www.w3.org/2000/svg",'title'); 
+	  el3.setAttribute("id","tle2_title"+i);
+	  el3.setAttribute("name","tle2_title");
+      el2.appendChild(el3);	
+      var el4=document.createElementNS("http://www.w3.org/2000/svg",'polyline'); 
+      el4.setAttribute("id","tle4_"+i);
+      el4.setAttribute("name","tle4");
+	  el4.setAttribute("stroke",col);
+	  el4.setAttribute("points",""); // el4.setAttribute("y1",-99); 
+	  //el4.setAttribute("x2",-99); el4.setAttribute("y2",-99); 
+	  el4.setAttribute("stroke-dasharray","2,2");
+      document.getElementById("gt").appendChild(el4);
+      var el5=document.createElementNS("http://www.w3.org/2000/svg",'polyline'); 
+      el5.setAttribute("id","tle5_"+i);
+      el5.setAttribute("name","tle5");
+	  el5.setAttribute("stroke",col);
+	  el5.setAttribute("points",""); 
+	  el5.setAttribute("fill","none"); 
+      document.getElementById("gt").appendChild(el5);	
+    }
+// satellite subpoint
+    el.setAttribute("cx",(cc>=0)?xy[0]:-99);  
+    el.setAttribute("cy",(cc>=0)?xy[1]:-99);
+	el.setAttribute("lon",(lo*180/pi).toFixed(2));
+	el.setAttribute("lat",(la*180/pi).toFixed(2));	
+	el.setAttribute("alt",alt.toFixed(0));	
+    //el.setAttribute("fill",col);
+    
+	//el.style.visibility="visible"; //setAttribute("visibility","visible"); //style.display="block";
+// satellite point
+    var xy2 = V(P(L(lo*180/pi,la*180/pi,(6378+alt/1000)/6378)));
+	var cc2 = cc;
+    var xy2a = (P(L(lo*180/pi,la*180/pi,(6378+alt/1000)/6378)));
+	if(Math.sqrt(xy2a[0]*xy2a[0]+xy2a[1]*xy2a[1])>1) cc2=1;
+    var el2 = document.getElementById("tle2_"+i);
+    if(el2) {
+	  el2.setAttribute("cx",(cc2>=0)?xy2[0]:-99);  
+      el2.setAttribute("cy",(cc2>=0)?xy2[1]:-99);
+      el2.setAttribute("lon",(lo*180/pi).toFixed(2));
+  	  el2.setAttribute("lat",(la*180/pi).toFixed(2));	
+  	  el2.setAttribute("alt",(alt).toFixed(0));	
+      //el2.style.visibility="visible"; //setAttribute("visibility","visible"); //style.display="block";
+    }
+// satellite line to ground
+    var el4 = document.getElementById("tle4_"+i);
+    if(el4) {
+	  var p=[];
+	  for(t=0;t<alt/1000;t+=50) {
+	  	p.push([lo*180/pi,la*180/pi,(6378+t)/6378]);
+	  }
+	  draw_llpoints(el4,cc2>=0?p:[]);  
+      //el4.style.visibility="visible"; //setAttribute("visibility","visible"); //style.display="block";
+    }
+// satellite description	
+    var s = sname+": "+(lo*180/pi).toFixed(1)+", "+(la*180/pi).toFixed(1)+ 
+	"&#xA;P="+ lla[i][7].toFixed(1)+"h"+
+	"&#xA;Alt=" + (alt/1000).toFixed(1)+"km"+
+	"&#xA;M0="+M0.toFixed(1)+"&deg;"+
+	"&#xA;&epsilon;="+ecc.toFixed(4)+""+
+	"&#xA;Inc="+inc.toFixed(1)+"&deg;"+
+	"&#xA;&omega;="+omega.toFixed(1)+"&deg;"+
+	"&#xA;&Omega;="+Omega.toFixed(1)+"&deg;";	  
+	document.getElementById("tle1_title"+i).innerHTML = s;
+	document.getElementById("tle2_title"+i).innerHTML = s;
+// satellite ground track	    
+    el = document.getElementById("tle1track_"+i);
+    if(!el) {
+      el = document.createElementNS("http://www.w3.org/2000/svg", 'polyline'); 
+      el.setAttribute("id","tle1track_"+i); 
+	  el.setAttribute("fill","none");
+      el.setAttribute("name","tle1track");
+	  el.setAttribute("stroke",col);
+	  el.setAttribute("stroke-dasharray","2,2");
+      document.getElementById("gt").appendChild(el);
+    }
+    el.style.visibility="visible"; //setAttribute("visibility","visible"); //style.display="block";
+	var p=[], dt=800*lla[i][7]; // by rev period (i.e. ISS 1.5h, GPS 12h)
+	if(btle2) for(var t=-dt;t<dt;t+=60) {
+	  var ll = tle2lla(tsec+t,[tt[i]]);
+	  p.push([ll[0][1]*180/pi,ll[0][0]*180/pi]);
+	}
+	draw_llpoints(el,p); // (6378+400)/6378);
+/*	
+	p=[]; dt=800*lla[i][7];  // satellite track
+    var el5 = document.getElementById("tle5_"+i);
+    if(el5) {
+	  for(var t=-dt;t<dt;t+=60) {
+		var ll = tle2lla(tsec+t,[tt[i]]);
+		p.push([ll[0][1]*180/pi,ll[0][0]*180/pi,(6378+alt/1000)/6378]);
+      }
+	  draw_llpoints(el5,p); 
+    }
+*/
+// satellite orbit - only for two GPSs and Molniya from demo set and for all gnss sets
+	if(i==2||i==3||i==15||tle_idx==2||tle_idx==3||tle_idx==4||tle_idx==5) { 
+      var el6 = document.getElementById("tle6track_"+i); 
+      if(!el6) {
+        el6 = document.createElementNS("http://www.w3.org/2000/svg", 'polyline'); 
+        el6.setAttribute("id","tle6track_"+i); 
+        el6.setAttribute("name","tle6track"); 
+	    el6.setAttribute("fill","none");
+ 	    el6.setAttribute("stroke",col);
+ 	    el6.setAttribute("stroke-dasharray","1,1");
+        document.getElementById("gt").appendChild(el6);
+      }
+	  var s2='';
+      if(zoom<1) {with(Math) {
+		var gmst = MST(utc,0);
+  		var T = lla[i][7];                  // in hours
+  		var r = pow(6028.9*60*T,2/3)/6378;  // semi major axis in Earth radius
+		for(var t=0;t<=360;t++) {	
+		  var M0 = t*pi/180;
+	      var E0 = M0+ecc*sin(M0)+ecc*ecc*sin(2*M0)/2;
+	      for(var err=1; abs(err)>0.00000001; E0-=err) {err=E0-ecc*sin(E0)-M0;}
+          var xyz = [r*(cos(E0)-ecc),r*sqrt(1-ecc*ecc)*sin(E0),0];
+          xyz = SO(xyz,0,0,(Omega-gmst)*pi/180,inc*pi/180,omega*pi/180);
+          s2 += V(P(xyz)).myString();
+        }
+      }}
+	  el6.setAttribute("points",s2);
+      //el6.style.visibility="visible"; //setAttribute("visibility","visible"); //style.display="block";
+    }
+  }
+}
+
+function ll_onclick(el) {
+  //alert(el.getAttribute("lat")+","+el.getAttribute("lon"));
+  console.log(el);
+  a = parseFloat(el.getAttribute("lon"))*pi/180;  
+  b = - parseFloat(el.getAttribute("lat"))*pi/180;
+  var str=el.getAttribute("id");
+  if(str.startsWith("tle")) { tle_id = str.split("_")[1];}
+  init();
+}
+
+function draw_llpoints(el,p) { 
+  //  var s=''; for(var j=0;j<p.length;j++) {s += V(P(L(p[j]))).myString();}	
+  var s='', cnt1=0, cnt2=0;
+  for(var j=0;j<p.length;j++) {
+	var ll = p[j], r=p[j].length>2?p[j][2]:1;
+	var xy = P( L(ll[0], ll[1], r) ); cnt1++;
+	if(!H(ll[0],ll[1],1) || (Math.sqrt(xy[0]*xy[0]+xy[1]*xy[1])>1) ) { cnt2++;
+      s += V( xy ).myString();
+	}    
+  }	
+  el.setAttribute("points",s); //cnt1!=cnt2?s:"");	
+}
+
+var anim_onoff=0, anim_id=0;
+function animate2(el) {
+  anim_onoff^=1;
+  document.getElementById("play").innerHTML = (anim_onoff==1)?"⏸":"▶️"; 
+  // &#9208; &#9654;
+  if(anim_onoff&1==1) {
+	 anim_id = setInterval( function() {
+		utc.setTime(utc.getTime()+30000);
+		if(tle_id==-1) {
+			a -= pi/180*(30000/60000/4);
+		} else {
+//		    var tt=read_tle(tle());
+		    var tsec=utc.getTime()/1000;
+		    var lla = tle2lla(tsec,[tt[tle_id]]);
+			a =  lla[0][1];  // lo
+			b = -lla[0][0];  // la			
+		}
+		init(); 
+	    }, 100);
+  }	else {
+	  clearInterval(anim_id);
+	  anim_id=0;
+  }
+}
+
+function update_planets() { with(Math) {
+  var gmst = MST(utc,0);
+  var d = jd2000(utc)-jd2000(new Date(2013,8-1,16,0,0,0,0)); //2456520.5  
+  // 16.8.2013: i       o       p        a         n         e         l
+  var pl = [
+	["Earth",  0,      0,      103.147, 1,        0.985611, 0.016679,324.5489]
+   ,["Mercury",7.0052, 48.493, 77.669,  0.387098, 4.09235,  0.205645, 93.8725]
+   ,["Venus",  3.3949, 76.804, 131.99,  0.723327, 1.60215,  0.006769,233.5729]
+   ,["Mars",   1.8496, 49.668, 336.322, 1.523762, 0.523998, 0.093346, 82.9625]
+   ,["Jupiter",1.3033, 100.629,14.556,  5.20245,  0.083099, 0.048892, 87.9728]
+   ,["Saturn" ,2.4869, 113.732,91.500,  9.52450,  0.033551, 0.055724,216.6279]
+  ];
+  var colors=["blue","gray","silver","red","orange","gold"];
+// Earth
+  var ec = 23.44*pi/180;
+  var i=pl[0][1]*pi/180, o=pl[0][2]*pi/180, p=pl[0][3]*pi/180,
+      a=pl[0][4], n=pl[0][5]*pi/180, e=pl[0][6], l=pl[0][7]*pi/180;
+  var M = (n * d + l - p); while(M>2*pi) M-=2*pi;
+  var v = M + ((2*e-e*e*e/4)*sin(M)+5/4*e*e*sin(2*M)+13/12*e*e*e*sin(3*M));
+  var r = a * (1 - e*e) / (1 + e * cos(v));
+  var Xe = r * cos(v + p), Ye = r * sin(v + p), Ze = 0;
+
+// Planets
+ for(var k=1;k<pl.length;k++) {
+  var id=pl[k][0], i=pl[k][1]*pi/180, o=pl[k][2]*pi/180, p=pl[k][3]*pi/180, 
+	  a=pl[k][4],  n=pl[k][5]*pi/180, e=pl[k][6],        l=pl[k][7]*pi/180;
+  var M = (n * d + l - p); while(M>2*pi) M-=2*pi;
+  var v = M + ((2*e-e*e*e/4)*sin(M)+5/4*e*e*sin(2*M)+13/12*e*e*e*sin(3*M));
+	/*  var v = M + (2 * e - 0.25 *pow(e,3) + 5/96 * pow(e,5)) * sin(M) +
+	         (1.25 * pow(e,2) - 11/24 * pow(e,4)) * sin(2*M) + 
+	         (13/12 * pow(e,3) - 43/64 * pow(e,5)) * sin(3*M) + 
+	         103/96 * pow(e,4) * sin(4*M) + 1097/960 * pow(e,5) * sin(5*M);
+	*/
+	//  var v = M + e*sin(M) +  e*e*sin(2*M)/2;
+	//  for(var err=1; abs(err)>0.00000001; v -= err) {err = v - e*sin(v) - M;}
+  var r = a * (1 - e*e) / (1 + e * cos(v)), vpo = v + p - o;
+  var X = r * (cos(o) * cos(vpo) - sin(o) * sin(vpo) * cos(i));
+  var Y = r * (sin(o) * cos(vpo) + cos(o) * sin(vpo) * cos(i));
+  var Z = r * (sin(vpo) * sin(i));
+
+// Earth-planet
+  X -= Xe; Y -= Ye; Z -= Ze;
+  var Xq = X, Yq = Y * cos(ec) - Z * sin(ec), Zq = Y * sin(ec) + Z * cos(ec); 
+  var alpha = atan(Yq/Xq); if(Xq<0) alpha+=pi; else if(Xq>0&&Yq<0) alpha+=2*pi;
+  var delta = atan(Zq/sqrt(Xq*Xq + Yq*Yq));
+  var dist = sqrt(Xq*Xq + Yq*Yq + Zq*Zq);
+//console.log("mra="+(alpha*180/pi/15)+" mdec="+(delta*180/pi)+" dist="+(dist));
+
+// planet display  
+  var lo=alpha*180/pi-gmst, la=delta*180/pi, rr = 9;
+  var xy0 = P(L(lo,la,rr));
+  var cc = /*H(lo,la,1) && (xy0[0]*xy0[0]+xy0[1]*xy0[1])>1 &&*/ bsky && zoom<1;
+  var xy = V(xy0);		
+  var el=document.getElementById(id);
+  if(!el) {
+    el = document.createElementNS("http://www.w3.org/2000/svg", 'circle'); 
+    el.setAttribute("id",id); 
+	el.setAttribute("r",5);
+    el.setAttribute("fill",colors[k]);
+	el.setAttribute("fill-opacity","1");
+    document.getElementById("gt0").appendChild(el);
+    var el2=document.createElementNS("http://www.w3.org/2000/svg",'title'); 
+    el2.setAttribute("id",id+"_title");
+    el.appendChild(el2);		
+  }
+  el.setAttribute("cx",cc?xy[0]:-99); 
+  el.setAttribute("cy",cc?xy[1]:-99); 
+  var el2=document.getElementById(id+"_title");
+  el2.innerHTML = id+":" + 
+    "&#xA;RA="+(alpha*180/pi/15).toFixed(2)+" h"+
+    "&#xA;DEC="+(delta*180/pi).toFixed(2)+"&deg;"+
+    "&#xA;DIST="+dist.toFixed(2)+" au";  // console.log(el2.innerHTML);
+ }	
+}}
+
+var shp_data=[];
+function update_shp() {
+  for(var k=0;k<shp_data.length;k++) {
+    var pp=[];
+    for(var j=0;j<shp_data[k].length;j++) {
+	  pp.push([shp_data[k][j][0],shp_data[k][j][1]]);
+    }
+    var el = document.getElementById("shp_"+k);
+    if(!el) {
+      el = document.createElementNS("http://www.w3.org/2000/svg", 'polyline'); 
+      el.setAttribute("id","shp_"+k); 
+	  el.setAttribute("points","");
+	  el.setAttribute("stroke","white");
+	  el.setAttribute("stroke-dasharray","2,2"); 
+	  el.setAttribute("fill","none"); 
+      document.getElementById("gt").appendChild(el);	
+      var el2=document.createElementNS("http://www.w3.org/2000/svg", 'title'); 
+	  el2.setAttribute("id","shp_"+k+"_title");
+	  el.appendChild(el2);
+    }
+    draw_llpoints(el,pp);
+	var el2=document.getElementById("shp_"+k+"_title");
+	if(el2) el2.innerHTML="shp_"+k;
+  }
+}
+
+function shp_load(fname) {
+	let url=fname;
+	fetch(fname)
+	.then( resp => { if(!resp.ok){throw new Error(`HTTP error: ${resp.status}`);} return resp.arrayBuffer();} )
+	.then( buf => { shp_read(buf,url); });
+}
+function getFloat(arr) {
+    var view = new DataView(new ArrayBuffer(8));
+    arr.forEach(function(b,i){view.setUint8(7-i,b);});
+    return view.getFloat64(0);
+}
+function shp_read(b,fname) {
+	console.log(fname+": "+ b.byteLength);
+	const a = new Uint8Array(b);
+	var n;
+
+	n = 24; var flen = 2*(a[n+3]+(a[n+2]<<8)+(a[n+1]<<16)+(a[n]<<24));
+	n = 32; var stype = (a[n]+(a[n+1]<<8)+(a[n+2]<<16)+(a[n+3]<<24));
+	console.log("Header: "+flen+" "+stype);
+	
+	if(stype==3||stype==5||stype==13||stype==15) {
+		n = 100; 
+		shp_data=[]; 
+		for(var k=0; k<233 && n<b.byteLength; k++) {
+			var rnum = (a[n+3]+(a[n+2]<<8)+(a[n+1]<<16)+(a[n]<<24)); n += 4; 
+			var rlen = (a[n+3]+(a[n+2]<<8)+(a[n+1]<<16)+(a[n]<<24)); n += 4; 
+			var stype2 = (a[n]+(a[n+1]<<8)+(a[n+2]<<16)+(a[n+3]<<24)); n += 4; 
+			var xmin = getFloat(a.slice(n,n+8)); n += 8; 
+			var ymin = getFloat(a.slice(n,n+8)); n += 8; 
+			var xmax = getFloat(a.slice(n,n+8)); n += 8; 
+			var ymax = getFloat(a.slice(n,n+8)); n += 8; 
+			var nparts = (a[n]+(a[n+1]<<8)+(a[n+2]<<16)+(a[n+3]<<24)); n += 4; 
+			var npoints = (a[n]+(a[n+1]<<8)+(a[n+2]<<16)+(a[n+3]<<24)); n += 4;
+
+			var s ="<br>\n"+(k+1)+". "+rnum+" "+rlen+" "+stype2+" "+
+				xmin.toFixed(2)+" "+ymin.toFixed(2)+" "+xmax.toFixed(2)+" "+ymax.toFixed(2)+" "+
+				nparts+" "+npoints+"<br>\n";
+			//s += "parts: "+nparts+"<br>\n";
+			for(var i=0;i<nparts;i++) {
+				 var p = (a[n]+(a[n+1]<<8)+(a[n+2]<<16)+(a[n+3]<<24));	n += 4;
+				 //s += " "+p+"<br>\n";
+			}
+			s += "points: "+npoints+"<br>\n";
+			var pp=[];
+			for(var i=0;i<npoints;i++) {
+				var x = getFloat(a.slice(n,n+8)); n += 8;
+				var y = getFloat(a.slice(n,n+8)); n += 8;
+				pp.push([x,y]);
+				//s += " "+x.toFixed(2)+" "+y.toFixed(2)+"<br>\n";
+			}
+			shp_data.push(pp);
+			console.log(s + "n= "+n);
+		}
+	}
+}
+function kml_read(s,fname) {
+	var s=s.replaceAll(/<coordinates>(.*?)<\/coordinates>/gm,function(match,m1,off,str){
+		var xyz=m1.split(' ');
+		var ll=[];
+		console.log("kml_read (1): "+xyz.length);
+		for(var i=0;i<xyz.length;i++) {
+			var xy=xyz[i].split(",");
+			ll.push([xy[0],xy[1]]);
+		}
+		console.log("kml_read (2): "+ll.length);
+	})
+}
+function kml_load(fname) {
+	let url=fname;
+	fetch(fname).then( resp => { return resp.text();} ).then( s => { kml_read(s,url); });
+}
+
+//shp_load("WRS2_descending.shp");
+//shp_load("stadion.shp");
+//kml_load("stadion.kml");
+
+function update_test() {
+  // sunlight2();
+  // cap();
+  update_shp();	
+  //update_path();
+  update_planets();
+}
+
+function init_sliders() { // sliders
+  document.getElementById("a_slider").value = Math.round(a*180/pi);
+  document.getElementById("b_slider").value = Math.round(b*180/pi);
+  document.getElementById("c_slider").value = Math.round(c*180/pi);
+  document.getElementById("m_slider").value = utc.getUTCMonth()+1;
+  document.getElementById("d_slider").value = utc.getUTCDate();
+  document.getElementById("h_slider").value = utc.getUTCHours();
+}
+
+function a_changed(el) {a = parseFloat(el.value)*pi/180; init(); }
+function b_changed(el) {b = parseFloat(el.value)*pi/180; init(); }
+function c_changed(el) {c = parseFloat(el.value)*pi/180; init(); }
+function m_changed(el) {utc.setUTCMonth(parseFloat(el.value-1)); init(); }
+function d_changed(el) {utc.setUTCDate(parseFloat(el.value)); init(); }
+function h_changed(el) {utc.setUTCHours(parseFloat(el.value)); 
+	a = (12-(utc.getUTCHours()+utc.getUTCMinutes()/60))*pi/12; 
+	init(); }
+
+function update_status() {
+  clear();
+  print(utc.toUTCString()+" ("+MST(utc,0).toFixed(1)+" GMST)"); //);
+//     +"  ("+(a*180/pi).toFixed(1) + ", " +(-b*180/pi).toFixed(1)+", " +(c*180/pi).toFixed(1)+") ");		
+}
+
+var bsky=1;
+var bcities=1;
+var bobjects=1;
+var bsun=1;
+var bmoon=1;
+var btle=1;
+var btle2=0;
+var btle3=0;
+var btest=1;
+
+function update_latlon() {
+	var a1=a*180/pi,b1=-b*180/pi;
+	var c1= a1>0?' E':' W',c2=b1>0?' N':' S';
+	document.getElementById("latlon").innerHTML= 
+		"&nbsp;&nbsp;"+ Math.abs(a1).toFixed(1).padStart(5,' ').replaceAll(' ',"&nbsp;")+c1+
+		"&nbsp;&nbsp;"+ Math.abs(b1).toFixed(1).padStart(4,' ').replaceAll(' ',"&nbsp;")+c2;
+}
+function update() {
+  update_status(); 
+  update_latlon();
+  bsky=zoom<1; init_sky();  // if(bsky) 
+  init_sphere();
+  init_earth();
+  if(bcities) init_cities();
+  update_object2(); // if(bobjects) 
+  if(bsun) update_sun2();
+  if(bmoon) update_moon2();
+/*
+  var els = document.getElementsByClassName("caret");
+  for(var i=0;i<els.length;i++) {
+	if(els[i].innerHTML.startsWith("Satellites")) {
+	   btle=els[i].children[0].checked;
+	}
+  }
+*/
+  update_tle2();  // if(btle) inside
+  
+  if(btest) update_test();    
+}
+
+function init() {
+  init_view();  
+  init_sliders();
+  update();
+}
+
+function main() {
+  var l,el;
+  l = localStorage.lat; if(l) lat=parseFloat(l);
+  l = localStorage.lon; if(l) lon=parseFloat(l);
+/*
+  if(l==null) {
+	try { 
+	  navigator.geolocation.getCurrentPosition((p)=>{
+  	    lat=p.coords.latitude; lon=p.coords.longitude;
+      });
+    } catch (e) {console.error(e);}
+  }
+*/ 
+  url_params();
+  try {
+    localStorage.lat = lat;
+    localStorage.lon = lon;
+  } catch (e) {}
+  
+  if(lon!=-999) {
+	  a = lon*pi/180;  
+	  b = -lat*pi/180;
+  }
+   
+  el=document.getElementById("svgdiv");
+  if(el) {
+	  el.setAttribute("style","background:"+bkg+";width:"+(wh+150)); //+";height:"+(wh+60));
+//	  el.style.width=(wh+60);
+//	  el.style.height=(wh+60);
+  } 
+  el=document.getElementById("svg");
+  if(el) {
+	  el.setAttribute("width", wh+150);
+	  el.setAttribute("height", wh+30);
+  } 
+  el.ondblclick = function(e) {e.preventDefault();animate2(e.target);}
+
+  el=document.getElementById("btle2");
+  if(el) {el.checked=btle2;}
+  el=document.getElementById("btle3");
+  if(el) {el.checked=btle3;}
+   
+  var t0 = new Date().getTime(); 
+  //ss_change(); //
+  init_tle();
+  tt=read_tle(tle());
+  init_mouse();
+  init();
+  console.log("time of init(): "+(new Date().getTime()-t0)+" ms" );
+  
+  setInterval(function(){
+	  if(anim_id==0){utc.setTime(utc.getTime()+5000);update();}}, 5000);
+
+/*
+  fetch('https://celestrak.org/NORAD/elements/stations.txt')
+	    .then(response => response.text())
+	    .then((data) => {console.log(data)})
+*/
+/*
+  var xhr=new XMLHttpRequest();
+  xhr.open("GET",
+    "https://celestrak.org/NORAD/elements/gp.php?GROUP=noaa&FORMAT=json");
+  xhr.onload=function(){console.log(xhr.responseText);}
+  xhr.setRequestHeader("content-type", "application/json");
+//  xhr.setRequestHeader("ReferrerPolicy","unsafe-url");
+  xhr.send();  
+*/
+/* 
+  fetch('http://celestrak.org/NORAD/elements/gp.php?GROUP=noaa&FORMAT=json')
+      .then((response) => response.json())
+      .then((json) => console.log(json));  
+*/
+/*
+  fetch('celestrack.php')
+      .then((response) => response.text())
+      .then((json) => console.log(json));  
+*/
+/*	  
+  var ifra=document.createElement('iframe');
+  ifra.src="https://celestrak.org/NORAD/elements/stations.txt";
+  ifra.setAttribute("id","if");
+  ifra.setAttribute("height","230");
+  ifra.setAttribute("width","360");
+  ifra.setAttribute("position","absolute");
+	  ifra.setAttribute("top","-9999");
+  document.body.appendChild(ifra);
+*/
+/*
+	  var ifra=document.createElement('iframe');
+	  ifra.src="http://knot805.eti.pg.gda.pl/pulsar++/tczew/ne_110m_land.js";
+	  ifra.setAttribute("id","if");
+	  ifra.setAttribute("height","230");
+	  ifra.setAttribute("width","360");
+	  ifra.onload = function () {console.log("log: "+this.innerText); postMessage("xxx","*")}
+	  ifra.setAttribute("position","absolute");
+	  ifra.setAttribute("top","-9999");
+      ifra.setAttribute("referrerpolicy","unsafe-url");	  
+	  document.body.appendChild(ifra);
+	  window.onmessage = function (e) {console.log("onmessage: "+e.data);}
+*/
+// setTimeout(function() {window.location.assign("https://celestrak.org/NORAD/elements/stations.txt");}, 2000);
+}
+
+</script>
+
+<!--<script type="module" src="celestrack.js"></script> -->
+
+<!--<script id="script1" type="text/javascript" src="http://celestrak.org/NORAD/elements/gp.php?GROUP=noaa&FORMAT=json"></script>
+
+<script>cbfun = function(x) {alert(x);}</script>
+<script src= 'http://celestrak.org/NORAD/elements/gp.php?GROUP=noaa&FORMAT=json&callback=cbfun'>
+</script>
+-->
+	
+<body onload="main();">	
+<center>
+ <div class="tab-2" id="svgdiv" style="width:460;height:460;background:#000055;" onclick="">
+
+	<div id="myModal" class="modal" style="">
+	  <div class="modal-content" style="width:440px;">
+	    <span onclick="modal.style.display='none';" class="close">&times;</span>
+	    <p>Earth3D MM 2022-2025</p>
+<!-- tle_names=["demo","gnss","tdrss","ss","weather","earthres","geosync","iridium","oneweb","starlink","cosmos2251debris"];	
+tle_idx=parseInt(document.querySelector('input[name=ss]:checked').value);ss_change(tle_idx);
+				<hr>
+		<form name="ssform">
+		<table>
+				<tr>
+			<td><input type="radio" id="r0" name="ss" value="0"><label for="r0">&nbsp;Demo Set</label></td>
+			<td><input type="radio" id="r1" name="ss" value="1"><label for="r1">&nbsp;GNSS</label></td>
+			<td><input type="radio" id="r2" name="ss" value="2"><label for="r2">&nbsp;TDRSS</label></td>
+			<td><input type="radio" id="r3" name="ss" value="3"><label for="r3">&nbsp;SStations</label></td>
+				</tr>
+				<tr>
+			<td><input type="radio" id="r4" name="ss" value="4"><label for="r4">&nbsp;Weather</label></td>
+			<td><input type="radio" id="r5" name="ss" value="5"><label for="r5">&nbsp;Earth Res</label></td>
+			<td><input type="radio" id="r6" name="ss" value="6"><label for="r6">&nbsp;GeoSynchro</label></td>
+			<td><input type="radio" id="r7" name="ss" value="7"><label for="r7">&nbsp;Iridium</label></td>
+				</tr>
+				<tr>
+			<td><input type="radio" id="r8" name="ss" value="8"><label for="r8">&nbsp;OneWeb</label></td>
+			<td><input type="radio" id="r9" name="ss" value="9"><label for="r9">&nbsp;Starlink</label></td>
+			<td><input type="radio" id="r10" name="ss" value="10"><label for="r10">&nbsp;Cosmos2251Debris</label></td>
+				</tr>
+			</table>
+		</form>
+document.forms['ssform'].ss[tle_idx].checked=true;
+-->
+	  </div>
+	</div>
+
+	<script>
+	var modal = document.getElementById("myModal");
+	var info = 
+`Earth3D  MM 2022-2025
+
+Ctrl A - animate on/off
+Ctrl B - background color switch
+Ctrl + - zoom in
+Ctrl - - zoom out
+Ctrl R - zoom rest
+click - center object
+dblclick - animate object
+
+marek.moszynski@pg.edu.pl`;
+	</script>
+
+
+    <button onclick="alert(info)" onclick1="modal.style.display='block';" 
+	  style="float:left;border:none;margin-left:0;background-color:transparent;font-size:14px">
+		 <!--<img src="menu-burger.svg" style="width:20px;height:20px;">-->
+		 <img style="width:20px;height:20px;" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJPdXRsaW5lIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIj4KPHJlY3QgeT0iMTEiIHdpZHRoPSIyMiIgaGVpZ2h0PSIzIiByeD0iMSIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeT0iNCIgd2lkdGg9IjIyIiBoZWlnaHQ9IjMiIHJ4PSIxIiAgZmlsbD0id2hpdGUiLz4KPHJlY3QgeT0iMTgiIHdpZHRoPSIyMiIgaGVpZ2h0PSIzIiByeD0iMSIgIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=">
+ 	</button>
+	 
+    <button onclick="zoomout();update();" 
+	  style="border:none;color:white;background-color:#0080FF;border-radius:12px;width:24px;height:24px;font-size:14px"
+	 ><b>&minus;</b></button>
+	<input type="range" min="-180" max="180" value="0" class="slider" id="a_slider" style="width:116;position:relative;top:4px" oninput="a_changed(this);"> 
+	<input type="range" min="-180" max="180" value="-20" class="slider" id="b_slider" style="width:116;position:relative;top:4px" oninput="b_changed(this);"> 
+	<input type="range" min="-180" max="180" value="0" class="slider" id="c_slider" style="width:116;position:relative;top:4px" oninput="c_changed(this);"> 
+    <button onclick="zoomin();update();"
+	  style="border:none;color:white;background-color:#0080FF;
+	         border-radius:12px;width:24px;height:24px;font-size:14px"
+	 ><b>&plus;</b></button>
+   <br>
+  <select onchange="ss_change(parseInt(this.value))" title="Select group of satellites" id="ssform" name="ssform" style1="position:absolute;left:10px;top:10px;" style="color:white;background-color:#0080FF;border:none;font-size:13px;">
+    <option value="0">Demo Set</option>
+    <option value="1">GNSS</option>
+    <option value="2">&nbsp;&nbsp;GPS</option>
+    <option value="3">&nbsp;&nbsp;Glonass</option>
+    <option value="4">&nbsp;&nbsp;Galileo</option>
+    <option value="5">&nbsp;&nbsp;Beidou</option>
+    <option value="6">TDRSS</option>
+    <option value="7">Space Stations</option>
+    <option value="8">Weather</option>
+    <option value="9">Earth Resources</option>
+    <option value="10">GeoSynchronous</option>
+    <option value="11">Intelsat</option>
+    <option value="12">Iridium</option>
+    <option value="13">OneWeb</option>
+    <option value="14">Starlink</option>
+    <option value="15">Cosmos2251Debris</option>
+    <option value="16">Planet</option>
+    <option value="17">Space & Earth Science</option>
+  </select>
+  <select onchange="ss2_change(parseInt(this.value));" title="Center selected satellite or leave not centered when empty selected" id="ssform2" name="ssform2" style="color:white;background-color:#0080FF;border:none;font-size:13px;">
+  </select>
+  <span id="latlon" style="color:white;"></span>
+<div style="position:relative">	 
+  <svg xmlns="http://www.w3.org/2000/svg" id="svg" width="490" height="430" font-family="Times" font-size=14 >
+
+<!--
+<polyline points="14,0 14,20" stroke="brown" stroke-width="1" fill="none"/>
+<polyline points="0,13 20,13" stroke="brown" stroke-width="1" fill="none"/>
+<polyline points="0,0 20,0" stroke="brown" stroke-width="1" fill="none"/>
+<text x="-6" y="6" style="fill:black">&#9801;</text>
+-->
+	  	  
+   <defs>
+    <marker id="dot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5">
+     <circle cx="5" cy="5" r="5" fill="white" />
+    </marker>
+    <radialGradient id="rg1">
+      <stop offset="0%" stop-color="lightgray"/>
+      <stop offset="50%" stop-color="gray"/>
+    </radialGradient>
+   </defs>
+			 
+   <g id="gt0" transform="translate(75,25)">
+
+	 <text id="aries_label0" x="-99" style="fill:black">&#9800;</text>
+	 <text id="libra_label0" y="-99" style="fill:black">&#9806;</text>
+	 <text id="cancer_label0" x="-99" style="fill:black">&#9803;</text>
+	 <text id="capricornus_label0" y="-99" style="fill:black">&#9809;</text>
+   </g>
+
+   <g id="gte" transform="translate(75,25)">
+     <circle id="skyplane" cx="200" cy="200" r="1800" stroke="yellow" fill="none" stroke-dasharray="1,6"/>
+     <circle id="plane" cx="200" cy="200" r="200" stroke="none" fill="lightblue"/>
+   </g>
+   
+   <g id="gt" transform="translate(75,25)">
+     <circle id="plane_line" cx="200" cy="200" r="200" stroke="gray" fill="none"/>
+<!--	 <path d=" M 400 200 A 200 200 0 1 1 0 200" fill="lightgray" fill-opacity="50%"/> -->
+
+	 <polyline id="a1" points="" stroke="brown" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+	 <polyline id="a2" points="" stroke="gray" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+	 <polyline id="a3" points="" stroke="gray" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+	 
+	 <polyline id="a4" points="" stroke="gray" stroke-width="1" fill="none"/>
+	 <polyline id="a4a" points="" stroke="gray" stroke-width="1" fill="none"/>
+	 <polygon id="a4b" points="" stroke="none" fill="none"/> <!--fill-opacity="25%"/> -->
+	 
+	 <polyline id="a5" points="" stroke="brown" stroke-width="1" fill="none">
+		 <title>Greenwich Meridian</title>
+	 </polyline>
+	 <polyline id="a5a" points="" stroke="brown" stroke-width="1" fill="none">
+		 <title>Greenwich Meridian</title>
+	 </polyline>
+	 
+	 <polyline id="a6" points="" stroke="gray" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+	 <polyline id="a6a" points="" stroke="gray" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+
+	 <polyline id="a7" points="" stroke="gray" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+	 <polyline id="a7a" points="" stroke="gray" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+
+	 <polyline id="a8" points="" stroke="gray" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+	 <polyline id="a8a" points="" stroke="gray" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+
+	 <polyline id="a9" points="" stroke="gray" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+	 <polyline id="a9a" points="" stroke="gray" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+
+	 <polyline id="a10" points="" stroke="gray" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+	 <polyline id="a10a" points="" stroke="gray" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+
+	 <polyline id="a11" points="" stroke="yellow" stroke-width="1" fill="none" />
+	 <polyline id="a11a" points="" stroke="yellow" stroke-width="1" fill="none" />
+
+     <circle id="ae1" cx="-99" cy="-99" r="5" stroke="none" fill="red"/>
+	   <text id="ae1_label" style="fill:black"></text>
+     <circle id="ae2" cx="-99" cy="-99" r="5" stroke="none" fill="green"/>
+	   <text id="ae2_label" style="fill:black"></text>
+     <circle id="ae3" cx="-99" cy="-99" r="5" stroke="none" fill="blue"/>
+	   <text id="ae3_label" style="fill:black"></text>
+
+	 <text id="aries_label" x="-99" style="fill:black"><title>Aries point</title>&#9800;</text>
+	 <text id="libra_label" y="-99" style="fill:black"><title>Libra point</title>&#9806;</text>
+	 <text id="cancer_label" x="-99" style="fill:black"><title>Cancer point</title>&#9803;</text>
+	 <text id="capricornus_label" y="-99" style="fill:black"><title>Capricornus point</title>&#9809;</text>
+	   
+     <circle id="B0329+54_shadow" cx="-99" cy="-99" r="5" stroke="red" fill="none"/>
+	 <text id="B0329+54_label" style="fill:red"></text>
+	 <polyline id="B0329+54_line1" points="" stroke="yellow" stroke-width="1" fill="none" stroke-dasharray="2,2">
+	  		 <title>B0329+54 path</title>
+	 </polyline>
+	 <polyline id="B0329+54_line2" points="" stroke="blue" stroke-width="1" fill="none" stroke-dasharray="2,2"/>
+	 
+	 <polyline id="B0329+54_line" points="" stroke="white" stroke-width="1" fill="none" stroke-dasharray="2,2">
+      	<title>B0329+54</title>
+	 </polyline>	 
+
+	 <polyline id="b1" points="" stroke="yellow" stroke-width="1" fill="none" stroke-dasharray="1,6"/>
+	 <polyline id="b1a" points="" stroke="yellow" stroke-width="1" fill="none" stroke-dasharray="1,6"/>
+	 <polyline id="b2" points="" stroke="yellow" stroke-width="1" fill="none" stroke-dasharray="1,6"/>
+	 <polyline id="b2a" points="" stroke="yellow" stroke-width="1" fill="none" stroke-dasharray="1,6"/>
+	 <polyline id="b3" points="" stroke="yellow" stroke-width="1" fill="none" stroke-dasharray="1,6"/>
+	 <polyline id="b3a" points="" stroke="yellow" stroke-width="1" fill="none" stroke-dasharray="1,6"/>
+	 <polyline id="b4" points="" stroke="yellow" stroke-width="1" fill="none" stroke-dasharray="1,6"/>
+	 <polyline id="b4a" points="" stroke="yellow" stroke-width="1" fill="none" stroke-dasharray="1,6"/>
+	 <polyline id="b5" points="" stroke="yellow" stroke-width="1" fill="none" stroke-dasharray="1,6"/>
+	 <polyline id="b5a" points="" stroke="yellow" stroke-width="1" fill="none" stroke-dasharray="1,6"/>
+
+	 <polyline id="b6" points="" stroke="yellow" stroke-width="1" fill="none" stroke-dasharray="1,6"/>
+	 <polyline id="b6a" points="" stroke="yellow" stroke-width="1" fill="none" stroke-dasharray="1,6"/>
+	 <polyline id="b7" points="" stroke="yellow" stroke-width="1" fill="none" stroke-dasharray="1,6"/>
+	 <polyline id="b7a" points="" stroke="yellow" stroke-width="1" fill="none" stroke-dasharray="1,6"/>
+
+<!--
+       <clipPath id="clip">
+		   <circle cx="200" cy="200" r="200"/>
+	   </clipPath>			
+	   <polygon id="Sun_line0" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%" clip-path="url(#clip)"/>	   
+	   <polygon id="Sun_line1" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%" clip-path="url(#clip)"/>
+	   <polygon id="Sun_line2" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%" clip-path="url(#clip)"/>	   
+	   <polygon id="Sun_line3" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%" clip-path="url(#clip)"/>
+	   <polygon id="Sun_line4" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%" clip-path="url(#clip)"/>
+	   <polygon id="Sun_line5" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%" clip-path="url(#clip)"/>
+	   <polygon id="Sun_line6" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%" clip-path="url(#clip)"/>
+	   <polygon id="Sun_line7" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%" clip-path="url(#clip)"/>
+	   <polygon id="Sun_line8" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%" clip-path="url(#clip)"/>
+	   <polygon id="Sun_line9" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%" clip-path="url(#clip)"/>
+-->
+
+	   <polygon id="Sun_line0" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%"/>	   
+	   <polygon id="Sun_line1" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%"/>
+	   <polygon id="Sun_line2" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%"/>	   
+	   <polygon id="Sun_line3" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%"/>
+	   <polygon id="Sun_line4" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%"/>
+	   <polygon id="Sun_line5" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%"/>
+	   <polygon id="Sun_line6" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%"/>
+	   <polygon id="Sun_line7" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%"/>
+	   <polygon id="Sun_line8" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%"/>
+	   <polygon id="Sun_line9" points="" stroke="none" stroke-width="1" fill="yellow" fill-opacity="25%"/>
+
+	   <polyline id="test_line0" points="" stroke="orange" stroke-width="2"
+fill="none"/>
+	   <polyline id="test_line1" points="" stroke="orange" stroke-width="2"
+fill="none"/>
+	   <polyline id="test_line2" points="" stroke="orange" stroke-width="2"
+fill="none"/>
+	   <polyline id="test_line3" points="" stroke="orange" stroke-width="2"
+fill="none"/>
+	   <polyline id="test_line4" points="" stroke="orange" stroke-width="2"
+fill="none"/>
+	   <polyline id="test_line5" points="" stroke="orange" stroke-width="2"
+fill="none"/>
+	   <polyline id="test_line6" points="" stroke="orange" stroke-width="2"
+fill="none"/>
+	   <polyline id="test_line7" points="" stroke="orange" stroke-width="2"
+fill="none"/>
+	   <polyline id="test_line8" points="" stroke="orange" stroke-width="2"
+fill="none"/>
+	   <polyline id="test_line9" points="" stroke="orange" stroke-width="2"
+fill="none" stroke-dasharray="2,2"/>
+
+
+	   <polyline id="Sun_to_ecliptic" points="" stroke="orange" stroke-width="2"
+fill="none" stroke-dasharray="2,2"/>
+	   <polyline id="ecliptic" points="" stroke="orange" stroke-width="1"
+fill="none" stroke-dasharray="1,3"/>
+
+	   <polygon id="test_area" points="" stroke="none" stroke-width="1" fill="orange" fill-opacity="25%"/>
+
+<!--   
+	   <path d="M50 20A40 40 0 1 0 50 70 30 30 0 1 1 50 20z" stroke="black" stroke-width="2" fill="red"/>
+-->
+	   	   	   
+   </g>
+   <g id="gte2" transform="translate(75,25)">
+     <circle id="Greenwich" lat="51.48" lon="0.0"
+	         cx="-99" cy="-99" r="3" stroke="none" fill="black">
+     	<title>Greenwich 51.48N 0.0E</title>
+     </circle>
+     <circle id="Winer" cx="-99" cy="-99" r="3" stroke="none" fill="red">
+     	<title>Winer Observatory</title>
+     </circle>
+     <circle id="Kiruna" lat="67.86" lon="20.97" 
+	    cx="-99" cy="-99" r="3" stroke="none" fill="black">
+     	<title>Kiruna 67.86N 20.97E &#xA;KIR-1:15m &#xA;KIR-2:13m</title>
+     </circle>
+     <circle id="Svalbard" lat="78.24" lon="15.4" 
+	    cx="-99" cy="-99" r="3" stroke="none" fill="black">
+     	<title>Svalbard 78.23N 15.4E</title>
+     </circle>
+     <circle id="Troll" lat="-72.02" lon="2.53" 
+	    cx="-99" cy="-99" r="3" stroke="none" fill="black">
+     	<title>Troll 72.02S 2.53E</title>
+     </circle>
+
+     <g id="gtm" transform="scale(1)">
+     <circle id="Moon" cx="-99" cy="-99" r="8" stroke-width=4 stroke="black" fill="black">
+     	<title id="Moon_title">Sublunar point</title>
+     </circle>
+     <path id="Moon2" fill="white" stroke="none" d="">
+     	<title id="Moon_title2">Sublunar point</title>
+     </path>
+     </g>
+	 
+     <circle id="Sun" cx="-99" cy="-99" r="12" stroke="gold" stroke-width=6 fill="yellow">
+       <title id="Sun_title">Subsolar point</title>
+     </circle>
+     <circle id="Sun_shadow" cx="-99" cy="-99" r="5" stroke="yellow" fill="none"/>
+	 <text id="Sun_label" style="fill:brown"></text>
+     <circle id="B0329+54" cx="-99" cy="-99" r="4" stroke="none" fill="white">
+	   <title>B0329+54 &#xA;RA=3&deg;32'59" &#xA;DEC=54&deg;34'43"</title>
+     </circle>
+     <circle id="B0329+54a" cx="-99" cy="-99" r="4" stroke="none" fill="white">
+	   <title>B0329+54 &#xA;RA=3&deg;32'59" &#xA;DEC=54&deg;34'43"</title>
+     </circle>	 
+   </g>  
+  </svg>
+
+</div>
+
+
+
+    <button id="play" title="time animation" onclick="animate2(this);"
+	  style="border:none;background-color:transparent;font-size:20px;color:white"
+	 ><b>▶️</b></button> &nbsp;&nbsp;
+   <span id="disp" onclick="ss_change();" title="Click to change satellite group" style="color:white;"></span>	&nbsp;&nbsp; 
+   <input id="btle2" title="satellite track" type="checkbox" onchange="btle2^=1;update();"> &nbsp;&nbsp;
+   <input id="btle3" title="satellite footprint" type="checkbox" onchange="btle3^=1;update();"> &nbsp;&nbsp;
+  <br>    
+   <span style="color:white">
+    <sup>1</sup> 
+    <input type="range" min="1" max="12" value="1" class="slider" id="m_slider" style="width:100;accent-color:green" oninput="m_changed(this);"> 
+	<sup>12</sup>
+	&nbsp;&nbsp;&nbsp;&nbsp;
+    <sup>1</sup> 
+    <input type="range" min="1" max="30" value="1" class="slider" id="d_slider" style="width:100;accent-color:brown" oninput="d_changed(this);"> 
+	<sup>30</sup>
+	&nbsp;&nbsp;&nbsp;&nbsp;
+    <sup>0</sup> 
+    <input type="range" min="0" max="23" value="1" class="slider" id="h_slider" style="width:100;accent-color:red" oninput="h_changed(this);"> 
+	<sup>24</sup>
+   </span>
+ </div>
+</center>
+<!--
+<style>
+  ul, #myUL {list-style-type: none;}
+  #myUL {margin: 0;padding: 0;}
+  .caret {cursor: pointer;user-select: none; /* Prevent text selection */}
+  .caret::before {content: "\25B6";color: black;display: inline-block;margin-right: 6px;}
+  .caret-down::before {transform: rotate(90deg); }
+  .nested {display: none;}
+  .active {display: block;}
+</style>
+<ul id="myUL">
+  <li><span class="caret">Satellites <input type="checkbox" checked onchange="caret_changed(this);"/></span>
+    <ul class="nested">
+      <li><span class="caret">Scientific <input type="checkbox" checked/></span>
+        <ul class="nested">
+           <li>ISS (ZARYA) <input type="checkbox" checked/></li>
+		   <li>HST (HUBBLE) <input type="checkbox" checked/></li>
+		   <li>ICESAT-2 <input type="checkbox" checked/></li>
+           <li>BRITE-PL2 (HEWELIUSZ) <input type="checkbox" checked/></li>
+        </ul>
+      </li>
+      <li><span class="caret">Telecommunication <input type="checkbox" checked/></span>
+        <ul class="nested">
+          <li>EUTELSAT HOTBIRD 13E <input type="checkbox" checked/></li>
+          <li>EDRS-C <input type="checkbox" checked/></li>
+          <li>ICESAT-2 <input type="checkbox" checked/></li>
+          <li>MOLNIYA 3-50 <input type="checkbox" checked/></li>
+        </ul>
+      </li>
+      <li><span class="caret">Navigational <input type="checkbox" checked/></span>
+        <ul class="nested">
+          <li>GPS BIII-5  (PRN 11) <input type="checkbox" checked/></li>
+          <li>GPS BIIR-2  (PRN 13) <input type="checkbox" checked/></li>
+		  <li>IOR-W (EGNOS/PRN 126) <input type="checkbox" checked/><li>
+        </ul>
+      </li>
+      <li><span class="caret">Weather <input type="checkbox" checked/></span>
+        <ul class="nested">
+           <li>NOAA 18 [B] <input type="checkbox" checked/></li>
+        </ul>
+      </li>
+      <li><span class="caret">Earth Observation <input type="checkbox" checked/></span>
+        <ul class="nested">
+          <li>LANDSAT 8 <input type="checkbox" checked/></li>
+          <li>LANDSAT 9 <input type="checkbox" checked/></li>
+          <li>SENTINEL-3A <input type="checkbox" checked/></li>
+          <li>SENTINEL-3B <input type="checkbox" checked/></li>
+		  <li>WORLDVIEW-3 (WV-3) <input type="checkbox" checked/></li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+<script>
+  var toggler = document.getElementsByClassName("caret");
+  for(var i = 0; i < toggler.length; i++) {
+	toggler[i].addEventListener("click", function() {
+	  this.parentElement.querySelector(".nested").classList.toggle("active");
+	  this.classList.toggle("caret-down");
+    });
+  }  
+  function caret_changed(el) {update();}  
+</script>
+-->
+<textarea id="ta" style="position:absolute;top:-9999;"></textarea>
+
+</body>
+
+<!-- 
+planetary positions: https://codepen.io/lulunac27/full/NRoyxE
+-->
