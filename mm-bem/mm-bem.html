@@ -31,6 +31,8 @@ optgroup {font-size: 16px;}
   <option value="simplify10_YFT_swimbladder_origin_msh">simplify10_YFT_swimbladder_origin.msh</option>
 </optgroup>
 </select>
+<br><span style="margin-left:64px"/> or <input accept="model/mesh"  id="openfile" title="Load from msh (ascii 2.0) file" type="file" onchange="readFile(this);"/>
+
 <br><br>
 <textarea id="obj" style="width:400;height:120" onchange="change(this.value)">[sphere(0.01905), [0, 0, 0]]</textarea>
 <br><br>
@@ -38,13 +40,29 @@ optgroup {font-size: 16px;}
 <select id="th" onchange="select()">
 <optgroup>
   <option value="0">0&deg;</option>
+  <option value="15">15&deg;</option>
+  <option value="30">30&deg;</option>
   <option value="45">45&deg;</option>
+  <option value="60">60&deg;</option>
+  <option value="75">75&deg;</option>
   <option value="90">90&deg;</option>
+  <option value="105">105&deg;</option>
+  <option value="120">120&deg;</option>
   <option value="135">135&deg;</option>
+  <option value="150">150&deg;</option>
+  <option value="165">165&deg;</option>
   <option value="180">180&deg;</option>
+  <option value="195">195&deg;</option>
+  <option value="210">210&deg;</option>
   <option value="225">225&deg;</option>
+  <option value="240">240&deg;</option>
+  <option value="255">255&deg;</option>
   <option value="270">270&deg;</option>
+  <option value="285">285&deg;</option>
+  <option value="300">300&deg;</option>
   <option value="315">315&deg;</option>
+  <option value="330">330&deg;</option>
+  <option value="345">345&deg;</option>
 </optgroup>
 </select>
 <br><br>
@@ -67,9 +85,9 @@ optgroup {font-size: 16px;}
   <option value="1520">1520 m/s</option>
 </optgroup>
 </select>
-<br><br><hr>
+<hr>
 <br>
-<label for="out">Calculatioin engine: </label> 
+<label for="out">Calculation engine: </label> 
 <select id="out" onchange="select()" style="background-color:#ffe6e6">
 <optgroup>
   <option value="py_soft">pyodide</option>
@@ -92,6 +110,8 @@ optgroup {font-size: 16px;}
   <option value="sphere_1_905_0_38_1480_js">sphere-1.905-0-38-1480-js.txt</option>
 </optgroup>
 </select>
+
+<br><span style="margin-left:64px"/> or <input accept="text/plain"  id="openfile2" title="Load from two-columns txt file" type="file" onchange="readFile2(this);"/>
 
 </div>
 
@@ -181,15 +201,54 @@ function select() {
     change();
 }
 
+function readFile(e) {  // local file reader
+	var file = e.files[0];
+	if (!file) return;
+	var reader = new FileReader();
+	reader.onload = function(e) {
+		document.getElementById("msh").value=e.target.result;
+		change(); // start calculations after reading
+	};
+	if(file.name.endsWith(".msh")) {
+		document.getElementById("openfile").value="";
+		document.getElementById("obj").value=file.name;
+		reader.readAsText(file);
+	} else {
+		alert("Only msh (ascii 2.0) files allowed") 
+	}
+}
+
+function readFile2(e) {  // local file reader
+	var file = e.files[0];
+	if (!file) return;
+	var reader = new FileReader();
+	reader.onload = function(e) {
+		document.getElementById("out2").value="none"
+		document.getElementById("txt2").value=e.target.result;
+		change2(); 
+	};
+	if(file.name.endsWith(".txt")) {
+		//document.getElementById("openfile2").value="";
+		document.getElementById("txt2").value="";
+		reader.readAsText(file);
+	} else {
+		alert("Only *.txt files allowed") 
+	}
+}
+
+
 function change() {
     var obj = document.getElementById("obj").value;
     if(obj[0]=='[') {
         O = eval('['+obj+']');
         O.forEach(o => msh_str(o));
         document.getElementById("msh").value=msh_flush().replaceAll('\n','\n');
+    } else if(obj.endsWith(".msh")) {
+        // document.getElementById("msh").value='[already inplace]';  	
     } else {
         document.getElementById("msh").value=eval(obj);  	
     }
+    // start calc
     var out = document.getElementById("out").value;
     document.getElementById("txt").value="Calculating ...";
     if(out=="js_soft") {setTimeout(js_soft,100);}
@@ -202,13 +261,16 @@ function change() {
 
 function change2() {
     var out2 = document.getElementById("out2").value;
-    if(out2=="none") {
-        document.getElementById("txt2").value="";
-        plot("Q","#");
-    } else {
-	var s=eval(out2);
+    var txt2 = document.getElementById("txt2").value;
+    if(out2!="none") {
+	var s = eval(out2);
         document.getElementById("txt2").value=s;
 	plot("Q",s,"#4da6ff");
+    } else if(txt2.length>1) {
+	plot("Q",txt2,"#4da6ff");
+    } else {
+        document.getElementById("txt2").value="";
+        plot("Q","#");
     }
 }
 	 
