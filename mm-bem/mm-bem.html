@@ -189,7 +189,7 @@ optgroup {font-size: 16px;}
 
 <textarea id="txt2" style="width:220;height:440;background-color:#e6ffff">
 </textarea>
-
+<br>
 <input type=button value="save to txt file" onclick='writeFile(document.getElementById("txt").value,"mm-bem.txt");' /> 
 
 </td></tr></table>
@@ -569,8 +569,9 @@ function msh_str(O) {
     let M = O.length > 2 ? O[2] : R1()
 
     for (let i = 0; i < vx.length; i++) {
-	var xyz = rot (M, xo + vx[i][0], yo + vx[i][1], zo + vx[i][2] )
-        Sn += `${i+Nn+1} ${xyz[0].toFixed(6)} ${xyz[1].toFixed(6)} ${xyz[2].toFixed(6)}\n`;
+	//var xyz = [xo + vx[i][0], yo + vx[i][1], zo + vx[i][2] );
+        var xyz = rot (M, xo + vx[i][0], yo + vx[i][1], zo + vx[i][2] );
+	Sn += `${i+Nn+1} ${xyz[0].toFixed(6)} ${xyz[1].toFixed(6)} ${xyz[2].toFixed(6)}\n`;
     }
     for (let i = 0; i < fx.length; i++) {
         Se += `${i+Ne+1} 2 2 0 1 ${fx[i][0]+Nn+1} ${fx[i][1]+Nn+1} ${fx[i][2]+Nn+1}\n`;
