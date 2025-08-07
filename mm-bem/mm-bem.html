@@ -177,6 +177,8 @@ optgroup {font-size: 16px;}
 
 <textarea id="msh" style="width:480;height:440;background-color:#e6fff2">
 </textarea>
+<br>
+<input type=button value="save to msh file" onclick='writeFile(document.getElementById("msh").value,"mm-bem.msh");' /> 
 
 </td><td>
 
@@ -185,6 +187,8 @@ optgroup {font-size: 16px;}
 
 <textarea id="txt2" style="width:220;height:440;background-color:#e6ffff">
 </textarea>
+
+<input type=button value="save to txt file" onclick='writeFile(document.getElementById("txt").value,"mm-bem.txt");' /> 
 
 </td></tr></table>
 </center>
@@ -236,6 +240,22 @@ function readFile2(e) {  // local file reader
 	}
 }
 
+function writeFile(data, filename, type) {
+	var file = new Blob([data], {type: type||"plain/text;charset=utf-8"});
+	if (window.navigator.msSaveOrOpenBlob) // IE10+
+		window.navigator.msSaveOrOpenBlob(file, filename);
+	else { // Others
+		var a = document.createElement("a");
+		a.href = URL.createObjectURL(file); 
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		setTimeout(function() {
+			document.body.removeChild(a);
+			window.URL.revokeObjectURL(url);  
+		}, 0); 
+	}
+}
 
 function change() {
     var obj = document.getElementById("obj").value;
