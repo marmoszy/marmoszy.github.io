@@ -11,7 +11,7 @@ optgroup {font-size: 16px;}
 </style>
 
 <center>
-<h2 style="color:#004080">mm-bem - scattering from soft targets <small>(<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy/mm-bem">github</a>)</small></h2>
+<h2 style="color:#004080">mm-bem - Scattering from soft targets - web-demo<small> (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy/mm-bem">github</a>)</small></h2>
 </center>
 
 <center>
@@ -153,7 +153,7 @@ optgroup {font-size: 16px;}
   
   <span id="latlon" style="color:white;"></span>
   <div style="position:relative">	 
-    <svg xmlns="http://www.w3.org/2000/svg" id="svg1" width="440" height="430" font-family="Times" font-size=14 >
+    <svg xmlns="http://www.w3.org/2000/svg" id="svg1" width="440" height="430" font-family="Times" font-size=14 oncopy="svg_copy(this);">
       <g id="gt" transform="translate(0,20)">	   	   	   
       </g>
     </svg>
@@ -314,10 +314,10 @@ document.onkeydown = function(e) {
   update();  
 };
 
-document.oncopy = function(e) {
+document.oncopy0 = function(e) {
   var ta = document.getElementById('ta');
   if(ta) {
-	ta.value = document.getElementById("svg").outerHTML;
+    ta.value = document.getElementById("svg").outerHTML;
     ta.select();
     document.execCommand('copy');
   }
@@ -440,25 +440,24 @@ function update_mesh() {
       var pp=[];
       for(var j=0;j<3;j++) {
   	      pp.push(vx[fx[k][j]]);
-  	      //pp.push(rot(M,vadd(vx[fx[k][j]],[x0,y0,z0])));
       }
       var el = document.getElementById("mesh_"+k);
       if(!el) {
         el = document.createElementNS("http://www.w3.org/2000/svg", 'polyline'); 
         el.setAttribute("id","mesh_"+k); 
-  	    el.setAttribute("points","");
-  	    el.setAttribute("stroke",mshcolor);
-  	    el.setAttribute("stroke-width",0.5);
-  	    //el.setAttribute("stroke-dasharray","2,2"); 
-  	    el.setAttribute("fill","none"); 
+  	el.setAttribute("points","");
+  	el.setAttribute("stroke",mshcolor);
+  	el.setAttribute("stroke-width",0.5);
+  	//el.setAttribute("stroke-dasharray","2,2"); 
+  	el.setAttribute("fill","none"); 
         document.getElementById("gt").appendChild(el);	
         var el2=document.createElementNS("http://www.w3.org/2000/svg", 'title'); 
-  	    el2.setAttribute("id","mesh_"+k+"_title");
-  	    el.appendChild(el2);
+  	el2.setAttribute("id","mesh_"+k+"_title");
+  	el.appendChild(el2);
       }
       draw_xyzpoints(el,pp);
-  	  var el2=document.getElementById("mesh_"+k+"_title");
-  	  if(el2) el2.innerHTML="mesh_"+k;
+      var el2=document.getElementById("mesh_"+k+"_title");
+      if(el2) el2.innerHTML="mesh_"+k;
     }
 }
 
@@ -486,7 +485,37 @@ function update_axes() {
       var el2=document.getElementById("axes_"+(3+(j-1)*k)+"_title");
       if(el2) el2.innerHTML="axes_"+id;
     }
-  }	
+  }
+  {	
+  var el = document.getElementById("xyz000");
+  if(!el) {
+      el = document.createElementNS("http://www.w3.org/2000/svg", 'polyline'); 
+      el.setAttribute("id","xyz000"); 
+      el.setAttribute("points","");
+      el.setAttribute("stroke",axes_onoff?"black":"none");
+      el.setAttribute("stroke-width",4);
+      el.setAttribute("fill","none"); 
+      document.getElementById("gt").appendChild(el);	
+  }
+  draw_xyzpoints(el,[[0,0,-0.0001],[0,0,0.0001]]);
+  }
+
+  {	
+  var el = document.getElementById("lambda_0");
+  if(!el) {
+      el = document.createElementNS("http://www.w3.org/2000/svg", 'polyline'); 
+      el.setAttribute("id","lambda_0"); 
+      el.setAttribute("points","");
+      el.setAttribute("stroke",axes_onoff?axcolors[0]:"none");
+      el.setAttribute("stroke-width",4);
+      el.setAttribute("fill","none"); 
+      document.getElementById("gt").appendChild(el);	
+  }
+  var f0 = parseFloat(document.getElementById("f0").value);
+  var c0 = parseFloat(document.getElementById("c0").value);
+  var l = c0/f0;
+  draw_xyzpoints(el,[[l/2,0,-l/50],[l/2,0,l/50]]);
+  }
 }
 
 function init_sliders() { // sliders
