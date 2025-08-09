@@ -11,13 +11,13 @@ optgroup {font-size: 16px;}
 </style>
 
 <center>
-<h2 style="color:#004080">mm-bem - scattering from soft target <small>(<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy/mm-bem">github</a>)</small></h2>
+<h2 style="color:#004080">mm-bem - scattering from soft targets <small>(<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy/mm-bem">github</a>)</small></h2>
 </center>
 
 <center>
 <table><tr><td>
 
-<div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#ffffe6">
+<div style="width:440;height:160;border-width:1;border-style:solid;padding:20px;display:block;background-color:#ffffe6">
 <label for="def">1. Target: </label>
 <select id="def" onchange="select()" style="background-color:#e6fff2">
 <optgroup>
@@ -27,18 +27,19 @@ optgroup {font-size: 16px;}
   <option value="[ellipsoid(0.01905,0.01,0.01), [0, 0, 0]]">Prolate spheroid</option>
   <option value="[ellipsoid(0.01905,0.005,0.01), [0, 0, 0]]">Ellipsoid</option>
   <option value="[ellipsoid(0.01905,0.005,0.01), [0, 0, 0], Rz(-45)]">Ellipsoid z-axis rotated</option>
-  <option value="[cylinder(0.01905,0.01905,0.01), [0, 0, 0]]">Cylinder</option>
+  <option value="[cylinder(0.005,0.005,3*0.01905), [0, 0, 0]]">Cylinder</option>
+  <option value="[cylinder(0.005,0.005,3*0.01905), [0, 0, 0], Ry(90)]">Cylinder y-axis rotated</option>
   <option value="[sphere(0.005), [-0.01, 0, 0]],|[sphere(0.005), [0.01, 0, 0]]">Two spheres</option>
   <option value="[sphere(0.005), [-0.01, 0, 0]],|[sphere(0.005), [0.01, 0, 0]],|[sphere(0.005), [0,-0.01, 0]],|[sphere(0.005), [0, 0.01, 0]]">Four spheres</option>
+  <option value="[sphere(0.005), [-0.01, 0, -0.01]],|[sphere(0.005), [0.01, 0, -0.01]],|[sphere(0.005), [0,-0.01, -0.01]],|[sphere(0.005), [0, 0.01, -0.01]],|[sphere(0.005), [-0.01, 0, 0.01]],|[sphere(0.005), [0.01, 0, 0.01]],|[sphere(0.005), [0,-0.01, 0.01]],|[sphere(0.005), [0, 0.01, 0.01]]">Eight spheres</option>
   <option value="simplify10_YFT_swimbladder_origin_msh">simplify10_YFT_swimbladder_origin.msh</option>
 </optgroup>
 </select>
 <br><span style="margin-left:64px"/> or <input accept="model/mesh"  id="openfile" title="Load from msh (ascii 2.0) file" type="file" onchange="readFile(this);"/>
 
 <br><br>
-<textarea id="obj" style="width:400;height:120" onchange="change(this.value)">[sphere(0.01905), [0, 0, 0]]</textarea>
-<br><br>
-<label for="th">2. Direction: </label> 
+
+<label for="th">2. Direction: <i>&theta;</i> =</label> 
 <select id="th" onchange="select()">
 <optgroup>
   <option value="0">0&deg;</option>
@@ -68,10 +69,11 @@ optgroup {font-size: 16px;}
 </optgroup>
 </select>
 <br><br>
-<label for="f0">3. Frequency: </label> 
+<label for="f0">3. Frequency: <i>f<sub>0</sub></i> =</label> 
 <select id="f0" onchange="select()">
 <optgroup>
-  <option value="38e3">38 kHz</option>
+  <option value="18e3">18 kHz</option>
+  <option value="38e3" selected>38 kHz</option>
   <option value="70e3">70 kHz</option>
   <option value="120e3">120 kHz</option>
   <option value="200e3">200 kHz</option>
@@ -79,16 +81,25 @@ optgroup {font-size: 16px;}
 </optgroup>
 </select>
 <br><br>
-<label for="c0">4. Sound speed: </label> 
+<label for="c0">4. Sound speed: <i>c<sub>0</sub></i> =</label> 
 <select id="c0" onchange="select()">
 <optgroup>
   <option value="1480">1480 m/s</option>
+  <option value="1490">1490 m/s</option>
   <option value="1500">1500 m/s</option>
+  <option value="1510">1510 m/s</option>
   <option value="1520">1520 m/s</option>
 </optgroup>
 </select>
-<hr>
-<br>
+
+<br><br>
+</div>
+</td><td>
+<div style="width:440;height:160;border-width:1;border-style:solid;padding:20px;display:block;background-color:#ffffe6">
+
+<textarea id="obj" style="width:425;height:72" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905), [0, 0, 0]]</textarea>
+
+<br><br>
 <label for="out">Calculation engine: </label> 
 <select id="out" onchange="select()" style="background-color:#ffe6e6">
 <optgroup>
@@ -117,6 +128,37 @@ optgroup {font-size: 16px;}
 
 </div>
 
+</td></tr>
+
+<tr><td>
+
+<div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#eee">
+ <!--
+    <button onclick="alert(about)" 
+	  style="float:left;border:none;margin-left:0;background-color:transparent;font-size:14px">
+		 <img style="width:20px;height:20px;" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJPdXRsaW5lIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIj4KPHJlY3QgeT0iMTEiIHdpZHRoPSIyMiIgaGVpZ2h0PSIzIiByeD0iMSIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeT0iNCIgd2lkdGg9IjIyIiBoZWlnaHQ9IjMiIHJ4PSIxIiAgZmlsbD0id2hpdGUiLz4KPHJlY3QgeT0iMTgiIHdpZHRoPSIyMiIgaGVpZ2h0PSIzIiByeD0iMSIgIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=">
+ 	</button>
+-->	 
+    <button  style="border:none;color:white;background-color:#0080FF;border-radius:12px;width:24px;height:24px;font-size:14px"
+		onclick="zoomout();update();"><b>&minus;</b></button>
+	<input type="range" min="-180" max="180" value="0" class="slider" id="a_slider" style="width:116;position:relative;top:4px"
+		oninput="a_changed(this);"> 
+	<input type="range" min="-180" max="180" value="-20" class="slider" id="b_slider" style="width:116;position:relative;top:4px" 
+	oninput="b_changed(this);"> 
+	<input type="range" min="-180" max="180" value="0" class="slider" id="c_slider" style="width:116;position:relative;top:4px"
+		oninput="c_changed(this);"> 
+    <button  style="border:none;color:white;background-color:#0080FF;border-radius:12px;width:24px;height:24px;font-size:14px"
+		onclick="zoomin();update();"><b>&plus;</b></button>
+   <br>   
+  
+  <span id="latlon" style="color:white;"></span>
+  <div style="position:relative">	 
+    <svg xmlns="http://www.w3.org/2000/svg" id="svg1" width="440" height="430" font-family="Times" font-size=14 >
+      <g id="gt" transform="translate(0,20)">	   	   	   
+      </g>
+    </svg>
+</div>
+	
 </td><td>
 
 <div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#eee">
@@ -200,7 +242,306 @@ optgroup {font-size: 16px;}
 <textarea id="ta" style="opacity:0;position:absolute;z-index:-9999;pointer-events:none;"></textarea>
 
 <br><br>
-<span title="Marek Moszyński 2025">MM 29.7.2025</span>
+<span title="Marek Moszyński 2025">MM 8.8.2025 (mm-bem v1.5)</span>
+
+<script>
+// globals
+var pi=Math.PI;
+var a=0.4, b=-0.4, c=0.0;     // 3D view angles
+var a11,a12,a13,a21,a22,a23;  // 2D projection coefficients
+var zoom = 1, xoff = 0, yoff = 0;
+//var bkg1 = "#004488", bkg2 = "#0055aa";
+var bkg1 = "#e8ebff", bkg2 = "#fff";
+var axcolors = ["red","green","blue"];
+var mshcolor = "#0b22ae"; //"black";
+var wh=Math.max(window.innerHeight-150,400), bkg = bkg1; //"#000077"; // "#ffdd88"; "darkblue"; //
+var axes_onoff=1;
+
+function zoomin() {zoom*=2; xoff-=wh/4*zoom; yoff-=wh/4*zoom;}
+function zoomout() {if(zoom>1/8) {xoff+=wh/4*zoom; yoff+=wh/4*zoom; zoom/=2; }}
+
+function init_mouse() {
+	let delta=8,sX,sY,clk=0;
+	var el=document.getElementById("svg1");
+	el.onmousedown = function (event) {sX = event.pageX; sY = event.pageY;  clk=1;}
+	el.onmouseup = function (event) {clk=0;}
+	el.onmousemove = function (event) {if(clk==0) return;
+		var dX = event.pageX-sX, dY = event.pageY-sY;
+		if (Math.abs(dX) < delta && Math.abs(dY) < delta) {return;} 
+		else {
+			if(Math.abs(dX)>Math.abs(dY)) {a -= dX/4*pi/180;} else {b -= dY/4*pi/180;}
+			tle_id=-1;
+			init3d();
+		}
+		sX = event.pageX; sY = event.pageY;
+	}
+}
+
+document.onkeydown = function(e) {
+  if(e.keyCode==65 ) { // ctl A
+	  if(e.ctrlKey) {e.preventDefault(); axes_onoff^=1;}
+  }
+  if(e.keyCode==66 ) { // ctl B
+	if(e.ctrlKey) {e.preventDefault(); 
+	  bkg = (bkg!==bkg1)?bkg1:bkg2;  
+	  el=document.getElementById("svgdiv");
+      if(el) {
+		el.setAttribute("style","background:"+bkg+";width:"+(wh+80));
+	  }
+    }
+  }
+  if(e.keyCode==82 ) { // ctl R
+	  if(e.ctrlKey) {e.preventDefault(); zoom=1; xoff=0; yoff=0;}
+  }
+  if(e.keyCode==187 ) { // ctl +
+	  zoomin();
+  }
+  if(e.keyCode==189 ) { // ctl -
+	  zoomout();
+  }
+  if(e.keyCode==37 ) { /* left key */
+     if(e.shiftKey && e.ctrlKey) {e.preventDefault(); xoff -= 20;}
+  }
+  if(e.keyCode==39 ) { // right key
+     if(e.shiftKey && e.ctrlKey) {e.preventDefault(); xoff += 20;}
+  }
+  if(e.keyCode==38 ) { /* up key */
+      if(e.shiftKey && e.ctrlKey) {e.preventDefault(); yoff -= 20;}
+  }
+  if(e.keyCode==40 ) { // down key
+      if(e.shiftKey && e.ctrlKey) {e.preventDefault(); yoff += 20;}
+  }	
+  update();  
+};
+
+document.oncopy = function(e) {
+  var ta = document.getElementById('ta');
+  if(ta) {
+	ta.value = document.getElementById("svg").outerHTML;
+    ta.select();
+    document.execCommand('copy');
+  }
+}
+
+function init_view() {
+  with(Math) {
+    a11=-cos(c)*sin(a)-sin(c)*cos(a)*sin(b);
+    a12=cos(c)*cos(a)-sin(c)*sin(a)*sin(b);
+    a13=-sin(c)*cos(b);
+    a21=cos(c)*cos(a)*sin(b)-sin(c)*sin(a);
+    a22=cos(c)*sin(a)*sin(b)+sin(c)*cos(a);
+    a23=cos(c)*cos(b);
+  }
+}
+
+function P(x, y, z) { if(x instanceof Array) {y=x[1];z=x[2];x=x[0];}
+  //return [(a11*x+a12*y+a13*z),(a21*x+a22*y+a23*z)];
+  return [(a11*z+a12*x+a13*y),(a21*z+a22*x+a23*y)];
+}
+function V(xy) {
+  return [zoom*wh*(xy[0]/2+1/2)+xoff, zoom*wh*(-xy[1]/2+1/2)+yoff];	
+} 
+
+Array.prototype.myString = function() {
+  return " "+this[0].toFixed(2)+","+this[1].toFixed(2);
+}	
+
+function draw_xyzpoints(el,p) { 
+  var s='';
+  for(var j=0;j<p.length;j++) {
+      s += V(P(p[j])).myString();
+  }	
+  el.setAttribute("points",s); //cnt1!=cnt2?s:"");	
+}
+
+// ---- matrix functions
+
+const PI = Math.PI;
+
+function vadd(a,b) {
+	return a.map((val, i) => val + b[i]);
+}
+function madd(A,B) {
+	return A.map((row, i) => row.map((val, j) => val + B[i][j]));
+}
+
+// Matrix multiplication
+function mul(A, B) {
+  return A.map(row => B[0].map((_, j) => row.reduce((sum, a, i) => sum + a * B[i][j], 0)));
+}
+
+// Rotate a point [x, y, z] using matrix M
+function rot(M, x, y, z) { if(x instanceof Array) {y=x[1];z=x[2];x=x[0];}
+  const result = mul(M, [[x], [y], [z]]);
+  return result.map(row => row[0]);
+}
+
+// Identity matrix
+function R1() {
+  return [[1, 0, 0],[0, 1, 0],[0, 0, 1]];
+}
+
+// Rotation around Z-axis
+function Rz(a, M = R1()) {
+  const rad = a * PI / 180;
+  const R = [[Math.cos(rad),-Math.sin(rad),0],[Math.sin(rad),Math.cos(rad),0],[0,0,1]];
+  return mul(R, M);
+}
+
+// Rotation around Y-axis
+function Ry(a, M = R1()) {
+  const rad = a * PI / 180;
+  const R = [[ Math.cos(rad),0,Math.sin(rad)],[0,1,0],[-Math.sin(rad),0,Math.cos(rad)]];
+  return mul(R, M);
+}
+
+// Rotation around X-axis
+function Rx(a, M = R1()) {
+  const rad = a * PI / 180;
+  const R = [[1,0,0],[0,Math.cos(rad),-Math.sin(rad)],[0,Math.sin(rad),Math.cos(rad)]];
+  return mul(R, M);
+}
+
+function msh_parse(s) {
+	var lines = s.split('\n');
+	const n = parseInt(lines[4]);
+	const v = lines.slice(5, 5 + n).map(line =>line.trim().split(/\s+/).slice(1, 4).map(parseFloat));
+	const m = parseInt(lines[n + 7]);
+	const e = lines.slice(n + 8, n + 8 + m).map(line => line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x)-1));
+	return [v,e];
+}
+
+var vx=[],fx=[],x0,y0,z0,M=[];
+function init_mesh() {
+	var s=document.getElementById("msh").value;
+	clear_mesh();
+	[vx,fx] = msh_parse(s);
+	//[vx,fx] = sphere(0.01905,3);
+	//[vx,fx] = cylinder(0.01905,0.01,0.01);
+	//[vx,fx] = ellipsoid(0.01905,0.01,0.01);
+	x0=0.0, y0=0; z0=0;
+	M = R1(); //Ry(-45);
+
+	//msh_str([[vx,fx]]);
+	//mesh=msh_flush();
+	//console.log(mesh);
+}
+
+function clear_mesh() {
+    for(var k=0;k<fx.length;k++) {
+        var el = document.getElementById("mesh_"+k);
+		if(el) {
+			el.setAttribute("points","");
+		}
+	}
+}
+function update_mesh() {
+    for(var k=0;k<fx.length;k++) {
+      var pp=[];
+      for(var j=0;j<3;j++) {
+  	      pp.push(vx[fx[k][j]]);
+  	      //pp.push(rot(M,vadd(vx[fx[k][j]],[x0,y0,z0])));
+      }
+      var el = document.getElementById("mesh_"+k);
+      if(!el) {
+        el = document.createElementNS("http://www.w3.org/2000/svg", 'polyline'); 
+        el.setAttribute("id","mesh_"+k); 
+  	    el.setAttribute("points","");
+  	    el.setAttribute("stroke",mshcolor);
+  	    el.setAttribute("stroke-width",0.5);
+  	    //el.setAttribute("stroke-dasharray","2,2"); 
+  	    el.setAttribute("fill","none"); 
+        document.getElementById("gt").appendChild(el);	
+        var el2=document.createElementNS("http://www.w3.org/2000/svg", 'title'); 
+  	    el2.setAttribute("id","mesh_"+k+"_title");
+  	    el.appendChild(el2);
+      }
+      draw_xyzpoints(el,pp);
+  	  var el2=document.getElementById("mesh_"+k+"_title");
+  	  if(el2) el2.innerHTML="mesh_"+k;
+    }
+}
+
+function update_axes() {
+  for(var j=-1;j<2;j+=2) {
+    for(var k=0;k<3;k++) {
+      var pp = [[0,0,0],[j*(k==0),j*(k==1),j*(k==2)]];
+      var id = (4+j*(k+1));
+      var el = document.getElementById("axes_"+id);
+      if(!el) {
+        el = document.createElementNS("http://www.w3.org/2000/svg", 'polyline'); 
+        el.setAttribute("id","axes_"+id); 
+  	el.setAttribute("points","");
+  	el.setAttribute("stroke",axes_onoff?axcolors[k]:"none");
+  	el.setAttribute("stroke-width",0.5);
+  	if(j<0) el.setAttribute("stroke-dasharray","2,4"); 
+  	el.setAttribute("fill","none"); 
+	document.getElementById("gt").appendChild(el);	
+        var el2=document.createElementNS("http://www.w3.org/2000/svg", 'title'); 
+  	el2.setAttribute("id","axes_"+id+"_title");
+        el.appendChild(el2);
+      }
+      el.setAttribute("stroke",axes_onoff?axcolors[k]:"none");
+      draw_xyzpoints(el,pp);
+      var el2=document.getElementById("axes_"+(3+(j-1)*k)+"_title");
+      if(el2) el2.innerHTML="axes_"+id;
+    }
+  }	
+}
+
+function init_sliders() { // sliders
+  document.getElementById("a_slider").value = Math.round(a*180/pi);
+  document.getElementById("b_slider").value = Math.round(b*180/pi);
+  document.getElementById("c_slider").value = Math.round(c*180/pi);
+}
+
+function a_changed(el) {a = parseFloat(el.value)*pi/180; init3d(); }
+function b_changed(el) {b = parseFloat(el.value)*pi/180; init3d(); }
+function c_changed(el) {c = parseFloat(el.value)*pi/180; init3d(); }
+
+function update() {
+  update_axes();
+  update_mesh();
+}
+
+function init3d() {
+  init_view();  
+  init_sliders();
+  update();
+}
+
+function main() {
+  var el;
+
+  el=document.getElementById("svgdiv");
+  if(el) {
+	  el.setAttribute("style","background:"+bkg+";width:"+(wh+80)); //+";height:"+(wh+60));
+//	  el.style.width=(wh+60);
+//	  el.style.height=(wh+60);
+  } 
+  init_mouse();
+  init_mesh();
+  zoomin();
+  zoomin();
+  zoomin();
+  zoomin();
+  zoomin();
+  init3d();
+}
+
+var about =`
+mesh3D  MM 2025
+
+Ctrl A - axes on/off
+Ctrl B - background color switch
+Ctrl + - zoom in
+Ctrl - - zoom out
+Ctrl R - zoom reset
+
+marek.moszynski@pg.edu.pl`;
+</script>
+
+
 <script>
 
 function select() {
@@ -272,6 +613,9 @@ function change() {
     } else {
         document.getElementById("msh").value=eval(obj);  	
     }
+	// 3d update()
+	init_mesh()
+	init3d();
     // start calc
     var out = document.getElementById("out").value;
     document.getElementById("txt").value="Calculating ...";
@@ -386,7 +730,7 @@ function svg_copy(e) {
 
 // ---- matrix functions
 
-const PI = Math.PI;
+//const PI = Math.PI;
 
 // Matrix multiplication
 function mul(A, B) {
@@ -500,6 +844,67 @@ function sphere(R = 1, N = 2) {
     return [vx, fx];
 }
 
+function ellipsoid3d(rx, ry, rz, N = 2) {
+      const vx = [];
+      
+      const t = (1 + Math.sqrt(5)) / 2;
+      const rawVerts = [
+        [-1,  t,  0], [ 1,  t,  0], [-1, -t,  0], [ 1, -t,  0],
+        [ 0, -1,  t], [ 0,  1,  t], [ 0, -1, -t], [ 0,  1, -t],
+        [ t,  0, -1], [ t,  0,  1], [-t,  0, -1], [-t,  0,  1],
+      ];
+
+      const rawFaces = [
+        [0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7,10], [0,10,11],
+        [1, 5, 9], [5,11,4], [11,10,2], [10,7,6], [7,1,8],
+        [3,9,4], [3,4,2], [3,2,6], [3,6,8], [3,8,9],
+        [4,9,5], [2,4,11], [6,2,10], [8,6,7], [9,8,1],
+      ];
+
+      function project([x, y, z]) {
+        const length = Math.sqrt(x*x + y*y + z*z);
+        return [rx * x / length, ry * y / length, rz * z / length];
+      }
+
+      const midpointCache = {};
+      function getMidpoint(a, b) {
+        const key = a < b ? `${a}_${b}` : `${b}_${a}`;
+        if (midpointCache[key] !== undefined) return midpointCache[key];
+
+        const v1 = vx[a];
+        const v2 = vx[b];
+        const mid = project([
+          (v1[0] + v2[0]) / 2,
+          (v1[1] + v2[1]) / 2,
+          (v1[2] + v2[2]) / 2,
+        ]);
+        vx.push(mid);
+        const index = vx.length - 1;
+        midpointCache[key] = index;
+        return index;
+      }
+
+      rawVerts.forEach(v => vx.push(project(v)));
+      let fx = rawFaces.map(f => [...f]);
+
+      for (let s = 0; s < N; s++) {
+        const newFaces = [];
+        for (const [a, b, c] of fx) {
+          const ab = getMidpoint(a, b);
+          const bc = getMidpoint(b, c);
+          const ca = getMidpoint(c, a);
+
+          newFaces.push([a, ab, ca]);
+          newFaces.push([b, bc, ab]);
+          newFaces.push([c, ca, bc]);
+          newFaces.push([ab, bc, ca]);
+        }
+        fx = newFaces;
+      }
+
+      return [vx, fx];
+}
+
 function ellipsoid(rx, ry, rz, N = 2) {
       const vx = [];
       
@@ -561,6 +966,7 @@ function ellipsoid(rx, ry, rz, N = 2) {
       return [vx, fx];
 }
 
+
 // Mesh generation logic
 let Nn = 0, Ne = 0;
 let Sn = "", Se = "";
@@ -571,7 +977,7 @@ function msh_str(O) {
     let M = O.length > 2 ? O[2] : R1()
 
     for (let i = 0; i < vx.length; i++) {
-	//var xyz = [xo + vx[i][0], yo + vx[i][1], zo + vx[i][2] );
+	//var xyz = [xo + vx[i][0], yo + vx[i][1], zo + vx[i][2] ];
         var xyz = rot (M, xo + vx[i][0], yo + vx[i][1], zo + vx[i][2] );
 	Sn += `${i+Nn+1} ${xyz[0].toFixed(6)} ${xyz[1].toFixed(6)} ${xyz[2].toFixed(6)}\n`;
     }
@@ -597,7 +1003,7 @@ function msh_flush() {
 
 // Input parameters
 // const fname = 'sphere-1.905-600.msh';
-const pi = Math.PI;
+//const pi = Math.PI;
 var f0 = 38e3, c0 = 1480;
 var d = [1, 0, 0];
 
@@ -729,6 +1135,7 @@ async function py_soft() {
 }
 
 change();
+main();
 
 const simplify10_YFT_swimbladder_origin_msh = `$MeshFormat
 2.2 0 8
