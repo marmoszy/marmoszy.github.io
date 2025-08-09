@@ -346,10 +346,16 @@ Array.prototype.myString = function() {
   return " "+this[0].toFixed(2)+","+this[1].toFixed(2);
 }	
 
-function draw_xyzpoints(el,p) { 
+function draw_xyzpoint(el,p) { 
+  var xy = V(P(p));
+  el.setAttribute("cx",xy[0]);
+  el.setAttribute("cy",xy[1]);	
+}
+
+function draw_xyzpoints(el,pp) { 
   var s='';
-  for(var j=0;j<p.length;j++) {
-      s += V(P(p[j])).myString();
+  for(var j=0;j<pp.length;j++) {
+      s += V(P(pp[j])).myString();
   }	
   el.setAttribute("points",s); //cnt1!=cnt2?s:"");	
 }
@@ -486,36 +492,41 @@ function update_axes() {
       if(el2) el2.innerHTML="axes_"+id;
     }
   }
-  {	
   var el = document.getElementById("xyz000");
   if(!el) {
-      el = document.createElementNS("http://www.w3.org/2000/svg", 'polyline'); 
+      el = document.createElementNS("http://www.w3.org/2000/svg", 'circle'); 
       el.setAttribute("id","xyz000"); 
-      el.setAttribute("points","");
-      el.setAttribute("stroke",axes_onoff?"black":"none");
-      el.setAttribute("stroke-width",4);
-      el.setAttribute("fill","none"); 
-      document.getElementById("gt").appendChild(el);	
+      el.setAttribute("fill",axes_onoff?"black":"none");
+      el.setAttribute("r",4);
+      el.setAttribute("stroke","none"); 
+      document.getElementById("gt").appendChild(el);
+      var el2=document.createElementNS("http://www.w3.org/2000/svg", 'title'); 
+      el2.setAttribute("id","xyz000"+"_title");
+      el.appendChild(el2);
   }
-  draw_xyzpoints(el,[[0,0,-0.0001],[0,0,0.0001]]);
-  }
+  draw_xyzpoint(el,[0,0,0]);
+  var el2=document.getElementById("xyz000"+"_title");
+  if(el2) el2.innerHTML="[0,0,0]";
 
-  {	
   var el = document.getElementById("lambda_0");
   if(!el) {
-      el = document.createElementNS("http://www.w3.org/2000/svg", 'polyline'); 
+      el = document.createElementNS("http://www.w3.org/2000/svg", 'circle'); 
       el.setAttribute("id","lambda_0"); 
-      el.setAttribute("points","");
-      el.setAttribute("stroke",axes_onoff?axcolors[0]:"none");
-      el.setAttribute("stroke-width",4);
-      el.setAttribute("fill","none"); 
+      el.setAttribute("fill",axes_onoff?axcolors[0]:"none");
+      el.setAttribute("r",4);
+      el.setAttribute("stroke","none"); 
       document.getElementById("gt").appendChild(el);	
+      var el2=document.createElementNS("http://www.w3.org/2000/svg", 'title'); 
+      el2.setAttribute("id","lambda_0"+"_title");
+      el.appendChild(el2);
   }
   var f0 = parseFloat(document.getElementById("f0").value);
   var c0 = parseFloat(document.getElementById("c0").value);
   var l = c0/f0;
-  draw_xyzpoints(el,[[l/2,0,-l/50],[l/2,0,l/50]]);
-  }
+  draw_xyzpoint(el,[l/2,0,0]);
+  var el2=document.getElementById("lambda_0"+"_title");
+  if(el2) el2.innerHTML='\u03bb<tspan dy="10">0</tspan>/2';
+
 }
 
 function init_sliders() { // sliders
