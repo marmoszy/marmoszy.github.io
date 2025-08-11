@@ -138,7 +138,8 @@ optgroup {font-size: 16px;}
 	  style="float:left;border:none;margin-left:0;background-color:transparent;font-size:14px">
 		 <img style="width:20px;height:20px;" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJPdXRsaW5lIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIj4KPHJlY3QgeT0iMTEiIHdpZHRoPSIyMiIgaGVpZ2h0PSIzIiByeD0iMSIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeT0iNCIgd2lkdGg9IjIyIiBoZWlnaHQ9IjMiIHJ4PSIxIiAgZmlsbD0id2hpdGUiLz4KPHJlY3QgeT0iMTgiIHdpZHRoPSIyMiIgaGVpZ2h0PSIzIiByeD0iMSIgIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=">
  	</button>
--->	 
+-->	
+
     <button  style="border:none;color:white;background-color:#0080FF;border-radius:12px;width:24px;height:24px;font-size:14px"
 		onclick="zoomout();update();"><b>&minus;</b></button>
 	<input type="range" min="-180" max="180" value="0" class="slider" id="a_slider" style="width:116;position:relative;top:4px"
@@ -151,13 +152,13 @@ optgroup {font-size: 16px;}
 		onclick="zoomin();update();"><b>&plus;</b></button>
    <br>   
   
-  <span id="latlon" style="color:white;"></span>
-  <div style="position:relative">	 
-    <svg xmlns="http://www.w3.org/2000/svg" id="svg1" width="440" height="430" font-family="Times" font-size=14 oncopy="svg_copy(this);">
+   <svg xmlns="http://www.w3.org/2000/svg" id="svg1" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
       <g id="gt" transform="translate(0,20)">	   	   	   
       </g>
-    </svg>
+   </svg>
 </div>
+
+<input type=button value="save to svg file" onclick='writeFile(document.getElementById("svg1").outerHTML,"mm-bem-polar.svg");' /> 
 	
 </td><td>
 
@@ -218,6 +219,8 @@ optgroup {font-size: 16px;}
 </g>
 </svg>
 </div>
+
+<input type=button value="save to svg file" onclick='writeFile(document.getElementById("svg").outerHTML,"mm-bem-mesh.svg");' /> 
 
 </td></tr><tr><td>
 
@@ -289,6 +292,9 @@ document.onkeydown = function(e) {
 		el.setAttribute("style","background:"+bkg+";width:"+(wh+80));
 	  }
     }
+  }
+  if(e.keyCode==72 ) { // ctl H
+	  if(e.ctrlKey) {e.preventDefault(); alert(about);}
   }
   if(e.keyCode==82 ) { // ctl R
 	  if(e.ctrlKey) {e.preventDefault(); zoom=1; xoff=0; yoff=0;}
@@ -569,14 +575,13 @@ function main() {
   init3d();
 }
 
-var about =`
-mesh3D  MM 2025
+var about =`mm-bem web-demo MM 2025
 
-Ctrl A - axes on/off
-Ctrl B - background color switch
-Ctrl + - zoom in
-Ctrl - - zoom out
-Ctrl R - zoom reset
+ctrl A - axes on/off
+ctrl + - zoom in
+ctrl - - zoom out
+ctrl R - zoom to unit distance
+ctrl-shift-cursors - move
 
 marek.moszynski@pg.edu.pl`;
 </script>
