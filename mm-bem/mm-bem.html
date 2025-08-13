@@ -245,12 +245,12 @@ optgroup {font-size: 16px;}
 <textarea id="ta" style="opacity:0;position:absolute;z-index:-9999;pointer-events:none;"></textarea>
 
 <br><br>
-<span title="Marek Moszyński 2025">MM 8.8.2025 (mm-bem v1.5)</span>
+<span title="Marek Moszyński 2025">MM 14.8.2025 (mm-bem v1.55)</span>
 
 <script>
 // globals
 var pi=Math.PI;
-var a=0.4, b=-0.4, c=0.0;     // 3D view angles
+var a=0.4, b=-0.2, c=0.0;     // 3D view angles
 var a11,a12,a13,a21,a22,a23;  // 2D projection coefficients
 var zoom = 1, xoff = 0, yoff = 0;
 //var bkg1 = "#004488", bkg2 = "#0055aa";
@@ -258,7 +258,7 @@ var bkg1 = "#e8ebff", bkg2 = "#fff";
 var axcolors = ["red","green","blue"];
 var mshcolor = "#0b22ae"; //"black";
 var wh=Math.max(window.innerHeight-150,400), bkg = bkg1; //"#000077"; // "#ffdd88"; "darkblue"; //
-var axes_onoff=1;
+var axes_onoff=1,box_onoff=1;
 
 function zoomin() {zoom*=2; xoff-=wh/4*zoom; yoff-=wh/4*zoom;}
 function zoomout() {if(zoom>1/8) {xoff+=wh/4*zoom; yoff+=wh/4*zoom; zoom/=2; }}
@@ -281,17 +281,21 @@ function init_mouse() {
 }
 
 document.onkeydown = function(e) {
-  if(e.keyCode==65 ) { // ctl A
-	  if(e.ctrlKey) {e.preventDefault(); axes_onoff^=1;}
+  if(e.keyCode==65 ) { // ctrl A
+    if(e.ctrlKey) {e.preventDefault(); axes_onoff^=1;}
   }
-  if(e.keyCode==66 ) { // ctl B
-	if(e.ctrlKey) {e.preventDefault(); 
-	  bkg = (bkg!==bkg1)?bkg1:bkg2;  
-	  el=document.getElementById("svgdiv");
+  if(e.keyCode==66 ) { // ctrl B
+    if(e.ctrlKey) {e.preventDefault(); box_onoff^=1;}
+/*
+    if(e.ctrlKey) {
+      e.preventDefault(); 
+      bkg = (bkg!==bkg1)?bkg1:bkg2;  
+      el=document.getElementById("svgdiv");
       if(el) {
-		el.setAttribute("style","background:"+bkg+";width:"+(wh+80));
-	  }
+        el.setAttribute("style","background:"+bkg+";width:"+(wh+80));
+      }
     }
+*/
   }
   if(e.keyCode==72 ) { // ctl H
 	  if(e.ctrlKey) {e.preventDefault(); alert(about);}
@@ -365,6 +369,17 @@ function draw_xyzpoints(el,pp) {
   }	
   el.setAttribute("points",s); //cnt1!=cnt2?s:"");	
 }
+
+function draw_box(svg,id,xmin,xmax,ymin,ymax,zmin,zmax,color,w) {
+  var el = document.getElementById(svg);
+  var p1=V(P(xmin,ymin,zmin)), p2=V(P(xmin,ymin,zmax));
+  var p3=V(P(xmin,ymax,zmax)), p4=V(P(xmin,ymax,zmin));
+  var p5=V(P(xmax,ymin,zmin)), p6=V(P(xmax,ymin,zmax));
+  var p7=V(P(xmax,ymax,zmax)), p8=V(P(xmax,ymax,zmin));
+  svg_createpath(el,id, [ [p1,p2,p3,p4], [p5,p6,p7,p8], [p1,p5], [p2,p6], [p3,p7], [p4,p8] ]
+    , color||'black', w||0.5);
+}
+
 
 // ---- matrix functions
 
@@ -533,6 +548,7 @@ function update_axes() {
   var el2=document.getElementById("lambda_0"+"_title");
   if(el2) el2.innerHTML='\u03bb<tspan dy="10">0</tspan>/2';
 
+  draw_box("svg1","B1",-l/2,l/2,-l/2,l/2,-l/2,l/2,box_onoff?'black':'none');
 }
 
 function init_sliders() { // sliders
@@ -578,6 +594,7 @@ function main() {
 var about =`mm-bem web-demo MM 2025
 
 ctrl A - axes on/off
+ctrl B - box on/off
 ctrl + - zoom in
 ctrl - - zoom out
 ctrl R - zoom to unit distance
@@ -749,7 +766,7 @@ function svg_createpoint(svg,id,x,y,color,r,color2,title) { // building svg circ
 	el.innerHTML = "<title>"+(title || '')+"</title>";
 }
 
-function svg_createline(svg,id,x1,y1,x2,y2,color,w) { // building svg rect with coords in a string s for histogram bar
+function svg_createline(svg,id,x1,y1,x2,y2,color,w) { 
 	var el=document.getElementById(id);
 	if (!el) {
 		el = document.createElementNS('http://www.w3.org/2000/svg', 'line');
@@ -762,6 +779,27 @@ function svg_createline(svg,id,x1,y1,x2,y2,color,w) { // building svg rect with 
 	el.setAttribute("y1",y1);
 	el.setAttribute("x2",x2);
 	el.setAttribute("y2",y2);
+}
+
+function svg_createpath(svg,id,p,color,w) { 
+	var el=document.getElementById(id);
+	if (!el) {
+		el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+		el.setAttribute('id',id);
+		svg.appendChild(el);
+	}
+	el.setAttribute('stroke',color||'black');
+	el.setAttribute('stroke-width',w||1);
+  	el.setAttribute("stroke-dasharray","2,2"); 
+	el.setAttribute('fill','none');
+	s = '';
+	for(var i=0;i<p.length;i++) {
+		for(var j=0;j<p[i].length;j++) {
+			s+=(j==0?'M':'L')+p[i][j][0].toFixed(2)+' '+p[i][j][1].toFixed(2)+' ';
+		}
+		s+='Z';
+	}
+	el.setAttribute('d',s);
 }
 
 function svg_copy(e) {
