@@ -5,9 +5,16 @@
 <script src="https://cdn.jsdelivr.net/pyodide/v0.23.2/full/pyodide.js">
 </script>
 
+<!--
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+-->
+
 <style> 
-body,textarea {font-size: 16px;}
-optgroup {font-size: 16px;}
+html,body,textarea {font-size: 16px;}
+select,optgroup {font-size: 16px; font-family: monospace}
+input[type='file'] {font-size: 16px; }
+input[type='button'] {font-size: 16px; }
 </style>
 
 <center>
@@ -17,9 +24,9 @@ optgroup {font-size: 16px;}
 <center>
 <table><tr><td>
 
-<div style="width:440;height:160;border-width:1;border-style:solid;padding:20px;display:block;background-color:#ffffe6">
+<div style="width:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#ffffe6">
 <label for="def">1. Target: </label>
-<select id="def" onchange="select()" style="background-color:#e6fff2">
+<select id="def" onchange="select()" style="background-color:#e6fff2;max-width:360px">
 <optgroup>
   <option value="[sphere(0.01905), [0, 0, 0]]">Low resolution sphere</option>
   <option value="[sphere(0.01905,3), [0, 0, 0]]">Medium resolution sphere</option>
@@ -92,12 +99,12 @@ optgroup {font-size: 16px;}
 </optgroup>
 </select>
 
-<br><br>
+<br>
 </div>
 </td><td>
-<div style="width:440;height:160;border-width:1;border-style:solid;padding:20px;display:block;background-color:#ffffe6">
+<div style="width:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#ffffe6">
 
-<textarea id="obj" style="width:425;height:72" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905), [0, 0, 0]]</textarea>
+<textarea id="obj" style="width:425;height:60" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905), [0, 0, 0]]</textarea>
 
 <br><br>
 <label for="out">Calculation engine: </label> 
@@ -124,7 +131,7 @@ optgroup {font-size: 16px;}
 </optgroup>
 </select>
 
-<br><span style="margin-left:64px"/> or <input accept="text/plain"  id="openfile2" title="Load from two-columns txt file" type="file" onchange="readFile2(this);"/>
+<br><span style="margin-left:64px"/> or <input accept="text/plain"  id="openfile2" title="Load from two-columns txt file" type="file" onchange="readFile2(this);" multiple/>
 
 </div>
 
@@ -245,35 +252,43 @@ optgroup {font-size: 16px;}
 <textarea id="ta" style="opacity:0;position:absolute;z-index:-9999;pointer-events:none;"></textarea>
 
 <br><br>
-<span title="Marek Moszyński 2025">MM 14.8.2025 (mm-bem v1.55)</span>
+<span title="Marek Moszyński 2025">MM 14.8.2025 (mm-bem v1.56)</span>
 
 <script>
 // globals
 var pi=Math.PI;
-var a=0.4, b=-0.2, c=0.0;     // 3D view angles
-var a11,a12,a13,a21,a22,a23;  // 2D projection coefficients
+var a = 0.4, b = -0.2, c = 0.0;     // 3D view angles
+var a11, a12, a13, a21, a22, a23;   // 2D projection coefficients
 var zoom = 1, xoff = 0, yoff = 0;
+
 //var bkg1 = "#004488", bkg2 = "#0055aa";
 var bkg1 = "#e8ebff", bkg2 = "#fff";
-var axcolors = ["red","green","blue"];
+var bkg = bkg1; //"#000077"; // "#ffdd88"; "darkblue"; //
+
+var axcolors = ["red", "green", "blue"];
 var mshcolor = "#0b22ae"; //"black";
-var wh=Math.max(window.innerHeight-150,400), bkg = bkg1; //"#000077"; // "#ffdd88"; "darkblue"; //
-var axes_onoff=1,box_onoff=1;
+var wh = Math.max(window.innerHeight-150,400);
+var axes_onoff = 1, box_onoff = 1;
 
 function zoomin() {zoom*=2; xoff-=wh/4*zoom; yoff-=wh/4*zoom;}
 function zoomout() {if(zoom>1/8) {xoff+=wh/4*zoom; yoff+=wh/4*zoom; zoom/=2; }}
 
 function init_mouse() {
-	let delta=8,sX,sY,clk=0;
+	let delta=8, sX, sY, clk=0;
 	var el=document.getElementById("svg1");
 	el.onmousedown = function (event) {sX = event.pageX; sY = event.pageY;  clk=1;}
 	el.onmouseup = function (event) {clk=0;}
-	el.onmousemove = function (event) {if(clk==0) return;
+	el.onmousemove = function (event) {
+		if(clk==0) return;
 		var dX = event.pageX-sX, dY = event.pageY-sY;
-		if (Math.abs(dX) < delta && Math.abs(dY) < delta) {return;} 
-		else {
-			if(Math.abs(dX)>Math.abs(dY)) {a -= dX/4*pi/180;} else {b -= dY/4*pi/180;}
-			tle_id=-1;
+		if (Math.abs(dX) < delta && Math.abs(dY) < delta) {
+			return;
+		} else {
+			if(Math.abs(dX)>Math.abs(dY)) {
+				a -= dX/4*pi/180;
+			} else {
+				b -= dY/4*pi/180;
+			}
 			init3d();
 		}
 		sX = event.pageX; sY = event.pageY;
@@ -376,8 +391,11 @@ function draw_box(svg,id,xmin,xmax,ymin,ymax,zmin,zmax,color,w) {
   var p3=V(P(xmin,ymax,zmax)), p4=V(P(xmin,ymax,zmin));
   var p5=V(P(xmax,ymin,zmin)), p6=V(P(xmax,ymin,zmax));
   var p7=V(P(xmax,ymax,zmax)), p8=V(P(xmax,ymax,zmin));
-  svg_createpath(el,id, [ [p1,p2,p3,p4], [p5,p6,p7,p8], [p1,p5], [p2,p6], [p3,p7], [p4,p8] ]
-    , color||'black', w||0.5);
+  var p9=[];
+  for(var i=0;i<360;i++) {
+    p9.push(V(P([(xmax-xmin)/2*Math.cos(i*pi/180),(ymax-ymin)/2*Math.sin(i*pi/180),zmax])));
+  }
+  svg_createpath(el,id, [ [p1,p2,p3,p4], [p5,p6,p7,p8], [p1,p5], [p2,p6], [p3,p7], [p4,p8], p9 ], color||'black', w||0.5);
 }
 
 
@@ -577,9 +595,9 @@ function main() {
 
   el=document.getElementById("svgdiv");
   if(el) {
-	  el.setAttribute("style","background:"+bkg+";width:"+(wh+80)); //+";height:"+(wh+60));
-//	  el.style.width=(wh+60);
-//	  el.style.height=(wh+60);
+	  el.setAttribute("style","background:"+bkg+";width:"+(wh+80)+";height:"+(wh+80));
+	  el.style.width=(wh+80);
+	  el.style.height=(wh+80);
   } 
   init_mouse();
   init_mesh();
@@ -630,13 +648,22 @@ function readFile(e) {  // local file reader
 }
 
 function readFile2(e) {  // local file reader
-	var file = e.files[0];
+    let k = 0;
+    let N = e.files.length;
+    for(var i=0; i<N; i++) {
+	var file = e.files[i];
 	if (!file) return;
+	if(i==0) { 
+		document.getElementById("txt2").value="";
+		document.getElementById("out2").value="none"
+	}
 	var reader = new FileReader();
 	reader.onload = function(e) {
-		document.getElementById("out2").value="none"
-		document.getElementById("txt2").value=e.target.result;
-		change2(); 
+		k++;
+		document.getElementById("txt2").value += e.target.result;
+		if(k==N) {
+			change2(); 
+		}
 	};
 	if(file.name.endsWith(".txt")) {
 		//document.getElementById("openfile2").value="";
@@ -645,6 +672,7 @@ function readFile2(e) {  // local file reader
 	} else {
 		alert("Only *.txt files allowed") 
 	}
+    }
 }
 
 function writeFile(data, filename, type) {
