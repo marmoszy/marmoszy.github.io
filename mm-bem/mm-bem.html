@@ -664,13 +664,9 @@ function select() {
 function readFile(e) {  // local file reader
     let k = 0;
     let N = e.files.length;
-console.log(N);
-console.log(e);
     for(var i=0; i<N; i++) {
 	var file = e.files[i];
-console.log(file);
 	if (!file) return;
-console.log(file.name);
 	if(i==0) {
 		document.getElementById("obj").value="";
 		document.getElementById("msh").value="";
@@ -684,7 +680,6 @@ console.log(file.name);
 	};
 	if(file.name.endsWith(".msh")) {
 		document.getElementById("obj").value+=' '+file.name;
-console.log(document.getElementById("obj").value);
 		reader.readAsText(file);
 	} else {
 		alert("Only msh (ascii 2.0) files allowed") 
