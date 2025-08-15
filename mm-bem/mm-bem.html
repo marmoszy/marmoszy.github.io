@@ -110,6 +110,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <optgroup>
   <option value="py_soft">pyodide</option>
   <option value="js_soft">math.js</option>
+  <option value="soft.js">math.js worker</option>
   <option value="none">do not calculate</option>
 </optgroup>
 </select>
@@ -163,7 +164,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
    </svg>
 </div>
 
-<input type=button value="save to svg file" onclick='writeFile(document.getElementById("svg1").outerHTML,"mm-bem-polar.svg");' /> 
+<input type=button value="Save to svg file" onclick='writeFile(document.getElementById("svg1").outerHTML,"mm-bem-polar.svg");' /> 
 	
 </td><td>
 
@@ -225,24 +226,24 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 </svg>
 </div>
 
-<input type=button value="save to svg file" onclick='writeFile(document.getElementById("svg").outerHTML,"mm-bem-mesh.svg");' /> 
+<input type=button value="Save to svg file" onclick='writeFile(document.getElementById("svg").outerHTML,"mm-bem-mesh.svg");' /> 
 
 </td></tr><tr><td>
 
 <textarea id="msh" style="width:480px;height:440px;background-color:#e6fff2">
 </textarea>
 <br>
-<input type=button value="save to msh file" onclick='writeFile(document.getElementById("msh").value,"mm-bem.msh");' /> 
+<input type=button value="Save to msh file" onclick='writeFile(document.getElementById("msh").value,"mm-bem.msh");' /> 
 
 </td><td>
 
 <textarea id="txt" style="width:240;height:440;background-color:#ffe6e6" ondrop="drop(event);" onchange="plot();" onpaste="setTimeout(plot,0);">
 </textarea>
 
-<textarea id="txt2" style="width:240;height:440;background-color:#e6ffff">
+<textarea id="txt2" style="width:240;height:440;background-color:#e6ffff" ondrop="drop2(event);">
 </textarea>
 <br>
-<input type=button value="save to txt file" onclick='writeFile(document.getElementById("txt").value,"mm-bem.txt");' /> 
+<input type=button value="Save to txt file" onclick='writeFile(document.getElementById("txt").value,"mm-bem.txt");' /> 
 
 </td></tr></table>
 </center>
@@ -393,9 +394,34 @@ function draw_box(svg,id,xmin,xmax,ymin,ymax,zmin,zmax,color,w) {
 	//for(var i=0;i<360;i++) {
 	//  p9.push(V(P([(xmax-xmin)/2*Math.cos(i*pi/180),(ymax-ymin)/2*Math.sin(i*pi/180),zmax])));
 	//}
+	var xo=xmin+(xmax-xmin)/3;
+	var p11=V(P(xo,ymin,zmin)), p12=V(P(xo,ymin,zmax));
+	var p13=V(P(xo,ymax,zmax)), p14=V(P(xo,ymax,zmin));
+	xo += (xmax-xmin)/3;
+	var p15=V(P(xo,ymin,zmin)), p16=V(P(xo,ymin,zmax));
+	var p17=V(P(xo,ymax,zmax)), p18=V(P(xo,ymax,zmin));
+
+	var yo=ymin+(ymax-ymin)/3;
+	var p21=V(P(xmin,yo,zmin)), p22=V(P(xmin,yo,zmax));
+	var p23=V(P(xmax,yo,zmax)), p24=V(P(xmax,yo,zmin));
+	yo += (ymax-ymin)/3;
+	var p25=V(P(xmin,yo,zmin)), p26=V(P(xmin,yo,zmax));
+	var p27=V(P(xmax,yo,zmax)), p28=V(P(xmax,yo,zmin));
+
+	var zo=zmin+(zmax-zmin)/3;
+	var p31=V(P(xmin,ymin,zo)), p32=V(P(xmin,ymax,zo));
+	var p33=V(P(xmax,ymax,zo)), p34=V(P(xmax,ymin,zo));
+	zo += (zmax-zmin)/3;
+	var p35=V(P(xmin,ymin,zo)), p36=V(P(xmin,ymax,zo));
+	var p37=V(P(xmax,ymax,zo)), p38=V(P(xmax,ymin,zo));
+
 	var el = document.getElementById(svg);
-	svg_createpath(el,id,[[p1,p2,p3,p4],[p5,p6,p7,p8],[p1,p5],[p2,p6],[p3,p7],[p4,p8],p9]
-		, color||'black', w||0.5);
+	svg_createpath(el,id+"1",[[p1,p2,p3,p4],[p5,p6,p7,p8],[p1,p5],[p2,p6],[p3,p7],[p4,p8],p9
+] , color||'gray', w||0.5, "1,0");
+	svg_createpath(el,id,[[p11,p12,p13,p14],[p15,p16,p17,p18]
+,[p21,p22,p23,p24],[p25,p26,p27,p28]
+,[p31,p32,p33,p34],[p35,p36,p37,p38]
+] , color||'gray', w||0.5, "2,4");
 }
 
 // ---- matrix functions
@@ -462,10 +488,8 @@ function init_mesh() {
 	var s=document.getElementById("msh").value;
 	clear_mesh();
 	var ss=s.split('$EndElements\n');
-	console.log(ss.length);
 	vx=[];fx=[];
 	for(var i=0;i<ss.length;i++) {
-		console.log(ss[i].length);
 		if(ss[i].length>0) {
 			var vi=[],fi=[];
 			[vi,fi] = msh_parse(ss[i]);
@@ -486,7 +510,6 @@ function init_mesh() {
 	msh_str([[vx,fx]]);
 	s = msh_flush();
 	document.getElementById("msh").value = s;
-	//console.log(mesh);
 }
 
 function clear_mesh() {
@@ -662,57 +685,53 @@ function select() {
 }
 
 function readFile(e) {  // local file reader
-    let k = 0;
-    let N = e.files.length;
-    for(var i=0; i<N; i++) {
-	var file = e.files[i];
-	if (!file) return;
-	if(i==0) {
-		document.getElementById("obj").value="";
-		document.getElementById("msh").value="";
+	let k = 0;
+	let N = e.files.length;
+	for(var i=0; i<N; i++) {
+		var file = e.files[i];
+		if (!file) return;
+		if(i==0) {
+			document.getElementById("obj").value="";
+			document.getElementById("msh").value="";
+		}
+		var reader = new FileReader();
+		reader.onload = function(e) {
+			k++;
+			document.getElementById("msh").value+=e.target.result;
+			if(k==N) change(); // start calculations after reading
+		};
+		if(file.name.endsWith(".msh")) {
+			document.getElementById("obj").value+=' '+file.name;
+			reader.readAsText(file);
+		} else {
+			alert("Only msh (ascii 2.0) files allowed") 
+		}
 	}
-	var reader = new FileReader();
-	reader.onload = function(e) {
-		k++;
-		document.getElementById("msh").value+=e.target.result;
-		//document.getElementById("openfile").value="";
-		if(k==N) change(); // start calculations after reading
-	};
-	if(file.name.endsWith(".msh")) {
-		document.getElementById("obj").value+=' '+file.name;
-		reader.readAsText(file);
-	} else {
-		alert("Only msh (ascii 2.0) files allowed") 
-	}
-    }
 }
 
 function readFile2(e) {  // local file reader
-    let k = 0;
-    let N = e.files.length;
-    for(var i=0; i<N; i++) {
-	var file = e.files[i];
-	if (!file) return;
-	if(i==0) { 
-		document.getElementById("txt2").value="";
-		document.getElementById("out2").value="none"
-	}
-	var reader = new FileReader();
-	reader.onload = function(e) {
-		k++;
-		document.getElementById("txt2").value += e.target.result;
-		if(k==N) {
-			change2(); 
+	let k = 0;
+	let N = e.files.length;
+	for(var i=0; i<N; i++) {
+		var file = e.files[i];
+		if (!file) return;
+		if(i==0) { 
+			document.getElementById("txt2").value="";
+			document.getElementById("out2").value="none"
 		}
-	};
-	if(file.name.endsWith(".txt")) {
-		//document.getElementById("openfile2").value="";
-		document.getElementById("txt2").value="";
-		reader.readAsText(file);
-	} else {
-		alert("Only *.txt files allowed") 
+		var reader = new FileReader();
+		reader.onload = function(e) {
+			document.getElementById("txt2").value += e.target.result;
+			k++;
+			if(k==N) change2(); 
+		};
+		if(file.name.endsWith(".txt")) {
+			document.getElementById("txt2").value="";
+			reader.readAsText(file);
+		} else {
+			alert("Only *.txt files allowed") 
+		}
 	}
-    }
 }
 
 function writeFile(data, filename, type) {
@@ -732,57 +751,102 @@ function writeFile(data, filename, type) {
 	}
 }
 
+var worker = undefined;
+
 function change() {
-    var obj = document.getElementById("obj").value;
-    if(obj[0]=='[') {
-        O = eval('['+obj+']');
-        O.forEach(o => msh_str(o));
-        document.getElementById("msh").value=msh_flush().replaceAll('\n','\n');
-    } else if(obj.endsWith(".msh")) {
-        // document.getElementById("msh").value='[already inplace]';  	
-    } else {
-        document.getElementById("msh").value=eval(obj);  	
-    }
-    // 3d update()
-    init_mesh()
-    init3d();
-    // start calc
-    var out = document.getElementById("out").value;
-    document.getElementById("txt").value="Calculating ...";
-    if(out=="js_soft") {
-        setTimeout(js_soft,100);
-    } else if(out=="py_soft") {
-        setTimeout(py_soft,100);
-    } else { //if(out=="none") {
-        document.getElementById("txt").value="";
-	plot();
-    }
+	var obj = document.getElementById("obj").value;
+	if(obj[0]=='[') {
+		O = eval('['+obj+']');
+		O.forEach(o => msh_str(o));
+		document.getElementById("msh").value=msh_flush();
+	} else if(obj.endsWith(".msh")) {
+		// document.getElementById("msh").value='[already inplace]';  	
+	} else {
+		document.getElementById("msh").value=eval(obj);  	
+	}
+// 3d update()
+	init_mesh()
+	init3d();
+// start calc
+	var out = document.getElementById("out").value;
+	document.getElementById("txt").value="Calculating ...\n";
+	if(typeof(worker) !== "undefined") {
+		worker.terminate();
+		worker = undefined;
+	}
+	if(out=="js_soft") {
+        	setTimeout(js_soft,100);
+	} else if(out=="soft.js") {
+		//worker = new Worker("soft.js");
+		let blob = new Blob([workerCode], { type: "application/javascript" });
+		worker = new Worker(URL.createObjectURL(blob));
+		worker.onmessage = function(event) {
+			var s = event.data;
+			if(s.startsWith('[') && s.endsWith(']')) {
+				document.getElementById("txt").value += s.slice(1,-1)+'\n';
+			} else {
+				document.getElementById("txt").value = JSON.parse(s);
+				plot();
+			}
+		};
+
+		var lines = document.getElementById("msh").value.split('\n');
+		th = parseFloat(document.getElementById("th").value);
+		f0 = parseFloat(document.getElementById("f0").value);
+		c0 = parseFloat(document.getElementById("c0").value);
+		worker.postMessage(JSON.stringify([lines,th,f0,c0]));
+
+	} else if(out=="py_soft") {
+		setTimeout(py_soft,100);
+	} else { //if(out=="none") {
+		document.getElementById("txt").value="";
+		plot();
+	}
 }
 
 function change2() {
-    var out2 = document.getElementById("out2").value;
-    var txt2 = document.getElementById("txt2").value;
-    if(out2!="none") {
-	var s = eval(out2);
-        document.getElementById("txt2").value=s;
-	plot("Q",s,"#4da6ff");
-    } else if(txt2.length>1) {
-	plot("Q",txt2,"#4da6ff");
-    } else {
-        document.getElementById("txt2").value="";
-        plot("Q","#");
-    }
+	var out2 = document.getElementById("out2").value;
+	var txt2 = document.getElementById("txt2").value;
+	if(out2!="none") {
+		var s = eval(out2);
+		document.getElementById("txt2").value=s;
+		plot("Q",s,"#4da6ff");
+	} else if(txt2.length>1) {
+		plot("Q",txt2,"#4da6ff");
+	} else {
+		document.getElementById("txt2").value="";
+		plot("Q","#");
+	}
 }
-	 
+
 function drop(e) {
-    e.preventDefault();
-    var file = e.dataTransfer.files[0];
-    var reader = new FileReader();
-      reader.onload = function(e) {
-      document.getElementById("txt").value = e.target.result;
-      plot();
-    };
-    reader.readAsText(file, "UTF-8");
+	e.preventDefault();
+	var file = e.dataTransfer.files[0];
+	var reader = new FileReader();
+	reader.onload = function(e) {
+		document.getElementById("txt").value = e.target.result;
+		plot();
+	};
+	reader.readAsText(file, "UTF-8");
+}
+
+function drop2(e) {
+	e.preventDefault();
+	let k = 0;
+	let N = e.dataTransfer.files.length;
+ 	for(var i=0; i<N; i++) {
+		if(i==0) {
+			document.getElementById("txt2").value="";
+		}
+		var file = e.dataTransfer.files[i];
+		var reader = new FileReader();
+		reader.onload = function(e) {
+			document.getElementById("txt2").value += e.target.result;
+			k++;
+			if(k==N) change2();
+		};
+		reader.readAsText(file, "UTF-8");
+	}
 }
 
 function plot(id2,s,c) {
@@ -1175,7 +1239,7 @@ function js_soft() {
 	);
 	const m = parseInt(lines[n + 7]);
 	const e = lines.slice(n + 8, n + 8 + m).map(line =>
-	  line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x) - 1)  // adjust for 0-based indexing
+	  line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x) - 1)  // 0-based indexing
 	);
 
 	// Triangle centers
@@ -1221,6 +1285,84 @@ function js_soft() {
 	document.getElementById("txt").value = s;
 	plot();
 }
+
+// math.js + worker code
+
+const workerCode = `
+// soft scattering worker
+// calling by: 	worker.postMessage(JSON.stringify([lines,th,f0,c0]));
+// result by:   worker.onmessage = function(e) {var result = e.data;};
+// MM 15.8.2025
+
+importScripts('https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js')
+//importScripts('https://unpkg.com/mathjs@14.6.0/lib/browser/math.js')
+//importScripts('https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.js');
+
+pi = Math.PI;
+
+onmessage = function(e) {
+	[lines,th,f0,c0] = JSON.parse(e.data);
+	var s = js_soft(lines,th,f0,c0);
+	postMessage(JSON.stringify(s));
+}
+
+function js_soft(lines,th,f0,c0) {
+	
+	var k = 2 * pi * f0 / c0;
+	d = [Math.cos(th*pi/180), Math.sin(th*pi/180), 0];
+
+	const n = parseInt(lines[4]);
+	const v = lines.slice(5, 5 + n).map(line =>
+	  line.trim().split(/\\s+/).slice(1, 4).map(parseFloat)
+	);
+	const m = parseInt(lines[n + 7]);
+	const e = lines.slice(n + 8, n + 8 + m).map(line =>
+	  line.trim().split(/\\s+/).slice(5, 8).map(x => parseInt(x)-1)  // 0-based indexing
+	);
+
+	// Triangle centers
+	const x = e.map(tri => {
+	  const sum = tri.reduce((acc, idx) => {
+	    return math.add(acc, math.divide(v[idx], 3));
+	  }, [0, 0, 0]);
+	  return sum;
+	});
+postMessage("[... Assembling]");
+	// Helmholtz single layer matrix
+	//let S = math.zeros([m, m]).map(() => math.complex(0));
+	var S = math.matrix().resize([m, m]);
+	for (let i = 0; i < m; i++) {
+	  for (let j = 0; j < m; j++) {
+	    const r = math.norm(math.subtract(x[i], x[j]));
+	    S._data[i][j] = (r!==0) ? math.divide(math.exp(math.complex(0, k*r)),r*(4*pi))
+	                            : math.multiply(math.complex(0, k), 1/(4*pi) );
+	  }
+	}
+
+	// Incident field
+	const f = x.map(p => math.exp( math.complex(0, k * math.dot(p,d))));
+postMessage("[... LUSolving]");
+	// Surface solution using LU decomposition
+	const phi = math.lusolve(S, f.map(val => math.multiply(-1, val)));
+
+postMessage("[... Far field solution]");
+	// Far field solution
+	const r1 = Array.from({length: 360}, (_, i) => [
+	  Math.cos(i*pi/180), Math.sin(i*pi/180), 0]);
+
+	const Sff = r1.map(rvec => x.map(xj =>
+	  math.divide(math.exp( math.complex(0, -k * math.dot(xj,rvec))), 4*pi)));
+
+	const psc = Sff.map(row => math.multiply(row, phi));
+
+	// Return results
+	var s='';
+	for(let i=0; i<psc.length; i++) {
+	  s += i+"\\t"+math.abs(psc[i]._data[0]).toFixed(6)+"\\n";
+	}
+	return(s);
+}
+      `;
 
 pycode=`
 from numpy import pi, sqrt, exp, sin, cos, array, zeros
