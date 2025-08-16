@@ -231,19 +231,23 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 
 </td></tr><tr><td>
 
+<table style="padding:0"><tr><td>
 <textarea id="msh" style="width:480px;height:440px;background-color:#e6fff2">
 </textarea>
-<br>
+</td></tr></table>
 <input type=button value="Save to msh file" onclick='writeFile(document.getElementById("msh").value,"mm-bem.msh");' /> 
+
 
 </td><td>
 
+<table style="padding:0"><tr><td>
 <textarea id="txt" style="width:240;height:440;background-color:#ffe6e6" ondrop="drop(event);" onchange="plot();" onpaste="setTimeout(plot,0);">
 </textarea>
-
+</td><td>
 <textarea id="txt2" style="width:240;height:440;background-color:#e6ffff" ondrop="drop2(event);">
 </textarea>
-<br>
+</td></tr></table>
+
 <input type=button value="Save to txt file" onclick='writeFile(document.getElementById("txt").value,"mm-bem.txt");' /> 
 
 </td></tr></table>
@@ -252,7 +256,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <textarea id="ta" style="opacity:0;position:absolute;z-index:-9999;pointer-events:none;"></textarea>
 
 <br><br>
-<span title="Marek Moszyński 2025">MM 15.8.2025 (mm-bem v1.57)</span>
+<span title="Marek Moszyński 2025">MM 16.8.2025 (mm-bem v1.58)</span>
 
 <script>
 // globals
