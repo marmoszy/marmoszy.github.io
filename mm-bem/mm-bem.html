@@ -109,8 +109,9 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <select id="out" onchange="select()" style="background-color:#ffe6e6">
 <optgroup>
   <option value="py_soft">pyodide</option>
+  <option value="py_soft_worker" selected>pyodide worker</option>
   <option value="js_soft">math.js</option>
-  <option value="soft.js">math.js worker</option>
+  <option value="js_soft_worker">math.js worker</option>
   <option value="none">do not calculate</option>
 </optgroup>
 </select>
@@ -268,7 +269,8 @@ var axcolors = ["red", "green", "blue"];
 var mshcolor = "#0b22ae"; //"black";
 var axes_onoff = 1, box_onoff = 1;
 
-var wh = Math.max(window.innerHeight-150,400);
+//var wh = Math.max(window.innerHeight-150,400);
+var wh = document.getElementById("svg1").getAttribute("width")-0;
 
 function zoomin()  {zoom*=2; xoff-=wh/4*zoom; yoff-=wh/4*zoom;}
 function zoomout() {if(zoom>1/8) {xoff+=wh/4*zoom; yoff+=wh/4*zoom; zoom/=2; }}
@@ -776,10 +778,11 @@ function change() {
 	}
 	if(out=="js_soft") {
         	setTimeout(js_soft,100);
-	} else if(out=="soft.js") {
-		//worker = new Worker("soft.js");
-		let blob = new Blob([workerCode], { type: "application/javascript" });
+	} else if(out=="js_soft_worker") {
+		var s = js_soft_worker_header + js_soft_worker.toString();
+		let blob = new Blob([s], { type: "application/javascript" });
 		worker = new Worker(URL.createObjectURL(blob));
+		//worker = new Worker("soft.js");
 		worker.onmessage = function(event) {
 			var s = event.data;
 			if(s.startsWith('[') && s.endsWith(']')) {
@@ -789,13 +792,18 @@ function change() {
 				plot();
 			}
 		};
-
 		var lines = document.getElementById("msh").value.split('\n');
 		th = parseFloat(document.getElementById("th").value);
 		f0 = parseFloat(document.getElementById("f0").value);
 		c0 = parseFloat(document.getElementById("c0").value);
 		worker.postMessage(JSON.stringify([lines,th,f0,c0]));
-
+	} else if(out=="py_soft_worker") {
+		var lines = document.getElementById("msh").value; //.split('\n');
+		th = document.getElementById("th").value;
+		f0 = document.getElementById("f0").value;
+		c0 = document.getElementById("c0").value;
+		py_main(lines,th,f0,c0);
+		//worker.postMessage(JSON.stringify([lines,th,f0,c0]));
 	} else if(out=="py_soft") {
 		setTimeout(py_soft,100);
 	} else { //if(out=="none") {
@@ -1286,38 +1294,30 @@ function js_soft() {
 	plot();
 }
 
-// math.js + worker code
+// ---- js_soft_worker (math.js + worker code)
 
-const workerCode = `
-// soft scattering worker
-// calling by: 	worker.postMessage(JSON.stringify([lines,th,f0,c0]));
-// result by:   worker.onmessage = function(e) {var result = e.data;};
-// MM 15.8.2025
-
+const js_soft_worker_header = `
 importScripts('https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js')
-//importScripts('https://unpkg.com/mathjs@14.6.0/lib/browser/math.js')
-//importScripts('https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.js');
-
 pi = Math.PI;
-
 onmessage = function(e) {
 	[lines,th,f0,c0] = JSON.parse(e.data);
-	var s = js_soft(lines,th,f0,c0);
+	var s = js_soft_worker(lines,th,f0,c0);
 	postMessage(JSON.stringify(s));
 }
+`;
 
-function js_soft(lines,th,f0,c0) {
+function js_soft_worker(lines,th,f0,c0) {
 	
 	var k = 2 * pi * f0 / c0;
 	d = [Math.cos(th*pi/180), Math.sin(th*pi/180), 0];
 
 	const n = parseInt(lines[4]);
 	const v = lines.slice(5, 5 + n).map(line =>
-	  line.trim().split(/\\s+/).slice(1, 4).map(parseFloat)
+	  line.trim().split(/\s+/).slice(1, 4).map(parseFloat)
 	);
 	const m = parseInt(lines[n + 7]);
 	const e = lines.slice(n + 8, n + 8 + m).map(line =>
-	  line.trim().split(/\\s+/).slice(5, 8).map(x => parseInt(x)-1)  // 0-based indexing
+	  line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x)-1)  // 0-based indexing
 	);
 
 	// Triangle centers
@@ -1358,11 +1358,12 @@ postMessage("[... Far field solution]");
 	// Return results
 	var s='';
 	for(let i=0; i<psc.length; i++) {
-	  s += i+"\\t"+math.abs(psc[i]._data[0]).toFixed(6)+"\\n";
+	  s += i+"\t"+math.abs(psc[i]._data[0]).toFixed(6)+"\n";
 	}
 	return(s);
 }
-      `;
+
+// ---- py_soft  (pyodide)
 
 pycode=`
 from numpy import pi, sqrt, exp, sin, cos, array, zeros
@@ -1400,7 +1401,8 @@ phi = lu_solve(lu_factor(S), -f)
 r1 = [[cos(pi/180*i),sin(pi/180*i),0] for i in range(360)]
 S = [[exp(-1j*k*p@r)/(4*pi) for p in x] for r in r1]
 psc = S @ phi;    
-output=["\\n".join(["%d\t%g"%(i,abs(psc[i])) for i in range(len(psc))])]
+#output=["\\n".join(["%d\\t%g"%(i,abs(psc[i])) for i in range(len(psc))])]
+"\\n".join(["%d\\t%g"%(i,abs(psc[i])) for i in range(len(psc))])
 `;
 
 async function init() {
@@ -1420,8 +1422,8 @@ async function py_soft() {
 	,document.getElementById("c0").value
   ]);
   try {
-    pyodide.runPython(pycode);
-    let result = pyodide.globals.get('output').toJs();
+    let result = pyodide.runPython(pycode);
+    //let result = pyodide.globals.get('output').toJs();
     document.getElementById("txt").value = result.toString();
     plot()
   } catch (e) {
@@ -1429,8 +1431,83 @@ async function py_soft() {
   }
 }
 
+// --- py_soft_worker
+
+const workerCode=`
+importScripts("https://cdn.jsdelivr.net/pyodide/v0.28.1/full/pyodide.js");
+
+let pyodideReadyPromise = loadPyodide();
+
+self.onmessage = async (event) => {
+	const pyodide = await pyodideReadyPromise;
+	const { id, python, context } = event.data;
+	await pyodide.loadPackagesFromImports(python);
+	const dict = pyodide.globals.get("dict");
+	const globals = dict(Object.entries(context));
+	try {
+		const result = await pyodide.runPythonAsync(python, { globals });
+		self.postMessage({ result, id });
+	} catch (error) {
+		self.postMessage({ error: error.message, id });
+	}
+};
+`;
+
+function getPromiseAndResolve() {
+	let resolve;
+	let promise = new Promise((res) => { resolve = res; });
+	return { promise, resolve };
+}
+
+let lastId = 1; // Each message needs a unique id to identify the response
+function getId() {
+	return lastId++;
+}
+
+// Add an id to msg, send it to worker, then wait for a response with the same id.
+// When we get such a response, use it to resolve the promise.
+function requestResponse(worker, msg) {
+	const { promise, resolve } = getPromiseAndResolve();
+	const idWorker = getId();
+	worker.addEventListener("message", function listener(event) {
+		if (event.data?.id !== idWorker) {
+			return;
+		}
+		// This listener is done so remove it.
+		worker.removeEventListener("message", listener);
+		// Filter the id out of the result
+		const { id, ...rest } = event.data;
+		resolve(rest);
+	});
+	worker.postMessage({ id: idWorker, ...msg });
+	return promise;
+}
+
+let blob = new Blob([workerCode], {type:"application/javascript"});
+const pyodideWorker  = new Worker(URL.createObjectURL(blob));
+
+function asyncRun(script, context) {
+	return requestResponse(pyodideWorker, {context, python: script});
+}
+
+async function py_main(lines,th,f0,c0) {
+	const context = { input: [ lines, th, f0, c0] };
+	const { result, error } = await asyncRun(pycode, context);
+	el = document.getElementById("txt");
+	if (result) {
+		el.value = result;
+		plot();
+	} else if (error) {
+		el.value = "pyodideWorker error:" + error;
+	}
+}
+
+// --------
+
 change();
 main();
+
+// --------  
 
 const simplify10_YFT_swimbladder_origin_msh = `$MeshFormat
 2.2 0 8
