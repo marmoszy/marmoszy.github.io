@@ -23,7 +23,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <table><tr><td>
 
 <div style="width:440;height:172;border-width:1;border-style:solid;padding:20px;display:block;background-color:#ffffe6">
-<label for="def">1. Target: </label>
+<label for="def">Target: </label>
 <select id="def" onchange="select()" style="background-color:#e6fff2;max-width:360px">
 <optgroup>
   <option value="[sphere(0.01905), [0, 0, 0]]">Low resolution sphere</option>
@@ -44,7 +44,26 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 
 <br><br>
 
-<label for="th">2. Direction: <i>&theta;</i> =</label> 
+<textarea id="obj" style="width:425;height:104" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905), [0, 0, 0]]</textarea>
+
+<br>
+</div>
+</td><td>
+<div style="width:440px;height:172px;border-width:1;border-style:solid;padding:20px;display:block;background-color:#ffffe6">
+
+<label for="out">Calculation engine: </label> 
+<select id="out" onchange="select()" style="background-color:#ffe6e6">
+<optgroup>
+  <option value="py_soft">pyodide</option>
+  <option value="py_soft_worker" selected>pyodide worker</option>
+  <option value="js_soft">math.js</option>
+  <option value="js_soft_worker">math.js worker</option>
+  <option value="none">do not calculate</option>
+</optgroup>
+</select>
+<br><br>
+
+<label for="th">Wave direction: <i>&theta;<sub>0</sub></i> =</label> 
 <select id="th" onchange="select()">
 <optgroup>
   <option value="0">0&deg;</option>
@@ -73,8 +92,8 @@ input[type='file'],input[type='button'] {font-size: 16px; }
   <option value="345">345&deg;</option>
 </optgroup>
 </select>
-<br><br>
-<label for="f0">3. Frequency: <i>f<sub>0</sub></i> =</label> 
+
+<label for="f0"> frequency: <i>f<sub>0</sub></i> =</label> 
 <select id="f0" onchange="select()">
 <optgroup>
   <option value="18e3">18 kHz</option>
@@ -86,35 +105,24 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 </optgroup>
 </select>
 <br><br>
-<label for="c0">4. Sound speed: <i>c<sub>0</sub></i> =</label> 
+<label for="c0">Sound speed in the medium: <i>c<sub>0</sub></i> =</label> 
 <select id="c0" onchange="select()">
 <optgroup>
-  <option value="1480">1480 m/s</option>
+  <option value="1470">1470 m/s</option>
+  <option value="1475">1475 m/s</option>
+  <option value="1480" selected>1480 m/s</option>
+  <option value="1485">1485 m/s</option>
   <option value="1490">1490 m/s</option>
+  <option value="1495">1495 m/s</option>
   <option value="1500">1500 m/s</option>
+  <option value="1505">1505 m/s</option>
   <option value="1510">1510 m/s</option>
+  <option value="1515">1515 m/s</option>
   <option value="1520">1520 m/s</option>
 </optgroup>
 </select>
 
-<br>
-</div>
-</td><td>
-<div style="width:440px;height:172px;border-width:1;border-style:solid;padding:20px;display:block;background-color:#ffffe6">
 
-<textarea id="obj" style="width:425;height:60" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905), [0, 0, 0]]</textarea>
-
-<br><br>
-<label for="out">Calculation engine: </label> 
-<select id="out" onchange="select()" style="background-color:#ffe6e6">
-<optgroup>
-  <option value="py_soft">pyodide</option>
-  <option value="py_soft_worker" selected>pyodide worker</option>
-  <option value="js_soft">math.js</option>
-  <option value="js_soft_worker">math.js worker</option>
-  <option value="none">do not calculate</option>
-</optgroup>
-</select>
 
 <br><br>
 <label for="out">Add data: </label> 
@@ -256,7 +264,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <textarea id="ta" style="opacity:0;position:absolute;z-index:-9999;pointer-events:none;"></textarea>
 
 <br><br>
-<span title="Marek Moszyński 2025">MM 16.8.2025 (mm-bem v1.58)</span>
+<span title="Marek Moszyński 2025">MM 17.8.2025 (mm-bem v1.59)</span>
 
 <script>
 // globals
