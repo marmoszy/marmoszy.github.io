@@ -264,7 +264,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <textarea id="ta" style="opacity:0;position:absolute;z-index:-9999;pointer-events:none;"></textarea>
 
 <br><br>
-<span title="Marek Moszyński 2025">MM 17.8.2025 (mm-bem v1.60)</span>
+<span title="Marek Moszyński 2025">MM 18.8.2025 (mm-bem v1.61)</span>
 
 <script>
 // globals
@@ -278,7 +278,7 @@ var bkg1 = "#e8ebff", bkg2 = "#fff";
 var bkg = bkg1; //"#000077"; // "#ffdd88"; "darkblue"; //
 
 var axcolors = ["red", "green", "blue"];
-var mshcolor = "#0b22ae"; //"black";
+var mshcolor = "#0b22ae";
 var axes_onoff = 1, box_onoff = 1, circle_onoff = 1;
 
 //var wh = Math.max(window.innerHeight-150,400);
@@ -387,12 +387,6 @@ function V(xy) {
 Array.prototype.myString = function() {
   return " "+this[0].toFixed(2)+","+this[1].toFixed(2);
 }	
-
-function draw_xyzpoint(el,p) { 
-  var xy = V(P(p));
-  el.setAttribute("cx",xy[0]);
-  el.setAttribute("cy",xy[1]);	
-}
 
 function draw_xyzpoints(el,pp) { 
   var s='';
@@ -503,7 +497,6 @@ function msh_parse(s) {
 var vx=[],fx=[],x0,y0,z0,M=[];
 function init_mesh() {
 	var s=document.getElementById("msh").value;
-	clear_mesh();
 	var ss=s.split('$EndElements\n');
 	vx=[];fx=[];
 	for(var i=0;i<ss.length;i++) {
@@ -529,140 +522,47 @@ function init_mesh() {
 	document.getElementById("msh").value = s;
 }
 
-function clear_mesh() {
-    for(var k=0;k<fx.length;k++) {
-        var el = document.getElementById("mesh_"+k);
-		if(el) {
-			el.setAttribute("points","");
-		}
-	}
-}
-
 function update_mesh() {
-	var pp=[];
-	for(var k=0;k<fx.length;k++) {
-		var p=[];
-		for(var j=0;j<3;j++) {
-			p.push(V(P(vx[fx[k][j]])));
-      		}
-		pp.push(p);
-	}
 	var svg = document.getElementById("svg1");
-	svg_createpath(svg, "M", pp, mshcolor, 0.5, "1,0");	
-}
-
-function update_mesh0() {
-    for(var k=0;k<fx.length;k++) {
-      var pp=[];
-      for(var j=0;j<3;j++) {
-  	      pp.push(vx[fx[k][j]]);
-      }
-      var el = document.getElementById("mesh_"+k);
-      if(!el) {
-        el = document.createElementNS("http://www.w3.org/2000/svg", 'polyline'); 
-        el.setAttribute("id","mesh_"+k); 
-  	el.setAttribute("points","");
-  	el.setAttribute("stroke",mshcolor);
-  	el.setAttribute("stroke-width",0.5);
-  	//el.setAttribute("stroke-dasharray","2,2"); 
-  	el.setAttribute("fill","none"); 
-        document.getElementById("gt").appendChild(el);	
-        var el2=document.createElementNS("http://www.w3.org/2000/svg", 'title'); 
-  	el2.setAttribute("id","mesh_"+k+"_title");
-  	el.appendChild(el2);
-      }
-      draw_xyzpoints(el,pp);
-      var el2=document.getElementById("mesh_"+k+"_title");
-      if(el2) el2.innerHTML="mesh_"+k;
-    }
+	var p = [];
+	for(var k=0; k<fx.length; k++) {
+		p.push([V(P(vx[fx[k][0]])),V(P(vx[fx[k][1]])),V(P(vx[fx[k][2]]))]);
+	}
+	svg_createpath(svg, "M", p, mshcolor, 0.5, "1,0");	
 }
 
 function update_axes() {
+  var svg = document.getElementById("svg1");
 
 // ---- 3 positive and negative axes
-  var el = document.getElementById("svg1");
-  svg_createpath(el,"Axp",[[V(P([0,0,0])),V(P([1,0,0]))]],axes_onoff?'red':'none',0.5,"1,0");
-  svg_createpath(el,"Axn",[[V(P([0,0,0])),V(P([-1,0,0]))]],axes_onoff?'red':'none',0.5,"2,4");
-  svg_createpath(el,"Ayp",[[V(P([0,0,0])),V(P([0,1,0]))]],axes_onoff?'green':'none',0.5,"1,0");
-  svg_createpath(el,"Ayn",[[V(P([0,0,0])),V(P([0,-1,0]))]],axes_onoff?'green':'none',0.5,"2,4");
-  svg_createpath(el,"Azp",[[V(P([0,0,0])),V(P([0,0,1]))]],axes_onoff?'blue':'none',0.5,"1,0");
-  svg_createpath(el,"Azn",[[V(P([0,0,0])),V(P([0,0,-1]))]],axes_onoff?'blue':'none',0.5,"2,4");
-
-/*
-  for(var j=1;j<2;j++) {
-    for(var k=0;k<3;k++) {
-      var pp = [[0,0,0],[j*(k==0),j*(k==1),j*(k==2)]];
-      var id = (4+j*(k+1));
-      var el = document.getElementById("axes_"+id);
-      if(!el) {
-        el = document.createElementNS("http://www.w3.org/2000/svg", 'polyline'); 
-        el.setAttribute("id","axes_"+id); 
-  	el.setAttribute("points","");
-  	el.setAttribute("stroke",axes_onoff?axcolors[k]:"none");
-  	el.setAttribute("stroke-width",0.5);
-  	if(j<0) el.setAttribute("stroke-dasharray","2,4"); 
-  	el.setAttribute("fill","none"); 
-	document.getElementById("svg1").appendChild(el);	
-        var el2=document.createElementNS("http://www.w3.org/2000/svg", 'title'); 
-  	el2.setAttribute("id","axes_"+id+"_title");
-        el.appendChild(el2);
-      }
-      el.setAttribute("stroke",axes_onoff?axcolors[k]:"none");
-      console.log(pp);
-      draw_xyzpoints(el,pp);
-      var el2=document.getElementById("axes_"+(3+(j-1)*k)+"_title");
-      if(el2) el2.innerHTML="axes_"+id;
-    }
-  }
-*/
+  svg_createpath(svg,"Xp",[[V(P([0,0,0])),V(P([1,0,0]))]],axes_onoff?'red':'none',0.5,"1,0");
+  svg_createpath(svg,"Xn",[[V(P([0,0,0])),V(P([-1,0,0]))]],axes_onoff?'red':'none',0.5,"2,4");
+  svg_createpath(svg,"Yp",[[V(P([0,0,0])),V(P([0,1,0]))]],axes_onoff?'green':'none',0.5,"1,0");
+  svg_createpath(svg,"Yn",[[V(P([0,0,0])),V(P([0,-1,0]))]],axes_onoff?'green':'none',0.5,"2,4");
+  svg_createpath(svg,"Zp",[[V(P([0,0,0])),V(P([0,0,1]))]],axes_onoff?'blue':'none',0.5,"1,0");
+  svg_createpath(svg,"Zn",[[V(P([0,0,0])),V(P([0,0,-1]))]],axes_onoff?'blue':'none',0.5,"2,4");
 
 // ---- point for center of axes
-  var el = document.getElementById("xyz000");
-  if(!el) {
-      el = document.createElementNS("http://www.w3.org/2000/svg", 'circle'); 
-      el.setAttribute("id","xyz000"); 
-      el.setAttribute("fill",axes_onoff?"black":"none");
-      el.setAttribute("r",4);
-      el.setAttribute("stroke","none"); 
-      document.getElementById("svg1").appendChild(el);
-      var el2=document.createElementNS("http://www.w3.org/2000/svg", 'title'); 
-      el2.setAttribute("id","xyz000"+"_title");
-      el.appendChild(el2);
-  }
-  draw_xyzpoint(el,[0,0,0]);
-  var el2=document.getElementById("xyz000"+"_title");
-  if(el2) el2.innerHTML="[0,0,0]";
+  svg_createpoint(svg,"O",V(P([0,0,0])),axes_onoff?"black":"none","[0,0,0]");
 
 // ---- point showing the half wave length on x-axis
-  var el = document.getElementById("lambda_0");
-  if(!el) {
-      el = document.createElementNS("http://www.w3.org/2000/svg", 'circle'); 
-      el.setAttribute("id","lambda_0"); 
-      el.setAttribute("fill",axes_onoff?axcolors[0]:"none");
-      el.setAttribute("r",4);
-      el.setAttribute("stroke","none"); 
-      document.getElementById("svg1").appendChild(el);	
-      var el2=document.createElementNS("http://www.w3.org/2000/svg", 'title'); 
-      el2.setAttribute("id","lambda_0"+"_title");
-      el.appendChild(el2);
-  }
   var f0 = parseFloat(document.getElementById("f0").value);
   var c0 = parseFloat(document.getElementById("c0").value);
   var l = c0/f0;
-  draw_xyzpoint(el,[l/2,0,0]);
-  var el2=document.getElementById("lambda_0"+"_title");
-  if(el2) el2.innerHTML='\u03bb_0/2='+(l/2).toFixed(4);
+  var p0 = [l/2,0,0]
+  var t0 = '\u03bb/2='+(l/2).toFixed(4);
+  svg_createpoint(svg,"lambda_0",V(P(p0)),axes_onoff?axcolors[0]:"none",t0);
 
   draw_box("svg1","B1",-l/2,l/2,-l/2,l/2,-l/2,l/2,box_onoff?'black':'none');
 
 // --- circle for showing wave direction
   var r = l/2 * Math.sqrt(2);
+
   var p1=[];
   for(var i=0;i<360;i++) {
 	p1.push(V(P([r*Math.cos(i*pi/180), r*Math.sin(i*pi/180), 0])));
   }
-  var el = document.getElementById("svg1");
-  svg_createpath(el,"C1",[p1],circle_onoff?'green':'none',1,"1,2");
+  svg_createpath(svg,"C1",[p1],circle_onoff?'green':'none',1,"1,2");
 
 // --- circle ticks 
   var p2=[];
@@ -672,26 +572,13 @@ function update_axes() {
   	p.push(V(P([0.97*r*Math.cos(i*pi/180), 0.97*r*Math.sin(i*pi/180), 0])));
 	p2.push(p);
   }
-  var el = document.getElementById("svg1");
-  svg_createpath(el,"C2",p2,circle_onoff?'green':'none',1,"1,0");
+  svg_createpath(svg,"C2",p2,circle_onoff?'green':'none',1,"1,1");
 
 // --- point that symbolize the wave direction
-  var el = document.getElementById("th_xy");
-  if(!el) {
-      el = document.createElementNS("http://www.w3.org/2000/svg", 'circle'); 
-      el.setAttribute("id","th_xy"); 
-      el.setAttribute("fill",circle_onoff?"green":"none");
-      el.setAttribute("r",4);
-      el.setAttribute("stroke","none"); 
-      document.getElementById("svg1").appendChild(el);
-      var el2=document.createElementNS("http://www.w3.org/2000/svg", 'title'); 
-      el2.setAttribute("id","th_xy"+"_title");
-      el.appendChild(el2);
-  }
   var th = parseFloat(document.getElementById("th").value);
-  draw_xyzpoint(el,[r*Math.cos(th*pi/180), r*Math.sin(th*pi/180), 0]);
-  var el2=document.getElementById("th_xy"+"_title");
-  if(el2) el2.innerHTML='\u03b8_0='+th;
+  var p3 = [r*Math.cos((th+180)*pi/180), r*Math.sin((th+180)*pi/180), 0];
+  var t3 = '\u03b8='+th;
+  svg_createpoint(svg,"th_xy",V(P(p3)),circle_onoff?"green":"none",t3);
 }
 
 function init_sliders() { // sliders
@@ -889,11 +776,11 @@ function change2() {
 		var s = eval(out2);
 		document.getElementById("txt2").value=s;
 		plot("Q",s,"#4da6ff");
-	} else if(txt2.length>1) {
-		plot("Q",txt2,"#4da6ff");
+	//} else if(txt2.length>1) {
+	//	plot("Q",txt2,"#4da6ff");
 	} else {
 		document.getElementById("txt2").value="";
-		plot("Q","#");
+		plot("Q","#"); // clear curve2
 	}
 }
 
@@ -938,31 +825,58 @@ function plot(id2,s,c) {
 			y.push(parseFloat(s2[1])); /* column 2: absolute values */
 		}
 	}
-	svg_polar(document.getElementById("svg0"),x,y,id2||"P",c||"#ff6633");  
+	svg = document.getElementById("svg");
+	const W = svg.getAttribute("width")-40;
+	const H = svg.getAttribute("height")-40;
+
+	svg0 = document.getElementById("svg0");
+	svg_polar(svg0,x,y,W,H,id2||"P",c||"#ff6633");  
+
+	var th = parseFloat(document.getElementById("th").value);
+	var idx = (th+180)%360;
+	svg_polar(svg0,[x[idx]],[y[idx]], W,H
+		,(id2||"P")+"_TS",x.length==0?"none":c||"#ff6633");  
 }
 
 // ---- svg functions
 
-function svg_polar(id,x,y,id2,c) {
+function svg_polar(svg,x,y,W,H,id,c) {
 	const tmin=-60,tmax=-20,off=10/200;
-	const W=document.getElementById("svg").getAttribute("width")-40;
-	const H=document.getElementById("svg").getAttribute("height")-40;
+	var t;
+/*
 	for(var i=0;i<1000;i++) {
-		svg_createpoint(id,(id2||"P")+i,-100,-100);	 // outside	
+		svg_createpoint(svg,(id||"P")+i,[-100,-100]);	 // outside	
 	}
+*/
+	var p=[];
 	for(var i=0;i<x.length;i++) {
-		var t = 20*Math.log10(Math.abs(y[i]));
-		if(t>=-60) {
+		t = 20*Math.log10(Math.abs(y[i]));
+/*
+		if(t>=tmin) {
 			var ro=off+(1-off)*(t-tmin)/(tmax-tmin);
 			var xx=0.5+ro*Math.cos(x[i]*Math.PI/180)/2;
 			var yy=0.5+ro*Math.sin(x[i]*Math.PI/180)/2;
-			svg_createpoint(id,(id2||"P")+i,xx*W,(1-yy)*H,c||"red",2,c||"red","("+i+","+t.toFixed(2)+")");
+			svg_createpoint(svg,(id||"P")+i,[xx*W,(1-yy)*H],c||"red","("+i+","+t.toFixed(2)+")",2,c||"red");
 		}
+*/
+		if(t<tmin) t=tmin;
+		var ro=off+(1-off)*(t-tmin)/(tmax-tmin);
+		//if(ro<2) ro=2;
+		var xx=0.5+ro*Math.cos(x[i]*Math.PI/180)/2;
+		var yy=0.5+ro*Math.sin(x[i]*Math.PI/180)/2;
+		p.push([xx*W,(1-yy)*H]);	
+
+	}
+	if(x.length==1) {
+		svg_createpoint(svg,id,[p[0][0],p[0][1]],c||"red"
+			,"TS("+x[0]+ "&deg;)="+t.toFixed(2),4,c||"red");
+	} else {
+		svg_createpath(svg,id,[p],c||"red",3,"1,0");
 	}
 }
 
 /* svg drawing functions */	
-function svg_createpoint(svg,id,x,y,color,r,color2,title) { // building svg circle with coords in a string s
+function svg_createpoint(svg, id, xy, color, title, r, color2) { 
 	var el=document.getElementById(id);
 	if (!el) {
 		el = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -972,9 +886,9 @@ function svg_createpoint(svg,id,x,y,color,r,color2,title) { // building svg circ
 	el.setAttribute('fill',color);
 	el.setAttribute('stroke-width',1);
 	el.setAttribute('stroke',color2||'none');
-	el.setAttribute("r",r||6);
-	el.setAttribute("cx",x);
-	el.setAttribute("cy",y);
+	el.setAttribute("r",r||4);
+	el.setAttribute("cx",xy[0]);
+	el.setAttribute("cy",xy[1]);
 	el.innerHTML = "<title>"+(title || '')+"</title>";
 }
 
