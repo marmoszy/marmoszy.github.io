@@ -51,8 +51,8 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 </td><td>
 <div style="width:440px;height:172px;border-width:1;border-style:solid;padding:20px;display:block;background-color:#ffffe6">
 
-<label for="out">Calculation engine: </label> 
-<select id="out" onchange="select()" style="background-color:#ffe6e6">
+<label for="engine">Calculation engine: </label> 
+<select id="engine" onchange="select()" style="background-color:#ffe6e6">
 <optgroup>
   <option value="py_soft">pyodide</option>
   <option value="py_soft_worker" selected>pyodide worker</option>
@@ -125,7 +125,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 
 
 <br><br>
-<label for="out">Add data: </label> 
+<label for="out2">Add data: </label> 
 <select id="out2" onchange="change2()" style="background-color:#e6ffff">
 <optgroup>
   <option value="none">none</option>
@@ -264,7 +264,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <textarea id="ta" style="opacity:0;position:absolute;z-index:-9999;pointer-events:none;"></textarea>
 
 <br><br>
-<span title="Marek Moszyński 2025">MM 18.8.2025 (mm-bem v1.61)</span>
+<span title="Marek Moszyński 2025">MM 19.8.2025 (mm-bem v1.62)</span>
 
 <script>
 // globals
@@ -553,14 +553,16 @@ function update_axes() {
   var t0 = '\u03bb/2='+(l/2).toFixed(4);
   svg_createpoint(svg,"lambda_0",V(P(p0)),axes_onoff?axcolors[0]:"none",t0);
 
+// ---- wave length box
   draw_box("svg1","B1",-l/2,l/2,-l/2,l/2,-l/2,l/2,box_onoff?'black':'none');
 
 // --- circle for showing wave direction
   var r = l/2 * Math.sqrt(2);
 
-  var p1=[];
+  var p1 = [];
   for(var i=0;i<360;i++) {
-	p1.push(V(P([r*Math.cos(i*pi/180), r*Math.sin(i*pi/180), 0])));
+	p1.push(V(P(rot(Ry(phi0),r*Math.cos(i*pi/180)
+		,r*Math.sin(i*pi/180), 0))));
   }
   svg_createpath(svg,"C1",[p1],circle_onoff?'green':'none',1,"1,2");
 
@@ -568,15 +570,18 @@ function update_axes() {
   var p2=[];
   for(var i=0;i<360;i+=15) {
 	var p=[]
-	p.push(V(P([r*Math.cos(i*pi/180), r*Math.sin(i*pi/180), 0])));
-  	p.push(V(P([0.97*r*Math.cos(i*pi/180), 0.97*r*Math.sin(i*pi/180), 0])));
+	p.push(V(P(rot(Ry(phi0),r*Math.cos(i*pi/180)
+		, r*Math.sin(i*pi/180), 0))));
+  	p.push(V(P(rot(Ry(phi0),0.97*r*Math.cos(i*pi/180)
+		, 0.97*r*Math.sin(i*pi/180), 0))));
 	p2.push(p);
   }
   svg_createpath(svg,"C2",p2,circle_onoff?'green':'none',1,"1,1");
 
 // --- point that symbolize the wave direction
   var th = parseFloat(document.getElementById("th").value);
-  var p3 = [r*Math.cos((th+180)*pi/180), r*Math.sin((th+180)*pi/180), 0];
+  var p3 = rot(Ry(phi0),r*Math.cos((th+180)*pi/180)
+		, r*Math.sin((th+180)*pi/180), 0);
   var t3 = '\u03b8='+th;
   svg_createpoint(svg,"th_xy",V(P(p3)),circle_onoff?"green":"none",t3);
 }
@@ -632,10 +637,6 @@ ctrl R - zoom to unit distance
 ctrl-shift-cursors - move
 
 marek.moszynski@pg.edu.pl`;
-</script>
-
-
-<script>
 
 function select() {
     var d = document.getElementById("def").value.replaceAll('|','\n');
@@ -727,15 +728,15 @@ function change() {
 	init_mesh()
 	init3d();
 // start calc
-	var out = document.getElementById("out").value;
+	var eng = document.getElementById("engine").value;
 	document.getElementById("txt").value="Calculating ...\n";
 	if(typeof(worker) !== "undefined") {
 		worker.terminate();
 		worker = undefined;
 	}
-	if(out=="js_soft") {
+	if(eng=="js_soft") {
         	setTimeout(js_soft,100);
-	} else if(out=="js_soft_worker") {
+	} else if(eng=="js_soft_worker") {
 		var s = js_soft_worker_header + js_soft_worker.toString();
 		let blob = new Blob([s], { type: "application/javascript" });
 		worker = new Worker(URL.createObjectURL(blob));
@@ -754,16 +755,16 @@ function change() {
 		f0 = parseFloat(document.getElementById("f0").value);
 		c0 = parseFloat(document.getElementById("c0").value);
 		worker.postMessage(JSON.stringify([lines,th,f0,c0]));
-	} else if(out=="py_soft_worker") {
+	} else if(eng=="py_soft_worker") {
 		var lines = document.getElementById("msh").value; //.split('\n');
 		th = document.getElementById("th").value;
 		f0 = document.getElementById("f0").value;
 		c0 = document.getElementById("c0").value;
 		py_main(lines,th,f0,c0);
 		//worker.postMessage(JSON.stringify([lines,th,f0,c0]));
-	} else if(out=="py_soft") {
+	} else if(eng=="py_soft") {
 		setTimeout(py_soft,100);
-	} else { //if(out=="none") {
+	} else { //if(eng=="none") {
 		document.getElementById("txt").value="";
 		plot();
 	}
@@ -834,8 +835,10 @@ function plot(id2,s,c) {
 
 	var th = parseFloat(document.getElementById("th").value);
 	var idx = (th+180)%360;
-	svg_polar(svg0,[x[idx]],[y[idx]], W,H
-		,(id2||"P")+"_TS",x.length==0?"none":c||"#ff6633");  
+	if(idx<x.length) {
+		svg_polar(svg0,[x[idx]],[y[idx]], W,H
+			,(id2||"P")+"_TS",x.length==0?"none":c||"#ff6633");
+	}
 }
 
 // ---- svg functions
@@ -925,6 +928,7 @@ function svg_createpath(svg,id,p,color,w,dd) {
 		}
 		s+='Z';
 	}
+	if(s=='Z') s='';
 	el.setAttribute('d',s);
 }
 
@@ -1486,7 +1490,24 @@ async function py_main(lines,th,f0,c0) {
 	}
 }
 
+function url_params() { // overwrite globals from url params
+    var s = window.location.search.substring(1);
+    var ss = s.split('&');
+    for (var i = 0; i < ss.length; i++) {
+        var sss = ss[i].split('=');
+		window[sss[0]] = sss.length>1?sss[1]:"";
+    }
+}
+
 // --------
+
+var phi0 = 0;
+var engine = 'py_soft_worker';
+
+url_params();
+phi0 = parseFloat(phi0);
+
+document.getElementById("engine").value=engine;
 
 change();
 main();
