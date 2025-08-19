@@ -22,7 +22,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <center>
 <table><tr><td>
 
-<div style="width:440;height:172;border-width:1;border-style:solid;padding:20px;display:block;background-color:#ffffe6">
+<div style="width:440;height:180;height1:100%;overflow-y:scroll;border-width:1;border-style:solid;padding:20px;background-color:#ffffe6">
 <label for="def">Target: </label>
 <select id="def" onchange="select()" style="background-color:#e6fff2;max-width:360px">
 <optgroup>
@@ -32,8 +32,9 @@ input[type='file'],input[type='button'] {font-size: 16px; }
   <option value="[ellipsoid(0.01905,0.01,0.01), [0, 0, 0]]">Prolate spheroid</option>
   <option value="[ellipsoid(0.01905,0.005,0.01), [0, 0, 0]]">Ellipsoid</option>
   <option value="[ellipsoid(0.01905,0.005,0.01), [0, 0, 0], Rz(-45)]">Ellipsoid z-axis rotated</option>
-  <option value="[cylinder(0.005,0.005,3*0.01905), [0, 0, 0]]">Cylinder</option>
-  <option value="[cylinder(0.005,0.005,3*0.01905), [0, 0, 0], Ry(90)]">Cylinder y-axis rotated</option>
+  <option value="[cylinder(0.005,0.005,2*0.01905), [0, 0, 0]]">Cylinder</option>
+  <option value="[cylinder(0.005,0.005,2*0.01905), [0, 0, 0], Ry(90)]">Cylinder y-axis rotated</option>
+  <option value="[cylinder(0.005,0.005,2*0.01905), [0, 0, 0], mul(Ry(30),Rx(60))]">Cylinder double rotated</option>
   <option value="[sphere(0.005), [-0.01, 0, 0]],|[sphere(0.005), [0.01, 0, 0]]">Two spheres</option>
   <option value="[sphere(0.005), [-0.01, 0, 0]],|[sphere(0.005), [0.01, 0, 0]],|[sphere(0.005), [0,-0.01, 0]],|[sphere(0.005), [0, 0.01, 0]]">Four spheres</option>
   <option value="[sphere(0.005), [-0.01, 0, -0.01]],|[sphere(0.005), [0.01, 0, -0.01]],|[sphere(0.005), [0,-0.01, -0.01]],|[sphere(0.005), [0, 0.01, -0.01]],|[sphere(0.005), [-0.01, 0, 0.01]],|[sphere(0.005), [0.01, 0, 0.01]],|[sphere(0.005), [0,-0.01, 0.01]],|[sphere(0.005), [0, 0.01, 0.01]]">Eight spheres</option>
@@ -49,7 +50,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <br>
 </div>
 </td><td>
-<div style="width:440px;height:172px;border-width:1;border-style:solid;padding:20px;display:block;background-color:#ffffe6">
+<div style="width:440px;height:180;height1:100%;overflow-y:scroll;border-width:1;border-style:solid;padding:20px;background-color:#ffffe6">
 
 <label for="engine">Calculation engine: </label> 
 <select id="engine" onchange="select()" style="background-color:#ffe6e6">
@@ -93,7 +94,37 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 </optgroup>
 </select>
 
-<label for="f0"> frequency: <i>f<sub>0</sub></i> =</label> 
+<label for="ph"><i>&phi;<sub>0</sub></i> =</label> 
+<select id="ph" onchange="select()">
+<optgroup>
+  <option value="0">0&deg;</option>
+  <option value="15">15&deg;</option>
+  <option value="30">30&deg;</option>
+  <option value="45">45&deg;</option>
+  <option value="60">60&deg;</option>
+  <option value="75">75&deg;</option>
+  <option value="90">90&deg;</option>
+  <option value="105">105&deg;</option>
+  <option value="120">120&deg;</option>
+  <option value="135">135&deg;</option>
+  <option value="150">150&deg;</option>
+  <option value="165">165&deg;</option>
+  <option value="180">180&deg;</option>
+  <option value="195">195&deg;</option>
+  <option value="210">210&deg;</option>
+  <option value="225">225&deg;</option>
+  <option value="240">240&deg;</option>
+  <option value="255">255&deg;</option>
+  <option value="270">270&deg;</option>
+  <option value="285">285&deg;</option>
+  <option value="300">300&deg;</option>
+  <option value="315">315&deg;</option>
+  <option value="330">330&deg;</option>
+  <option value="345">345&deg;</option>
+</optgroup>
+</select>
+<br>
+<label for="f0"> Frequency: <i>f<sub>0</sub></i> =</label> 
 <select id="f0" onchange="select()">
 <optgroup>
   <option value="18e3">18 kHz</option>
@@ -104,8 +135,8 @@ input[type='file'],input[type='button'] {font-size: 16px; }
   <option value="420e3">420 kHz</option>
 </optgroup>
 </select>
-<br><br>
-<label for="c0">Sound speed in the medium: <i>c<sub>0</sub></i> =</label> 
+<br>
+<label for="c0">Sound speed: <i>c<sub>0</sub></i> =</label> 
 <select id="c0" onchange="select()">
 <optgroup>
   <option value="1470">1470 m/s</option>
@@ -557,11 +588,12 @@ function update_axes() {
   draw_box("svg1","B1",-l/2,l/2,-l/2,l/2,-l/2,l/2,box_onoff?'black':'none');
 
 // --- circle for showing wave direction
+  var ph = parseFloat(document.getElementById("ph").value);
   var r = l/2 * Math.sqrt(2);
 
   var p1 = [];
   for(var i=0;i<360;i++) {
-	p1.push(V(P(rot(Ry(phi0),r*Math.cos(i*pi/180)
+	p1.push(V(P(rot(Ry(ph),r*Math.cos(i*pi/180)
 		,r*Math.sin(i*pi/180), 0))));
   }
   svg_createpath(svg,"C1",[p1],circle_onoff?'green':'none',1,"1,2");
@@ -570,9 +602,9 @@ function update_axes() {
   var p2=[];
   for(var i=0;i<360;i+=15) {
 	var p=[]
-	p.push(V(P(rot(Ry(phi0),r*Math.cos(i*pi/180)
+	p.push(V(P(rot(Ry(ph),r*Math.cos(i*pi/180)
 		, r*Math.sin(i*pi/180), 0))));
-  	p.push(V(P(rot(Ry(phi0),0.97*r*Math.cos(i*pi/180)
+  	p.push(V(P(rot(Ry(ph),0.97*r*Math.cos(i*pi/180)
 		, 0.97*r*Math.sin(i*pi/180), 0))));
 	p2.push(p);
   }
@@ -580,7 +612,7 @@ function update_axes() {
 
 // --- point that symbolize the wave direction
   var th = parseFloat(document.getElementById("th").value);
-  var p3 = rot(Ry(phi0),r*Math.cos((th+180)*pi/180)
+  var p3 = rot(Ry(ph),r*Math.cos((th+180)*pi/180)
 		, r*Math.sin((th+180)*pi/180), 0);
   var t3 = '\u03b8='+th;
   svg_createpoint(svg,"th_xy",V(P(p3)),circle_onoff?"green":"none",t3);
@@ -735,7 +767,16 @@ function change() {
 		worker = undefined;
 	}
 	if(eng=="js_soft") {
-        	setTimeout(js_soft,100);
+		var lines = document.getElementById("msh").value.split('\n');
+		th = parseFloat(document.getElementById("th").value);
+		f0 = parseFloat(document.getElementById("f0").value);
+		c0 = parseFloat(document.getElementById("c0").value);
+		ph = parseFloat(document.getElementById("ph").value);
+        	setTimeout(function(){
+			var s=js_soft(lines,th,f0,c0,ph);
+			document.getElementById("txt").value = s;
+			plot();
+		},100);
 	} else if(eng=="js_soft_worker") {
 		var s = js_soft_worker_header + js_soft_worker.toString();
 		let blob = new Blob([s], { type: "application/javascript" });
@@ -754,14 +795,16 @@ function change() {
 		th = parseFloat(document.getElementById("th").value);
 		f0 = parseFloat(document.getElementById("f0").value);
 		c0 = parseFloat(document.getElementById("c0").value);
-		worker.postMessage(JSON.stringify([lines,th,f0,c0]));
+		ph = parseFloat(document.getElementById("ph").value);
+		worker.postMessage(JSON.stringify([lines,th,f0,c0,ph]));
 	} else if(eng=="py_soft_worker") {
 		var lines = document.getElementById("msh").value; //.split('\n');
 		th = document.getElementById("th").value;
 		f0 = document.getElementById("f0").value;
 		c0 = document.getElementById("c0").value;
-		py_main(lines,th,f0,c0);
-		//worker.postMessage(JSON.stringify([lines,th,f0,c0]));
+		ph = document.getElementById("ph").value;
+		py_main(lines, th, f0, c0, ph);
+		//worker.postMessage(JSON.stringify([lines,th,f0,c0,ph]));
 	} else if(eng=="py_soft") {
 		setTimeout(py_soft,100);
 	} else { //if(eng=="none") {
@@ -1220,14 +1263,13 @@ function msh_flush() {
 var f0 = 38e3, c0 = 1480;
 var d = [1, 0, 0];
 
-function js_soft() {
-	var lines = document.getElementById("msh").value.split('\n');
-	th = parseFloat(document.getElementById("th").value);
-	f0 = parseFloat(document.getElementById("f0").value);
-	c0 = parseFloat(document.getElementById("c0").value);
+// ----- js_soft() near the same as js_soft_worker() - just not having postMessages
+ 
+function js_soft(lines,th,f0,c0,ph) {
 	
 	var k = 2 * pi * f0 / c0;
-	d = [Math.cos(th*pi/180), Math.sin(th*pi/180), 0];
+	//d = [Math.cos(th*pi/180), Math.sin(th*pi/180), 0];
+	d = mul(Ry(ph),[[Math.cos(th*pi/180)],[Math.sin(th*pi/180)],[0]]);
 
 	const n = parseInt(lines[4]);
 	const v = lines.slice(5, 5 + n).map(line =>
@@ -1264,8 +1306,10 @@ function js_soft() {
 	const phi = math.lusolve(S, f.map(val => math.multiply(-1, val)));
 
 	// Far field solution
-	const r1 = Array.from({length: 360}, (_, i) => [
-	  Math.cos(i*pi/180), Math.sin(i*pi/180), 0]);
+	//const r1 = Array.from({length: 360}, (_, i) => [
+	//  Math.cos(i*pi/180), Math.sin(i*pi/180), 0]);
+	const r1 = Array.from({length: 360}, (_, i) => mul(Ry(ph),
+	  [[Math.cos(i*pi/180)],[Math.sin(i*pi/180)],[0]]) );
 
 	const Sff = r1.map(rvec => x.map(xj =>
 	  math.divide(math.exp( math.complex(0, -k * math.dot(xj,rvec))), 4*pi)));
@@ -1278,8 +1322,7 @@ function js_soft() {
 	  //console.log(`${i}\t${math.abs(val)}`);
 	  s += `${i}\t${math.abs(val._data[0]).toFixed(6)}\n`;
 	});
-	document.getElementById("txt").value = s;
-	plot();
+	return(s);
 }
 
 // ---- js_soft_worker (math.js + worker code)
@@ -1287,17 +1330,27 @@ function js_soft() {
 const js_soft_worker_header = `
 importScripts('https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js')
 pi = Math.PI;
+
+function mul(A, B) {
+  return A.map(row => B[0].map((_, j) => row.reduce((sum, a, i) => sum + a*B[i][j], 0)));
+}
+function Ry(a) { const b = a*pi/180; // Rotation around Y-axis by a
+  return [[Math.cos(b),0,Math.sin(b)],[0,1,0],[-Math.sin(b),0,Math.cos(b)]];
+}
+
+
 onmessage = function(e) {
-	[lines,th,f0,c0] = JSON.parse(e.data);
-	var s = js_soft_worker(lines,th,f0,c0);
+	[lines,th,f0,c0,ph] = JSON.parse(e.data);
+	var s = js_soft_worker(lines,th,f0,c0,ph);
 	postMessage(JSON.stringify(s));
 }
 `;
 
-function js_soft_worker(lines,th,f0,c0) {
+function js_soft_worker(lines,th,f0,c0,ph) {
 	
 	var k = 2 * pi * f0 / c0;
-	d = [Math.cos(th*pi/180), Math.sin(th*pi/180), 0];
+	//d = [Math.cos(th*pi/180), Math.sin(th*pi/180), 0];
+	d = mul(Ry(ph),[[Math.cos(th*pi/180)],[Math.sin(th*pi/180)],[0]]);
 
 	const n = parseInt(lines[4]);
 	const v = lines.slice(5, 5 + n).map(line =>
@@ -1335,8 +1388,10 @@ postMessage("[... LUSolving]");
 
 postMessage("[... Far field solution]");
 	// Far field solution
-	const r1 = Array.from({length: 360}, (_, i) => [
-	  Math.cos(i*pi/180), Math.sin(i*pi/180), 0]);
+	//const r1 = Array.from({length: 360}, (_, i) => [
+	//	Math.cos(i*pi/180), Math.sin(i*pi/180), 0]);
+	const r1 = Array.from({length: 360}, (_, i) => mul(Ry(ph),
+	  [[Math.cos(i*pi/180)],[Math.sin(i*pi/180)],[0]]) );
 
 	const Sff = r1.map(rvec => x.map(xj =>
 	  math.divide(math.exp( math.complex(0, -k * math.dot(xj,rvec))), 4*pi)));
@@ -1360,8 +1415,11 @@ msh= input[0].split('\\n')
 th = float(input[1]) 
 f0 = float(input[2]) 
 c0 = float(input[3])
+ph = float(input[4])
  
-k = 2*pi*f0/c0; d = [cos(pi/180*th),sin(pi/180*th),0]
+k = 2*pi*f0/c0;
+Ry = array([[cos(ph*pi/180),0,sin(ph*pi/180)],[0,1,0],[-sin(ph*pi/180),0,cos(ph*pi/180)]])
+d = Ry@[cos(th*pi/180),sin(pi/180*th),0]
 
 n = int(msh[4])
 v = [list(map(float,msh[5+i].split()[1:4])) for i in range(n)]
@@ -1386,7 +1444,7 @@ from scipy.linalg import lu_factor, lu_solve
 phi = lu_solve(lu_factor(S), -f)
 
 # far field solution
-r1 = [[cos(pi/180*i),sin(pi/180*i),0] for i in range(360)]
+r1 = [Ry@[cos(pi/180*i),sin(pi/180*i),0] for i in range(360)]
 S = [[exp(-1j*k*p@r)/(4*pi) for p in x] for r in r1]
 psc = S @ phi;    
 #output=["\\n".join(["%d\\t%g"%(i,abs(psc[i])) for i in range(len(psc))])]
@@ -1408,6 +1466,7 @@ async function py_soft() {
 	,document.getElementById("th").value
 	,document.getElementById("f0").value
 	,document.getElementById("c0").value
+	,document.getElementById("ph").value
   ]);
   try {
     let result = pyodide.runPython(pycode);
@@ -1478,8 +1537,8 @@ function asyncRun(script, context) {
 	return requestResponse(pyodideWorker, {context, python: script});
 }
 
-async function py_main(lines,th,f0,c0) {
-	const context = { input: [ lines, th, f0, c0] };
+async function py_main(lines, th, f0, c0, ph) {
+	const context = { input: [ lines, th, f0, c0, ph] };
 	const { result, error } = await asyncRun(pycode, context);
 	el = document.getElementById("txt");
 	if (result) {
@@ -1501,13 +1560,15 @@ function url_params() { // overwrite globals from url params
 
 // --------
 
-var phi0 = 0;
+var th = 0;
+var ph = 0;
 var engine = 'py_soft_worker';
 
 url_params();
-phi0 = parseFloat(phi0);
 
-document.getElementById("engine").value=engine;
+document.getElementById("th").value = parseFloat(th);
+document.getElementById("ph").value = parseFloat(ph);
+document.getElementById("engine").value = engine;
 
 change();
 main();
