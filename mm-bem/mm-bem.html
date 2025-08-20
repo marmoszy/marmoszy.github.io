@@ -64,7 +64,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 </select>
 <br><br>
 
-<label for="th">Wave direction: <i>&theta;<sub>0</sub></i> =</label> 
+<label for="th">Plane wave: <i>&theta;<sub>0</sub></i> =</label> 
 <select id="th" onchange="select()">
 <optgroup>
   <option value="0">0&deg;</option>
@@ -93,7 +93,6 @@ input[type='file'],input[type='button'] {font-size: 16px; }
   <option value="345">345&deg;</option>
 </optgroup>
 </select>
-
 <label for="ph"><i>&phi;<sub>0</sub></i> =</label> 
 <select id="ph" onchange="select()">
 <optgroup>
@@ -123,8 +122,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
   <option value="345">345&deg;</option>
 </optgroup>
 </select>
-<br>
-<label for="f0"> Frequency: <i>f<sub>0</sub></i> =</label> 
+<label for="f0"><i>f<sub>0</sub></i> =</label> 
 <select id="f0" onchange="select()">
 <optgroup>
   <option value="18e3">18 kHz</option>
@@ -135,7 +133,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
   <option value="420e3">420 kHz</option>
 </optgroup>
 </select>
-<br>
+<br><br>
 <label for="c0">Sound speed: <i>c<sub>0</sub></i> =</label> 
 <select id="c0" onchange="select()">
 <optgroup>
@@ -295,7 +293,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <textarea id="ta" style="opacity:0;position:absolute;z-index:-9999;pointer-events:none;"></textarea>
 
 <br><br>
-<span title="Marek Moszyński 2025">MM 19.8.2025 (mm-bem v1.62)</span>
+<span title="Marek Moszyński 2025">MM 20.8.2025 (mm-bem v1.63)</span>
 
 <script>
 // globals
@@ -587,7 +585,7 @@ function update_axes() {
 // ---- wave length box
   draw_box("svg1","B1",-l/2,l/2,-l/2,l/2,-l/2,l/2,box_onoff?'black':'none');
 
-// --- circle for showing wave direction
+// --- two circles for showing wave direction
   var ph = parseFloat(document.getElementById("ph").value);
   var r = l/2 * Math.sqrt(2);
 
@@ -597,6 +595,12 @@ function update_axes() {
 		,r*Math.sin(i*pi/180), 0))));
   }
   svg_createpath(svg,"C1",[p1],circle_onoff?'green':'none',1,"1,2");
+
+  var p1 = [];
+  for(var i=0;i<360;i++) {
+	p1.push(V(P([r*Math.cos(i*pi/180), 0, r*Math.sin(i*pi/180)])));
+  }
+  svg_createpath(svg,"C1h",[p1],circle_onoff?'green':'none',1,"1,2");
 
 // --- circle ticks 
   var p2=[];
@@ -609,6 +613,15 @@ function update_axes() {
 	p2.push(p);
   }
   svg_createpath(svg,"C2",p2,circle_onoff?'green':'none',1,"1,1");
+
+  var p2=[];
+  for(var i=0;i<360;i+=15) {
+	var p=[]
+	p.push(V(P([r*Math.cos(i*pi/180), 0, r*Math.sin(i*pi/180)])));
+  	p.push(V(P([0.97*r*Math.cos(i*pi/180),0, 0.97*r*Math.sin(i*pi/180)])));
+	p2.push(p);
+  }
+  svg_createpath(svg,"C2h",p2,circle_onoff?'green':'none',1,"1,1");
 
 // --- point that symbolize the wave direction
   var th = parseFloat(document.getElementById("th").value);
