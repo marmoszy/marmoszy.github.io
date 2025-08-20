@@ -625,7 +625,7 @@ function update_axes() {
   var th = parseFloat(document.getElementById("th").value);
   var p3 = rot(Ry(ph),r*Math.cos((th+180)*pi/180)
 		, r*Math.sin((th+180)*pi/180), 0);
-  var t3 = '\u03b8='+th;
+  var t3 = '\u03b8='+th + " " + "\u03a6=" + ph;
   svg_createpoint(svg,"th_xy",V(P(p3)),circle_onoff?"green":"none",t3);
 }
 
