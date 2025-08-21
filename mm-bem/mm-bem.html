@@ -143,10 +143,12 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <label for="engine">Calculation engine: </label> 
 <select id="engine" onchange="select()" style="background-color:#ffe6e6">
 <optgroup>
-  <option value="py_soft">pyodide</option>
-  <option value="py_soft_worker" selected>pyodide worker</option>
-  <option value="js_soft">math.js</option>
-  <option value="js_soft_worker">math.js worker</option>
+<!--  <option value="py_soft">pyodide</option> -->
+  <option value="py_soft_worker">pyodide</option>
+<!--  <option value="js_soft">math.js</option> -->
+  <option value="js_soft_worker">math.js</option>
+  <option value="js2_soft_worker">javascript</option>
+  <option value="wasm_soft_worker" selected>wasm</option>
   <option value="none">do not calculate</option>
 </optgroup>
 </select>
@@ -291,7 +293,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <textarea id="ta" style="opacity:0;position:absolute;z-index:-9999;pointer-events:none;"></textarea>
 
 <br><br>
-<span title="marek.moszynski@pg.edu.pl 2025">MM 20.8.2025 (mm-bem v1.64)</span>
+<span title="marek.moszynski@pg.edu.pl 2025">MM 21.8.2025 (mm-bem v1.70)</span>
 
 <script>
 // globals
@@ -793,6 +795,44 @@ function change() {
 		let blob = new Blob([s], { type: "application/javascript" });
 		worker = new Worker(URL.createObjectURL(blob));
 		//worker = new Worker("soft.js");
+		worker.onmessage = function(event) {
+			var s = event.data;
+			if(s.startsWith('[') && s.endsWith(']')) {
+				document.getElementById("txt").value += s.slice(1,-1)+'\n';
+			} else {
+				document.getElementById("txt").value = JSON.parse(s);
+				plot();
+			}
+		};
+		var lines = document.getElementById("msh").value.split('\n');
+		th = parseFloat(document.getElementById("th").value);
+		f0 = parseFloat(document.getElementById("f0").value);
+		c0 = parseFloat(document.getElementById("c0").value);
+		ph = parseFloat(document.getElementById("ph").value);
+		worker.postMessage(JSON.stringify([lines,th,f0,c0,ph]));
+	} else if(eng=="js2_soft_worker") {
+		var s = js2_soft_worker_header + js2_soft_worker.toString();
+		let blob = new Blob([s], { type: "application/javascript" });
+		worker = new Worker(URL.createObjectURL(blob));
+		worker.onmessage = function(event) {
+			var s = event.data;
+			if(s.startsWith('[') && s.endsWith(']')) {
+				document.getElementById("txt").value += s.slice(1,-1)+'\n';
+			} else {
+				document.getElementById("txt").value = JSON.parse(s);
+				plot();
+			}
+		};
+		var lines = document.getElementById("msh").value.split('\n');
+		th = parseFloat(document.getElementById("th").value);
+		f0 = parseFloat(document.getElementById("f0").value);
+		c0 = parseFloat(document.getElementById("c0").value);
+		ph = parseFloat(document.getElementById("ph").value);
+		worker.postMessage(JSON.stringify([lines,th,f0,c0,ph]));
+	} else if(eng=="wasm_soft_worker") {
+		var s = wasm_soft_worker_header + wasm_soft_worker.toString();
+		let blob = new Blob([s], { type: "application/javascript" });
+		worker = new Worker(URL.createObjectURL(blob));
 		worker.onmessage = function(event) {
 			var s = event.data;
 			if(s.startsWith('[') && s.endsWith(']')) {
@@ -1350,8 +1390,6 @@ function mul(A, B) {
 function Ry(a) { const b = a*pi/180; // Rotation around Y-axis by a
   return [[Math.cos(b),0,Math.sin(b)],[0,1,0],[-Math.sin(b),0,Math.cos(b)]];
 }
-
-
 onmessage = function(e) {
 	[lines,th,f0,c0,ph] = JSON.parse(e.data);
 	var s = js_soft_worker(lines,th,f0,c0,ph);
@@ -1562,6 +1600,443 @@ async function py_main(lines, th, f0, c0, ph) {
 	}
 }
 
+// ---- javascript complex numbers
+
+
+const js2_soft_worker_header = `
+//importScripts('https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js')
+pi = Math.PI;
+
+function mul(A, B) {
+  return A.map(row => B[0].map((_, j) => row.reduce((sum, a, i) => sum + a*B[i][j], 0)));
+}
+function Ry(a) { const b = a*pi/180; // Rotation around Y-axis by a
+  return [[Math.cos(b),0,Math.sin(b)],[0,1,0],[-Math.sin(b),0,Math.cos(b)]];
+}
+onmessage = function(e) {
+	[lines,th,f0,c0,ph] = JSON.parse(e.data);
+	var s = js2_soft_worker(lines,th,f0,c0,ph);
+	postMessage(JSON.stringify(s));
+}
+function dist(x,y) {
+    return Math.sqrt((x[0]-y[0])**2 + (x[1]-y[1])**2 + (x[2]-y[2])**2);
+}
+function dot(x,y) {
+	return x[0]*y[0] + x[1]*y[1] + x[2]*y[2];
+}
+
+class Complex {
+  constructor(re, im) {
+    this.re = re;
+    this.im = im;
+  }
+  add(other) {
+    return new Complex(this.re + other.re, this.im + other.im);
+  }
+  sub(other) {
+    return new Complex(this.re - other.re, this.im - other.im);
+  }
+  mul(other) {
+    return new Complex(
+      this.re * other.re - this.im * other.im,
+      this.re * other.im + this.im * other.re
+    );
+  }
+  div(other) {
+    const denom = other.re ** 2 + other.im ** 2;
+    return new Complex(
+      (this.re * other.re + this.im * other.im) / denom,
+      (this.im * other.re - this.re * other.im) / denom
+    );
+  }
+  abs() {
+    return Math.sqrt(this.re ** 2 + this.im ** 2);
+  }
+  clone() {
+    return new Complex(this.re, this.im);
+  }
+  toString() {
+    const sign = this.im >= 0 ? "+" : "-";
+    return "" + this.re + sign + Math.abs(this.im)+"i";
+  }
+}
+// ---- gauss elimination
+
+function gaussianEliminationComplex(A, b) {
+  const n = A.length;
+  const x = Array(n).fill(null);
+
+  // Forward elimination
+postMessage("[... Forward elimination]");
+  for (let k = 0; k < n; k++) {
+    // --- Pivoting
+    let maxRow = k;
+    for (let i = k + 1; i < n; i++) {
+      if (A[i][k].abs() > A[maxRow][k].abs()) {
+        maxRow = i;
+      }
+    }
+    [A[k], A[maxRow]] = [A[maxRow], A[k]];
+    [b[k], b[maxRow]] = [b[maxRow], b[k]];
+    // --- Eliminate below
+    for (let i = k + 1; i < n; i++) {
+      const factor = A[i][k].div(A[k][k]);
+      for (let j = k; j < n; j++) {
+        A[i][j] = A[i][j].sub(factor.mul(A[k][j]));
+      }
+      b[i] = b[i].sub(factor.mul(b[k]));
+    }
+  }
+  // --- Back substitution
+postMessage("[... Back substitution]");
+  for (let i = n - 1; i >= 0; i--) {
+    let sum = b[i].clone();
+    for (let j = i + 1; j < n; j++) {
+      sum = sum.sub(A[i][j].mul(x[j]));
+    }
+    x[i] = sum.div(A[i][i]);
+  }
+  return x;
+}
+function multiplyMatrixVector(matrix, vector) {
+  const rows = matrix.length;
+  const cols = matrix[0].length;
+  if (vector.length !== cols) {
+    throw new Error("Matrix columns must match vector length");
+  }
+  const result = Array(rows).fill(null).map(() => new Complex(0, 0));
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      result[i] = result[i].add(matrix[i][j].mul(vector[j]));
+    }
+  }
+  return result;
+}
+`;
+
+function js2_soft_worker(lines,th,f0,c0,ph) {
+	
+	var k = 2 * pi * f0 / c0;
+	//d = [Math.cos(th*pi/180), Math.sin(th*pi/180), 0];
+	d = mul(Ry(ph),[[Math.cos(th*pi/180)],[Math.sin(th*pi/180)],[0]]);
+
+	const n = parseInt(lines[4]);
+	const v = lines.slice(5, 5 + n).map(line =>
+	  line.trim().split(/\s+/).slice(1, 4).map(parseFloat)
+	);
+	const m = parseInt(lines[n + 7]);
+	const e = lines.slice(n + 8, n + 8 + m).map(line =>
+	  line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x)-1)  // 0-based indexing
+	);
+
+	// Triangle centers
+/*
+	const x = e.map(tri => {
+	  const sum = tri.reduce((acc, idx) => {
+	    return math.add(acc, math.divide(v[idx], 3));
+	  }, [0, 0, 0]);
+	  return sum;
+	});
+*/
+	var x=[];
+	for(var i=0;i<m;i++) {
+		x.push( [ (v[e[i][0]][0]+v[e[i][1]][0]+v[e[i][2]][0])/3
+			 ,(v[e[i][0]][1]+v[e[i][1]][1]+v[e[i][2]][1])/3
+			 ,(v[e[i][0]][2]+v[e[i][1]][2]+v[e[i][2]][2])/3]);
+	}
+
+postMessage("[... Assembling]");
+
+	// Helmholtz single layer matrix
+	//let S = math.zeros([m, m]).map(() => math.complex(0));
+	//var S = math.matrix().resize([m, m]);
+	var S = new Array(m);
+	for (let i = 0; i < m; i++) {
+	  S[i] = new Array(m);
+	  for (let j = 0; j < m; j++) {
+	    //const r = math.norm(math.subtract(x[i], x[j]));
+	    //S._data[i][j] = (r!==0) ? math.divide(math.exp(math.complex(0, k*r)),r*(4*pi))
+	    //                        : math.multiply(math.complex(0, k), 1/(4*pi) );
+	    const r = dist(x[i],x[j]);
+	    S[i][j] = (r!==0) ? new Complex(Math.cos(k*r)/(r*4*pi),Math.sin(k*r)/(r*4*pi))
+	                       : new Complex(0, k/(4*pi) ) ;
+	  }
+	}
+
+	// Incident field
+	//const f = x.map(p => math.exp( math.complex(0, k * math.dot(p,d))));
+	const f = x.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));
+
+postMessage("[... Gauss Solving]");
+
+	// Surface solution using LU decomposition
+	//onst phi = math.lusolve(S, f.map(val => math.multiply(-1, val)));
+	// Surface solution using Gauss elimination	
+	var phi = gaussianEliminationComplex(S, f)
+
+	//console.log(S._data[0][0]);
+	//console.log(S2[0][0]);
+
+	//console.log(phi._data[0][0]);
+	//console.log(phi2[0]);
+	
+postMessage("[... Far field solution2]");
+
+	// Far field solution
+	const r1 = Array.from({length: 360}, (_, i) => mul(Ry(ph),
+	  [[Math.cos(i*pi/180)],[Math.sin(i*pi/180)],[0]]) );
+
+	//const Sff = r1.map(rvec => x.map(xj =>
+	//  math.divide(math.exp( math.complex(0, -k * math.dot(xj,rvec))), 4*pi)));
+	const Sff = r1.map(v => x.map(xj =>
+	  new Complex(Math.cos(-k * dot(xj,v))/(4*pi), Math.sin(-k * dot(xj,v))/(4*pi) )));
+
+	//console.log(Sff);
+	//console.log(Sff2[0][0]);
+
+	//const psc = Sff.map(row => math.multiply(row, phi));
+	const psc = multiplyMatrixVector(Sff, phi);
+
+	//console.log(psc[0]._data[0]);
+	//console.log(psc2[0]);
+
+	// Return results
+	var s = '';
+	for(let i=0; i<psc.length; i++) {
+		// s += i+"\t"+math.abs(psc[i]._data[0]).toFixed(6)+"\n";
+		s += i + "\t" + psc[i].abs().toFixed(6) + "\n";
+	}
+	return(s);
+}
+
+// ---- wasm
+
+const wasm_soft_worker_header = `
+//importScripts('https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js')
+pi = Math.PI;
+
+function mul(A, B) {
+  return A.map(row => B[0].map((_, j) => row.reduce((sum, a, i) => sum + a*B[i][j], 0)));
+}
+function Ry(a) { const b = a*pi/180; // Rotation around Y-axis by a
+  return [[Math.cos(b),0,Math.sin(b)],[0,1,0],[-Math.sin(b),0,Math.cos(b)]];
+}
+
+var gauss_wasm="AGFzbQEAAAABBwFgA39/fwACDwEDZW52Bm1lbW9yeQIAAgMCAQAEBQFwAQEBBggBfwFBgIgECwcJAQVnYXVzcwAACp0JAZoJCxB/AnwBfwF8AX8BfAR/AXwBfwJ+AXwjgICAgABBEGsaAkAgAEEBSA0AIABBfmohAyAAQQR0IgRBIGohBSAAQQFqIgZBBHQhByAAQQV0QSBqIQggASAEQRBqIglqIQpBACELIAEhDEF/IQ0gASEOIAEhDwNAIAEgCyIQQQR0IhFqIgQgECAGbEEEdGoiEisACCETIBIrAAAhFAJAIBBBAWoiCyAATiIVDQAgFCAUoiATIBOioCEWAkACQCAQQX9zIABqQQFxDQAgCyEEIBAhFwwBCyAEIAsgBmxBBHRqIgQrAAAiGCAYoiAEKwAIIhggGKKgIhggFiAYIBZkIgQbIRYgCyAQIAQbIRcgEEECaiEECwJAIAMgEEYNACAHIARsIRkgByAEQQFqbCEaIA8hGwNAIBsgGmoiHCsAACIYIBiiIBxBCGorAAAiGCAYoqAiGCAbIBlqIhwrAAAiHSAdoiAcQQhqKwAAIh0gHaKgIh0gFiAdIBZkIhwbIhYgGCAWZCIeGyEWIARBAWogBCAXIBwbIB4bIRcgGyAIaiEbIARBAmoiBCAARw0ACwsgFyAQRg0AIAEgFyAGbEEEdGohBCAOIRsgBiEXA0AgGykDACEfIBsgBCkDADcDACAbQQhqIhwpAwAhICAcIARBCGoiHikDADcDACAEIB83AwAgHiAgNwMAIBtBEGohGyAEQRBqIQQgF0F/aiIXDQALIBIrAwghEyASKwMAIRQLIBQgFKIgEyAToqAhFiAMIQQgDSEbA0AgBEEIaiIXIBcrAAAiGCAUoiATIAQrAAAiHaKhIBajOQMAIAQgHSAUoiATIBiioCAWozkDACAEQRBqIQQgACAbQQFqIhtHDQALIAohHiALIRkCQCAVDQADQCABIBkgBmxBBHRqIBFqIgQrAwAhEyAEKwMIIhiaIR1BACEEIAAhFwNAIB4gBGoiG0EIaiIcIBwrAAAgEyAMIARqIhxBCGorAAAiFKIgGCAcKwAAIhaioKE5AwAgGyAbKwAAIBMgFqIgFCAdoqChOQMAIARBEGohBCANIBdBf2oiF0cNAAsgHiAJaiEeIBlBAWoiGSAARw0ACwsgCiAFaiEKIAwgBWohDCANQQFqIQ0gDiAJaiEOIA9BEGohDyALIABHDQALIABBAUgNACABIABBBHQiBGohCSABIABBf2ogAEEBaiIRbEEEdCAEamohDCACIARqIQ1BYCAEayEBQQAhGSAAIRwDQCAcQX9qIh4gEWwhBkQAAAAAAAAAACETRAAAAAAAAAAAIRQCQCAcIABODQBEAAAAAAAAAAAhFCANIQQgDCEbIBkhF0QAAAAAAAAAACETA0AgEyAbKwAAIhYgBEEIaisAACIYoiAEKwAAIh0gG0EIaisAACIhoqCgIRMgFCAWIB2iIBggIaKhoCEUIARBEGohBCAbQRBqIRsgF0F/aiIXDQALCyAJIAZBBHRqIgQrAAAhFiACIB5BBHRqIhsgBCsACCAToTkDCCAbIBYgFKE5AwAgDUFwaiENIAwgAWohDCAZQQFqIRkgHEEBSiEEIB4hHCAEDQALCwsAMQRuYW1lAAwLZ2F1c3MyLndhc20BCAEABWdhdXNzBxIBAA9fX3N0YWNrX3BvaW50ZXIAOAlwcm9kdWNlcnMBDHByb2Nlc3NlZC1ieQEMVWJ1bnR1IGNsYW5nETE4LjEuMyAoMXVidW50dTEpACwPdGFyZ2V0X2ZlYXR1cmVzAisPbXV0YWJsZS1nbG9iYWxzKwhzaWduLWV4dA==";
+
+var gauss, heap;
+
+onmessage = function(e) {
+	const memory = new WebAssembly.Memory({ initial: 512*16 }); // 512MiB = 512*16*64 KiB
+	//const { instance } = await WebAssembly.instantiateStreaming(
+  	//	fetch('data:application/wasm;base64,'+gauss_wasm), {env: { memory }});
+
+	fetch('data:application/wasm;base64,'+gauss_wasm)
+	.then(response => response.arrayBuffer())
+	.then(bytes => WebAssembly.instantiate(bytes,{env:{memory}}))
+	.then(function(result) {
+
+	gauss = result.instance.exports.gauss;
+	//const gauss = instance.exports.gauss;
+	heap = new Float64Array(memory.buffer);
+
+	[lines,th,f0,c0,ph] = JSON.parse(e.data);
+	var s = wasm_soft_worker(lines,th,f0,c0,ph);
+	postMessage(JSON.stringify(s));
+	});
+}
+function dist(x,y) {
+    return Math.sqrt((x[0]-y[0])**2 + (x[1]-y[1])**2 + (x[2]-y[2])**2);
+}
+function dot(x,y) {
+	return x[0]*y[0] + x[1]*y[1] + x[2]*y[2];
+}
+
+class Complex {
+  constructor(re, im) {
+    this.re = re;
+    this.im = im;
+  }
+  add(other) {
+    return new Complex(this.re + other.re, this.im + other.im);
+  }
+  sub(other) {
+    return new Complex(this.re - other.re, this.im - other.im);
+  }
+  mul(other) {
+    return new Complex(
+      this.re * other.re - this.im * other.im,
+      this.re * other.im + this.im * other.re
+    );
+  }
+  div(other) {
+    const denom = other.re ** 2 + other.im ** 2;
+    return new Complex(
+      (this.re * other.re + this.im * other.im) / denom,
+      (this.im * other.re - this.re * other.im) / denom
+    );
+  }
+  abs() {
+    return Math.sqrt(this.re ** 2 + this.im ** 2);
+  }
+  clone() {
+    return new Complex(this.re, this.im);
+  }
+  toString() {
+    const sign = this.im >= 0 ? "+" : "-";
+    return "" + this.re + sign + Math.abs(this.im)+"i";
+  }
+}
+// ---- gauss elimination
+
+function gaussianEliminationComplex(A, b) {
+  const n = A.length;
+  const x = Array(n).fill(null);
+
+  // Forward elimination
+postMessage("[... Forward elimination]");
+  for (let k = 0; k < n; k++) {
+    // --- Pivoting
+    let maxRow = k;
+    for (let i = k + 1; i < n; i++) {
+      if (A[i][k].abs() > A[maxRow][k].abs()) {
+        maxRow = i;
+      }
+    }
+    [A[k], A[maxRow]] = [A[maxRow], A[k]];
+    [b[k], b[maxRow]] = [b[maxRow], b[k]];
+    // --- Eliminate below
+    for (let i = k + 1; i < n; i++) {
+      const factor = A[i][k].div(A[k][k]);
+      for (let j = k; j < n; j++) {
+        A[i][j] = A[i][j].sub(factor.mul(A[k][j]));
+      }
+      b[i] = b[i].sub(factor.mul(b[k]));
+    }
+  }
+  // --- Back substitution
+postMessage("[... Back substitution]");
+  for (let i = n - 1; i >= 0; i--) {
+    let sum = b[i].clone();
+    for (let j = i + 1; j < n; j++) {
+      sum = sum.sub(A[i][j].mul(x[j]));
+    }
+    x[i] = sum.div(A[i][i]);
+  }
+  return x;
+}
+function multiplyMatrixVector(matrix, vector) {
+  const rows = matrix.length;
+  const cols = matrix[0].length;
+  if (vector.length !== cols) {
+    throw new Error("Matrix columns must match vector length");
+  }
+  const result = Array(rows).fill(null).map(() => new Complex(0, 0));
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      result[i] = result[i].add(matrix[i][j].mul(vector[j]));
+    }
+  }
+  return result;
+}
+
+function gaussianWasm(S,f) { // using gauss, heap
+  const n = f.length;
+  const matOffset = 0;
+  const outOffset = n * (n + 1) * 2; //  + n * 2;
+
+  var k = 0;
+  for(var i=0; i<n; i++) {
+	for(var j=0; j<n; j++) {
+		heap[k] = S[i][j].re;
+		heap[k+1] = S[i][j].im;
+		k += 2;
+	}
+	heap[k] = f[i].re;
+	heap[k+1] = f[i].im;
+	k += 2;
+  }
+
+  gauss(n, matOffset * 8, outOffset * 8); // pass byte offsets
+
+  var phi = [];
+  for (let i = 0; i < n; i++) {
+    const re = heap[outOffset + 2 * i];
+    const im = heap[outOffset + 2 * i + 1];
+    phi.push(new Complex(re,im));
+  }
+
+  return phi;
+}
+`;
+
+function wasm_soft_worker(lines,th,f0,c0,ph) {
+
+	var k = 2 * pi * f0 / c0;
+	//d = [Math.cos(th*pi/180), Math.sin(th*pi/180), 0];
+	d = mul(Ry(ph),[[Math.cos(th*pi/180)],[Math.sin(th*pi/180)],[0]]);
+
+	const n = parseInt(lines[4]);
+	const v = lines.slice(5, 5 + n).map(line =>
+	  line.trim().split(/\s+/).slice(1, 4).map(parseFloat)
+	);
+	const m = parseInt(lines[n + 7]);
+	const e = lines.slice(n + 8, n + 8 + m).map(line =>
+	  line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x)-1)  // 0-based indexing
+	);
+
+	// Triangle centers
+	var x=[];
+	for(var i=0;i<m;i++) {
+		x.push( [ (v[e[i][0]][0]+v[e[i][1]][0]+v[e[i][2]][0])/3
+			 ,(v[e[i][0]][1]+v[e[i][1]][1]+v[e[i][2]][1])/3
+			 ,(v[e[i][0]][2]+v[e[i][1]][2]+v[e[i][2]][2])/3]);
+	}
+
+postMessage("[... Assembling]");
+
+	// Helmholtz single layer matrix
+	var S = new Array(m);
+	for (let i = 0; i < m; i++) {
+	  S[i] = new Array(m);
+	  for (let j = 0; j < m; j++) {
+	    const r = dist(x[i],x[j]);
+	    S[i][j] = (r!==0) ? new Complex(Math.cos(k*r)/(r*4*pi),Math.sin(k*r)/(r*4*pi))
+	                       : new Complex(0, k/(4*pi) ) ;
+	  }
+	}
+
+	// Incident field
+	const f = x.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));
+
+postMessage("[... Gauss Wasm Solver]");
+	var phi = gaussianWasm(S,f);
+
+//postMessage("[... Gauss Javascript Solver]");
+//	var phi = gaussianEliminationComplex(S, f)
+
+postMessage("[... Far field solution2]");
+
+	// Far field solution
+	const r1 = Array.from({length: 360}, (_, i) => mul(Ry(ph),
+	  [[Math.cos(i*pi/180)],[Math.sin(i*pi/180)],[0]]) );
+
+	const Sff = r1.map(v => x.map(xj =>
+	  new Complex(Math.cos(-k * dot(xj,v))/(4*pi), Math.sin(-k * dot(xj,v))/(4*pi) )));
+
+	const psc = multiplyMatrixVector(Sff, phi);
+
+	// Return results
+	var s = '';
+	for(let i=0; i<psc.length; i++) {
+		s += i + "\t" + psc[i].abs().toFixed(6) + "\n";
+	}
+	return(s);
+}
+
+
+// ----
+
 function url_params() { // overwrite globals from url params
     var s = window.location.search.substring(1);
     var ss = s.split('&');
@@ -1575,7 +2050,7 @@ function url_params() { // overwrite globals from url params
 
 var th = 0;
 var ph = 0;
-var engine = 'py_soft_worker';
+var engine = 'wasm_soft_worker'; // 'py_soft_worker';
 
 url_params();
 
