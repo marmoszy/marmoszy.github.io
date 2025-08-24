@@ -56,7 +56,11 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <label for="th">Plane wave: <i>&theta;<sub>0</sub></i> =</label> 
 <select id="th" onchange="select()">
 <optgroup>
-  <option value="0">0&deg;</option>
+  <option value="-1">1&deg;scan</option>
+  <option value="-2">2&deg;scan</option>
+  <option value="-5">5&deg;scan</option>
+  <option disabled>_____</option>
+  <option value="0" selected>0&deg;</option>
   <option value="15">15&deg;</option>
   <option value="30">30&deg;</option>
   <option value="45">45&deg;</option>
@@ -85,6 +89,10 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <label for="ph"><i>&phi;<sub>0</sub></i> =</label> 
 <select id="ph" onchange="select()">
 <optgroup>
+  <option value="-1">1&deg;scan</option>
+  <option value="-2">2&deg;scan</option>
+  <option value="-5">5&deg;scan</option>
+  <option disabled>_____</option>
   <option value="0">0&deg;</option>
   <option value="15">15&deg;</option>
   <option value="30">30&deg;</option>
@@ -277,7 +285,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 
 </td></tr><tr><td>
 
-<span title="marek.moszynski@pg.edu.pl 2025">MM 22.8.2025 (mm-bem v1.72)</span>
+<span title="marek.moszynski@pg.edu.pl 2025">MM 24.8.2025 (mm-bem v1.73)</span>
 </td><td>
 <span>
 <label for="engine">Calculation engine: </label> 
@@ -590,9 +598,17 @@ function update_axes() {
 // ---- wave length box
   draw_box("svg1","B1",-l/2,l/2,-l/2,l/2,-l/2,l/2,box_onoff?'black':'none');
 
-// --- two circles for showing wave direction
+  var th = parseFloat(document.getElementById("th").value);
   var ph = parseFloat(document.getElementById("ph").value);
-  var r = l/2 * Math.sqrt(2);
+
+  update_wave_direction(svg,th,ph,f0,c0);
+
+}
+
+function update_wave_direction(svg,th,ph,f0,c0) {
+  var r = c0/f0/2 * Math.sqrt(2);
+
+// --- two circles for showing wave direction
 
   var p1 = [];
   for(var i=0;i<360;i++) {
@@ -629,9 +645,11 @@ function update_axes() {
   svg_createpath(svg,"C2h",p2,circle_onoff?'green':'none',1,"1,1");
 
 // --- point that symbolize the wave direction
-  var th = parseFloat(document.getElementById("th").value);
-  var p3 = rot(Ry(ph),r*Math.cos((th+180)*pi/180)
-		, r*Math.sin((th+180)*pi/180), 0);
+  //var p3 = rot(Ry(ph),r*Math.cos((th+180)*pi/180), r*Math.sin((th+180)*pi/180), 0);
+  //var t3 = '\u03b8='+th + " " + "\u03a6=" + ph;
+  //svg_createpoint(svg,"th_xy",V(P(p3)),circle_onoff?"green":"none",t3);
+
+  var p3 = rot(Ry(ph), r*Math.cos((th+180)*pi/180), r*Math.sin((th+180)*pi/180), 0);
   var t3 = '\u03b8='+th + " " + "\u03a6=" + ph;
   svg_createpoint(svg,"th_xy",V(P(p3)),circle_onoff?"green":"none",t3);
 }
@@ -765,6 +783,7 @@ function writeFile(data, filename, type) {
 var worker = undefined;
 
 function change() {
+console.log("change");
 	var obj = document.getElementById("obj").value;
 	if(obj[0]=='[') {
 		O = eval('['+obj+']');
@@ -810,6 +829,7 @@ function change() {
 				var t = Date.now()/1000 - start;
 				s = '# mm-bem-math.js: '+ t.toFixed(3) + 's\n' + JSON.parse(s);
 				document.getElementById("txt").value = s;
+				
 				plot();
 			}
 		};
@@ -853,6 +873,16 @@ function change() {
 				s = '# mm-bem-wasm: '+ t.toFixed(3) + 's\n' + JSON.parse(s);
 				document.getElementById("txt").value = s;
 				plot();
+				// extract ph0,th0,f0,c0,bsl
+				var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+bsl=(\S+)/);
+				if(v) {
+				   var svg1 = document.getElementById("svg1");							   update_wave_direction(svg1,parseFloat(v[1])
+					,parseFloat(v[2]),parseFloat(v[3]),parseFloat(v[4]));
+				   var th_bsl = (parseFloat(v[1])+180)%360;
+				   var TS = 20*Math.log10(parseFloat(v[5]));
+console.log(th_bsl+' '+TS);
+				}
+
 			}
 		};
 		var lines = document.getElementById("msh").value.split('\n');
@@ -924,6 +954,11 @@ function drop2(e) {
 
 function plot(id2,s,c) {
 	s = s||document.getElementById("txt").value;
+	var th = undefined;
+	var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+bsl=(\S+)/);
+	if(v) {
+		th=parseFloat(v[1]);		
+	}
 	var ss=s.split('\n');
 	var x=[],y=[];
 	for(var i=0;i<ss.length;i++) {
@@ -940,7 +975,7 @@ function plot(id2,s,c) {
 	svg0 = document.getElementById("svg0");
 	svg_polar(svg0,x,y,W,H,id2||"P",c||"#ff6633");  
 
-	var th = parseFloat(document.getElementById("th").value);
+	th = th || parseFloat(document.getElementById("th").value);
 	var idx = (th+180)%360;
 	if(idx<x.length) {
 		svg_polar(svg0,[x[idx]],[y[idx]], W,H
@@ -1836,25 +1871,35 @@ function Ry(a) { const b = a*pi/180; // Rotation around Y-axis by a
 
 var gauss_wasm="AGFzbQEAAAABBwFgA39/fwACDwEDZW52Bm1lbW9yeQIAAgMCAQAEBQFwAQEBBggBfwFBgIgECwcJAQVnYXVzcwAACp0JAZoJCxB/AnwBfwF8AX8BfAR/AXwBfwJ+AXwjgICAgABBEGsaAkAgAEEBSA0AIABBfmohAyAAQQR0IgRBIGohBSAAQQFqIgZBBHQhByAAQQV0QSBqIQggASAEQRBqIglqIQpBACELIAEhDEF/IQ0gASEOIAEhDwNAIAEgCyIQQQR0IhFqIgQgECAGbEEEdGoiEisACCETIBIrAAAhFAJAIBBBAWoiCyAATiIVDQAgFCAUoiATIBOioCEWAkACQCAQQX9zIABqQQFxDQAgCyEEIBAhFwwBCyAEIAsgBmxBBHRqIgQrAAAiGCAYoiAEKwAIIhggGKKgIhggFiAYIBZkIgQbIRYgCyAQIAQbIRcgEEECaiEECwJAIAMgEEYNACAHIARsIRkgByAEQQFqbCEaIA8hGwNAIBsgGmoiHCsAACIYIBiiIBxBCGorAAAiGCAYoqAiGCAbIBlqIhwrAAAiHSAdoiAcQQhqKwAAIh0gHaKgIh0gFiAdIBZkIhwbIhYgGCAWZCIeGyEWIARBAWogBCAXIBwbIB4bIRcgGyAIaiEbIARBAmoiBCAARw0ACwsgFyAQRg0AIAEgFyAGbEEEdGohBCAOIRsgBiEXA0AgGykDACEfIBsgBCkDADcDACAbQQhqIhwpAwAhICAcIARBCGoiHikDADcDACAEIB83AwAgHiAgNwMAIBtBEGohGyAEQRBqIQQgF0F/aiIXDQALIBIrAwghEyASKwMAIRQLIBQgFKIgEyAToqAhFiAMIQQgDSEbA0AgBEEIaiIXIBcrAAAiGCAUoiATIAQrAAAiHaKhIBajOQMAIAQgHSAUoiATIBiioCAWozkDACAEQRBqIQQgACAbQQFqIhtHDQALIAohHiALIRkCQCAVDQADQCABIBkgBmxBBHRqIBFqIgQrAwAhEyAEKwMIIhiaIR1BACEEIAAhFwNAIB4gBGoiG0EIaiIcIBwrAAAgEyAMIARqIhxBCGorAAAiFKIgGCAcKwAAIhaioKE5AwAgGyAbKwAAIBMgFqIgFCAdoqChOQMAIARBEGohBCANIBdBf2oiF0cNAAsgHiAJaiEeIBlBAWoiGSAARw0ACwsgCiAFaiEKIAwgBWohDCANQQFqIQ0gDiAJaiEOIA9BEGohDyALIABHDQALIABBAUgNACABIABBBHQiBGohCSABIABBf2ogAEEBaiIRbEEEdCAEamohDCACIARqIQ1BYCAEayEBQQAhGSAAIRwDQCAcQX9qIh4gEWwhBkQAAAAAAAAAACETRAAAAAAAAAAAIRQCQCAcIABODQBEAAAAAAAAAAAhFCANIQQgDCEbIBkhF0QAAAAAAAAAACETA0AgEyAbKwAAIhYgBEEIaisAACIYoiAEKwAAIh0gG0EIaisAACIhoqCgIRMgFCAWIB2iIBggIaKhoCEUIARBEGohBCAbQRBqIRsgF0F/aiIXDQALCyAJIAZBBHRqIgQrAAAhFiACIB5BBHRqIhsgBCsACCAToTkDCCAbIBYgFKE5AwAgDUFwaiENIAwgAWohDCAZQQFqIRkgHEEBSiEEIB4hHCAEDQALCwsAMQRuYW1lAAwLZ2F1c3MyLndhc20BCAEABWdhdXNzBxIBAA9fX3N0YWNrX3BvaW50ZXIAOAlwcm9kdWNlcnMBDHByb2Nlc3NlZC1ieQEMVWJ1bnR1IGNsYW5nETE4LjEuMyAoMXVidW50dTEpACwPdGFyZ2V0X2ZlYXR1cmVzAisPbXV0YWJsZS1nbG9iYWxzKwhzaWduLWV4dA==";
 
-var gauss, heap;
+var lu_wasm="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";
+
+var gauss2a_wasm="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";
+
+var gauss, gauss_factor, gauss_solve, lu_decompose, lu_solve, heap;
 
 onmessage = function(e) {
 	const memory = new WebAssembly.Memory({ initial: 512*16 }); // 512MiB = 512*16*64 KiB
 	//const { instance } = await WebAssembly.instantiateStreaming(
-  	//	fetch('data:application/wasm;base64,'+gauss_wasm), {env: { memory }});
+  	//	fetch('data:application/wasm;base64,'+gauss2a_wasm), {env: { memory }});
 
-	fetch('data:application/wasm;base64,'+gauss_wasm)
+	fetch('data:application/wasm;base64,'+gauss2a_wasm)
 	.then(response => response.arrayBuffer())
 	.then(bytes => WebAssembly.instantiate(bytes,{env:{memory}}))
 	.then(function(result) {
 
+	//console.log(result.instance.exports);
+
 	gauss = result.instance.exports.gauss;
+	gauss_factor = result.instance.exports.gauss_factor;
+	gauss_solve = result.instance.exports.gauss_solve;
+	lu_decompose = result.instance.exports.lu_decompose;
+	lu_solve = result.instance.exports.lu_solve;
 	//const gauss = instance.exports.gauss;
 	heap = new Float64Array(memory.buffer);
 
 	[lines,th,f0,c0,ph] = JSON.parse(e.data);
 	var s = wasm_soft_worker(lines,th,f0,c0,ph);
-	postMessage(JSON.stringify(s));
+	// postMessage(JSON.stringify(s));
 	});
 }
 function dist(x,y) {
@@ -1980,13 +2025,84 @@ function gaussianWasm(S,f) { // using gauss, heap
 
   return phi;
 }
+
+function gaussian0Wasm(S) { // using gauss, heap
+  const n = S.length;
+  const matOffset = 0;
+  //const outOffset = n * n * 2;
+
+  var k = 0;
+  for(var i=0; i<n; i++) {
+	for(var j=0; j<n; j++) {
+		heap[k] = S[i][j].re;
+		heap[k+1] = S[i][j].im;
+		k += 2;
+	}
+  }
+  gauss_factor(n, matOffset * 8); // pass byte offsets 
+}
+
+function gaussian1Wasm(f) { // using gauss, heap
+  const n = f.length;
+  const matOffset = 0;
+  const outOffset = n * n * 2;
+
+  var k = outOffset;
+  for(var i=0; i<n; i++) {
+	heap[k] = f[i].re;
+	heap[k+1] = f[i].im;
+	k += 2;
+  }
+  gauss_solve(n, matOffset * 8, outOffset * 8);
+  var phi = [];
+  for (let i = 0; i < n; i++) {
+    const re = heap[outOffset + 2 * i];
+    const im = heap[outOffset + 2 * i + 1];
+    phi.push(new Complex(re,im));
+  }
+  return phi;
+}
+
+function luWasm(S,f) { // using gauss, heap
+  const n = f.length;
+  const matOffset = 0;
+  const outOffset = n * n * 2;
+
+  var k = 0;
+  for(var i=0; i<n; i++) {
+	for(var j=0; j<n; j++) {
+		heap[k] = S[i][j].re;
+		heap[k+1] = S[i][j].im;
+		k += 2;
+	}
+  }
+  for(var i=0; i<n; i++) {
+	heap[k] = f[i].re;
+	heap[k+1] = f[i].im;
+	k += 2;
+  }
+
+  lu_decompose(n, matOffset * 8); // pass byte offsets
+  lu_solve(n, matOffset * 8, outOffset * 8);
+
+  var phi = [];
+  for (let i = 0; i < n; i++) {
+    const re = heap[outOffset + 2 * i];
+    const im = heap[outOffset + 2 * i + 1];
+    phi.push(new Complex(re,im));
+  }
+
+  return phi;
+}
+
 `;
 
 function wasm_soft_worker(lines,th,f0,c0,ph) {
 
+console.log("wasm_soft_worker: "+th+" "+ph);
+
 	var k = 2 * pi * f0 / c0;
 	//d = [Math.cos(th*pi/180), Math.sin(th*pi/180), 0];
-	d = mul(Ry(ph),[[Math.cos(th*pi/180)],[Math.sin(th*pi/180)],[0]]);
 
 	const n = parseInt(lines[4]);
 	const v = lines.slice(5, 5 + n).map(line =>
@@ -2014,34 +2130,61 @@ postMessage("[... Assembling]");
 	  for (let j = 0; j < m; j++) {
 	    const r = dist(x[i],x[j]);
 	    S[i][j] = (r!==0) ? new Complex(Math.cos(k*r)/(r*4*pi),Math.sin(k*r)/(r*4*pi))
-	                       : new Complex(0, k/(4*pi) ) ;
+	                      : new Complex(0, k/(4*pi) ) ;
 	  }
 	}
 
-	// Incident field
-	const f = x.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));
-
-postMessage("[... Gauss Wasm Solver]");
-	var phi = gaussianWasm(S,f);
-
 //postMessage("[... Gauss Javascript Solver]");
 //	var phi = gaussianEliminationComplex(S, f)
+//postMessage("[... Gauss Wasm Solver]");
+//	var phi = gaussianWasm(S,f);
+//postMessage("[... LU Wasm Solver]");
+//	var phi = luWasm(S,f);
+
+postMessage("[... Gauss0 Wasm Solver]");
+	gaussian0Wasm(S);
+postMessage("[... Gauss1 Wasm Solver]");
+
+	// wave direction scanning setup
+	var thmin,thmax,thstep, phmin,phmax,phstep;
+	if(ph<0) {phmin=0;phmax=360;phstep=-ph;} else {phmin=ph;phmax=ph;phstep=1;}
+	if(th<0) {thmin=0;thmax=360;thstep=-th;} else {thmin=th;thmax=th;thstep=1;}
+	var TS=[];
+	for(var ph0=phmin;ph0<=phmax;ph0+=phstep) {
+        for(var th0=thmin;th0<=thmax;th0+=thstep) {
+
+	// Incident field
+	d = mul(Ry(ph0),[[Math.cos(th0*pi/180)],[Math.sin(th0*pi/180)],[0]]);	
+	const f = x.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));
+
+	var phi = gaussian1Wasm(f);
 
 postMessage("[... Far field solution]");
 
 	// Far field solution
-	const r1 = Array.from({length: 360}, (_, i) => mul(Ry(ph),
+	const r1 = Array.from({length: 360}, (_, i) => mul(Ry(ph0),
 	  [[Math.cos(i*pi/180)],[Math.sin(i*pi/180)],[0]]) );
-
 	const Sff = r1.map(v => x.map(xj =>
 	  new Complex(Math.cos(-k * dot(xj,v))/(4*pi), Math.sin(-k * dot(xj,v))/(4*pi) )));
-
 	const psc = multiplyMatrixVector(Sff, phi);
 
+	var idx = (th0+180)%360;
+	var bsl = psc[idx].abs();
 	// Return results
-	var s = '# th0='+th+' ph0='+ph+' f0='+f0+' c0='+c0+'\n';
+	var s = '# th0='+th0+' ph0='+ph0+' f0='+f0+' c0='+c0+' bsl='+psc[(th0+180)%360].abs().toFixed(6)+'\n';
 	for(let i=0; i<psc.length; i++) {
 		s += i + '\t' + psc[i].abs().toFixed(6) + '\n';
+	}
+	postMessage(JSON.stringify(s));
+	TS.push([idx,bsl]);
+        }}
+
+	if(thmin!=thmax || phmin!=phmax) {
+		s = '';
+		for(var i=0; i<TS.length; i++) {
+			s += TS[i][0] + '\t' + TS[i][1].toFixed(6) + '\n';
+		}
+		postMessage(JSON.stringify(s));
 	}
 	return(s);
 }
