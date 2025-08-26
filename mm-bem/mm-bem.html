@@ -2184,12 +2184,17 @@ postMessage("[... Far field solution]");
 	}
 	postMessage(JSON.stringify(s));
 	BSL.push([(th0+180)%360,ph0,bsl]);
-        }}
+        }
+	  BSL.push(["\n"]);
+	}
 
 	if(thmin!=thmax || phmin!=phmax) {
 		s = '';
 		for(var i=0; i<BSL.length; i++) {
-			s += BSL[i][0] + '\t' + BSL[i][1] + '\t' + BSL[i][2].toFixed(6) + '\n';
+			if( BSL[i]=='\n') 
+				s+='\n'; 
+			else
+				s+=BSL[i][0]+'\t'+BSL[i][1]+'\t'+ BSL[i][2].toFixed(6)+'\n';
 		}
 		postMessage(JSON.stringify(s));
 	}
