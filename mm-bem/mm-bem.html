@@ -287,7 +287,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 
 </td></tr><tr><td>
 
-<span title="marek.moszynski@pg.edu.pl 2025">MM 25.8.2025 (mm-bem v1.74)</span>
+<span title="marek.moszynski@pg.edu.pl 2025">MM 26.8.2025 (mm-bem v1.75)</span>
 </td><td>
 <span>
 <label for="engine">Calculation engine: </label> 
@@ -2185,7 +2185,7 @@ postMessage("[... Far field solution]");
 	postMessage(JSON.stringify(s));
 	BSL.push([(th0+180)%360,ph0,bsl]);
         }
-	  BSL.push(["\n"]);
+	BSL.push(["\n"]); // append empty line as the block separator
 	}
 
 	if(thmin!=thmax || phmin!=phmax) {
