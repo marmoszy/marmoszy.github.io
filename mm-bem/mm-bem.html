@@ -60,6 +60,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
   <option value="-2">2&deg;scan</option>
   <option value="-5">5&deg;scan</option>
   <option value="-10">10&deg;scan</option>
+  <option value="-15">15&deg;scan</option>
   <option disabled>_____</option>
   <option value="0" selected>0&deg;</option>
   <option value="15">15&deg;</option>
@@ -94,6 +95,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
   <option value="-2">2&deg;scan</option>
   <option value="-5">5&deg;scan</option>
   <option value="-10">10&deg;scan</option>
+  <option value="-15">15&deg;scan</option>
   <option disabled>_____</option>
   <option value="0">0&deg;</option>
   <option value="15">15&deg;</option>
@@ -284,10 +286,11 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 </td></tr></table>
 
 <input type=button value="Save to txt file" onclick='writeFile(document.getElementById("txt").value,"mm-bem.txt");' /> 
+<input type=button value="Save to msh file" onclick='generated_mesh.length>0?writeFile(generated_mesh,"mm-bem.msh"):alert("Mesh not generated!\nSelect scanning options for both angles to have 3D data");' /> 
 
 </td></tr><tr><td>
 
-<span title="marek.moszynski@pg.edu.pl 2025">MM 26.8.2025 (mm-bem v1.75)</span>
+<span title="marek.moszynski@pg.edu.pl 2025">MM 27.8.2025 (mm-bem v1.76)</span>
 </td><td>
 <span>
 <label for="engine">Calculation engine: </label> 
@@ -777,7 +780,7 @@ function writeFile(data, filename, type) {
 		a.click();
 		setTimeout(function() {
 			document.body.removeChild(a);
-			window.URL.revokeObjectURL(url);  
+			window.URL.revokeObjectURL(a.href);  
 		}, 0); 
 	}
 }
@@ -785,7 +788,7 @@ function writeFile(data, filename, type) {
 var worker = undefined;
 
 function change() {
-console.log("change");
+//console.log("change");
 	var obj = document.getElementById("obj").value;
 	if(obj[0]=='[') {
 		O = eval('['+obj+']');
@@ -829,7 +832,7 @@ console.log("change");
 				document.getElementById("txt").value += s.slice(1,-1)+'\n';
 			} else {
 				var t = Date.now()/1000 - start;
-				s = '# mm-bem-math.js: '+ t.toFixed(3) + 's\n' + JSON.parse(s);
+				s = '# mm-bem-math.js: '+ t.toFixed(3) + 's ' + JSON.parse(s);
 				document.getElementById("txt").value = s;
 				
 				plot();
@@ -872,7 +875,7 @@ console.log("change");
 				document.getElementById("txt").value += s.slice(1,-1)+'\n';
 			} else {
 				var t = Date.now()/1000 - start;
-				s = '# mm-bem-wasm: '+ t.toFixed(3) + 's\n' + JSON.parse(s);
+				s = '# mm-bem-wasm: '+ t.toFixed(3) + 's ' + JSON.parse(s);
 				document.getElementById("txt").value = s;
 				plot();
 				// extract ph0,th0,f0,c0,bsl
@@ -882,7 +885,7 @@ console.log("change");
 					,parseFloat(v[2]),parseFloat(v[3]),parseFloat(v[4]));
 				   var th_bsl = (parseFloat(v[1])+180)%360;
 				   var TS = 20*Math.log10(parseFloat(v[5]));
-console.log(th_bsl+' '+TS);
+//console.log(th_bsl+' '+TS);
 				}
 
 			}
@@ -916,8 +919,8 @@ function change2() {
 		var s = eval(out2);
 		document.getElementById("txt2").value=s;
 		plot("Q",s,"#4da6ff");
-	//} else if(txt2.length>1) {
-	//	plot("Q",txt2,"#4da6ff");
+	} else if(txt2.length>1) {
+		plot("Q",txt2,"#4da6ff");
 	} else {
 		document.getElementById("txt2").value="";
 		plot("Q","#"); // clear curve2
@@ -956,19 +959,28 @@ function drop2(e) {
 
 function plot(id2,s,c) {
 	s = s||document.getElementById("txt").value;
+	var m=0,n=0;
 	var th = undefined;
 	var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+bsl=(\S+)/);
 	if(v) {
 		th=parseFloat(v[1]);		
 	}
 	var ss=s.split('\n');
-	var x=[],y=[],ncols=0;
+	var x=[],y=[],x2=[],ncols=0;
 	for(var i=0;i<ss.length;i++) {
 		s2=ss[i].trim().split(/\s+/);
 		if(s2[0][0]!='#' && s2.length>=2) {
 			if(ncols==0) ncols=s2.length;
-			x.push(parseFloat(s2[0])); // column 1: degrees 
-			y.push(parseFloat(s2[s2.length-1])); // column 2: absolute values
+			x.push(parseFloat(s2[0])); // column 1: degrees
+			if(s2[ncols-1].match(/^[a-zA-Z]+/)) ncols-=1; // gp generated table
+			y.push(parseFloat(s2[ncols-1])); // last column: absolute values
+			if(ncols>2) x2.push(parseFloat(s2[1]));
+		} else {
+			var v = ss[i].match(/# (\d+)x(\d+)/); // detection of scanning data
+			if(v) {
+				m = parseInt(v[1]);
+				n = parseInt(v[2]);
+			}
 		}
 	}
 	svg = document.getElementById("svg");
@@ -986,6 +998,37 @@ function plot(id2,s,c) {
 	} else {
 		svg_polar(svg0,[0],[0], W,H,(id2||"P")+"_TS","none");
 	}
+
+	generated_mesh = (ncols>=3 && m>1 && n>1) ? msh_from3cols(m,n,x,x2,y) :'';
+}
+
+var generated_mesh='';
+
+function msh_from3cols(m,n,x,x2,y) {
+console.log(m,n);
+	var k=0,k2=0; 
+	var s='$MeshFormat\n2.2 0 8\n$EndMeshFormat\n$Nodes\n'+(m*n)+'\n';
+	var s2='';
+	for(var i=0;i<n;i++) {
+		for(var j=0;j<m;j++) {
+				s += (k+1);
+				s += ' '+ (y[k]*Math.sin(x[k]*pi/180)).toFixed(6);
+				s += ' '+ (y[k]*Math.cos(x[k]*pi/180)*Math.cos(x2[k]*pi/180)).toFixed(6);
+				s += ' '+ (y[k]*Math.cos(x[k]*pi/180)*Math.sin(x2[k]*pi/180)).toFixed(6);
+				s += '\n';
+				k += 1;
+				if((i<n-1) && (j<m-1)) {
+			if(x[k-1]!=90 && x[k-1]!=270) {
+					k2 += 1;
+					s2 += (k2) + ' 2 2 0 1 ' + (k) + ' ' + (k+1) + ' ' + (k+m) + '\n';
+			}
+					k2 += 1;
+					s2 += (k2) + ' 2 2 0 1 ' + (k+1) + ' ' + (k+m+1) + ' ' + (k+m) + '\n';
+				}
+		}
+	}
+console.log(k2);
+	return s + '$EndNodes\n$Elements\n'+(k2)+'\n' +s2 + '$EndElements\n';
 }
 
 // ---- svg functions
@@ -2105,7 +2148,7 @@ function luWasm(S,f) { // using gauss, heap
 
 function wasm_soft_worker(lines,th,f0,c0,ph) {
 
-console.log("wasm_soft_worker: "+th+" "+ph);
+//console.log("wasm_soft_worker: "+th+" "+ph);
 
 	var k = 2 * pi * f0 / c0;
 	//d = [Math.cos(th*pi/180), Math.sin(th*pi/180), 0];
@@ -2154,7 +2197,8 @@ postMessage("[... Gauss1 Wasm Solver]");
 	// wave direction scanning setup
 	var thmin,thmax,thstep, phmin,phmax,phstep;
 	if(ph<0) {phmin=0;phmax=360;phstep=-ph;} else {phmin=ph;phmax=ph;phstep=1;}
-	if(th<0) {thmin=0;thmax=360;thstep=-th;} else {thmin=th;thmax=th;thstep=1;}
+	if(th<0) {if(ph<0){thmin=-90;thmax=90;} else {thmin=0;thmax=360;} thstep=-th;} 
+	else { thmin=th;thmax=th;thstep=1; }
 	var BSL=[];
 	const l=thstep;
 	for(var ph0=phmin;ph0<=phmax;ph0+=phstep) {
@@ -2189,7 +2233,7 @@ postMessage("[... Far field solution]");
 	}
 
 	if(thmin!=thmax || phmin!=phmax) {
-		s = '';
+		s = '# '+ ((thmax-thmin)/thstep+1) + 'x' +((phmax-phmin)/phstep+1) + '\n';
 		for(var i=0; i<BSL.length; i++) {
 			if( BSL[i]=='\n') 
 				s+='\n'; 
