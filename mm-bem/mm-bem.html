@@ -26,7 +26,9 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <label for="def">Target: </label>
 <select id="def" onchange="select()" style="background-color:#e6fff2;max-width:360px">
 <optgroup>
-  <option value="[sphere(0.01905), [0, 0, 0]]">Low resolution sphere</option>
+  <option value="generated.msh">Generated mesh</option>
+  <option disabled>_____</option>
+  <option value="[sphere(0.01905), [0, 0, 0]]" selected>Low resolution sphere</option>
   <option value="[sphere(0.01905,3), [0, 0, 0]]">Medium resolution sphere</option>
   <option value="[sphere(0.01905,4), [0, 0, 0]]">High resolution sphere</option>
   <option value="[ellipsoid(0.01905,0.01,0.01), [0, 0, 0]]">Prolate spheroid</option>
@@ -1004,6 +1006,7 @@ function plot(id2,s,c) {
 	generated_mesh = (ncols>=3 && m>1 && n>1) ? msh_from3cols(m,n,x,x2,y) :'';
 	if(generated_mesh.length>0) {
 		document.getElementById("msh").value = generated_mesh;
+		document.getElementById("def").value = "generated.msh"
 		init_mesh();
 		update();
 	}
