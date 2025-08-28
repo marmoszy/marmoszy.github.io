@@ -26,7 +26,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <label for="def">Target: </label>
 <select id="def" onchange="select()" style="background-color:#e6fff2;max-width:360px">
 <optgroup>
-  <option value="generated.msh">Generated mesh</option>
+  <option value="generated.msh">Generated 3D backscattering length</option>
   <option disabled>_____</option>
   <option value="[sphere(0.01905), [0, 0, 0]]" selected>Low resolution sphere</option>
   <option value="[sphere(0.01905,3), [0, 0, 0]]">Medium resolution sphere</option>
@@ -794,12 +794,16 @@ var worker = undefined;
 function change() {
 //console.log("change");
 	var obj = document.getElementById("obj").value;
+	if(obj=="generated.msh" && generated_mesh=='') {
+		alert('Mesh not generated yet!\nTo generated mesh, please select both plane wave direction angles to one of its scanning option. I will finally generate 3D mesh of backscatering length.');
+		return;
+	} 	
 	if(obj[0]=='[') {
 		O = eval('['+obj+']');
 		O.forEach(o => msh_str(o));
 		document.getElementById("msh").value=msh_flush();
 	} else if(obj.endsWith(".msh")) {
-		// document.getElementById("msh").value='[already inplace]';  	
+		// document.getElementById("msh").value='[already inplace]'; 
 	} else {
 		document.getElementById("msh").value=eval(obj);  	
 	}
