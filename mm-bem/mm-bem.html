@@ -286,11 +286,13 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 </td></tr></table>
 
 <input type=button value="Save to txt file" onclick='writeFile(document.getElementById("txt").value,"mm-bem.txt");' /> 
+<!--
 <input type=button value="Save to msh file" onclick='generated_mesh.length>0?writeFile(generated_mesh,"mm-bem.msh"):alert("Mesh not generated!\nSelect scanning options for both angles to have 3D data");' /> 
+-->
 
 </td></tr><tr><td>
 
-<span title="marek.moszynski@pg.edu.pl 2025">MM 27.8.2025 (mm-bem v1.76)</span>
+<span title="marek.moszynski@pg.edu.pl 2025">MM 28.8.2025 (mm-bem v1.77)</span>
 </td><td>
 <span>
 <label for="engine">Calculation engine: </label> 
@@ -1000,6 +1002,11 @@ function plot(id2,s,c) {
 	}
 
 	generated_mesh = (ncols>=3 && m>1 && n>1) ? msh_from3cols(m,n,x,x2,y) :'';
+	if(generated_mesh.length>0) {
+		document.getElementById("msh").value = generated_mesh;
+		init_mesh();
+		update();
+	}
 }
 
 var generated_mesh='';
@@ -2196,9 +2203,15 @@ postMessage("[... Gauss1 Wasm Solver]");
 
 	// wave direction scanning setup
 	var thmin,thmax,thstep, phmin,phmax,phstep;
-	if(ph<0) {phmin=0;phmax=360;phstep=-ph;} else {phmin=ph;phmax=ph;phstep=1;}
-	if(th<0) {if(ph<0){thmin=-90;thmax=90;} else {thmin=0;thmax=360;} thstep=-th;} 
-	else { thmin=th;thmax=th;thstep=1; }
+	
+	//if(ph<0) {phmin=0;phmax=360;phstep=-ph;} else {phmin=ph;phmax=ph;phstep=1;}
+	//if(th<0) {if(ph<0){thmin=-90;thmax=90;} else {thmin=0;thmax=360;} thstep=-th;} 
+	//else { thmin=th;thmax=th;thstep=1; }
+	
+	if(ph<0) {if(ph<0){phmin=0;phmax=180;} else {phmin=0;phmax=360;} phstep=-ph;} 
+        else {phmin=ph;phmax=ph;phstep=1;}
+	if(th<0) {thmin=0;thmax=360;thstep=-th;} else { thmin=th;thmax=th;thstep=1; }
+
 	var BSL=[];
 	const l=thstep;
 	for(var ph0=phmin;ph0<=phmax;ph0+=phstep) {
@@ -2224,7 +2237,7 @@ postMessage("[... Far field solution]");
 	// Return results
 	var s = '# th0='+th0+' ph0='+ph0+' f0='+f0+' c0='+c0+' bsl='+bsl.toFixed(6)+'\n';
 	for(let i=0; i<psc.length; i++) {
-		s += l*i + '\t' + psc[i].abs().toFixed(6) + '\n';
+		s += l*i + ' ' + psc[i].abs().toFixed(6) + '\n';
 	}
 	postMessage(JSON.stringify(s));
 	BSL.push([(th0+180)%360,ph0,bsl]);
@@ -2238,7 +2251,7 @@ postMessage("[... Far field solution]");
 			if( BSL[i]=='\n') 
 				s+='\n'; 
 			else
-				s+=BSL[i][0]+'\t'+BSL[i][1]+'\t'+ BSL[i][2].toFixed(6)+'\n';
+				s+=BSL[i][0]+' '+BSL[i][1]+' '+ BSL[i][2].toFixed(6)+'\n';
 		}
 		postMessage(JSON.stringify(s));
 	}
