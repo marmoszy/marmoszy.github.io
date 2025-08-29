@@ -26,7 +26,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 <label for="def">Target: </label>
 <select id="def" onchange="select()" style="background-color:#e6fff2;max-width:360px">
 <optgroup>
-  <option value="generated.msh">Generated 3D backscattering length</option>
+  <option value="generated_mesh">Generated 3D backscattering length</option>
   <option disabled>_____</option>
   <option value="[sphere(0.01905), [0, 0, 0]]" selected>Low resolution sphere</option>
   <option value="[sphere(0.01905,3), [0, 0, 0]]">Medium resolution sphere</option>
@@ -294,19 +294,20 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 
 </td></tr><tr><td>
 
-<span title="marek.moszynski@pg.edu.pl 2025">MM 28.8.2025 (mm-bem v1.77)</span>
+<span title="marek.moszynski@pg.edu.pl 2025">MM 29.8.2025 (mm-bem v1.78)</span>
 </td><td>
 <span>
 <label for="engine">Calculation engine: </label> 
 <select id="engine" onchange="select()" style="background-color:#ffe6e6">
 <optgroup>
-  <option value="js2_soft_worker">javascript</option>
   <option value="wasm_soft_worker" selected>wasm</option>
-<!--  <option value="js_soft">math.js</option> -->
-  <option value="js_soft_worker">math.js</option>
-<!--  <option value="py_soft">pyodide</option> -->
-  <option value="py_soft_worker">pyodide</option>
   <option value="none">none</option>
+  <option disabled>_____</option>
+  <option value="js2_soft_worker">javascript</option>
+  <option value="js_soft_worker">math.js</option>
+  <option value="py_soft_worker">pyodide</option>
+<!--  <option value="js_soft">math.js</option> -->
+<!--  <option value="py_soft">pyodide</option> -->
 </optgroup>
 </select>
 </span>
@@ -540,6 +541,7 @@ function msh_parse(s) {
 	var lines = s.split('\n');
 	const n = parseInt(lines[4]);
 	const v = lines.slice(5, 5 + n).map(line =>line.trim().split(/\s+/).slice(1, 4).map(parseFloat));
+	//for(var i=0;i<v.length;i++) {v[i][0]/=1000;v[i][1]/=1000;v[i][2]/=1000;}
 	const m = parseInt(lines[n + 7]);
 	const e = lines.slice(n + 8, n + 8 + m).map(line => line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x)-1));
 	return [v,e];
@@ -794,7 +796,7 @@ var worker = undefined;
 function change() {
 //console.log("change");
 	var obj = document.getElementById("obj").value;
-	if(obj=="generated.msh" && generated_mesh=='') {
+	if((obj=="generated_mesh") && (generated_mesh=='')) {
 		alert('Mesh not generated yet!\nTo generated mesh, please select both plane wave direction angles to one of its scanning option. I will finally generate 3D mesh of backscatering length.');
 		return;
 	} 	
@@ -804,7 +806,10 @@ function change() {
 		document.getElementById("msh").value=msh_flush();
 	} else if(obj.endsWith(".msh")) {
 		// document.getElementById("msh").value='[already inplace]'; 
+	} else if(obj=="generated_mesh" && generated_mesh!='') {
+		document.getElementById("msh").value=generated_mesh; 
 	} else {
+		
 		document.getElementById("msh").value=eval(obj);  	
 	}
 // 3d update()
@@ -996,7 +1001,7 @@ function plot(id2,s,c) {
 	const H = svg.getAttribute("height")-40;
 
 	svg0 = document.getElementById("svg0");
-	svg_polar(svg0,x,y,W,H,id2||"P",c||(ncols==2?"#ff6633":"green"));  
+	svg_polar(svg0,x,y,W,H,id2||"P",c||(ncols==2?"#ff6633":"#92ba6c"));  
 
 	th = th || parseFloat(document.getElementById("th").value);
 	var idx = (th+180)%360;
@@ -1006,13 +1011,14 @@ function plot(id2,s,c) {
 	} else {
 		svg_polar(svg0,[0],[0], W,H,(id2||"P")+"_TS","none");
 	}
-
-	generated_mesh = (ncols>=3 && m>1 && n>1) ? msh_from3cols(m,n,x,x2,y) :'';
-	if(generated_mesh.length>0) {
-		document.getElementById("msh").value = generated_mesh;
-		document.getElementById("def").value = "generated.msh"
-		init_mesh();
-		update();
+	if(ncols>=3 && m>1 && n>1) {
+		generated_mesh =  msh_from3cols(m,n,x,x2,y);
+		if(generated_mesh.length>0) {
+			document.getElementById("msh").value = generated_mesh;
+			document.getElementById("def").value = "generated_mesh"
+			init_mesh();
+			update();
+		}
 	}
 }
 
