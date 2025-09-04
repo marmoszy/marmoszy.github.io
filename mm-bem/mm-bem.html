@@ -15,8 +15,20 @@ html,body,textarea,select,optgroup {font-size: 16px;}
 input[type='file'],input[type='button'] {font-size: 16px; }
 </style>
 
+
+	<link rel="icon" type="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld2JveD0iMCAwIDk2IDk2Ij4KCTxwYXRoIGQ9Ik0gMTAgNTAgTCA0MCA1MCBMIDQwIDgwIEwgMjAgNzAgWiIgc3Ryb2tlPSJub25lIiBmaWxsPSIjMzFCMUVEIiAvPgoJPHBhdGggZD0iTSA0MCA4MCBMIDQwIDUwIEwgODAgNTAgTCA2MCA3MCBaIiBzdHJva2U9Im5vbmUiIGZpbGw9IiM0NzgzRDciIC8+Cgk8cGF0aCBkPSJNIDQwIDIwIEwgNDAgNTAgTCA4MCA1MCBMIDYwIDMwIFoiIHN0cm9rZT0ibm9uZSIgZmlsbD0iIzMxRURDQSIgLz4KCTxwYXRoIGQ9Ik0gMTAgNTAgTCA0MCA1MCBMIDQwIDIwIEwgMjAgMzAgWiIgc3Ryb2tlPSJub25lIiBmaWxsPSIjNzNFOEU4IiAvPgoJPHBhdGggZD0iTSAxMCA1MCBMIDIwIDMwIEwgNDAgMjIuNSBMIDYwIDMwIEwgODAgNTAgTCA5NSAzNSBMIDkwIDUwIEwgOTUgNjUgTCA4MCA1MCBMIDYwIDcwIEwgNDAgNzcuNSBMIDIwIDcwIEwgMTAgNTAgTSAxMiA1MCBMIDIwIDUwIiBzdHJva2U9IiMyRjcyRUUiIHN0cm9rZS13aWR0aD0iNCIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGQ9Ik0gMTAgMTAgTCAyMCAyMCBNIDYwIDIwIEwgNzAgMTAgTSAxMCA5MCBMIDIwIDgwIE0gNjAgODAgTCA3MCA5MCIgc3Ryb2tlPSJkYXJrYmx1ZSIgc3Ryb2tlLWRhc2hhcnJheT0iMSwwIiBzdHJva2Utd2lkdGg9IjMJIiAvPgoJPGNpcmNsZSByPSI0IiBjeD0iMzAiIGN5PSI0MCIgZmlsbD0iIzAwYmZmZiIgc3Ryb2tlPSJkYXJrYmx1ZSIvPgoJPGVsbGlwc2Ugcng9IjEyIiByeT0iNSIgY3g9IjQ1IiBjeT0iNjAiIGZpbGw9IndoaXRlIiBzdHJva2U9Im5vbmUiIHRyYW5zZm9ybT0icm90YXRlKDExIDQ1IDYwKSIvPgo8L3N2Zz4K" />
+
+
 <center>
-<h2 style="color:#004080">mm-bem - Scattering from soft targets - web-demo<small> (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy/mm-bem">github</a>)</small></h2>
+<h2 style="color:darkblue">
+<img style="height:64px;vertical-align:middle"  src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld2JveD0iMCAwIDk2IDk2Ij4KCTxwYXRoIGQ9Ik0gMTAgNTAgTCA0MCA1MCBMIDQwIDgwIEwgMjAgNzAgWiIgc3Ryb2tlPSJub25lIiBmaWxsPSIjMzFCMUVEIiAvPgoJPHBhdGggZD0iTSA0MCA4MCBMIDQwIDUwIEwgODAgNTAgTCA2MCA3MCBaIiBzdHJva2U9Im5vbmUiIGZpbGw9IiM0NzgzRDciIC8+Cgk8cGF0aCBkPSJNIDQwIDIwIEwgNDAgNTAgTCA4MCA1MCBMIDYwIDMwIFoiIHN0cm9rZT0ibm9uZSIgZmlsbD0iIzMxRURDQSIgLz4KCTxwYXRoIGQ9Ik0gMTAgNTAgTCA0MCA1MCBMIDQwIDIwIEwgMjAgMzAgWiIgc3Ryb2tlPSJub25lIiBmaWxsPSIjNzNFOEU4IiAvPgoJPHBhdGggZD0iTSAxMCA1MCBMIDIwIDMwIEwgNDAgMjIuNSBMIDYwIDMwIEwgODAgNTAgTCA5NSAzNSBMIDkwIDUwIEwgOTUgNjUgTCA4MCA1MCBMIDYwIDcwIEwgNDAgNzcuNSBMIDIwIDcwIEwgMTAgNTAgTSAxMiA1MCBMIDIwIDUwIiBzdHJva2U9IiMyRjcyRUUiIHN0cm9rZS13aWR0aD0iNCIgZmlsbD0ibm9uZSIgLz4KCTxwYXRoIGQ9Ik0gMTAgMTAgTCAyMCAyMCBNIDYwIDIwIEwgNzAgMTAgTSAxMCA5MCBMIDIwIDgwIE0gNjAgODAgTCA3MCA5MCIgc3Ryb2tlPSJkYXJrYmx1ZSIgc3Ryb2tlLWRhc2hhcnJheT0iMSwwIiBzdHJva2Utd2lkdGg9IjMJIiAvPgoJPGNpcmNsZSByPSI0IiBjeD0iMzAiIGN5PSI0MCIgZmlsbD0iIzAwYmZmZiIgc3Ryb2tlPSJkYXJrYmx1ZSIvPgoJPGVsbGlwc2Ugcng9IjEyIiByeT0iNSIgY3g9IjQ1IiBjeT0iNjAiIGZpbGw9IndoaXRlIiBzdHJva2U9Im5vbmUiIHRyYW5zZm9ybT0icm90YXRlKDExIDQ1IDYwKSIvPgo8L3N2Zz4K" />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<span onclick="alert(about);">mm-bem - Scattering from soft targets - web-demo</span>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<small>
+(<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy/mm-bem">github</a>)
+</small>
+</h2>
 </center>
 
 <center>
@@ -37,9 +49,16 @@ input[type='file'],input[type='button'] {font-size: 16px; }
   <option value="[cylinder(0.005,0.005,2*0.01905), [0, 0, 0]]">Cylinder</option>
   <option value="[cylinder(0.005,0.005,2*0.01905), [0, 0, 0], Ry(90)]">Cylinder y-axis rotated</option>
   <option value="[cylinder(0.005,0.005,2*0.01905), [0, 0, 0], mul(Ry(30),Rx(60))]">Cylinder double rotated</option>
+  <option value="[frustum([0.005,0.006],[0.0075,0.01],2*0.01905), [0, 0, 0]]">Elliptical frustum</option>
+  <option value="[frustum([0.002,0.005],[0.002,0.0075],0.01905,24,1), [0, 0, -0.01905]],|[frustum([0.005,0.006],[0.0075,0.01],0.01905,24,0), [0, 0, 0]],|
+[frustum([0.006,0.0021],[0.01,0.002],0.01905,24,2), [0, 0, 0.01905]]">Three elliptical frustums</option>
+  <option value="[mfrustum([0.002,0.005,0.005,0.005,0.002],[0.002,0.0075,0.0075,0.0075,0.002],[0,0,0,0,0],[0.02,0.01,0.005,0.0025,0],[-2*0.01905,-0.01905,0,0.01905,2*0.01905]), [0, 0, 0]]">Multiple frustums</option>
+  <option value="[mfrustum([0.007,0.0115,0.0088,0.007,0.0053,0.0035,0.0008],[0.0018,0.0053,0.008,0.0062,0.0044,0.0026,0.0008],[0.0487,0.0532,0.0621,0.0709,0.0798,0.0887,0.0958],[0,0,0,0,0,0,0],[-0.0026,-0.00175,0.0005,0.0023,0.0049,0.0067,0.00679]), [-0.07, 0, 0]]">Shifted multiple frustum</option>
   <option value="[sphere(0.005), [-0.01, 0, 0]],|[sphere(0.005), [0.01, 0, 0]]">Two spheres</option>
   <option value="[sphere(0.005), [-0.01, 0, 0]],|[sphere(0.005), [0.01, 0, 0]],|[sphere(0.005), [0,-0.01, 0]],|[sphere(0.005), [0, 0.01, 0]]">Four spheres</option>
   <option value="[sphere(0.005), [-0.01, 0, -0.01]],|[sphere(0.005), [0.01, 0, -0.01]],|[sphere(0.005), [0,-0.01, -0.01]],|[sphere(0.005), [0, 0.01, -0.01]],|[sphere(0.005), [-0.01, 0, 0.01]],|[sphere(0.005), [0.01, 0, 0.01]],|[sphere(0.005), [0,-0.01, 0.01]],|[sphere(0.005), [0, 0.01, 0.01]]">Eight spheres</option>
+  <option value="[mfrustum(specimens[0].shapes[0].width, specimens[0].shapes[0].height, specimens[0].shapes[0].y, specimens[0].shapes[0].z, specimens[0].shapes[0].x),[0,0,0]]">gadus_morhua_A_L17.3_body</option>
+  <option value="[mfrustum(specimens[0].shapes[1].width, specimens[0].shapes[1].height, specimens[0].shapes[1].y, specimens[0].shapes[1].z, specimens[0].shapes[1].x),[0,0,0]]">gadus_morhua_A_L17.3_swimbladder</option>
   <option value="simplify10_YFT_swimbladder_origin_msh">simplify10_YFT_swimbladder_origin</option>
   <option value="simplify20_YFT_swimbladder_origin_msh">simplify20_YFT_swimbladder_origin</option>
 </optgroup>
@@ -154,6 +173,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
   <option value="1520">1520 m/s</option>
 </optgroup>
 </select>
+<!--<input type="button" value="Calculate" onclick="change1()"></input>-->
 
 <br><br>
 <label for="out2">Add data: </label> 
@@ -210,6 +230,8 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 
 <div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#eee">
 <svg xmlns="http://www.w3.org/2000/svg" id="svg" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
+<text x="10" y="10" id="title" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
+<text x="280" y="10" id="title2" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
 <g id="svg0" transform="translate(20,20)">
 <line x1="210" y1="200" x2="400" y2="200" stroke="gray"/>
 <line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform ="rotate(30 200 200)" stroke-dasharray="1,1"/>
@@ -294,7 +316,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 
 </td></tr><tr><td>
 
-<span title="marek.moszynski@pg.edu.pl 2025">MM 29.8.2025 (mm-bem v1.78)</span>
+<span title="marek.moszynski@pg.edu.pl 2025">MM 4.9.2025 (mm-bem v1.8)</span>
 </td><td>
 <span>
 <label for="engine">Calculation engine: </label> 
@@ -793,7 +815,8 @@ function writeFile(data, filename, type) {
 
 var worker = undefined;
 
-function change() {
+function change() {change1();}
+function change1() {
 //console.log("change");
 	var obj = document.getElementById("obj").value;
 	if((obj=="generated_mesh") && (generated_mesh=='')) {
@@ -973,10 +996,11 @@ function drop2(e) {
 function plot(id2,s,c) {
 	s = s||document.getElementById("txt").value;
 	var m=0,n=0;
-	var th = undefined;
+	var th = undefined, ph = undefined;
 	var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+bsl=(\S+)/);
 	if(v) {
 		th=parseFloat(v[1]);		
+		ph=parseFloat(v[2]);		
 	}
 	var ss=s.split('\n');
 	var x=[],y=[],x2=[],ncols=0;
@@ -1020,6 +1044,22 @@ function plot(id2,s,c) {
 			update();
 		}
 	}
+	if(ncols==2) {
+		svg_title("&theta;<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+th+"&deg; <tspan font-style='italic'>&phi;</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+ph+"&deg;</tspan>");
+		svg_title2("f<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+(f0/1000)+"kHz <tspan font-style='italic'>c</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+c0+"m/s</tspan>");
+
+	} else {
+		svg_title("");
+	}
+}
+
+function svg_title(s) {
+	var el = document.getElementById("title");
+	if(el) el.innerHTML = s;
+}
+function svg_title2(s) {
+	var el = document.getElementById("title2");
+	if(el) el.innerHTML = s;
 }
 
 var generated_mesh='';
@@ -1224,6 +1264,54 @@ function cylinder(rx = 1, ry = 1, H = 3, N = 24) {
     }
     return [vx,fx];
 }
+
+function frustum(rx = [1,1], ry = [1,1], H = 3, N = 24, mode = 3) {
+    var vx=[],fx=[];
+    for(var i=0; i<N; i++) { 
+        var a = rx[0] * Math.sin(2*pi*i/N), b = ry[0] * Math.cos(2*pi*i/N);
+        var c = rx[1] * Math.sin(2*pi*i/N), d = ry[1] * Math.cos(2*pi*i/N);
+        vx.push([a,b,-H/2]); vx.push([c,d,H/2]);
+    }
+    vx.push([0,0,-H/2]); vx.push([0,0,H/2]);
+    for(var i=0; i<N; i++) {
+        fx.push([2*i,2*i+1,(2*i+2)%(2*N)]); 
+	fx.push([(2*i+2)%(2*N),2*i+1,(2*i+3)%(2*N)]);
+        if(mode&1) fx.push([2*i,(2*i+2)%(2*N),2*N]); 
+	if(mode&2) fx.push([2*i+1,2*N+1,(2*i+3)%(2*N)]);
+    }
+    return [vx,fx];
+}
+
+
+function mfrustum(rx = [1,1,1], ry = [1,1,1], x=[0,0,0], y=[0,0,0], z = [3,3,3], N = 24) {
+    var vx=[],fx=[];
+    var n=0;
+for(var j=1;j<rx.length;j++) {
+    var mode = 0;
+    if(j==1) mode|=1;
+    if(j==rx.length-1) mode|=2;
+    //var off = (-(rx.length-2)/2+j-1)*H;
+    for(var i=0; i<N; i++) { 
+        var a = rx[j-1] * Math.sin(2*pi*i/N), b = ry[j-1] * Math.cos(2*pi*i/N);
+        //vx.push([a+x[j-1],b+y[j-1],-H/2+off]); 
+	vx.push([a+x[j-1],b+y[j-1],z[j-1]]); 
+	var c = rx[j] * Math.sin(2*pi*i/N), d = ry[j] * Math.cos(2*pi*i/N);
+        //vx.push([c+x[j],d+y[j],H/2+off]);
+	vx.push([c+x[j],d+y[j],z[j]]);
+     }
+    //vx.push([x[j-1],y[j-1],-H/2+off]); vx.push([x[j],y[j],H/2+off]);
+    vx.push([x[j-1],y[j-1],z[j-1]]); vx.push([x[j],y[j],z[j]]);
+    for(var i=0; i<N; i++) {
+        fx.push([n+2*i,n+2*i+1,n+(2*i+2)%(2*N)]); 
+	fx.push([n+(2*i+2)%(2*N),n+2*i+1,n+(2*i+3)%(2*N)]);
+        if(mode&1) fx.push([n+2*i,n+(2*i+2)%(2*N),n+2*N]); 
+	if(mode&2) fx.push([n+2*i+1,n+2*N+1,n+(2*i+3)%(2*N)]);
+    }
+    n += 2*N + 2;
+}
+    return [vx,fx];
+}
+
 
 function sphere(R = 1, N = 2) {
     let vx = [[0,0,R],[0,0,-R],[-R,0,0],[0,-R,0],[R,0,0],[0,R,0]];
@@ -11610,4 +11698,141 @@ $Elements
 3000 2 2 0 1 28 703 705
 $EndElements
 `;
+
+const specimens = [
+   {
+      "specimen_id": "A",
+      "specimen_condition": "fresh",
+      "length": 0.173,
+      "weight": 0.048,
+      "length_type": "standard length",
+      "shape_type": "outline",
+      "shapes": [
+        {
+          "name": "body",
+          "boundary": "fluid",
+          "x": [
+            0.0,
+            -0.0177,
+            -0.0354,
+            -0.0532,
+            -0.0709,
+            -0.0887,
+            -0.1064,
+            -0.1242,
+            -0.1419,
+            -0.1596,
+            -0.173
+          ],
+          "y": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "z": [
+            -0.00095,
+            0.0004,
+            -5e-05,
+            -0.0014,
+            -0.0027,
+            -0.0027,
+            -0.0032,
+            -0.00225,
+            -0.0009,
+            -5e-05,
+            -0.0005
+          ],
+          "height": [
+            0.0071,
+            0.0222,
+            0.0319,
+            0.0364,
+            0.0372,
+            0.0302,
+            0.0204,
+            0.0169,
+            0.0124,
+            0.0089,
+            0.0026
+          ],
+          "width": [
+            0.0062,
+            0.0221,
+            0.0221,
+            0.0239,
+            0.0239,
+            0.0177,
+            0.0106,
+            0.0062,
+            0.0044,
+            0.0026,
+            0.0008
+          ],
+          "mass_density": 1070,
+          "sound_speed_compressional": 1570
+        },
+        {
+          "name": "swimbladder",
+          "boundary": "soft",
+          "x": [
+            -0.0487,
+            -0.0532,
+            -0.0621,
+            -0.0709,
+            -0.0798,
+            -0.0887,
+            -0.0958
+          ],
+          "y": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            -0.0
+          ],
+          "z": [
+            0.0026,
+            0.00175,
+            -0.0005,
+            -0.0023,
+            -0.0049,
+            -0.0067,
+            -0.0067
+          ],
+          "height": [
+            0.0018,
+            0.0053,
+            0.008,
+            0.0062,
+            0.0044,
+            0.0026,
+            0.0008
+          ],
+          "width": [
+            0.007,
+            0.0115,
+            0.0088,
+            0.007,
+            0.0053,
+            0.0035,
+            0.0008
+          ],
+          "mass_density": 1.24,
+          "sound_speed_compressional": 345
+        }
+      ]
+    }
+];
+
+
 </script>
