@@ -36,7 +36,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 
 <div style="width:440;height:180;height1:100%;overflow-y:scroll;border-width:1;border-style:solid;padding:20px;background-color:#ffffe6">
 <label for="def">Target: </label>
-<select id="def" onchange="select()" style="background-color:#e6fff2;max-width:360px">
+<select id="def" onchange="select0();select();" style="background-color:#e6fff2;max-width:360px">
 <optgroup>
   <option value="generated_mesh">Generated 3D backscattering length</option>
   <option disabled>_____</option>
@@ -316,7 +316,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 
 </td></tr><tr><td>
 
-<span title="marek.moszynski@pg.edu.pl 2025">MM 4.9.2025 (mm-bem v1.8)</span>
+<span title="marek.moszynski@pg.edu.pl 2025">MM 4.9.2025 (mm-bem v1.81)</span>
 </td><td>
 <span>
 <label for="engine">Calculation engine: </label> 
@@ -739,9 +739,12 @@ ctrl-shift-cursors - move
 
 marek.moszynski@pg.edu.pl`;
 
-function select() {
+function select0() {
     var d = document.getElementById("def").value.replaceAll('|','\n');
     document.getElementById("obj").value=d;
+}
+
+function select() {
     document.getElementById("openfile").value="";
     change();
 }
@@ -820,7 +823,7 @@ function change1() {
 //console.log("change");
 	var obj = document.getElementById("obj").value;
 	if((obj=="generated_mesh") && (generated_mesh=='')) {
-		alert('Mesh not generated yet!\nTo generated mesh, please select both plane wave direction angles to one of its scanning option. I will finally generate 3D mesh of backscatering length.');
+		alert('Mesh not generated yet!\nTo generated mesh, please select both plane wave direction angles to one of its scanning option. It will finally generate 3D mesh of backscattering length.');
 		return;
 	} 	
 	if(obj[0]=='[') {
@@ -831,8 +834,7 @@ function change1() {
 		// document.getElementById("msh").value='[already inplace]'; 
 	} else if(obj=="generated_mesh" && generated_mesh!='') {
 		document.getElementById("msh").value=generated_mesh; 
-	} else {
-		
+	} else {		
 		document.getElementById("msh").value=eval(obj);  	
 	}
 // 3d update()
