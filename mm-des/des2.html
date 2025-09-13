@@ -333,7 +333,7 @@ The results are in the form of animated or static BPMN diagram, the timeline for
 <div class="panel">
 <p>
  
-The code implements basic BPMN elements:
+The code implements eight basic BPMN elements:
 <ol>
 	<li>Start(fun, param, tnmax, script) - start event
 	<li>Task(fun, param, script, nservers=1) - sequential task activity with n-servers inside
@@ -341,23 +341,23 @@ The code implements basic BPMN elements:
 	<li>AndGate(script) - parallel gateway (multi-output: passes through the event to all connected, multi-input: waits for all)
 	<li>Timer(fun, param, script) - timer delay event
 	<li>Condition(script) - conditional event with a script containing logical expression as the first one ("=&lt;expr&gt;;..."); the instructions after first semicolon will be executed only when condition evaluates to true
-	<li>End() - end event
 	<li>Terminate() - terminate event
+	<li>End() - end event
 </ol>
 where:
-<ol>
+<ul>
 	<li>fun - random functions: E([mean]), N([mean,std]), U([min,max]), T([min,max,mean,std]), B(p), C([p1,p2,p3,...]), None 
 	<li>param - array of fun params (fun==None: deterministic time delay in param[0])
 	<li>tnmax - tnmax&gt;0: maximum time for start generator; tnmax&lt;0: -tnmax represents maximum number of generated events
-	<li>script - string with semicolon separated codes for evaluation during event execution "[var]=&lt;expr&gt;; ... ;", empty var defaults to 'value' variable which is tested in XorGate and Condtion, var starting with 'S.' are scenario ones, starting with 'A.' element ones and without prefix - token/customer ones. Variable 'A.n' is element event counter which is initiated with 0 and increased by 1 at exec of each token/customer event. Token/customer have variable 'cname' (customer name) and may have variables '__t&lt;id&gt;a', '__t&lt;id&gt;b' and '__t&lt;id&gt;e' when the token visited event with identifier id. They mark arrival, begin and end times.
-</ol>
+	<li>script - string with semicolon separated codes for evaluation during event execution "[var]=&lt;expr&gt;; ... ;", empty var defaults to 'value' variable which is tested in XorGate and Condtion, var starting with 'S.' are scenario ones, starting with 'A.' element ones and without prefix - token/customer ones. Variable 'A.n' is element event counter which is initiated with 0 and increased by 1 at exec of each token/customer event. Token/customer have variable 'cname' (customer name) and may have variables '__t&lt;id&gt;a', '__t&lt;id&gt;b' and '__t&lt;id&gt;e' when the token visited the element with identifier id. They mark arrival, begin and end times.
+</ul>
 The text description of a process contains list of elemnts that should be ordered by number (element identifier) and semicolon separated list of connections. 
 The elements should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '/x[/y]' values after event identifier<!-- (see example 10) -->. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of element number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram.
 
 <p>
-Minimum working example with default values for all events looks like:
+Minimum working example (MWE) with default values for all events looks like:
 <pre style="font-size:smaller;border:1px solid gray;background-color:#ddd;padding:8px">
-# a single task
+# A single task
 1 Start()
 2 Task()
 3 End()
@@ -375,7 +375,7 @@ As a result the bpmn-like schematic is generated along with single process imple
 </p>
 
 <p>
-When number of simulations are greater than 1 the bpmn diagram is not animated and execution timeline is not generated.
+The section Run code allows for defining a process and running simulation. The examples presented in next section could be inserted by clicking numbered buttons. Before running simulation it is possible to define the number of simulations. When only one simulation is selected, animated bpmn diagram is generated along with timeline chart. It allows for detailed analysis of token flows in the process. When number of simulations are greater than 1 the bpmn diagram is not animated and execution timeline is not generated.
 </p>  
 
 </div>
