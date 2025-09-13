@@ -95,7 +95,7 @@ class QueuedEvent(Event):
                   if len(self.output)>0 and isinstance(self,XorGate):  
                         idx = 1  # send to second output
 #                        if self.customer.attr["value"] or len(self.output)<2:
-                        if "value" in self.customer.attr or len(self.output)<2:
+                        if ("value" in self.customer.attr and self.customer.attr["value"]) or len(self.output)<2:
                               idx=0 # send rather to first output
                         if len(self.output)>2:  # more than 2 outputs
                               idx=int(self.customer.attr["value"])
