@@ -200,15 +200,15 @@ ex11=`# G/G/2 test
 `
 ex12=`# Procurement Process 
 1 Start(E,[1],-40)      
-2 Task(N,[1,2/10])      ## handle quotation
+2 Task(N,[1,2/10])      # handle quotation
 3 Task(N,[2,4/10])      ## approve order
-4 XorGate()             ## approved/not approved
-5 AndGate()             ## approved trajectory
+4 XorGate()             # approved? # or not approved
+5 AndGate()             # approved # trajectory
 6 Terminate()           ## not approved trajectory
-7 Task(E,[2])           ## handle order
-8 Task(E,[2])           ## handle shipment
+7 Task(E,[2])           # handle order
+8 Task(E,[2])           # handle shipment
 9 AndGate()             ## 
-10 Task(N,[1,2/10])     ## review order
+10 Task(N,[1,2/10])     # review order
 11 End()
 1->2; 2->3; 3->4; 4->5; 4->6; 5->7; 5->8; 7->9; 8->9; 9->10; 10->11;
 `
