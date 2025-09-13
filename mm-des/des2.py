@@ -1,5 +1,5 @@
-# DES - discrete event (micro) simulator
-# - basic events: Generator,Service,Sink,ConditionalEvent
+# mm-des - discrete event simulator
+# - base events: Generator,Service,Sink,ConditionalEvent
 # - bpmn events: Start,Task,End,Timer,XorGate,AndGate,Condition,Terminate
 # MM 31.1.2024, 13.9.2025 (adopted for pyodide in js)
 
@@ -560,6 +560,7 @@ def to_bpmn(ee=QueuedEvent.instances,pp=None):
       s1+=s1a+' </bpmn:process>\n'
       return s+s1+s2+'</bpmn:definitions>\n'
 
+en_title = ""
 class EventNetwork():
       def __init__(self,s):
             Event.cnt, Customer.cnt = 0, 0
@@ -570,10 +571,15 @@ class EventNetwork():
       def __getitem__(self,i):
             return self.ee[i]
       def from_string(self,s):
-            ee, Event.cnt, ylevel = [], 0, -1
-            for s0 in s.split('\n'):
+            global en_title
+            ee, Event.cnt, ylevel, en_title = [], 0, -1, ''
+            ss = s.split('\n')
+            for s0 in ss:
                   s1 = s0.strip()
-                  if len(s1)<2 or s1[0]=='#': continue
+                  if len(s1)<2 or s1[0]=='#':
+                        if s1==ss[0]: # title in first line
+                              en_title = ss[0][1:]
+                        continue
                   if "->" in s1: # connection definition
                         ylevel += 1   # used for marking required y position
                         for s1a in s1.split(";"):
@@ -651,6 +657,7 @@ def bpmn_tosvg0(bpmnfile,W=100,H=80):
 #def bpmn_tosvg(bpmnfile,W=100,H=80):
 def bpmn_tosvg(bpmnstring,isanim,W=100,H=80):
       s = '<defs><marker id="triangle" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="strokeWidth" markerWidth="10" markerHeight="10" orient="auto"> <path d="M 0 0 L 10 5 L 0 10 z" fill="black" /></marker></defs>\n'
+      s += '<text x="10" y="8">'+en_title+'</text>\n';
       import xml.etree.ElementTree as ET
       #for e in ET.parse(bpmnfile).getroot():  # collect named processes
       for e in ET.fromstring(bpmnstring):  # collect named processes
