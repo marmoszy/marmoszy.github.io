@@ -337,7 +337,7 @@ The code implements basic BPMN elements:
 <ol>
 	<li>Start(fun, param, tnmax, script) - start event
 	<li>Task(fun, param, script, nservers=1) - sequential task activity with n-servers inside
-	<li>XorGate(script) - exclusive gateway (two-output: value==true passes the event to the first defined connection, value==false - to the second (more than two: must have algebraic choice-like function with results as a number starting from 0) multi-input: pass trough the event from all connected)
+	<li>XorGate(script) - exclusive gateway (two-output: value==true passes the event to the first defined connection, value==false - to the second (more than two: must have algebraic choice-like function with result being a number starting from 0) multi-input: pass trough the event from all connected), default script is "=B(0.5)" meaning binomial equally distributed choice for two outputs
 	<li>AndGate(script) - parallel gateway (multi-output: passes through the event to all connected, multi-input: waits for all)
 	<li>Timer(fun, param, script) - timer delay event
 	<li>Condition(script) - conditional event with a script containing logical expression as the first one ("=&lt;expr&gt;;..."); the instructions after first semicolon will be executed only when condition evaluates to true
@@ -348,11 +348,11 @@ where:
 <ol>
 	<li>fun - random functions: E([mean]), N([mean,std]), U([min,max]), T([min,max,mean,std]), B(p), C([p1,p2,p3,...]), None 
 	<li>param - array of fun params (fun==None: deterministic time delay in param[0])
-	<li>tnmax - tnmax&gt;	0: maximum time for start generator; tnmax&lt;0: -tnmax represents maximum number of generated events
-	<li>script - string with semicolon separated codes for evaluation during event execution "[var]=&lt;expr&gt;; ... ;", empty var defaults to 'value' variable which is tested in XorGate and Condtion, var starting with 'S.' are scenario ones, starting with 'A.' event ones and without prefix - token/customer ones. Variable 'A.n' is event counter which is initiated with 0 and increased by 1 at exec of each token/customer event. Token/customer have variable 'cname' (customer name) and may have variables '__t&lt;id&gt;a', '__t&lt;id&gt;b' and '__t&lt;id&gt;e' when the token visited event with identifier id. They mark arrival, begin and end times.
+	<li>tnmax - tnmax&gt;0: maximum time for start generator; tnmax&lt;0: -tnmax represents maximum number of generated events
+	<li>script - string with semicolon separated codes for evaluation during event execution "[var]=&lt;expr&gt;; ... ;", empty var defaults to 'value' variable which is tested in XorGate and Condtion, var starting with 'S.' are scenario ones, starting with 'A.' element ones and without prefix - token/customer ones. Variable 'A.n' is element event counter which is initiated with 0 and increased by 1 at exec of each token/customer event. Token/customer have variable 'cname' (customer name) and may have variables '__t&lt;id&gt;a', '__t&lt;id&gt;b' and '__t&lt;id&gt;e' when the token visited event with identifier id. They mark arrival, begin and end times.
 </ol>
-The text description of a process contains list of events that should be ordered by number (event identifier) and semicolon separated list of connections. 
-The events should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '/x[/y]' values after event identifier<!-- (see example 10) -->. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of event number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram.
+The text description of a process contains list of elemnts that should be ordered by number (element identifier) and semicolon separated list of connections. 
+The elements should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '/x[/y]' values after event identifier<!-- (see example 10) -->. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of element number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram.
 
 <p>
 Minimum working example with default values for all events looks like:
