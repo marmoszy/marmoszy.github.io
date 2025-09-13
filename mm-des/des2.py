@@ -657,7 +657,7 @@ def bpmn_tosvg0(bpmnfile,W=100,H=80):
 #def bpmn_tosvg(bpmnfile,W=100,H=80):
 def bpmn_tosvg(bpmnstring,isanim,W=100,H=80):
       s = '<defs><marker id="triangle" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="strokeWidth" markerWidth="10" markerHeight="10" orient="auto"> <path d="M 0 0 L 10 5 L 0 10 z" fill="black" /></marker></defs>\n'
-      s += '<text x="10" y="8">'+en_title+'</text>\n';
+      s += '<text x="10" y="10">'+en_title+'</text>\n';
       import xml.etree.ElementTree as ET
       #for e in ET.parse(bpmnfile).getroot():  # collect named processes
       for e in ET.fromstring(bpmnstring):  # collect named processes
