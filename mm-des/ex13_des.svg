@@ -1,0 +1,1423 @@
+<svg onclick="on_click()" xmlns="http://www.w3.org/2000/svg" width="2426" height="732">
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="20.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [0.00, 0.00, 0.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="20.0" width="25.80666490291552" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [0.00, 0.00, 1.61]</title></rect>
+<text x="22.0" y="86">1</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="45.80666490291552" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [1.61, 1.61, 1.61]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="45.80666490291552" width="31.40297138083055" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [1.61, 1.61, 3.58]</title></rect>
+<text x="47.80666490291552" y="134">1</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="45.80666490291552" width="50.08553966043592" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [1.61, 1.61, 4.74]</title></rect>
+<text x="47.80666490291552" y="158">1</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="77.20963628374608" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [3.58, 3.58, 3.58]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="77.20963628374608" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [3.58, 3.58, 3.58]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="77.20963628374608" width="181.08665440080443" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [3.58, 3.58, 14.89]</title></rect>
+<text x="79.20963628374608" y="278">1</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="258.2962906845505" width="16.85490511793165" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [14.89, 14.89, 15.95]</title></rect>
+<text x="260.2962906845505" y="302">1</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="275.15119580248216" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [8.57, 15.95, 15.95]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="95.89220456335144" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [4.74, 4.74, 4.74]</title></rect>
+<text x="8" y="368">14<title>task_14 product packaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="368">product packaging<title>task_14</title></text>
+<rect y="356" x="95.89220456335144" width="61.22164031411765" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [4.74, 4.74, 8.57]</title></rect>
+<text x="97.89220456335144" y="374">1</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="275.15119580248216" width="87.51744072431143" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [15.95, 15.95, 21.42]</title></rect>
+<text x="277.15119580248216" y="518">1</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="362.6686365267936" width="289.9744468084386" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [21.42, 21.42, 39.54]</title></rect>
+<text x="364.6686365267936" y="542">1</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="652.6430833352322" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [39.54, 39.54, 39.54]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="157.1138448774691" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [8.57, 8.57, 8.57]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="84.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [4.00, 4.00, 4.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="95.68570401026054" width="17.316783184267848" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [4.00, 4.73, 5.81]</title></rect>
+<text x="97.68570401026054" y="86">3</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="113.00248719452838" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [5.81, 5.81, 5.81]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="113.05135751164512" width="18.084651387164612" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [5.81, 5.82, 6.95]</title></rect>
+<text x="115.05135751164512" y="134">3</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="151.13756734073422" width="48.485517854740294" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [5.81, 8.20, 11.23]</title></rect>
+<text x="153.13756734073422" y="158">3</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="131.13600889880973" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [6.95, 6.95, 6.95]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="131.13600889880973" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [6.95, 6.95, 6.95]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="131.13600889880973" width="220.75673733612837" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [6.95, 6.95, 20.74]</title></rect>
+<text x="133.13600889880973" y="278">3</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="351.8927462349381" width="18.925542813820982" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [20.74, 20.74, 21.93]</title></rect>
+<text x="353.8927462349381" y="302">3</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="370.8182890487591" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [15.79, 21.93, 21.93]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="199.62308519547452" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [11.23, 11.23, 11.23]</title></rect>
+<text x="8" y="368">14<title>task_14 product packaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="368">product packaging<title>task_14</title></text>
+<rect y="356" x="213.18869944626078" width="59.45739662294406" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [11.23, 12.07, 15.79]</title></rect>
+<text x="215.18869944626078" y="374">3</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="370.8182890487591" width="68.36320913775143" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [21.93, 21.93, 26.20]</title></rect>
+<text x="372.8182890487591" y="518">3</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="439.1814981865105" width="373.5195005010557" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [26.20, 26.20, 49.54]</title></rect>
+<text x="441.1814981865105" y="542">3</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="812.7009986875662" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [49.54, 49.54, 49.54]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="272.6460960692049" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [15.79, 15.79, 15.79]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="116.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [6.00, 6.00, 6.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="116.0" width="25.265514402989197" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [6.00, 6.00, 7.58]</title></rect>
+<text x="118.0" y="86">4</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="141.2655144029892" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [7.58, 7.58, 7.58]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="141.2655144029892" width="43.95756350938413" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [7.58, 7.58, 10.33]</title></rect>
+<text x="143.2655144029892" y="134">4</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="199.62308519547452" width="48.17676338603303" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [7.58, 11.23, 14.24]</title></rect>
+<text x="201.62308519547452" y="158">4</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="185.22307791237333" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [10.33, 10.33, 10.33]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="185.22307791237333" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [10.33, 10.33, 10.33]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="185.22307791237333" width="149.48681944400076" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [10.33, 10.33, 19.67]</title></rect>
+<text x="187.22307791237333" y="278">4</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="370.8182890487591" width="26.645801388647953" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [19.67, 21.93, 23.59]</title></rect>
+<text x="372.8182890487591" y="302">4</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="397.46409043740704" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [19.03, 23.59, 23.59]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="247.79984858150755" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [14.24, 14.24, 14.24]</title></rect>
+<text x="8" y="368">14<title>task_14 product packaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="368">product packaging<title>task_14</title></text>
+<rect y="356" x="272.6460960692049" width="51.83559524974615" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [14.24, 15.79, 19.03]</title></rect>
+<text x="274.6460960692049" y="374">4</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="439.1814981865105" width="78.25654519032031" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [23.59, 26.20, 31.09]</title></rect>
+<text x="441.1814981865105" y="518">4</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="517.4380433768308" width="382.13664120609724" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [31.09, 31.09, 54.97]</title></rect>
+<text x="519.4380433768308" y="542">4</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="899.5746845829281" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [54.97, 54.97, 54.97]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="324.481691318951" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [19.03, 19.03, 19.03]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="148.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [8.00, 8.00, 8.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="148.0" width="45.98241353380229" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [8.00, 8.00, 10.87]</title></rect>
+<text x="150.0" y="86">5</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="193.9824135338023" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [10.87, 10.87, 10.87]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="193.9824135338023" width="40.77064474510453" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [10.87, 10.87, 13.42]</title></rect>
+<text x="195.9824135338023" y="134">5</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="247.79984858150755" width="51.35249586103316" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [10.87, 14.24, 17.45]</title></rect>
+<text x="249.79984858150755" y="158">5</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="234.75305827890682" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [13.42, 13.42, 13.42]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="234.75305827890682" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [13.42, 13.42, 13.42]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="234.75305827890682" width="223.81048956654067" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [13.42, 13.42, 27.41]</title></rect>
+<text x="236.75305827890682" y="278">5</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="458.5635478454475" width="27.029300164859137" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [27.41, 27.41, 29.10]</title></rect>
+<text x="460.5635478454475" y="302">5</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="485.5928480103066" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [22.46, 29.10, 29.10]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="299.1523444425407" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [17.45, 17.45, 17.45]</title></rect>
+<text x="8" y="368">14<title>task_14 product packaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="368">product packaging<title>task_14</title></text>
+<rect y="356" x="324.481691318951" width="54.93603158860191" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [17.45, 19.03, 22.46]</title></rect>
+<text x="326.481691318951" y="374">5</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="517.4380433768308" width="68.41021814952899" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [29.10, 31.09, 35.37]</title></rect>
+<text x="519.4380433768308" y="518">5</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="585.8482615263598" width="269.762149004991" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [35.37, 35.37, 52.23]</title></rect>
+<text x="587.8482615263598" y="542">5</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="855.6104105313508" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [52.23, 52.23, 52.23]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="379.4177229075529" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [22.46, 22.46, 22.46]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="180.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [10.00, 10.00, 10.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="193.9824135338023" width="46.191067858248374" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [10.00, 10.87, 13.76]</title></rect>
+<text x="195.9824135338023" y="86">6</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="240.17348139205066" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [13.76, 13.76, 13.76]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="240.17348139205066" width="31.186869912655567" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [13.76, 13.76, 15.71]</title></rect>
+<text x="242.17348139205066" y="134">6</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="299.1523444425407" width="52.66878926102447" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [13.76, 17.45, 20.74]</title></rect>
+<text x="301.1523444425407" y="158">6</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="271.3603513047062" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [15.71, 15.71, 15.71]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="271.3603513047062" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [15.71, 15.71, 15.71]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="271.3603513047062" width="92.26906063079366" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [15.71, 15.71, 21.48]</title></rect>
+<text x="273.3603513047062" y="278">6</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="485.5928480103066" width="18.068562843749476" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [21.48, 29.10, 30.23]</title></rect>
+<text x="487.5928480103066" y="302">6</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="503.6614108540561" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [26.12, 30.23, 30.23]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="351.8211337035652" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [20.74, 20.74, 20.74]</title></rect>
+<text x="8" y="368">14<title>task_14 product packaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="368">product packaging<title>task_14</title></text>
+<rect y="356" x="379.4177229075529" width="58.44030161029241" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [20.74, 22.46, 26.12]</title></rect>
+<text x="381.4177229075529" y="374">6</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="585.8482615263598" width="75.41568481496142" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [30.23, 35.37, 40.08]</title></rect>
+<text x="587.8482615263598" y="518">6</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="661.2639463413212" width="272.46312016270815" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [40.08, 40.08, 57.11]</title></rect>
+<text x="663.2639463413212" y="542">6</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="933.7270665040294" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [57.11, 57.11, 57.11]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="437.8580245178453" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [26.12, 26.12, 26.12]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="212.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [12.00, 12.00, 12.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="240.17348139205066" width="21.229974437421532" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [12.00, 13.76, 15.09]</title></rect>
+<text x="242.17348139205066" y="86">7</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="261.4034558294722" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [15.09, 15.09, 15.09]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="271.3603513047062" width="27.880877572890824" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [15.09, 15.71, 17.45]</title></rect>
+<text x="273.3603513047062" y="134">7</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="351.8211337035652" width="52.33658808573273" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [15.09, 20.74, 24.01]</title></rect>
+<text x="353.8211337035652" y="158">7</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="299.24122887759705" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [17.45, 17.45, 17.45]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="299.24122887759705" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [17.45, 17.45, 17.45]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="299.24122887759705" width="76.52751112611998" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [17.45, 17.45, 22.24]</title></rect>
+<text x="301.24122887759705" y="278">7</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="503.6614108540561" width="23.68556905222232" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [22.24, 30.23, 31.71]</title></rect>
+<text x="505.6614108540561" y="302">7</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="527.3469799062784" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [29.81, 31.71, 31.71]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="404.1577217892979" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [24.01, 24.01, 24.01]</title></rect>
+<text x="8" y="368">14<title>task_14 product packaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="368">product packaging<title>task_14</title></text>
+<rect y="356" x="437.8580245178453" width="59.159225054467015" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [24.01, 26.12, 29.81]</title></rect>
+<text x="439.8580245178453" y="374">7</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="661.2639463413212" width="75.81040130953897" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [31.71, 40.08, 44.82]</title></rect>
+<text x="663.2639463413212" y="518">7</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="737.0743476508602" width="349.7168384324872" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [44.82, 44.82, 66.67]</title></rect>
+<text x="739.0743476508602" y="542">7</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="1086.7911860833474" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [66.67, 66.67, 66.67]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="497.0172495723123" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [29.81, 29.81, 29.81]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="244.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [14.00, 14.00, 14.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="261.4034558294722" width="27.365009339573646" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [14.00, 15.09, 16.80]</title></rect>
+<text x="263.4034558294722" y="86">8</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="288.76846516904584" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [16.80, 16.80, 16.80]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="299.24122887759705" width="17.961675181068017" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [16.80, 17.45, 18.58]</title></rect>
+<text x="301.24122887759705" y="134">8</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="404.1577217892979" width="51.914627194598665" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [16.80, 24.01, 27.25]</title></rect>
+<text x="406.1577217892979" y="158">8</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="317.20290405866507" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [18.58, 18.58, 18.58]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="317.20290405866507" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [18.58, 18.58, 18.58]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="317.20290405866507" width="6.629421697687803" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [18.58, 18.58, 18.99]</title></rect>
+<text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="527.3469799062784" width="24.688771361687373" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [18.99, 31.71, 33.25]</title></rect>
+<text x="529.3469799062784" y="302">8</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="558.074675248289" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [33.25, 33.63, 33.63]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="456.0723489838966" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [27.25, 27.25, 27.25]</title></rect>
+<text x="8" y="368">14<title>task_14 product packaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="368">product packaging<title>task_14</title></text>
+<rect y="356" x="497.0172495723123" width="61.05742567597673" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [27.25, 29.81, 33.63]</title></rect>
+<text x="499.0172495723123" y="374">8</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="737.0743476508602" width="95.34525398785036" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [33.63, 44.82, 50.78]</title></rect>
+<text x="739.0743476508602" y="518">8</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="832.4196016387106" width="380.48404825986233" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [50.78, 50.78, 74.56]</title></rect>
+<text x="834.4196016387106" y="542">8</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="1212.903649898573" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [74.56, 74.56, 74.56]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="558.074675248289" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [33.63, 33.63, 33.63]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="52.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [2.00, 2.00, 2.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="52.0" width="43.68570401026054" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [2.00, 2.00, 4.73]</title></rect>
+<text x="54.0" y="86">2</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="95.68570401026054" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [4.73, 4.73, 4.73]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="95.68570401026054" width="17.365653501384585" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [4.73, 4.73, 5.82]</title></rect>
+<text x="97.68570401026054" y="134">2</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="95.89220456335144" width="55.24536277738278" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [4.73, 4.74, 8.20]</title></rect>
+<text x="97.89220456335144" y="158">2</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="113.05135751164512" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [5.82, 5.82, 5.82]</title></rect>
+<text x="8" y="200">7<title>intermediateCatchEvent_7 correction request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="200">correction request<title>intermediateCatchEvent_7</title></text>
+<rect y="188" x="113.05135751164512" width="205.11352443972936" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [5.82, 5.82, 18.64]</title></rect>
+<text x="115.05135751164512" y="206">2</text><text x="8" y="224">8<title>task_8 invoice corrected</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="224">invoice corrected<title>task_8</title></text>
+<rect y="212" x="318.16488195137447" width="24.1737388417381" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [18.64, 18.64, 20.15]</title></rect>
+<text x="320.16488195137447" y="230">2</text><text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="342.33862079311257" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [20.15, 20.15, 20.15]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="342.33862079311257" width="20.733202984547916" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [20.15, 20.15, 21.44]</title></rect>
+<text x="344.33862079311257" y="278">2</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="552.0357512679658" width="27.67444232751791" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [21.44, 33.25, 34.98]</title></rect>
+<text x="554.0357512679658" y="302">2</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="579.7101935954837" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [12.07, 34.98, 34.98]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="151.13756734073422" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [8.20, 8.20, 8.20]</title></rect>
+<text x="8" y="368">14<title>task_14 product packaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="368">product packaging<title>task_14</title></text>
+<rect y="356" x="157.1138448774691" width="56.07485456879169" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [8.20, 8.57, 12.07]</title></rect>
+<text x="159.1138448774691" y="374">2</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="832.4196016387106" width="90.1530016812211" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [34.98, 50.78, 56.41]</title></rect>
+<text x="834.4196016387106" y="518">2</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="922.5726033199317" width="262.9938504981469" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [56.41, 56.41, 72.85]</title></rect>
+<text x="924.5726033199317" y="542">2</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="1185.5664538180786" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [72.85, 72.85, 72.85]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="213.18869944626078" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [12.07, 12.07, 12.07]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="308.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [18.00, 18.00, 18.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="315.0456376482652" width="40.72158857264441" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [18.00, 18.44, 20.99]</title></rect>
+<text x="317.0456376482652" y="86">10</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="355.7672262209096" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [20.99, 20.99, 20.99]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="364.594643327488" width="36.73771926750334" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [20.99, 21.54, 23.83]</title></rect>
+<text x="366.594643327488" y="134">10</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="510.5121350975872" width="60.637091479358276" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [20.99, 30.66, 34.45]</title></rect>
+<text x="512.5121350975871" y="158">10</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="401.3323625949913" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [23.83, 23.83, 23.83]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="401.3323625949913" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [23.83, 23.83, 23.83]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="401.3323625949913" width="51.74021335051094" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [23.83, 23.83, 27.07]</title></rect>
+<text x="403.3323625949913" y="278">10</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="579.7101935954837" width="25.638725741952612" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [27.07, 34.98, 36.58]</title></rect>
+<text x="581.7101935954837" y="302">10</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="670.7038903713275" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [36.58, 40.67, 40.67]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="571.1492265769455" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [34.45, 34.45, 34.45]</title></rect>
+<text x="8" y="368">14<title>task_14 product packaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="368">product packaging<title>task_14</title></text>
+<rect y="356" x="617.5899454050957" width="53.11394496623177" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [34.45, 37.35, 40.67]</title></rect>
+<text x="619.5899454050957" y="374">10</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="922.5726033199317" width="71.40552418175582" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [40.67, 56.41, 60.87]</title></rect>
+<text x="924.5726033199317" y="518">10</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="993.9781275016875" width="305.0670120340711" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [60.87, 60.87, 79.94]</title></rect>
+<text x="995.9781275016875" y="542">10</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="1299.0451395357586" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [79.94, 79.94, 79.94]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="670.7038903713275" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [40.67, 40.67, 40.67]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="340.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [20.00, 20.00, 20.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="355.7672262209096" width="26.71572245449039" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [20.00, 20.99, 22.66]</title></rect>
+<text x="357.7672262209096" y="86">11</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="382.4829486754" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [22.66, 22.66, 22.66]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="401.3323625949913" width="43.42739886093898" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [22.66, 23.83, 26.55]</title></rect>
+<text x="403.3323625949913" y="134">11</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="571.1492265769455" width="60.84987501483283" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [22.66, 34.45, 38.25]</title></rect>
+<text x="573.1492265769455" y="158">11</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="444.7597614559303" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [26.55, 26.55, 26.55]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="444.7597614559303" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [26.55, 26.55, 26.55]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="444.7597614559303" width="187.38528970615369" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [26.55, 26.55, 38.26]</title></rect>
+<text x="446.7597614559303" y="278">11</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="632.145051162084" width="23.344630451369767" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [38.26, 38.26, 39.72]</title></rect>
+<text x="634.145051162084" y="302">11</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="731.7366837001168" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [39.72, 44.48, 44.48]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="631.9991015917783" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [38.25, 38.25, 38.25]</title></rect>
+<text x="8" y="368">14<title>task_14 product packaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="368">product packaging<title>task_14</title></text>
+<rect y="356" x="670.7038903713275" width="61.03279332878935" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [38.25, 40.67, 44.48]</title></rect>
+<text x="672.7038903713275" y="374">11</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="993.9781275016875" width="74.24249228136352" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [44.48, 60.87, 65.51]</title></rect>
+<text x="995.9781275016875" y="518">11</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="1068.220619783051" width="311.09623198005784" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [65.51, 65.51, 84.96]</title></rect>
+<text x="1070.220619783051" y="542">11</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="1379.3168517631088" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [84.96, 84.96, 84.96]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="731.7366837001168" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [44.48, 44.48, 44.48]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="276.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [16.00, 16.00, 16.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="288.76846516904584" width="26.27717247921936" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [16.00, 16.80, 18.44]</title></rect>
+<text x="290.76846516904584" y="86">9</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="315.0456376482652" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [18.44, 18.44, 18.44]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="317.20290405866507" width="47.3917392688229" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [18.44, 18.58, 21.54]</title></rect>
+<text x="319.20290405866507" y="134">9</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="456.0723489838966" width="54.439786113690616" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [18.44, 27.25, 30.66]</title></rect>
+<text x="458.0723489838966" y="158">9</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="364.594643327488" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [21.54, 21.54, 21.54]</title></rect>
+<text x="8" y="200">7<title>intermediateCatchEvent_7 correction request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="200">correction request<title>intermediateCatchEvent_7</title></text>
+<rect y="188" x="364.594643327488" width="214.811952088822" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [21.54, 21.54, 34.96]</title></rect>
+<text x="366.594643327488" y="206">9</text><text x="8" y="224">8<title>task_8 invoice corrected</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="224">invoice corrected<title>task_8</title></text>
+<rect y="212" x="579.40659541631" width="31.72384532616377" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [34.96, 34.96, 36.95]</title></rect>
+<text x="581.40659541631" y="230">9</text><text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="611.1304407424738" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [36.95, 36.95, 36.95]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="611.1304407424738" width="206.0852766356387" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [36.95, 36.95, 49.83]</title></rect>
+<text x="613.1304407424738" y="278">9</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="817.2157173781125" width="17.62373265889653" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [49.83, 49.83, 50.93]</title></rect>
+<text x="819.2157173781125" y="302">9</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="834.839450037009" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [37.35, 50.93, 50.93]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="510.5121350975872" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [30.66, 30.66, 30.66]</title></rect>
+<text x="8" y="368">14<title>task_14 product packaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="368">product packaging<title>task_14</title></text>
+<rect y="356" x="558.074675248289" width="59.51527015680665" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [30.66, 33.63, 37.35]</title></rect>
+<text x="560.074675248289" y="374">9</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="1068.220619783051" width="92.458242701151" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [50.93, 65.51, 71.29]</title></rect>
+<text x="1070.220619783051" y="518">9</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="1160.678862484202" width="304.3388021631031" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [71.29, 71.29, 90.31]</title></rect>
+<text x="1162.678862484202" y="542">9</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="1465.017664647305" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [90.31, 90.31, 90.31]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="617.5899454050957" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [37.35, 37.35, 37.35]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="372.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [22.00, 22.00, 22.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="382.4829486754" width="42.06826428263105" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [22.00, 22.66, 25.28]</title></rect>
+<text x="384.4829486754" y="86">12</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="424.55121295803104" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [25.28, 25.28, 25.28]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="444.7597614559303" width="36.771376236815286" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [25.28, 26.55, 28.85]</title></rect>
+<text x="446.7597614559303" y="134">12</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="631.9991015917783" width="58.3693517512437" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [25.28, 38.25, 41.90]</title></rect>
+<text x="633.9991015917783" y="158">12</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="481.5311376927456" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [28.85, 28.85, 28.85]</title></rect>
+<text x="8" y="200">7<title>intermediateCatchEvent_7 correction request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="200">correction request<title>intermediateCatchEvent_7</title></text>
+<rect y="188" x="481.5311376927456" width="216.0660022096696" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [28.85, 28.85, 42.35]</title></rect>
+<text x="483.5311376927456" y="206">12</text><text x="8" y="224">8<title>task_8 invoice corrected</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="224">invoice corrected<title>task_8</title></text>
+<rect y="212" x="697.5971399024152" width="25.803087060289613" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [42.35, 42.35, 43.96]</title></rect>
+<text x="699.5971399024152" y="230">12</text><text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="723.4002269627048" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [43.96, 43.96, 43.96]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="723.4002269627048" width="82.3133098125154" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [43.96, 43.96, 49.11]</title></rect>
+<text x="725.4002269627048" y="278">12</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="914.7018598323267" width="20.16591809155193" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [49.11, 55.92, 57.18]</title></rect>
+<text x="916.7018598323267" y="302">12</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="934.8677779238786" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [48.16, 57.18, 57.18]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="690.368453343022" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [41.90, 41.90, 41.90]</title></rect>
+<text x="8" y="368">14<title>task_14 product packaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="368">product packaging<title>task_14</title></text>
+<rect y="356" x="731.7366837001168" width="58.749197551764496" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [41.90, 44.48, 48.16]</title></rect>
+<text x="733.7366837001168" y="374">12</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="1160.678862484202" width="69.44625350682622" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [57.18, 71.29, 75.63]</title></rect>
+<text x="1162.678862484202" y="518">12</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="1230.1251159910282" width="320.0712751235528" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [75.63, 75.63, 95.64]</title></rect>
+<text x="1232.1251159910282" y="542">12</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="1550.196391114581" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [95.64, 95.64, 95.64]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="790.4858812518813" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [48.16, 48.16, 48.16]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="404.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [24.00, 24.00, 24.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="424.55121295803104" width="19.84895698323021" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [24.00, 25.28, 26.53]</title></rect>
+<text x="426.55121295803104" y="86">13</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="444.40016994126125" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [26.53, 26.53, 26.53]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="481.5311376927456" width="47.41151662440262" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [26.53, 28.85, 31.81]</title></rect>
+<text x="483.5311376927456" y="134">13</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="690.368453343022" width="53.64374565947958" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [26.53, 41.90, 45.25]</title></rect>
+<text x="692.368453343022" y="158">13</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="528.9426543171483" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [31.81, 31.81, 31.81]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="528.9426543171483" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [31.81, 31.81, 31.81]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="528.9426543171483" width="132.03204194090364" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [31.81, 31.81, 40.06]</title></rect>
+<text x="530.9426543171483" y="278">13</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="660.9746962580518" width="31.774572926079145" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [40.06, 40.06, 42.05]</title></rect>
+<text x="662.9746962580518" y="302">13</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="1117.3114841078086" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [42.05, 68.58, 68.58]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="744.0121990025016" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [45.25, 45.25, 45.25]</title></rect>
+<text x="8" y="392">15<title>parallelGateway_15 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="392"><title>parallelGateway_15</title></text>
+<rect y="380" x="744.0121990025016" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [45.25, 45.25, 45.25]</title></rect>
+<text x="8" y="416">16<title>task_16 order from supplier</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="416">order from supplier<title>task_16</title></text>
+<rect y="404" x="744.0121990025016" width="75.19009212832964" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [45.25, 45.25, 49.95]</title></rect>
+<text x="746.0121990025016" y="422">13</text><text x="8" y="440">17<title>parallelGateway_17 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="440"><title>parallelGateway_17</title></text>
+<rect y="428" x="819.2022911308312" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [47.13, 49.95, 49.95]</title></rect>
+<text x="8" y="464">18<title>intermediateCatchEvent_18 wait for delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="464">wait for delivery<title>intermediateCatchEvent_18</title></text>
+<rect y="452" x="819.2022911308312" width="224.7977088691688" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [49.95, 49.95, 64.00]</title></rect>
+<text x="821.2022911308312" y="470">13</text><text x="8" y="488">19<title>task_19 repackaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="488">repackaging<title>task_19</title></text>
+<rect y="476" x="1044.0" width="73.31148410780861" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [64.00, 64.00, 68.58]</title></rect>
+<text x="1046.0" y="494">13</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="1230.1251159910282" width="67.55047366827466" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [68.58, 75.63, 79.85]</title></rect>
+<text x="1232.1251159910282" y="518">13</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="1297.675589659303" width="373.72233558793414" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [79.85, 79.85, 103.21]</title></rect>
+<text x="1299.675589659303" y="542">13</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="1671.397925247237" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [103.21, 103.21, 103.21]</title></rect>
+<text x="8" y="584">23<title>task_23 info to customer</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="584">info to customer<title>task_23</title></text>
+<rect y="572" x="744.0121990025016" width="30.052171671816495" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [45.25, 45.25, 47.13]</title></rect>
+<text x="746.0121990025016" y="590">13</text><text x="8" y="608">24<title>exclusiveGateway_24 not accepted?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="608">not accepted?<title>exclusiveGateway_24</title></text>
+<rect y="596" x="774.0643706743181" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [47.13, 47.13, 47.13]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="1117.3114841078086" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [68.58, 68.58, 68.58]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="596.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [36.00, 36.00, 36.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="621.311339387492" width="45.89308785343178" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [36.00, 37.58, 40.45]</title></rect>
+<text x="623.311339387492" y="86">19</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="667.2044272409238" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [40.45, 40.45, 40.45]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="700.1305317703201" width="24.734023854459792" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [40.45, 42.51, 44.05]</title></rect>
+<text x="702.1305317703201" y="134">19</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="1014.1888977590307" width="59.554271854003105" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [40.45, 62.14, 65.86]</title></rect>
+<text x="1016.1888977590307" y="158">19</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="724.8645556247799" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [44.05, 44.05, 44.05]</title></rect>
+<text x="8" y="200">7<title>intermediateCatchEvent_7 correction request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="200">correction request<title>intermediateCatchEvent_7</title></text>
+<rect y="188" x="724.8645556247799" width="216.21907871309406" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [44.05, 44.05, 57.57]</title></rect>
+<text x="726.8645556247799" y="206">19</text><text x="8" y="224">8<title>task_8 invoice corrected</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="224">invoice corrected<title>task_8</title></text>
+<rect y="212" x="941.083634337874" width="16.740525584661327" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [57.57, 57.57, 58.61]</title></rect>
+<text x="943.083634337874" y="230">19</text><text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="957.8241599225353" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [58.61, 58.61, 58.61]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="957.8241599225353" width="213.72657516267986" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [58.61, 58.61, 71.97]</title></rect>
+<text x="959.8241599225353" y="278">19</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="1171.5507350852151" width="18.183055185145577" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [71.97, 71.97, 73.11]</title></rect>
+<text x="1173.5507350852151" y="302">19</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="1189.7337902703607" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [69.34, 73.11, 73.11]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="1073.7431696130338" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [65.86, 65.86, 65.86]</title></rect>
+<text x="8" y="368">14<title>task_14 product packaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="368">product packaging<title>task_14</title></text>
+<rect y="356" x="1073.7431696130338" width="55.736914487404874" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [65.86, 65.86, 69.34]</title></rect>
+<text x="1075.7431696130338" y="374">19</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="1297.675589659303" width="72.60852364090738" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [73.11, 79.85, 84.39]</title></rect>
+<text x="1299.675589659303" y="518">19</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="1370.2841133002103" width="371.25462874535447" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [84.39, 84.39, 107.60]</title></rect>
+<text x="1372.2841133002103" y="542">19</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="1741.5387420455647" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [107.60, 107.60, 107.60]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="1129.4800841004387" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>19 [69.34, 69.34, 69.34]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="628.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [38.00, 38.00, 38.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="667.2044272409238" width="24.522856302658397" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [38.00, 40.45, 41.98]</title></rect>
+<text x="669.2044272409238" y="86">20</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="691.7272835435822" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [41.98, 41.98, 41.98]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="724.8645556247799" width="22.55482093607884" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [41.98, 44.05, 45.46]</title></rect>
+<text x="726.8645556247799" y="134">20</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="1073.7431696130338" width="54.02358203077188" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [41.98, 65.86, 69.24]</title></rect>
+<text x="1075.7431696130338" y="158">20</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="747.4193765608587" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [45.46, 45.46, 45.46]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="747.4193765608587" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [45.46, 45.46, 45.46]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="747.4193765608587" width="27.414222579371085" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [45.46, 45.46, 47.18]</title></rect>
+<text x="749.4193765608587" y="278">20</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="934.8677779238786" width="26.664732276674613" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [47.18, 57.18, 58.85]</title></rect>
+<text x="936.8677779238786" y="302">20</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="1190.9404936419753" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [58.85, 73.18, 73.18]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="1127.7667516438057" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [69.24, 69.24, 69.24]</title></rect>
+<text x="8" y="368">14<title>task_14 product packaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="368">product packaging<title>task_14</title></text>
+<rect y="356" x="1129.4800841004387" width="61.46040954153659" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [69.24, 69.34, 73.18]</title></rect>
+<text x="1131.4800841004387" y="374">20</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="1370.2841133002103" width="83.27217863301917" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [73.18, 84.39, 89.60]</title></rect>
+<text x="1372.2841133002103" y="518">20</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="1453.5562919332294" width="381.54604885520143" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [89.60, 89.60, 113.44]</title></rect>
+<text x="1455.5562919332294" y="542">20</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="1835.1023407884309" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [113.44, 113.44, 113.44]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="1190.9404936419753" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>20 [73.18, 73.18, 73.18]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="436.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [26.00, 26.00, 26.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="444.40016994126125" width="16.710321106464733" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [26.00, 26.53, 27.57]</title></rect>
+<text x="446.40016994126125" y="86">14</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="461.110491047726" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [27.57, 27.57, 27.57]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="528.9426543171483" width="39.05231971296399" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [27.57, 31.81, 34.25]</title></rect>
+<text x="530.9426543171483" y="134">14</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="744.0121990025016" width="48.34369757396996" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [27.57, 45.25, 48.27]</title></rect>
+<text x="746.0121990025016" y="158">14</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="567.9949740301122" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [34.25, 34.25, 34.25]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="567.9949740301122" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [34.25, 34.25, 34.25]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="567.9949740301122" width="44.48586128310944" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [34.25, 34.25, 37.03]</title></rect>
+<text x="569.9949740301122" y="278">14</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="692.749269184131" width="29.014603666664698" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [37.03, 42.05, 43.86]</title></rect>
+<text x="694.749269184131" y="302">14</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="1196.6467881180756" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [43.86, 73.54, 73.54]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="792.3558965764715" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [48.27, 48.27, 48.27]</title></rect>
+<text x="8" y="392">15<title>parallelGateway_15 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="392"><title>parallelGateway_15</title></text>
+<rect y="380" x="792.3558965764715" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [48.27, 48.27, 48.27]</title></rect>
+<text x="8" y="416">16<title>task_16 order from supplier</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="416">order from supplier<title>task_16</title></text>
+<rect y="404" x="819.2022911308312" width="82.75935087035441" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [48.27, 49.95, 55.12]</title></rect>
+<text x="821.2022911308312" y="422">14</text><text x="8" y="440">17<title>parallelGateway_17 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="440"><title>parallelGateway_17</title></text>
+<rect y="428" x="901.9616420011856" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [49.48, 55.12, 55.12]</title></rect>
+<text x="8" y="464">18<title>intermediateCatchEvent_18 wait for delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="464">wait for delivery<title>intermediateCatchEvent_18</title></text>
+<rect y="452" x="1044.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [55.12, 64.00, 64.00]</title></rect>
+<text x="8" y="488">19<title>task_19 repackaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="488">repackaging<title>task_19</title></text>
+<rect y="476" x="1117.3114841078086" width="79.33530401026701" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [64.00, 68.58, 73.54]</title></rect>
+<text x="1119.3114841078086" y="494">14</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="1453.5562919332294" width="90.03387638488516" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [73.54, 89.60, 95.22]</title></rect>
+<text x="1455.5562919332294" y="518">14</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="1543.5901683181146" width="271.8294211337611" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [95.22, 95.22, 112.21]</title></rect>
+<text x="1545.5901683181146" y="542">14</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="1815.4195894518757" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [112.21, 112.21, 112.21]</title></rect>
+<text x="8" y="584">23<title>task_23 info to customer</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="584">info to customer<title>task_23</title></text>
+<rect y="572" x="792.3558965764715" width="19.34686702668978" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [48.27, 48.27, 49.48]</title></rect>
+<text x="794.3558965764715" y="590">14</text><text x="8" y="608">24<title>exclusiveGateway_24 not accepted?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="608">not accepted?<title>exclusiveGateway_24</title></text>
+<rect y="596" x="811.7027636031613" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [49.48, 49.48, 49.48]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="1196.6467881180756" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [73.54, 73.54, 73.54]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="468.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [28.00, 28.00, 28.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="468.0" width="27.7216759726507" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [28.00, 28.00, 29.73]</title></rect>
+<text x="470.0" y="86">15</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="495.7216759726507" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [29.73, 29.73, 29.73]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="567.9949740301122" width="35.88251986205648" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [29.73, 34.25, 36.49]</title></rect>
+<text x="569.9949740301122" y="134">15</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="792.3558965764715" width="62.251445921008894" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [29.73, 48.27, 52.16]</title></rect>
+<text x="794.3558965764715" y="158">15</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="603.8774938921687" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [36.49, 36.49, 36.49]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="603.8774938921687" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [36.49, 36.49, 36.49]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="603.8774938921687" width="76.3618469409148" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [36.49, 36.49, 41.26]</title></rect>
+<text x="605.8774938921687" y="278">15</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="721.7638728507957" width="20.01178197026036" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [41.26, 43.86, 45.11]</title></rect>
+<text x="723.7638728507957" y="302">15</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="1290.9474183134582" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [45.11, 79.43, 79.43]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="854.6073424974804" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [52.16, 52.16, 52.16]</title></rect>
+<text x="8" y="392">15<title>parallelGateway_15 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="392"><title>parallelGateway_15</title></text>
+<rect y="380" x="854.6073424974804" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [52.16, 52.16, 52.16]</title></rect>
+<text x="8" y="416">16<title>task_16 order from supplier</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="416">order from supplier<title>task_16</title></text>
+<rect y="404" x="901.9616420011856" width="84.94912941856433" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [52.16, 55.12, 60.43]</title></rect>
+<text x="903.9616420011856" y="422">15</text><text x="8" y="440">17<title>parallelGateway_17 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="440"><title>parallelGateway_17</title></text>
+<rect y="428" x="986.91077141975" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [53.50, 60.43, 60.43]</title></rect>
+<text x="8" y="464">18<title>intermediateCatchEvent_18 wait for delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="464">wait for delivery<title>intermediateCatchEvent_18</title></text>
+<rect y="452" x="1044.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [60.43, 64.00, 64.00]</title></rect>
+<text x="8" y="488">19<title>task_19 repackaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="488">repackaging<title>task_19</title></text>
+<rect y="476" x="1196.6467881180756" width="94.30063019538261" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [64.00, 73.54, 79.43]</title></rect>
+<text x="1198.6467881180756" y="494">15</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="1543.5901683181146" width="67.5432317159075" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [79.43, 95.22, 99.45]</title></rect>
+<text x="1545.5901683181146" y="518">15</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="1611.133400034022" width="281.9846901157716" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [99.45, 99.45, 117.07]</title></rect>
+<text x="1613.133400034022" y="542">15</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="1893.1180901497937" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [117.07, 117.07, 117.07]</title></rect>
+<text x="8" y="584">23<title>task_23 info to customer</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="584">info to customer<title>task_23</title></text>
+<rect y="572" x="854.6073424974804" width="21.34343924264317" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [52.16, 52.16, 53.50]</title></rect>
+<text x="856.6073424974804" y="590">15</text><text x="8" y="608">24<title>exclusiveGateway_24 not accepted?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="608">not accepted?<title>exclusiveGateway_24</title></text>
+<rect y="596" x="875.9507817401236" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [53.50, 53.50, 53.50]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="1290.9474183134582" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>15 [79.43, 79.43, 79.43]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="500.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [30.00, 30.00, 30.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="500.0" width="28.94864458303954" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [30.00, 30.00, 31.81]</title></rect>
+<text x="502.0" y="86">16</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="528.9486445830396" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [31.81, 31.81, 31.81]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="603.8774938921687" width="39.35178430136864" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [31.81, 36.49, 38.95]</title></rect>
+<text x="605.8774938921687" y="134">16</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="854.6073424974804" width="55.41118602074107" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [31.81, 52.16, 55.63]</title></rect>
+<text x="856.6073424974804" y="158">16</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="643.2292781935373" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [38.95, 38.95, 38.95]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="643.2292781935373" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [38.95, 38.95, 38.95]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="643.2292781935373" width="90.79786626651958" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [38.95, 38.95, 44.63]</title></rect>
+<text x="645.2292781935373" y="278">16</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="834.839450037009" width="26.118138184765144" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [44.63, 50.93, 52.56]</title></rect>
+<text x="836.839450037009" y="302">16</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="1755.4265649473866" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [52.56, 108.46, 108.46]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="910.0185285182215" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [55.63, 55.63, 55.63]</title></rect>
+<text x="8" y="392">15<title>parallelGateway_15 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="392"><title>parallelGateway_15</title></text>
+<rect y="380" x="910.0185285182215" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [55.63, 55.63, 55.63]</title></rect>
+<text x="8" y="416">16<title>task_16 order from supplier</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="416">order from supplier<title>task_16</title></text>
+<rect y="404" x="986.91077141975" width="65.2560658551746" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [55.63, 60.43, 64.51]</title></rect>
+<text x="988.91077141975" y="422">16</text><text x="8" y="440">17<title>parallelGateway_17 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="440"><title>parallelGateway_17</title></text>
+<rect y="428" x="1052.1668372749245" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [56.92, 64.51, 64.51]</title></rect>
+<text x="8" y="464">18<title>intermediateCatchEvent_18 wait for delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="464">wait for delivery<title>intermediateCatchEvent_18</title></text>
+<rect y="452" x="1052.1668372749245" width="631.8331627250755" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [64.51, 64.51, 104.00]</title></rect>
+<text x="1054.1668372749245" y="470">16</text><text x="8" y="488">19<title>task_19 repackaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="488">repackaging<title>task_19</title></text>
+<rect y="476" x="1684.0" width="71.42656494738662" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [104.00, 104.00, 108.46]</title></rect>
+<text x="1686.0" y="494">16</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="1755.4265649473866" width="71.3289349353779" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [108.46, 108.46, 112.92]</title></rect>
+<text x="1757.4265649473866" y="518">16</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="1826.7554998827645" width="275.87113271556746" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [112.92, 112.92, 130.16]</title></rect>
+<text x="1828.7554998827645" y="542">16</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="2102.626632598332" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [130.16, 130.16, 130.16]</title></rect>
+<text x="8" y="584">23<title>task_23 info to customer</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="584">info to customer<title>task_23</title></text>
+<rect y="572" x="910.0185285182215" width="20.72916145093518" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [55.63, 55.63, 56.92]</title></rect>
+<text x="912.0185285182215" y="590">16</text><text x="8" y="608">24<title>exclusiveGateway_24 not accepted?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="608">not accepted?<title>exclusiveGateway_24</title></text>
+<rect y="596" x="930.7476899691567" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [56.92, 56.92, 56.92]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="1755.4265649473866" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>16 [108.46, 108.46, 108.46]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="532.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [32.00, 32.00, 32.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="532.0" width="43.72828309946283" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [32.00, 32.00, 34.73]</title></rect>
+<text x="534.0" y="86">17</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="575.7282830994628" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [34.73, 34.73, 34.73]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="643.2292781935373" width="38.12117219240031" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [34.73, 38.95, 41.33]</title></rect>
+<text x="645.2292781935373" y="134">17</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="910.0185285182215" width="51.68525938846642" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [34.73, 55.63, 58.86]</title></rect>
+<text x="912.0185285182215" y="158">17</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="681.3504503859376" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [41.33, 41.33, 41.33]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="681.3504503859376" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [41.33, 41.33, 41.33]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="681.3504503859376" width="179.96445996592388" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [41.33, 41.33, 52.58]</title></rect>
+<text x="683.3504503859376" y="278">17</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="861.3149103518615" width="22.16279932067721" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [52.58, 52.58, 53.97]</title></rect>
+<text x="863.3149103518615" y="302">17</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="1823.5377690296782" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [53.97, 112.72, 112.72]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="961.7037879066879" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [58.86, 58.86, 58.86]</title></rect>
+<text x="8" y="392">15<title>parallelGateway_15 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="392"><title>parallelGateway_15</title></text>
+<rect y="380" x="961.7037879066879" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [58.86, 58.86, 58.86]</title></rect>
+<text x="8" y="416">16<title>task_16 order from supplier</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="416">order from supplier<title>task_16</title></text>
+<rect y="404" x="1052.1668372749245" width="85.52447368957473" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [58.86, 64.51, 69.86]</title></rect>
+<text x="1054.1668372749245" y="422">17</text><text x="8" y="440">17<title>parallelGateway_17 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="440"><title>parallelGateway_17</title></text>
+<rect y="428" x="1137.6913109644993" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [59.88, 69.86, 69.86]</title></rect>
+<text x="8" y="464">18<title>intermediateCatchEvent_18 wait for delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="464">wait for delivery<title>intermediateCatchEvent_18</title></text>
+<rect y="452" x="1684.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [69.86, 104.00, 104.00]</title></rect>
+<text x="8" y="488">19<title>task_19 repackaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="488">repackaging<title>task_19</title></text>
+<rect y="476" x="1755.4265649473866" width="68.11120408229158" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [104.00, 108.46, 112.72]</title></rect>
+<text x="1757.4265649473866" y="494">17</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="1826.7554998827645" width="66.62169240798062" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [112.72, 112.92, 117.09]</title></rect>
+<text x="1828.7554998827645" y="518">17</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="1893.3771922907451" width="319.2556796778556" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [117.09, 117.09, 137.04]</title></rect>
+<text x="1895.3771922907451" y="542">17</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="2212.6328719686007" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [137.04, 137.04, 137.04]</title></rect>
+<text x="8" y="584">23<title>task_23 info to customer</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="584">info to customer<title>task_23</title></text>
+<rect y="572" x="961.7037879066879" width="16.378466852982456" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [58.86, 58.86, 59.88]</title></rect>
+<text x="963.7037879066879" y="590">17</text><text x="8" y="608">24<title>exclusiveGateway_24 not accepted?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="608">not accepted?<title>exclusiveGateway_24</title></text>
+<rect y="596" x="978.0822547596704" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [59.88, 59.88, 59.88]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="1823.5377690296782" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>17 [112.72, 112.72, 112.72]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 20 orders</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">20 orders<title>startEvent_1</title></text>
+<rect y="44" x="564.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [34.00, 34.00, 34.00]</title></rect>
+<text x="8" y="80">2<title>task_2 order registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80">order registration<title>task_2</title></text>
+<rect y="68" x="575.7282830994628" width="45.583056288029184" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [34.00, 34.73, 37.58]</title></rect>
+<text x="577.7282830994628" y="86">18</text><text x="8" y="104">3<title>parallelGateway_3 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104"><title>parallelGateway_3</title></text>
+<rect y="92" x="621.311339387492" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [37.58, 37.58, 37.58]</title></rect>
+<text x="8" y="128">4<title>task_4 invoice preparation</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">invoice preparation<title>task_4</title></text>
+<rect y="116" x="681.3504503859376" width="18.78008138438247" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [37.58, 41.33, 42.51]</title></rect>
+<text x="683.3504503859376" y="134">18</text><text x="8" y="152">5<title>task_5 check availability</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152">check availability<title>task_5</title></text>
+<rect y="140" x="961.7037879066879" width="52.485109852342816" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [37.58, 58.86, 62.14]</title></rect>
+<text x="963.7037879066879" y="158">18</text><text x="8" y="176">6<title>exclusiveGateway_6 correction needed?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">correction needed?<title>exclusiveGateway_6</title></text>
+<rect y="164" x="700.1305317703201" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [42.51, 42.51, 42.51]</title></rect>
+<text x="8" y="248">9<title>exclusiveGateway_9 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="248"><title>exclusiveGateway_9</title></text>
+<rect y="236" x="700.1305317703201" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [42.51, 42.51, 42.51]</title></rect>
+<text x="8" y="272">10<title>intermediateCatchEvent_10 payment request</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="272">payment request<title>intermediateCatchEvent_10</title></text>
+<rect y="260" x="700.1305317703201" width="121.12845374528194" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [42.51, 42.51, 50.08]</title></rect>
+<text x="702.1305317703201" y="278">18</text><text x="8" y="296">11<title>task_11 payment registration</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="296">payment registration<title>task_11</title></text>
+<rect y="284" x="883.4777096725387" width="31.224150159787996" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [50.08, 53.97, 55.92]</title></rect>
+<text x="885.4777096725387" y="302">18</text><text x="8" y="320">12<title>parallelGateway_12 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="320"><title>parallelGateway_12</title></text>
+<rect y="308" x="1901.745993244027" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [55.92, 117.61, 117.61]</title></rect>
+<text x="8" y="344">13<title>exclusiveGateway_13 available?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="344">available?<title>exclusiveGateway_13</title></text>
+<rect y="332" x="1014.1888977590307" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [62.14, 62.14, 62.14]</title></rect>
+<text x="8" y="392">15<title>parallelGateway_15 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="392"><title>parallelGateway_15</title></text>
+<rect y="380" x="1014.1888977590307" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [62.14, 62.14, 62.14]</title></rect>
+<text x="8" y="416">16<title>task_16 order from supplier</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="416">order from supplier<title>task_16</title></text>
+<rect y="404" x="1137.6913109644993" width="93.06793620103781" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [62.14, 69.86, 75.67]</title></rect>
+<text x="1139.6913109644993" y="422">18</text><text x="8" y="440">17<title>parallelGateway_17 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="440"><title>parallelGateway_17</title></text>
+<rect y="428" x="1230.759247165537" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [63.76, 75.67, 75.67]</title></rect>
+<text x="8" y="464">18<title>intermediateCatchEvent_18 wait for delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="464">wait for delivery<title>intermediateCatchEvent_18</title></text>
+<rect y="452" x="1684.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [75.67, 104.00, 104.00]</title></rect>
+<text x="8" y="488">19<title>task_19 repackaging</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="488">repackaging<title>task_19</title></text>
+<rect y="476" x="1823.5377690296782" width="78.20822421434877" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [104.00, 112.72, 117.61]</title></rect>
+<text x="1825.5377690296782" y="494">18</text><text x="8" y="512">20<title>task_20 preparation for shipment</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="512">preparation for shipment<title>task_20</title></text>
+<rect y="500" x="1901.745993244027" width="89.26218541111712" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [117.61, 117.61, 123.19]</title></rect>
+<text x="1903.745993244027" y="518">18</text><text x="8" y="536">21<title>intermediateCatchEvent_21 delivery</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="536">delivery<title>intermediateCatchEvent_21</title></text>
+<rect y="524" x="1991.008178655144" width="375.4206559312761" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [123.19, 123.19, 146.65]</title></rect>
+<text x="1993.008178655144" y="542">18</text><text x="8" y="560">22<title>endEvent_22 order completed</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="560">order completed<title>endEvent_22</title></text>
+<rect y="548" x="2366.42883458642" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [146.65, 146.65, 146.65]</title></rect>
+<text x="8" y="584">23<title>task_23 info to customer</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="584">info to customer<title>task_23</title></text>
+<rect y="572" x="1014.1888977590307" width="25.97433161600668" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [62.14, 62.14, 63.76]</title></rect>
+<text x="1016.1888977590307" y="590">18</text><text x="8" y="608">24<title>exclusiveGateway_24 not accepted?</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="608">not accepted?<title>exclusiveGateway_24</title></text>
+<rect y="596" x="1040.1632293750374" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [63.76, 63.76, 63.76]</title></rect>
+<text x="8" y="656">26<title>exclusiveGateway_26 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="656"><title>exclusiveGateway_26</title></text>
+<rect y="644" x="1901.745993244027" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>18 [117.61, 117.61, 117.61]</title></rect>
+<rect x="20" y="10" width="2362" height="2"/>
+<rect x="20" y="722" width="2362" height="2"/>
+<rect x="20" y="10" width="1" height="10"/>
+<rect x="20" y="712" width="1" height="10"/>
+<text x="12" y="32">0</text>
+<text x="12" y="712">0</text>
+<rect x="36" y="10" width="1" height="10"/>
+<rect x="36" y="712" width="1" height="10"/>
+<rect x="52" y="10" width="1" height="10"/>
+<rect x="52" y="712" width="1" height="10"/>
+<rect x="68" y="10" width="1" height="10"/>
+<rect x="68" y="712" width="1" height="10"/>
+<rect x="84" y="10" width="1" height="10"/>
+<rect x="84" y="712" width="1" height="10"/>
+<rect x="100" y="10" width="1" height="10"/>
+<rect x="100" y="712" width="1" height="10"/>
+<rect x="116" y="10" width="1" height="10"/>
+<rect x="116" y="712" width="1" height="10"/>
+<rect x="132" y="10" width="1" height="10"/>
+<rect x="132" y="712" width="1" height="10"/>
+<rect x="148" y="10" width="1" height="10"/>
+<rect x="148" y="712" width="1" height="10"/>
+<rect x="164" y="10" width="1" height="10"/>
+<rect x="164" y="712" width="1" height="10"/>
+<rect x="180" y="10" width="1" height="10"/>
+<rect x="180" y="712" width="1" height="10"/>
+<text x="172" y="32">10</text>
+<text x="172" y="712">10</text>
+<rect x="196" y="10" width="1" height="10"/>
+<rect x="196" y="712" width="1" height="10"/>
+<rect x="212" y="10" width="1" height="10"/>
+<rect x="212" y="712" width="1" height="10"/>
+<rect x="228" y="10" width="1" height="10"/>
+<rect x="228" y="712" width="1" height="10"/>
+<rect x="244" y="10" width="1" height="10"/>
+<rect x="244" y="712" width="1" height="10"/>
+<rect x="260" y="10" width="1" height="10"/>
+<rect x="260" y="712" width="1" height="10"/>
+<rect x="276" y="10" width="1" height="10"/>
+<rect x="276" y="712" width="1" height="10"/>
+<rect x="292" y="10" width="1" height="10"/>
+<rect x="292" y="712" width="1" height="10"/>
+<rect x="308" y="10" width="1" height="10"/>
+<rect x="308" y="712" width="1" height="10"/>
+<rect x="324" y="10" width="1" height="10"/>
+<rect x="324" y="712" width="1" height="10"/>
+<rect x="340" y="10" width="1" height="10"/>
+<rect x="340" y="712" width="1" height="10"/>
+<text x="332" y="32">20</text>
+<text x="332" y="712">20</text>
+<rect x="356" y="10" width="1" height="10"/>
+<rect x="356" y="712" width="1" height="10"/>
+<rect x="372" y="10" width="1" height="10"/>
+<rect x="372" y="712" width="1" height="10"/>
+<rect x="388" y="10" width="1" height="10"/>
+<rect x="388" y="712" width="1" height="10"/>
+<rect x="404" y="10" width="1" height="10"/>
+<rect x="404" y="712" width="1" height="10"/>
+<rect x="420" y="10" width="1" height="10"/>
+<rect x="420" y="712" width="1" height="10"/>
+<rect x="436" y="10" width="1" height="10"/>
+<rect x="436" y="712" width="1" height="10"/>
+<rect x="452" y="10" width="1" height="10"/>
+<rect x="452" y="712" width="1" height="10"/>
+<rect x="468" y="10" width="1" height="10"/>
+<rect x="468" y="712" width="1" height="10"/>
+<rect x="484" y="10" width="1" height="10"/>
+<rect x="484" y="712" width="1" height="10"/>
+<rect x="500" y="10" width="1" height="10"/>
+<rect x="500" y="712" width="1" height="10"/>
+<text x="492" y="32">30</text>
+<text x="492" y="712">30</text>
+<rect x="516" y="10" width="1" height="10"/>
+<rect x="516" y="712" width="1" height="10"/>
+<rect x="532" y="10" width="1" height="10"/>
+<rect x="532" y="712" width="1" height="10"/>
+<rect x="548" y="10" width="1" height="10"/>
+<rect x="548" y="712" width="1" height="10"/>
+<rect x="564" y="10" width="1" height="10"/>
+<rect x="564" y="712" width="1" height="10"/>
+<rect x="580" y="10" width="1" height="10"/>
+<rect x="580" y="712" width="1" height="10"/>
+<rect x="596" y="10" width="1" height="10"/>
+<rect x="596" y="712" width="1" height="10"/>
+<rect x="612" y="10" width="1" height="10"/>
+<rect x="612" y="712" width="1" height="10"/>
+<rect x="628" y="10" width="1" height="10"/>
+<rect x="628" y="712" width="1" height="10"/>
+<rect x="644" y="10" width="1" height="10"/>
+<rect x="644" y="712" width="1" height="10"/>
+<rect x="660" y="10" width="1" height="10"/>
+<rect x="660" y="712" width="1" height="10"/>
+<text x="652" y="32">40</text>
+<text x="652" y="712">40</text>
+<rect x="676" y="10" width="1" height="10"/>
+<rect x="676" y="712" width="1" height="10"/>
+<rect x="692" y="10" width="1" height="10"/>
+<rect x="692" y="712" width="1" height="10"/>
+<rect x="708" y="10" width="1" height="10"/>
+<rect x="708" y="712" width="1" height="10"/>
+<rect x="724" y="10" width="1" height="10"/>
+<rect x="724" y="712" width="1" height="10"/>
+<rect x="740" y="10" width="1" height="10"/>
+<rect x="740" y="712" width="1" height="10"/>
+<rect x="756" y="10" width="1" height="10"/>
+<rect x="756" y="712" width="1" height="10"/>
+<rect x="772" y="10" width="1" height="10"/>
+<rect x="772" y="712" width="1" height="10"/>
+<rect x="788" y="10" width="1" height="10"/>
+<rect x="788" y="712" width="1" height="10"/>
+<rect x="804" y="10" width="1" height="10"/>
+<rect x="804" y="712" width="1" height="10"/>
+<rect x="820" y="10" width="1" height="10"/>
+<rect x="820" y="712" width="1" height="10"/>
+<text x="812" y="32">50</text>
+<text x="812" y="712">50</text>
+<rect x="836" y="10" width="1" height="10"/>
+<rect x="836" y="712" width="1" height="10"/>
+<rect x="852" y="10" width="1" height="10"/>
+<rect x="852" y="712" width="1" height="10"/>
+<rect x="868" y="10" width="1" height="10"/>
+<rect x="868" y="712" width="1" height="10"/>
+<rect x="884" y="10" width="1" height="10"/>
+<rect x="884" y="712" width="1" height="10"/>
+<rect x="900" y="10" width="1" height="10"/>
+<rect x="900" y="712" width="1" height="10"/>
+<rect x="916" y="10" width="1" height="10"/>
+<rect x="916" y="712" width="1" height="10"/>
+<rect x="932" y="10" width="1" height="10"/>
+<rect x="932" y="712" width="1" height="10"/>
+<rect x="948" y="10" width="1" height="10"/>
+<rect x="948" y="712" width="1" height="10"/>
+<rect x="964" y="10" width="1" height="10"/>
+<rect x="964" y="712" width="1" height="10"/>
+<rect x="980" y="10" width="1" height="10"/>
+<rect x="980" y="712" width="1" height="10"/>
+<text x="972" y="32">60</text>
+<text x="972" y="712">60</text>
+<rect x="996" y="10" width="1" height="10"/>
+<rect x="996" y="712" width="1" height="10"/>
+<rect x="1012" y="10" width="1" height="10"/>
+<rect x="1012" y="712" width="1" height="10"/>
+<rect x="1028" y="10" width="1" height="10"/>
+<rect x="1028" y="712" width="1" height="10"/>
+<rect x="1044" y="10" width="1" height="10"/>
+<rect x="1044" y="712" width="1" height="10"/>
+<rect x="1060" y="10" width="1" height="10"/>
+<rect x="1060" y="712" width="1" height="10"/>
+<rect x="1076" y="10" width="1" height="10"/>
+<rect x="1076" y="712" width="1" height="10"/>
+<rect x="1092" y="10" width="1" height="10"/>
+<rect x="1092" y="712" width="1" height="10"/>
+<rect x="1108" y="10" width="1" height="10"/>
+<rect x="1108" y="712" width="1" height="10"/>
+<rect x="1124" y="10" width="1" height="10"/>
+<rect x="1124" y="712" width="1" height="10"/>
+<rect x="1140" y="10" width="1" height="10"/>
+<rect x="1140" y="712" width="1" height="10"/>
+<text x="1132" y="32">70</text>
+<text x="1132" y="712">70</text>
+<rect x="1156" y="10" width="1" height="10"/>
+<rect x="1156" y="712" width="1" height="10"/>
+<rect x="1172" y="10" width="1" height="10"/>
+<rect x="1172" y="712" width="1" height="10"/>
+<rect x="1188" y="10" width="1" height="10"/>
+<rect x="1188" y="712" width="1" height="10"/>
+<rect x="1204" y="10" width="1" height="10"/>
+<rect x="1204" y="712" width="1" height="10"/>
+<rect x="1220" y="10" width="1" height="10"/>
+<rect x="1220" y="712" width="1" height="10"/>
+<rect x="1236" y="10" width="1" height="10"/>
+<rect x="1236" y="712" width="1" height="10"/>
+<rect x="1252" y="10" width="1" height="10"/>
+<rect x="1252" y="712" width="1" height="10"/>
+<rect x="1268" y="10" width="1" height="10"/>
+<rect x="1268" y="712" width="1" height="10"/>
+<rect x="1284" y="10" width="1" height="10"/>
+<rect x="1284" y="712" width="1" height="10"/>
+<rect x="1300" y="10" width="1" height="10"/>
+<rect x="1300" y="712" width="1" height="10"/>
+<text x="1292" y="32">80</text>
+<text x="1292" y="712">80</text>
+<rect x="1316" y="10" width="1" height="10"/>
+<rect x="1316" y="712" width="1" height="10"/>
+<rect x="1332" y="10" width="1" height="10"/>
+<rect x="1332" y="712" width="1" height="10"/>
+<rect x="1348" y="10" width="1" height="10"/>
+<rect x="1348" y="712" width="1" height="10"/>
+<rect x="1364" y="10" width="1" height="10"/>
+<rect x="1364" y="712" width="1" height="10"/>
+<rect x="1380" y="10" width="1" height="10"/>
+<rect x="1380" y="712" width="1" height="10"/>
+<rect x="1396" y="10" width="1" height="10"/>
+<rect x="1396" y="712" width="1" height="10"/>
+<rect x="1412" y="10" width="1" height="10"/>
+<rect x="1412" y="712" width="1" height="10"/>
+<rect x="1428" y="10" width="1" height="10"/>
+<rect x="1428" y="712" width="1" height="10"/>
+<rect x="1444" y="10" width="1" height="10"/>
+<rect x="1444" y="712" width="1" height="10"/>
+<rect x="1460" y="10" width="1" height="10"/>
+<rect x="1460" y="712" width="1" height="10"/>
+<text x="1452" y="32">90</text>
+<text x="1452" y="712">90</text>
+<rect x="1476" y="10" width="1" height="10"/>
+<rect x="1476" y="712" width="1" height="10"/>
+<rect x="1492" y="10" width="1" height="10"/>
+<rect x="1492" y="712" width="1" height="10"/>
+<rect x="1508" y="10" width="1" height="10"/>
+<rect x="1508" y="712" width="1" height="10"/>
+<rect x="1524" y="10" width="1" height="10"/>
+<rect x="1524" y="712" width="1" height="10"/>
+<rect x="1540" y="10" width="1" height="10"/>
+<rect x="1540" y="712" width="1" height="10"/>
+<rect x="1556" y="10" width="1" height="10"/>
+<rect x="1556" y="712" width="1" height="10"/>
+<rect x="1572" y="10" width="1" height="10"/>
+<rect x="1572" y="712" width="1" height="10"/>
+<rect x="1588" y="10" width="1" height="10"/>
+<rect x="1588" y="712" width="1" height="10"/>
+<rect x="1604" y="10" width="1" height="10"/>
+<rect x="1604" y="712" width="1" height="10"/>
+<rect x="1620" y="10" width="1" height="10"/>
+<rect x="1620" y="712" width="1" height="10"/>
+<text x="1612" y="32">100</text>
+<text x="1612" y="712">100</text>
+<rect x="1636" y="10" width="1" height="10"/>
+<rect x="1636" y="712" width="1" height="10"/>
+<rect x="1652" y="10" width="1" height="10"/>
+<rect x="1652" y="712" width="1" height="10"/>
+<rect x="1668" y="10" width="1" height="10"/>
+<rect x="1668" y="712" width="1" height="10"/>
+<rect x="1684" y="10" width="1" height="10"/>
+<rect x="1684" y="712" width="1" height="10"/>
+<rect x="1700" y="10" width="1" height="10"/>
+<rect x="1700" y="712" width="1" height="10"/>
+<rect x="1716" y="10" width="1" height="10"/>
+<rect x="1716" y="712" width="1" height="10"/>
+<rect x="1732" y="10" width="1" height="10"/>
+<rect x="1732" y="712" width="1" height="10"/>
+<rect x="1748" y="10" width="1" height="10"/>
+<rect x="1748" y="712" width="1" height="10"/>
+<rect x="1764" y="10" width="1" height="10"/>
+<rect x="1764" y="712" width="1" height="10"/>
+<rect x="1780" y="10" width="1" height="10"/>
+<rect x="1780" y="712" width="1" height="10"/>
+<text x="1772" y="32">110</text>
+<text x="1772" y="712">110</text>
+<rect x="1796" y="10" width="1" height="10"/>
+<rect x="1796" y="712" width="1" height="10"/>
+<rect x="1812" y="10" width="1" height="10"/>
+<rect x="1812" y="712" width="1" height="10"/>
+<rect x="1828" y="10" width="1" height="10"/>
+<rect x="1828" y="712" width="1" height="10"/>
+<rect x="1844" y="10" width="1" height="10"/>
+<rect x="1844" y="712" width="1" height="10"/>
+<rect x="1860" y="10" width="1" height="10"/>
+<rect x="1860" y="712" width="1" height="10"/>
+<rect x="1876" y="10" width="1" height="10"/>
+<rect x="1876" y="712" width="1" height="10"/>
+<rect x="1892" y="10" width="1" height="10"/>
+<rect x="1892" y="712" width="1" height="10"/>
+<rect x="1908" y="10" width="1" height="10"/>
+<rect x="1908" y="712" width="1" height="10"/>
+<rect x="1924" y="10" width="1" height="10"/>
+<rect x="1924" y="712" width="1" height="10"/>
+<rect x="1940" y="10" width="1" height="10"/>
+<rect x="1940" y="712" width="1" height="10"/>
+<text x="1932" y="32">120</text>
+<text x="1932" y="712">120</text>
+<rect x="1956" y="10" width="1" height="10"/>
+<rect x="1956" y="712" width="1" height="10"/>
+<rect x="1972" y="10" width="1" height="10"/>
+<rect x="1972" y="712" width="1" height="10"/>
+<rect x="1988" y="10" width="1" height="10"/>
+<rect x="1988" y="712" width="1" height="10"/>
+<rect x="2004" y="10" width="1" height="10"/>
+<rect x="2004" y="712" width="1" height="10"/>
+<rect x="2020" y="10" width="1" height="10"/>
+<rect x="2020" y="712" width="1" height="10"/>
+<rect x="2036" y="10" width="1" height="10"/>
+<rect x="2036" y="712" width="1" height="10"/>
+<rect x="2052" y="10" width="1" height="10"/>
+<rect x="2052" y="712" width="1" height="10"/>
+<rect x="2068" y="10" width="1" height="10"/>
+<rect x="2068" y="712" width="1" height="10"/>
+<rect x="2084" y="10" width="1" height="10"/>
+<rect x="2084" y="712" width="1" height="10"/>
+<rect x="2100" y="10" width="1" height="10"/>
+<rect x="2100" y="712" width="1" height="10"/>
+<text x="2092" y="32">130</text>
+<text x="2092" y="712">130</text>
+<rect x="2116" y="10" width="1" height="10"/>
+<rect x="2116" y="712" width="1" height="10"/>
+<rect x="2132" y="10" width="1" height="10"/>
+<rect x="2132" y="712" width="1" height="10"/>
+<rect x="2148" y="10" width="1" height="10"/>
+<rect x="2148" y="712" width="1" height="10"/>
+<rect x="2164" y="10" width="1" height="10"/>
+<rect x="2164" y="712" width="1" height="10"/>
+<rect x="2180" y="10" width="1" height="10"/>
+<rect x="2180" y="712" width="1" height="10"/>
+<rect x="2196" y="10" width="1" height="10"/>
+<rect x="2196" y="712" width="1" height="10"/>
+<rect x="2212" y="10" width="1" height="10"/>
+<rect x="2212" y="712" width="1" height="10"/>
+<rect x="2228" y="10" width="1" height="10"/>
+<rect x="2228" y="712" width="1" height="10"/>
+<rect x="2244" y="10" width="1" height="10"/>
+<rect x="2244" y="712" width="1" height="10"/>
+<rect x="2260" y="10" width="1" height="10"/>
+<rect x="2260" y="712" width="1" height="10"/>
+<text x="2252" y="32">140</text>
+<text x="2252" y="712">140</text>
+<rect x="2276" y="10" width="1" height="10"/>
+<rect x="2276" y="712" width="1" height="10"/>
+<rect x="2292" y="10" width="1" height="10"/>
+<rect x="2292" y="712" width="1" height="10"/>
+<rect x="2308" y="10" width="1" height="10"/>
+<rect x="2308" y="712" width="1" height="10"/>
+<rect x="2324" y="10" width="1" height="10"/>
+<rect x="2324" y="712" width="1" height="10"/>
+<rect x="2340" y="10" width="1" height="10"/>
+<rect x="2340" y="712" width="1" height="10"/>
+<rect x="2356" y="10" width="1" height="10"/>
+<rect x="2356" y="712" width="1" height="10"/>
+<rect x="2372" y="10" width="1" height="10"/>
+<rect x="2372" y="712" width="1" height="10"/>
+<script>function on_click() {[...document.getElementsByClassName('t1')].forEach(e=>e.style.display=(e.style.display=='none'?'':'none'));}</script></svg>
+

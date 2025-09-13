@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1038" height="220">
+<defs><marker id="triangle" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="strokeWidth" markerWidth="10" markerHeight="10" orient="auto"> <path d="M 0 0 L 10 5 L 0 10 z" fill="black" /></marker></defs>
+<text x="56.0" y="90.0">1</text>
+<ellipse cx="80.0" cy="60.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Start_E_[1]_None</title></ellipse>
+<path marker-end="url(#triangle)" d="M98 60 L162 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="156.0" y="90.0">2</text>
+<path d="M162 60 L180 42 L198 60 L180 78 Z" stroke="orange" fill="white"><title>AndGate_None_0_None</title></path>
+<path d="M172 60 L188 60 M180 52 L180 68" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M198 60 L240 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<path marker-end="url(#triangle)" d="M180 78 L180 148.001 Q180 160 192 160 L240 160 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="234.0" y="102.0">3</text>
+<rect rx="7" ry="7" x="240.0" y="30.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_N_[1, 0.2]_None</title></rect>
+<path marker-end="url(#triangle)" d="M320 60 L362 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="234.0" y="202.0">4</text>
+<rect rx="7" ry="7" x="240.0" y="130.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_N_[2, 0.4]_</title></rect>
+<path marker-end="url(#triangle)" d="M320 160 L368 160 Q380 160 380 147.999 L380 78 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="356.0" y="90.0">5</text>
+<path d="M362 60 L380 42 L398 60 L380 78 Z" stroke="orange" fill="white"><title>AndGate_None_0_None</title></path>
+<path d="M372 60 L388 60 M380 52 L380 68" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M398 60 L462 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="456.0" y="90.0">6</text>
+<path d="M462 60 L480 42 L498 60 L480 78 Z" stroke="orange" fill="white"><title>XorGate_None_0_=B(0.5)</title></path>
+<path d="M474 54 L486 66 M486 54 L474 66" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M498 60 L540 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="534.0" y="102.0">7</text>
+<rect rx="7" ry="7" x="540.0" y="30.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_E_[2]_None</title></rect>
+<path marker-end="url(#triangle)" d="M620 60 L662 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="656.0" y="90.0">8</text>
+<path d="M662 60 L680 42 L698 60 L680 78 Z" stroke="orange" fill="white"><title>XorGate_None_0_=B(0.8)</title></path>
+<path d="M674 54 L686 66 M686 54 L674 66" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M698 60 L740 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<path marker-end="url(#triangle)" d="M680 78 L680 148.001 Q680 160 692 160 L740 160 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="734.0" y="102.0">9</text>
+<rect rx="7" ry="7" x="740.0" y="30.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_N_[1, 0.2]_None</title></rect>
+<path marker-end="url(#triangle)" d="M820 60 L962 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="734.0" y="202.0">10</text>
+<rect rx="7" ry="7" x="740.0" y="130.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_N_[1, 0.2]_None</title></rect>
+<path marker-end="url(#triangle)" d="M820 160 L862 160 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="956.0" y="90.0">11</text>
+<ellipse cx="980.0" cy="60.0" rx="18.0" ry="18.0" stroke-width="3" stroke="red" fill-opacity="0.6" fill="white"><title>End_None_None_None</title></ellipse>
+<text x="856.0" y="190.0">12</text>
+<path d="M862 160 L880 142 L898 160 L880 178 Z" stroke="orange" fill="white"><title>XorGate_None_0_=B(0.8)</title></path>
+<path d="M874 154 L886 166 M886 154 L874 166" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M898 160 L962 160 " style="fill:none;stroke:brown;stroke-width:1"/>
+<path marker-end="url(#triangle)" d="M880 142 L880 119.003 Q880 107 868 107 L492 107 Q480 107 480 94.9959 L480 78 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="956.0" y="190.0">13</text>
+<ellipse cx="980.0" cy="160.0" rx="18.0" ry="18.0" stroke-width="3" stroke="red" fill-opacity="0.6" fill="white"><title>End_None_None_None</title></ellipse>
+</svg>
+

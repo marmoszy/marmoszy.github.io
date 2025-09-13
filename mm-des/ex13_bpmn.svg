@@ -1,0 +1,2316 @@
+<svg onclick="on_click()" xmlns="http://www.w3.org/2000/svg" width="1438" height="520">
+<defs><marker id="triangle" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="strokeWidth" markerWidth="10" markerHeight="10" orient="auto"> <path d="M 0 0 L 10 5 L 0 10 z" fill="black" /></marker></defs>
+<text x="56.0" y="90.0">1</text>
+<text font-size="smaller" style="fill:gray" x="50.0" y="36.0"><tspan xml:space="preserve">20 orders</tspan></text>
+<text class="t1" font-size="smaller" style="fill:gray" x="80.0" y="90.0"><tspan xml:space="preserve">S.r=100</tspan></text>
+<ellipse cx="80.0" cy="60.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Start_U_[2]_S.r=100</title></ellipse>
+<path marker-end="url(#triangle)" d="M98 60 L140 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="134.0" y="102.0">2</text>
+<text font-size="smaller" style="fill:gray" x="128.0" y="24.0"><tspan xml:space="preserve">order registration</tspan></text>
+<text class="t1" font-size="smaller" style="fill:gray" x="158.0" y="102.0"><tspan xml:space="preserve">o=int(N([10,3]))</tspan></text>
+<rect rx="7" ry="7" x="140.0" y="30.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_U_[1, 3]_o=int(N([10,3]))</title></rect>
+<path marker-end="url(#triangle)" d="M220 60 L262 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="256.0" y="90.0">3</text>
+<text font-size="smaller" style="fill:gray" x="250.0" y="36.0"><tspan xml:space="preserve"></tspan></text>
+<path d="M262 60 L280 42 L298 60 L280 78 Z" stroke="orange" fill="white"><title>AndGate_None_0_None</title></path>
+<path d="M272 60 L288 60 M280 52 L280 68" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M298 60 L340 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<path marker-end="url(#triangle)" d="M280 78 L280 248.001 Q280 260 292 260 L340 260 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="334.0" y="102.0">4</text>
+<text font-size="smaller" style="fill:gray" x="328.0" y="24.0"><tspan xml:space="preserve">invoice preparation</tspan></text>
+<rect rx="7" ry="7" x="340.0" y="30.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_U_[1, 3]_None</title></rect>
+<path marker-end="url(#triangle)" d="M420 60 L462 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="334.0" y="302.0">5</text>
+<text font-size="smaller" style="fill:gray" x="328.0" y="224.0"><tspan xml:space="preserve">check availability</tspan></text>
+<rect rx="7" ry="7" x="340.0" y="230.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_U_[3, 4]_None</title></rect>
+<path marker-end="url(#triangle)" d="M420 260 L462 260 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="456.0" y="90.0">6</text>
+<text font-size="smaller" style="fill:gray" x="450.0" y="36.0"><tspan xml:space="preserve">correction needed?</tspan></text>
+<text class="t1" font-size="smaller" style="fill:gray" x="480.0" y="90.0"><tspan xml:space="preserve">=B(0.9)</tspan></text>
+<path d="M462 60 L480 42 L498 60 L480 78 Z" stroke="orange" fill="white"><title>XorGate_None_0_=B(0.9)</title></path>
+<path d="M474 54 L486 66 M486 54 L474 66" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M498 60 L762 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<path marker-end="url(#triangle)" d="M480 78 L480 148.001 Q480 160 492 160 L562 160 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="556.0" y="190.0">7</text>
+<text font-size="smaller" style="fill:gray" x="550.0" y="136.0"><tspan xml:space="preserve">correction request</tspan></text>
+<ellipse cx="580.0" cy="160.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Timer_U_[8, 16]_None</title></ellipse>
+<ellipse cx="580.0" cy="160.0" rx="15.0" ry="15.0" stroke-width="1" stroke="darkgreen" fill="white"/>
+<ellipse cx="580.0" cy="160.0" rx="12.0" ry="12.0" stroke-width="1" stroke="black" fill="white"/>
+<path d="M575 157 L580 160 586 154 M592 160 L589 160 M590.392 166 L587.794 164.5 M586 170.392 L584.5 167.794 M580 172 L580 169 M574 170.392 L575.5 167.794 M569.608 166 L572.206 164.5 M568 160 L571 160 M569.608 154 L572.206 155.5 M574 149.608 L575.5 152.206 M580 148 L580 151 M586 149.608 L584.5 152.206 M590.392 154 L587.794 155.5 " stroke="black" stroke-width="1" fill="none"/><path marker-end="url(#triangle)" d="M598 160 L640 160 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="634.0" y="202.0">8</text>
+<text font-size="smaller" style="fill:gray" x="628.0" y="124.0"><tspan xml:space="preserve">invoice corrected</tspan></text>
+<rect rx="7" ry="7" x="640.0" y="130.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_U_[1, 2]_None</title></rect>
+<path marker-end="url(#triangle)" d="M720 160 L768 160 Q780 160 780 147.999 L780 78 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="756.0" y="90.0">9</text>
+<text font-size="smaller" style="fill:gray" x="750.0" y="36.0"><tspan xml:space="preserve"></tspan></text>
+<path d="M762 60 L780 42 L798 60 L780 78 Z" stroke="orange" fill="white"><title>XorGate_None_0_None</title></path>
+<path d="M774 54 L786 66 M786 54 L774 66" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M798 60 L862 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="856.0" y="90.0">10</text>
+<text font-size="smaller" style="fill:gray" x="850.0" y="36.0"><tspan xml:space="preserve">payment request</tspan></text>
+<ellipse cx="880.0" cy="60.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Timer_U_[0, 14]_None</title></ellipse>
+<ellipse cx="880.0" cy="60.0" rx="15.0" ry="15.0" stroke-width="1" stroke="darkgreen" fill="white"/>
+<ellipse cx="880.0" cy="60.0" rx="12.0" ry="12.0" stroke-width="1" stroke="black" fill="white"/>
+<path d="M875 57 L880 60 886 54 M892 60 L889 60 M890.392 66 L887.794 64.5 M886 70.3923 L884.5 67.7942 M880 72 L880 69 M874 70.3923 L875.5 67.7942 M869.608 66 L872.206 64.5 M868 60 L871 60 M869.608 54 L872.206 55.5 M874 49.6077 L875.5 52.2058 M880 48 L880 51 M886 49.6077 L884.5 52.2058 M890.392 54 L887.794 55.5 " stroke="black" stroke-width="1" fill="none"/><path marker-end="url(#triangle)" d="M898 60 L940 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="934.0" y="102.0">11</text>
+<text font-size="smaller" style="fill:gray" x="928.0" y="24.0"><tspan xml:space="preserve">payment registration</tspan></text>
+<rect rx="7" ry="7" x="940.0" y="30.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_U_[1, 2]_None</title></rect>
+<path marker-end="url(#triangle)" d="M1020 60 L1062 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="1056.0" y="90.0">12</text>
+<text font-size="smaller" style="fill:gray" x="1050.0" y="36.0"><tspan xml:space="preserve"></tspan></text>
+<path d="M1062 60 L1080 42 L1098 60 L1080 78 Z" stroke="orange" fill="white"><title>AndGate_None_0_None</title></path>
+<path d="M1072 60 L1088 60 M1080 52 L1080 68" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M1098 60 L1140 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="456.0" y="290.0">13</text>
+<text font-size="smaller" style="fill:gray" x="450.0" y="236.0"><tspan xml:space="preserve">available?</tspan></text>
+<text class="t1" font-size="smaller" style="fill:gray" x="480.0" y="290.0"><tspan xml:space="preserve">=(S.r&gt;=o)</tspan></text>
+<path d="M462 260 L480 242 L498 260 L480 278 Z" stroke="orange" fill="white"><title>XorGate_None_0_=(S.r&gt;=o)</title></path>
+<path d="M474 254 L486 266 M486 254 L474 266" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M498 260 L540 260 " style="fill:none;stroke:brown;stroke-width:1"/>
+<path marker-end="url(#triangle)" d="M480 278 L480 348.001 Q480 360 492 360 L562 360 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="534.0" y="302.0">14</text>
+<text font-size="smaller" style="fill:gray" x="528.0" y="224.0"><tspan xml:space="preserve">product packaging</tspan></text>
+<text class="t1" font-size="smaller" style="fill:gray" x="558.0" y="302.0"><tspan xml:space="preserve">S.r=S.r-o</tspan></text>
+<rect rx="7" ry="7" x="540.0" y="230.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_U_[3, 4]_S.r=S.r-o</title></rect>
+<path marker-end="url(#triangle)" d="M620 260 L1062 260 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="556.0" y="390.0">15</text>
+<text font-size="smaller" style="fill:gray" x="550.0" y="336.0"><tspan xml:space="preserve"></tspan></text>
+<path d="M562 360 L580 342 L598 360 L580 378 Z" stroke="orange" fill="white"><title>AndGate_None_0_None</title></path>
+<path d="M572 360 L588 360 M580 352 L580 368" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M598 360 L640 360 " style="fill:none;stroke:brown;stroke-width:1"/>
+<path marker-end="url(#triangle)" d="M580 378 L580 448.001 Q580 460 592 460 L640 460 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="634.0" y="402.0">16</text>
+<text font-size="smaller" style="fill:gray" x="628.0" y="324.0"><tspan xml:space="preserve">order from supplier</tspan></text>
+<rect rx="7" ry="7" x="640.0" y="330.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_U_[4, 6]_None</title></rect>
+<path marker-end="url(#triangle)" d="M720 360 L762 360 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="756.0" y="390.0">17</text>
+<text font-size="smaller" style="fill:gray" x="750.0" y="336.0"><tspan xml:space="preserve"></tspan></text>
+<path d="M762 360 L780 342 L798 360 L780 378 Z" stroke="orange" fill="white"><title>AndGate_None_0_None</title></path>
+<path d="M772 360 L788 360 M780 352 L780 368" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M798 360 L862 360 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="856.0" y="390.0">18</text>
+<text font-size="smaller" style="fill:gray" x="850.0" y="336.0"><tspan xml:space="preserve">wait for delivery</tspan></text>
+<text class="t1" font-size="smaller" style="fill:gray" x="880.0" y="390.0"><tspan xml:space="preserve">S.r=S.r+100</tspan></text>
+<ellipse cx="880.0" cy="360.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Timer_None_[40, 24]_S.r=S.r+100</title></ellipse>
+<ellipse cx="880.0" cy="360.0" rx="15.0" ry="15.0" stroke-width="1" stroke="darkgreen" fill="white"/>
+<ellipse cx="880.0" cy="360.0" rx="12.0" ry="12.0" stroke-width="1" stroke="black" fill="white"/>
+<path d="M875 357 L880 360 886 354 M892 360 L889 360 M890.392 366 L887.794 364.5 M886 370.392 L884.5 367.794 M880 372 L880 369 M874 370.392 L875.5 367.794 M869.608 366 L872.206 364.5 M868 360 L871 360 M869.608 354 L872.206 355.5 M874 349.608 L875.5 352.206 M880 348 L880 351 M886 349.608 L884.5 352.206 M890.392 354 L887.794 355.5 " stroke="black" stroke-width="1" fill="none"/><path marker-end="url(#triangle)" d="M898 360 L940 360 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="934.0" y="402.0">19</text>
+<text font-size="smaller" style="fill:gray" x="928.0" y="324.0"><tspan xml:space="preserve">repackaging</tspan></text>
+<text class="t1" font-size="smaller" style="fill:gray" x="958.0" y="402.0"><tspan xml:space="preserve">S.r=S.r-o</tspan></text>
+<rect rx="7" ry="7" x="940.0" y="330.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_U_[4, 6]_S.r=S.r-o</title></rect>
+<path marker-end="url(#triangle)" d="M1020 360 L1068 360 Q1080 360 1080 347.999 L1080 278 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="1134.0" y="102.0">20</text>
+<text font-size="smaller" style="fill:gray" x="1128.0" y="24.0"><tspan xml:space="preserve">preparation for shipment</tspan></text>
+<rect rx="7" ry="7" x="1140.0" y="30.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_U_[4, 6]_None</title></rect>
+<path marker-end="url(#triangle)" d="M1220 60 L1262 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="1256.0" y="90.0">21</text>
+<text font-size="smaller" style="fill:gray" x="1250.0" y="36.0"><tspan xml:space="preserve">delivery</tspan></text>
+<ellipse cx="1280.0" cy="60.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Timer_U_[16, 24]_None</title></ellipse>
+<ellipse cx="1280.0" cy="60.0" rx="15.0" ry="15.0" stroke-width="1" stroke="darkgreen" fill="white"/>
+<ellipse cx="1280.0" cy="60.0" rx="12.0" ry="12.0" stroke-width="1" stroke="black" fill="white"/>
+<path d="M1275 57 L1280 60 1286 54 M1292 60 L1289 60 M1290.39 66 L1287.79 64.5 M1286 70.3923 L1284.5 67.7942 M1280 72 L1280 69 M1274 70.3923 L1275.5 67.7942 M1269.61 66 L1272.21 64.5 M1268 60 L1271 60 M1269.61 54 L1272.21 55.5 M1274 49.6077 L1275.5 52.2058 M1280 48 L1280 51 M1286 49.6077 L1284.5 52.2058 M1290.39 54 L1287.79 55.5 " stroke="black" stroke-width="1" fill="none"/><path marker-end="url(#triangle)" d="M1298 60 L1362 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="1356.0" y="90.0">22</text>
+<text font-size="smaller" style="fill:gray" x="1350.0" y="36.0"><tspan xml:space="preserve">order completed</tspan></text>
+<ellipse cx="1380.0" cy="60.0" rx="18.0" ry="18.0" stroke-width="3" stroke="red" fill-opacity="0.6" fill="white"><title>End_None_None_None</title></ellipse>
+<text x="634.0" y="502.0">23</text>
+<text font-size="smaller" style="fill:gray" x="628.0" y="424.0"><tspan xml:space="preserve">info to customer</tspan></text>
+<rect rx="7" ry="7" x="640.0" y="430.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_U_[1, 2]_None</title></rect>
+<path marker-end="url(#triangle)" d="M720 460 L762 460 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="756.0" y="490.0">24</text>
+<text font-size="smaller" style="fill:gray" x="750.0" y="436.0"><tspan xml:space="preserve">not accepted?</tspan></text>
+<text class="t1" font-size="smaller" style="fill:gray" x="780.0" y="490.0"><tspan xml:space="preserve">=B(0.1)</tspan></text>
+<path d="M762 460 L780 442 L798 460 L780 478 Z" stroke="orange" fill="white"><title>XorGate_None_0_=B(0.1)</title></path>
+<path d="M774 454 L786 466 M786 454 L774 466" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M798 460 L840 460 " style="fill:none;stroke:brown;stroke-width:1"/>
+<path marker-end="url(#triangle)" d="M780 442 L780 442 Q780 442 780 429.998 L780 378 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="834.0" y="502.0">25</text>
+<text font-size="smaller" style="fill:gray" x="828.0" y="424.0"><tspan xml:space="preserve">refund and cancel</tspan></text>
+<rect rx="7" ry="7" x="840.0" y="430.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_U_[1, 2]_None</title></rect>
+<path marker-end="url(#triangle)" d="M920 460 L962 460 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="1056.0" y="290.0">26</text>
+<text font-size="smaller" style="fill:gray" x="1050.0" y="236.0"><tspan xml:space="preserve"></tspan></text>
+<path d="M1062 260 L1080 242 L1098 260 L1080 278 Z" stroke="orange" fill="white"><title>XorGate_None_0_None</title></path>
+<path d="M1074 254 L1086 266 M1086 254 L1074 266" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M1080 242 L1080 242 Q1080 242 1080 229.999 L1080 78 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="956.0" y="490.0">27</text>
+<text font-size="smaller" style="fill:gray" x="950.0" y="436.0"><tspan xml:space="preserve"></tspan></text>
+<ellipse cx="980.0" cy="460.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Terminate_None_None_None</title></ellipse>
+<ellipse cx="980.0" cy="460.0" rx="12.0" ry="12.0" stroke-width="1" stroke="red" fill="red" fill-opacity="0.6"/>
+<script>function on_click() {[...document.getElementsByClassName('t1')].forEach(e=>e.style.display=(e.style.display=='none'?'':'none'));}</script><defs><filter x="0" y="0" width="1" height="1" id="fi">
+<feFlood flood-color="white"/>
+<feComposite in="SourceGraphic" operator="atop"/></filter></defs>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="0.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="0.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="0.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="0.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="0.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="1.61291655643222s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="1.61291655643222s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="1.61291655643222s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="1.61291655643222s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="1.61291655643222s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="1.61291655643222s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="3.5756022677341295s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="1.61291655643222s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="1.61291655643222s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="4.743262785209465s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="3.5756022677341295s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="3.5756022677341295s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="3.5756022677341295s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">1
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">1
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="3.5756022677341295s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="3.5756022677341295s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="3.5756022677341295s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="3.5756022677341295s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="3.5756022677341295s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="14.893518167784407s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="14.893518167784407s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="14.893518167784407s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="15.946949737655135s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="8.569615304841818s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="15.946949737655135s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="15.946949737655135s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="4.743262785209465s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="4.743262785209465s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="4.743262785209465s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="4.743262785209465s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="578" begin="4.743262785209465s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="8.569615304841818s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">1
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">1
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">1
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">1
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">1
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="15.946949737655135s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="15.946949737655135s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="21.4167897829246s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="21.4167897829246s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="21.4167897829246s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="39.54019270845201s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="39.54019270845201s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="39.54019270845201s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="39.54019270845201s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">1
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">1
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">1
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="8.569615304841818s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="8.569615304841818s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="8.569615304841818s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">1
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="4.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="4.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="4.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="4.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="4.7303565006412835s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="5.812655449658024s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="5.812655449658024s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="5.812655449658024s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="5.812655449658024s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="5.812655449658024s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="5.81570984447782s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="6.946000556175608s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="5.812655449658024s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="8.196097958795889s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="11.226442824717157s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="6.946000556175608s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="6.946000556175608s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="6.946000556175608s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">3
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">3
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="6.946000556175608s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="6.946000556175608s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="6.946000556175608s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="6.946000556175608s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="6.946000556175608s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="20.74329663968363s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="20.74329663968363s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="20.74329663968363s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="21.926143065547443s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="15.790381004325303s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="21.926143065547443s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="21.926143065547443s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="11.226442824717157s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="11.226442824717157s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="11.226442824717157s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="11.226442824717157s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="578" begin="12.074293715391299s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="15.790381004325303s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">3
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">3
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">3
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">3
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">3
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="21.926143065547443s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="21.926143065547443s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="26.198843636656907s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="26.198843636656907s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="26.198843636656907s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="49.54381241797289s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="49.54381241797289s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="49.54381241797289s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="49.54381241797289s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">3
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">3
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">3
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="15.790381004325303s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="15.790381004325303s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="15.790381004325303s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">3
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="6.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="6.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="6.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="6.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="6.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="7.579094650186825s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="7.579094650186825s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="7.579094650186825s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="7.579094650186825s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="7.579094650186825s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="7.579094650186825s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="10.326442369523333s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="7.579094650186825s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="11.226442824717157s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="14.237490536344222s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="10.326442369523333s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="10.326442369523333s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="10.326442369523333s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">4
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">4
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="10.326442369523333s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="10.326442369523333s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="10.326442369523333s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="10.326442369523333s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="10.326442369523333s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="19.66936858477338s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="19.66936858477338s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="21.926143065547443s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="23.59150565233794s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="19.030105707434437s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="23.59150565233794s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="23.59150565233794s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="14.237490536344222s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="14.237490536344222s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="14.237490536344222s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="14.237490536344222s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="578" begin="15.790381004325303s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="19.030105707434437s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">4
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">4
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">4
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">4
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">4
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="23.59150565233794s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="26.198843636656907s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="31.089877711051926s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="31.089877711051926s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="31.089877711051926s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="54.973417786433004s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="54.973417786433004s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="54.973417786433004s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="54.973417786433004s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">4
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">4
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">4
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">4
+<animate attributeName="visibility" from="hidden" to="visible" begin="19.030105707434437s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="19.030105707434437s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="19.030105707434437s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">4
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="8.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="8.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="8.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="8.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="8.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="10.873900845862643s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="10.873900845862643s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="10.873900845862643s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="10.873900845862643s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="10.873900845862643s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="10.873900845862643s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="13.422066142431676s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="10.873900845862643s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="14.237490536344222s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="17.447021527658794s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="13.422066142431676s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="13.422066142431676s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="13.422066142431676s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">5
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">5
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="13.422066142431676s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="13.422066142431676s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="13.422066142431676s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="13.422066142431676s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="13.422066142431676s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="27.410221740340468s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="27.410221740340468s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="27.410221740340468s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="29.099553000644164s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="22.463607681722056s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="29.099553000644164s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="29.099553000644164s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="17.447021527658794s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="17.447021527658794s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="17.447021527658794s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="17.447021527658794s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="578" begin="19.030105707434437s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="22.463607681722056s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">5
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">5
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">5
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">5
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">5
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="29.099553000644164s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="31.089877711051926s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="35.36551634539749s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="35.36551634539749s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="35.36551634539749s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="52.225650658209425s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="52.225650658209425s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="52.225650658209425s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="52.225650658209425s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">5
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">5
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">5
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="22.463607681722056s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="22.463607681722056s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="22.463607681722056s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">5
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="10.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="10.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="10.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="10.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="10.873900845862643s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="13.760842587003166s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="13.760842587003166s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="13.760842587003166s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="13.760842587003166s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="13.760842587003166s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="13.760842587003166s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="15.71002195654414s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="13.760842587003166s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="17.447021527658794s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="20.738820856472824s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="15.71002195654414s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="15.71002195654414s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="15.71002195654414s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">6
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">6
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="15.71002195654414s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="15.71002195654414s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="15.71002195654414s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="15.71002195654414s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="15.71002195654414s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="21.476838245968743s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="21.476838245968743s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="29.099553000644164s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="30.228838178378506s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="26.11612653236533s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="30.228838178378506s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="30.228838178378506s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="20.738820856472824s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="20.738820856472824s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="20.738820856472824s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="20.738820856472824s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="578" begin="22.463607681722056s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="26.11612653236533s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">6
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">6
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">6
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">6
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">6
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="30.228838178378506s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="35.36551634539749s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="40.07899664633258s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="40.07899664633258s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="40.07899664633258s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="57.107941656501836s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="57.107941656501836s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="57.107941656501836s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="57.107941656501836s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">6
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">6
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">6
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="26.11612653236533s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="26.11612653236533s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="26.11612653236533s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">6
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="12.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="12.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="12.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="12.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="13.760842587003166s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="15.087715989342012s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="15.087715989342012s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="15.087715989342012s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="15.087715989342012s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="15.087715989342012s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="15.71002195654414s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="17.452576804849816s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="15.087715989342012s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="20.738820856472824s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="24.00985761183112s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="17.452576804849816s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="17.452576804849816s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="17.452576804849816s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">7
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">7
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="17.452576804849816s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="17.452576804849816s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="17.452576804849816s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="17.452576804849816s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="17.452576804849816s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="22.235546250232314s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="22.235546250232314s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="30.228838178378506s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="31.7091862441424s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="29.81357809826952s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="31.7091862441424s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="31.7091862441424s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="24.00985761183112s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="24.00985761183112s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="24.00985761183112s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="24.00985761183112s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="578" begin="26.11612653236533s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="29.81357809826952s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">7
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">7
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">7
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">7
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">7
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="31.7091862441424s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="40.07899664633258s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="44.81714672817876s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="44.81714672817876s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="44.81714672817876s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="66.67444913020921s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="66.67444913020921s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="66.67444913020921s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="66.67444913020921s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">7
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">7
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">7
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="29.81357809826952s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="29.81357809826952s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="29.81357809826952s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">7
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="14.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="14.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="14.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="14.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="15.087715989342012s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="16.798029073065365s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="16.798029073065365s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="16.798029073065365s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="16.798029073065365s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="16.798029073065365s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="17.452576804849816s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="18.575181503666567s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="16.798029073065365s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="24.00985761183112s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="27.254521811493536s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="18.575181503666567s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="18.575181503666567s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="18.575181503666567s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">8
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">8
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="18.575181503666567s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="18.575181503666567s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="18.575181503666567s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="18.575181503666567s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="18.575181503666567s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="18.989520359772055s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="18.989520359772055s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="31.7091862441424s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="33.25223445424786s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="33.25223445424786s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="33.629667203018066s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="33.629667203018066s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="27.254521811493536s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="27.254521811493536s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="27.254521811493536s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="27.254521811493536s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="578" begin="29.81357809826952s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="33.629667203018066s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">8
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">8
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">8
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">8
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">8
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="33.629667203018066s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="44.81714672817876s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="50.77622510241941s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="50.77622510241941s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="50.77622510241941s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="74.5564781186608s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="74.5564781186608s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="74.5564781186608s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="74.5564781186608s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">8
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">8
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">8
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">8
+<animate attributeName="visibility" from="hidden" to="visible" begin="33.629667203018066s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="33.629667203018066s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="33.629667203018066s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">8
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="2.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="2.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="2.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="2.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="2.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="4.7303565006412835s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="4.7303565006412835s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="4.7303565006412835s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="4.7303565006412835s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="4.7303565006412835s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="4.7303565006412835s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="5.81570984447782s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="4.7303565006412835s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="4.743262785209465s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="8.196097958795889s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="5.81570984447782s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="5.81570984447782s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="5.81570984447782s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="5.81570984447782s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="600" begin="5.81570984447782s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="18.635305121960904s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="18.635305121960904s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="18.635305121960904s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="20.146163799569536s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="20.146163799569536s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="20.146163799569536s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="20.146163799569536s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="20.146163799569536s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="20.146163799569536s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="21.44198898610378s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="21.44198898610378s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="33.25223445424786s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="34.98188709971773s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="12.074293715391299s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="34.98188709971773s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="34.98188709971773s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="8.196097958795889s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="8.196097958795889s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="8.196097958795889s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="8.196097958795889s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="578" begin="8.569615304841818s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="12.074293715391299s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">2
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">2
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">2
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">2
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">2
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="34.98188709971773s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="50.77622510241941s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="56.41078770749573s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="56.41078770749573s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="56.41078770749573s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="72.84790336362991s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="72.84790336362991s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="72.84790336362991s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="72.84790336362991s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">2
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">2
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">2
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="12.074293715391299s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="12.074293715391299s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="12.074293715391299s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">2
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="18.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="18.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="18.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="18.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="18.440352353016575s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="20.98545163880685s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="20.98545163880685s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="20.98545163880685s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="20.98545163880685s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="20.98545163880685s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="21.537165207968s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="23.833272662186957s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="20.98545163880685s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="30.6570084435992s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="34.44682666105909s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="23.833272662186957s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="23.833272662186957s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="23.833272662186957s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">10
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">10
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="23.833272662186957s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="23.833272662186957s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="23.833272662186957s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="23.833272662186957s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="23.833272662186957s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="27.06703599659389s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="27.06703599659389s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="34.98188709971773s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="36.58430745858977s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="36.58430745858977s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="40.66899314820797s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="40.66899314820797s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="34.44682666105909s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="34.44682666105909s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="34.44682666105909s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="34.44682666105909s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="578" begin="37.34937158781848s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="40.66899314820797s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">10
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">10
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">10
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">10
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">10
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="40.66899314820797s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="56.41078770749573s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="60.87363296885547s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="60.87363296885547s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="60.87363296885547s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="79.94032122098491s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="79.94032122098491s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="79.94032122098491s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="79.94032122098491s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">10
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">10
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">10
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="40.66899314820797s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="40.66899314820797s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="40.66899314820797s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">10
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="20.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="20.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="20.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="20.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="20.98545163880685s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="22.6551842922125s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="22.6551842922125s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="22.6551842922125s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="22.6551842922125s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="22.6551842922125s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="23.833272662186957s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="26.547485090995643s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="22.6551842922125s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="34.44682666105909s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="38.249943849486144s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="26.547485090995643s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="26.547485090995643s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="26.547485090995643s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">11
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">11
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="26.547485090995643s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="26.547485090995643s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="26.547485090995643s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="26.547485090995643s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="26.547485090995643s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="38.25906569763025s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="38.25906569763025s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="38.25906569763025s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="39.71810510084086s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="39.71810510084086s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="44.4835427312573s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="44.4835427312573s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="38.249943849486144s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="38.249943849486144s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="38.249943849486144s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="38.249943849486144s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="578" begin="40.66899314820797s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="44.4835427312573s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">11
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">11
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">11
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">11
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">11
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="44.4835427312573s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="60.87363296885547s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="65.51378873644069s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="65.51378873644069s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="65.51378873644069s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="84.9573032351943s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="84.9573032351943s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="84.9573032351943s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="84.9573032351943s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">11
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">11
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">11
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">11
+<animate attributeName="visibility" from="hidden" to="visible" begin="44.4835427312573s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="44.4835427312573s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="44.4835427312573s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">11
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="16.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="16.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="16.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="16.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="16.798029073065365s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="18.440352353016575s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="18.440352353016575s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="18.440352353016575s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="18.440352353016575s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="18.440352353016575s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="18.575181503666567s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="21.537165207968s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="18.440352353016575s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="27.254521811493536s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="30.6570084435992s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="21.537165207968s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="21.537165207968s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="21.537165207968s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="21.537165207968s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="600" begin="21.537165207968s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="34.962912213519374s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="34.962912213519374s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="34.962912213519374s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="36.94565254640461s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="36.94565254640461s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="36.94565254640461s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="36.94565254640461s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="36.94565254640461s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="36.94565254640461s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="49.82598233613203s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="49.82598233613203s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="49.82598233613203s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="50.92746562731306s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="37.34937158781848s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="50.92746562731306s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="50.92746562731306s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="30.6570084435992s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="30.6570084435992s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="30.6570084435992s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="30.6570084435992s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="578" begin="33.629667203018066s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="37.34937158781848s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">9
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">9
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">9
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">9
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">9
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="50.92746562731306s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="65.51378873644069s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="71.29242890526262s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="71.29242890526262s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="71.29242890526262s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="90.31360404045657s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="90.31360404045657s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="90.31360404045657s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="90.31360404045657s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">9
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">9
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">9
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="37.34937158781848s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="37.34937158781848s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="37.34937158781848s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">9
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="22.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="22.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="22.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="22.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="22.6551842922125s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="25.28445080987694s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="25.28445080987694s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="25.28445080987694s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="25.28445080987694s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="25.28445080987694s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="26.547485090995643s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="28.8456961057966s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="25.28445080987694s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="38.249943849486144s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="41.898028333938875s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="28.8456961057966s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="28.8456961057966s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="28.8456961057966s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="28.8456961057966s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="600" begin="28.8456961057966s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="42.34982124390095s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="42.34982124390095s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="42.34982124390095s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="43.96251418516905s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="43.96251418516905s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="43.96251418516905s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="43.96251418516905s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="43.96251418516905s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="43.96251418516905s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="49.10709604845126s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="49.10709604845126s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="55.91886623952042s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="57.179236120242415s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="48.15536757824258s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="57.179236120242415s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="57.179236120242415s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="41.898028333938875s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="41.898028333938875s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="41.898028333938875s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="41.898028333938875s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="578" begin="44.4835427312573s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="48.15536757824258s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">12
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">12
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">12
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">12
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">12
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="57.179236120242415s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="71.29242890526262s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="75.63281974943926s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="75.63281974943926s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="75.63281974943926s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="95.63727444466132s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="95.63727444466132s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="95.63727444466132s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="95.63727444466132s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">12
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">12
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">12
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">12
+<animate attributeName="visibility" from="hidden" to="visible" begin="48.15536757824258s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="48.15536757824258s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="48.15536757824258s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">12
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="24.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="24.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="24.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="24.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="25.28445080987694s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="26.52501062132883s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="26.52501062132883s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="26.52501062132883s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="26.52501062132883s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="26.52501062132883s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="28.8456961057966s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="31.808915894821762s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="26.52501062132883s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="41.898028333938875s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="45.25076243765635s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="31.808915894821762s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="31.808915894821762s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="31.808915894821762s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">13
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">13
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="31.808915894821762s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="31.808915894821762s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="31.808915894821762s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="31.808915894821762s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="31.808915894821762s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="40.06091851612824s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="40.06091851612824s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="40.06091851612824s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="42.046829324008186s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="42.046829324008186s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="68.58196775673804s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="68.58196775673804s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="45.25076243765635s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="45.25076243765635s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="45.25076243765635s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">13
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="45.25076243765635s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="600" begin="45.25076243765635s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="45.25076243765635s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="45.25076243765635s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="45.25076243765635s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="49.95014319567695s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="47.12902316714488s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="49.95014319567695s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="49.95014319567695s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="49.95014319567695s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="49.95014319567695s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="64.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="64.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="64.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="68.58196775673804s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="68.58196775673804s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="75.63281974943926s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="79.85472435370643s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="79.85472435370643s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="79.85472435370643s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="103.21237032795231s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="103.21237032795231s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="103.21237032795231s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="103.21237032795231s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="45.25076243765635s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="45.25076243765635s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="47.12902316714488s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="47.12902316714488s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="47.12902316714488s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="47.12902316714488s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">13
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">13
+<animate attributeName="visibility" from="hidden" to="visible" begin="68.58196775673804s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="68.58196775673804s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="68.58196775673804s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">13
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="36.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="36.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="36.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="36.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="37.58195871171825s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="40.45027670255774s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="40.45027670255774s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="40.45027670255774s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="40.45027670255774s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="40.45027670255774s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="42.508158235645006s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="44.05403472654874s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="40.45027670255774s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="62.13680610993942s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="65.85894810081462s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="44.05403472654874s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="44.05403472654874s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="44.05403472654874s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="44.05403472654874s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="600" begin="44.05403472654874s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="57.56772714611712s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="57.56772714611712s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="57.56772714611712s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="58.614009995158455s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="58.614009995158455s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="58.614009995158455s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="58.614009995158455s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="58.614009995158455s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="58.614009995158455s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="71.97192094282595s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="71.97192094282595s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="71.97192094282595s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="73.10836189189754s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="69.34250525627742s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="73.10836189189754s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="73.10836189189754s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="65.85894810081462s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="65.85894810081462s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="65.85894810081462s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="65.85894810081462s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="578" begin="65.85894810081462s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="69.34250525627742s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">19
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">19
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">19
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">19
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">19
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="73.10836189189754s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="79.85472435370643s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="84.39275708126314s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="84.39275708126314s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="84.39275708126314s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="107.5961713778478s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="107.5961713778478s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="107.5961713778478s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="107.5961713778478s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">19
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">19
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">19
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">19
+<animate attributeName="visibility" from="hidden" to="visible" begin="69.34250525627742s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="69.34250525627742s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="69.34250525627742s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">19
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="38.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="38.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="38.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="38.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="40.45027670255774s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="41.98295522147389s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="41.98295522147389s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="41.98295522147389s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="41.98295522147389s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="41.98295522147389s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="44.05403472654874s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="45.46371103505367s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="41.98295522147389s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="65.85894810081462s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="69.23542197773786s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="45.46371103505367s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="45.46371103505367s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="45.46371103505367s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">20
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">20
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="45.46371103505367s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="45.46371103505367s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="45.46371103505367s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="45.46371103505367s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="45.46371103505367s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="47.17709994626436s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="47.17709994626436s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="57.179236120242415s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="58.84578188753458s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="58.84578188753458s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="73.18378085262346s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="73.18378085262346s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="69.23542197773786s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="69.23542197773786s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="69.23542197773786s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="69.23542197773786s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="578" begin="69.34250525627742s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="73.18378085262346s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">20
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">20
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">20
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">20
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">20
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="73.18378085262346s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="84.39275708126314s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="89.59726824582684s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="89.59726824582684s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="89.59726824582684s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="113.44389629927693s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="113.44389629927693s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="113.44389629927693s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="113.44389629927693s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">20
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">20
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">20
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">20
+<animate attributeName="visibility" from="hidden" to="visible" begin="73.18378085262346s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="73.18378085262346s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="73.18378085262346s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">20
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="26.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="26.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="26.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="26.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="26.52501062132883s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="27.569405690482874s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="27.569405690482874s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="27.569405690482874s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="27.569405690482874s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="27.569405690482874s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="31.808915894821762s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="34.24968587688201s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="27.569405690482874s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="45.25076243765635s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="48.27224353602947s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="34.24968587688201s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="34.24968587688201s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="34.24968587688201s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">14
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">14
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="34.24968587688201s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="34.24968587688201s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="34.24968587688201s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="34.24968587688201s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="34.24968587688201s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="37.03005220707635s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="37.03005220707635s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="42.046829324008186s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="43.86024205317473s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="43.86024205317473s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="73.54042425737973s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="73.54042425737973s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="48.27224353602947s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="48.27224353602947s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="48.27224353602947s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">14
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="48.27224353602947s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="600" begin="48.27224353602947s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="48.27224353602947s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="48.27224353602947s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="49.95014319567695s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="55.1226026250741s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="49.48142272519758s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="55.1226026250741s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="55.1226026250741s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="55.1226026250741s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="64.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="64.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="64.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="68.58196775673804s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="73.54042425737973s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="73.54042425737973s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="89.59726824582684s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="95.22438551988216s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="95.22438551988216s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="95.22438551988216s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="112.21372434074223s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="112.21372434074223s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="112.21372434074223s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="112.21372434074223s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="48.27224353602947s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="48.27224353602947s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="49.48142272519758s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="49.48142272519758s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="49.48142272519758s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="49.48142272519758s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">14
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">14
+<animate attributeName="visibility" from="hidden" to="visible" begin="73.54042425737973s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="73.54042425737973s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="73.54042425737973s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">14
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="28.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="28.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="28.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="28.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="28.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="29.73260474829067s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="29.73260474829067s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="29.73260474829067s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="29.73260474829067s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="29.73260474829067s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="34.24968587688201s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="36.49234336826054s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="29.73260474829067s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="48.27224353602947s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="52.16295890609253s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="36.49234336826054s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="36.49234336826054s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="36.49234336826054s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">15
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">15
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="36.49234336826054s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="36.49234336826054s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="36.49234336826054s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="36.49234336826054s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="36.49234336826054s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="41.26495880206772s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="41.26495880206772s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="43.86024205317473s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="45.110978426316s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="45.110978426316s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="79.43421364459114s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="79.43421364459114s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="52.16295890609253s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="52.16295890609253s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="52.16295890609253s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">15
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="52.16295890609253s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="600" begin="52.16295890609253s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="52.16295890609253s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="52.16295890609253s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="55.1226026250741s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="60.43192321373437s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="53.496923858757725s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="60.43192321373437s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="60.43192321373437s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="60.43192321373437s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="64.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="64.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="64.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="73.54042425737973s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="79.43421364459114s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="79.43421364459114s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="95.22438551988216s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="99.44583750212638s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="99.44583750212638s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="99.44583750212638s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="117.06988063436211s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="117.06988063436211s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="117.06988063436211s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="117.06988063436211s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="52.16295890609253s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="52.16295890609253s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="53.496923858757725s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="53.496923858757725s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="53.496923858757725s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="53.496923858757725s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">15
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">15
+<animate attributeName="visibility" from="hidden" to="visible" begin="79.43421364459114s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="79.43421364459114s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="79.43421364459114s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">15
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="30.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="30.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="30.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="30.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="30.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="31.80929028643997s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="31.80929028643997s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="31.80929028643997s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="31.80929028643997s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="31.80929028643997s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="36.49234336826054s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="38.95182988709608s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="31.80929028643997s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="52.16295890609253s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="55.626158032388844s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="38.95182988709608s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="38.95182988709608s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="38.95182988709608s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">16
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">16
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="38.95182988709608s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="38.95182988709608s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="38.95182988709608s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="38.95182988709608s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="38.95182988709608s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="44.626696528753556s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="44.626696528753556s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="50.92746562731306s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="52.55984926386088s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="52.55984926386088s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="108.46416030921166s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="108.46416030921166s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="55.626158032388844s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="55.626158032388844s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="55.626158032388844s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">16
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="55.626158032388844s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="600" begin="55.626158032388844s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="55.626158032388844s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="55.626158032388844s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="60.43192321373437s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="64.51042732968278s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="56.92173062307229s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="64.51042732968278s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="64.51042732968278s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="64.51042732968278s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="64.51042732968278s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="104.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="104.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="104.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="108.46416030921166s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="108.46416030921166s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="108.46416030921166s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="112.92221874267278s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="112.92221874267278s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="112.92221874267278s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="130.16416453739575s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="130.16416453739575s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="130.16416453739575s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="130.16416453739575s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="55.626158032388844s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="55.626158032388844s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="56.92173062307229s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="56.92173062307229s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="56.92173062307229s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="56.92173062307229s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">16
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">16
+<animate attributeName="visibility" from="hidden" to="visible" begin="108.46416030921166s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="108.46416030921166s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="108.46416030921166s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">16
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="32.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="32.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="32.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="32.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="32.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="34.73301769371643s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="34.73301769371643s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="34.73301769371643s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="34.73301769371643s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="34.73301769371643s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="38.95182988709608s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="41.3344031491211s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="34.73301769371643s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="55.626158032388844s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="58.856486744167995s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="41.3344031491211s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="41.3344031491211s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="41.3344031491211s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">17
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">17
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="41.3344031491211s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="41.3344031491211s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="41.3344031491211s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="41.3344031491211s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="41.3344031491211s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="52.582181896991344s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="52.582181896991344s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="52.582181896991344s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="53.96735685453367s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="53.96735685453367s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="112.72111056435489s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="112.72111056435489s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="58.856486744167995s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="58.856486744167995s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="58.856486744167995s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">17
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="58.856486744167995s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="600" begin="58.856486744167995s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="58.856486744167995s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="58.856486744167995s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="64.51042732968278s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="69.8557069352812s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="59.8801409224794s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="69.8557069352812s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="69.8557069352812s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="69.8557069352812s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="104.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="104.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="104.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="108.46416030921166s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="112.72111056435489s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="112.72111056435489s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="112.92221874267278s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="117.08607451817157s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="117.08607451817157s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="117.08607451817157s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="137.03955449803755s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="137.03955449803755s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="137.03955449803755s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="137.03955449803755s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="58.856486744167995s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="58.856486744167995s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="59.8801409224794s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="59.8801409224794s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="59.8801409224794s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="59.8801409224794s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">17
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">17
+<animate attributeName="visibility" from="hidden" to="visible" begin="112.72111056435489s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="112.72111056435489s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="112.72111056435489s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">17
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="46" y="55" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="34.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="100" begin="34.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="34.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="124" y="43" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="34.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="178" begin="34.73301769371643s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="37.58195871171825s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="246" y="55" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="37.58195871171825s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="300" begin="37.58195871171825s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="37.58195871171825s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="43" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="37.58195871171825s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="41.3344031491211s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="42.508158235645006s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="324" y="243" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="37.58195871171825s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="378" begin="58.856486744167995s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="62.13680610993942s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="55" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="42.508158235645006s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="42.508158235645006s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="42.508158235645006s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="155" visibility="hidden">18
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="143" visibility="hidden">18
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="55" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="42.508158235645006s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="42.508158235645006s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="42.508158235645006s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="55" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="42.508158235645006s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="42.508158235645006s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="50.07868659472513s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="43" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="50.07868659472513s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="53.96735685453367s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="55.91886623952042s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="55" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="55.91886623952042s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="117.60912457775169s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="117.60912457775169s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="446" y="255" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="62.13680610993942s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="500" begin="62.13680610993942s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="62.13680610993942s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="524" y="243" visibility="hidden">18
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="546" y="355" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="62.13680610993942s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="600" begin="62.13680610993942s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="62.13680610993942s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="343" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="62.13680610993942s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="69.8557069352812s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="75.67245294784607s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="355" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="63.76020183593984s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="75.67245294784607s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="75.67245294784607s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="846" y="355" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="75.67245294784607s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="900" begin="104.0s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="104.0s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="924" y="343" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="104.0s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="978" begin="112.72111056435489s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="117.60912457775169s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1124" y="43" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="117.60912457775169s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1178" begin="117.60912457775169s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="123.1880111659465s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1246" y="55" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="123.1880111659465s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1300" begin="123.1880111659465s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="146.65180216165126s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1346" y="55" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="146.65180216165126s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1400" begin="146.65180216165126s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="146.65180216165126s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="624" y="443" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="62.13680610993942s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="678" begin="62.13680610993942s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="63.76020183593984s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="746" y="455" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="63.76020183593984s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="800" begin="63.76020183593984s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="63.76020183593984s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="824" y="443" visibility="hidden">18
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="1046" y="255" visibility="hidden">18
+<animate attributeName="visibility" from="hidden" to="visible" begin="117.60912457775169s" dur="0.01s" fill="freeze"/>
+<animate attributeName="x" to="1100" begin="117.60912457775169s" dur="0.5s" fill="freeze"/>
+<animate attributeName="visibility" from="visible" to="hidden" begin="117.60912457775169s" dur="0.01s" fill="freeze"/>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="946" y="455" visibility="hidden">18
+</text>
+</svg>
+

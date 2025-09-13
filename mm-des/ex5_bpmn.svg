@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="438" height="408">
+<defs><marker id="triangle" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="strokeWidth" markerWidth="10" markerHeight="10" orient="auto"> <path d="M 0 0 L 10 5 L 0 10 z" fill="black" /></marker></defs>
+<text x="56.0" y="90.0">1</text>
+<ellipse cx="80.0" cy="60.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Start_E_[2.0]_S.bA=3</title></ellipse>
+<path marker-end="url(#triangle)" d="M98 60 L162 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="56.0" y="290.0">2</text>
+<ellipse cx="80.0" cy="260.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Start_E_[2.0]_S.bB=3</title></ellipse>
+<path marker-end="url(#triangle)" d="M98 260 L162 260 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="156.0" y="90.0">3</text>
+<path d="M162 60 L180 42 L198 60 L180 78 Z" stroke="orange" fill="white"><title>XorGate_None_0_=S.bA&gt;0;S.bA=S.bA&gt;0 and S.bA-1 or 0</title></path>
+<path d="M174 54 L186 66 M186 54 L174 66" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M198 60 L262 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<path marker-end="url(#triangle)" d="M180 78 L180 148.001 Q180 160 192 160 L262 160 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="156.0" y="290.0">4</text>
+<path d="M162 260 L180 242 L198 260 L180 278 Z" stroke="orange" fill="white"><title>XorGate_None_0_=S.bB&gt;0;S.bB=S.bB&gt;0 and S.bB-1 or 0</title></path>
+<path d="M174 254 L186 266 M186 254 L174 266" stroke="black" stroke-width="3" />
+<path marker-end="url(#triangle)" d="M198 260 L262 260 " style="fill:none;stroke:brown;stroke-width:1"/>
+<path marker-end="url(#triangle)" d="M180 278 L180 348.001 Q180 360 192 360 L262 360 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="256.0" y="90.0">5</text>
+<ellipse cx="280.0" cy="60.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Timer_U_[4.0, 5.0]_S.bB=S.bB+1</title></ellipse>
+<ellipse cx="280.0" cy="60.0" rx="15.0" ry="15.0" stroke-width="1" stroke="darkgreen" fill="none"/>
+<ellipse cx="280.0" cy="60.0" rx="12.0" ry="12.0" stroke-width="1" stroke="black" fill="none"/>
+<path d="M275 57 L280 60 286 54 M292 60 L289 60 M290.392 66 L287.794 64.5 M286 70.3923 L284.5 67.7942 M280 72 L280 69 M274 70.3923 L275.5 67.7942 M269.608 66 L272.206 64.5 M268 60 L271 60 M269.608 54 L272.206 55.5 M274 49.6077 L275.5 52.2058 M280 48 L280 51 M286 49.6077 L284.5 52.2058 M290.392 54 L287.794 55.5 " stroke="black" stroke-width="1" fill="none"/><path marker-end="url(#triangle)" d="M298 60 L362 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="256.0" y="190.0">6</text>
+<ellipse cx="280.0" cy="160.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Timer_U_[15.0, 20.0]_None</title></ellipse>
+<ellipse cx="280.0" cy="160.0" rx="15.0" ry="15.0" stroke-width="1" stroke="darkgreen" fill="none"/>
+<ellipse cx="280.0" cy="160.0" rx="12.0" ry="12.0" stroke-width="1" stroke="black" fill="none"/>
+<path d="M275 157 L280 160 286 154 M292 160 L289 160 M290.392 166 L287.794 164.5 M286 170.392 L284.5 167.794 M280 172 L280 169 M274 170.392 L275.5 167.794 M269.608 166 L272.206 164.5 M268 160 L271 160 M269.608 154 L272.206 155.5 M274 149.608 L275.5 152.206 M280 148 L280 151 M286 149.608 L284.5 152.206 M290.392 154 L287.794 155.5 " stroke="black" stroke-width="1" fill="none"/><path marker-end="url(#triangle)" d="M298 160 L362 160 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="256.0" y="290.0">7</text>
+<ellipse cx="280.0" cy="260.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Timer_U_[4.0, 5.0]_S.bA=S.bA+1</title></ellipse>
+<ellipse cx="280.0" cy="260.0" rx="15.0" ry="15.0" stroke-width="1" stroke="darkgreen" fill="none"/>
+<ellipse cx="280.0" cy="260.0" rx="12.0" ry="12.0" stroke-width="1" stroke="black" fill="none"/>
+<path d="M275 257 L280 260 286 254 M292 260 L289 260 M290.392 266 L287.794 264.5 M286 270.392 L284.5 267.794 M280 272 L280 269 M274 270.392 L275.5 267.794 M269.608 266 L272.206 264.5 M268 260 L271 260 M269.608 254 L272.206 255.5 M274 249.608 L275.5 252.206 M280 248 L280 251 M286 249.608 L284.5 252.206 M290.392 254 L287.794 255.5 " stroke="black" stroke-width="1" fill="none"/><path marker-end="url(#triangle)" d="M298 260 L362 260 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="256.0" y="390.0">8</text>
+<ellipse cx="280.0" cy="360.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Timer_U_[15.0, 20.0]_None</title></ellipse>
+<ellipse cx="280.0" cy="360.0" rx="15.0" ry="15.0" stroke-width="1" stroke="darkgreen" fill="none"/>
+<ellipse cx="280.0" cy="360.0" rx="12.0" ry="12.0" stroke-width="1" stroke="black" fill="none"/>
+<path d="M275 357 L280 360 286 354 M292 360 L289 360 M290.392 366 L287.794 364.5 M286 370.392 L284.5 367.794 M280 372 L280 369 M274 370.392 L275.5 367.794 M269.608 366 L272.206 364.5 M268 360 L271 360 M269.608 354 L272.206 355.5 M274 349.608 L275.5 352.206 M280 348 L280 351 M286 349.608 L284.5 352.206 M290.392 354 L287.794 355.5 " stroke="black" stroke-width="1" fill="none"/><path marker-end="url(#triangle)" d="M298 360 L362 360 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="356.0" y="90.0">9</text>
+<ellipse cx="380.0" cy="60.0" rx="18.0" ry="18.0" stroke-width="3" stroke="red" fill-opacity="0.6" fill="white"><title>End_None_None_None</title></ellipse>
+<text x="356.0" y="190.0">10</text>
+<ellipse cx="380.0" cy="160.0" rx="18.0" ry="18.0" stroke-width="3" stroke="red" fill-opacity="0.6" fill="white"><title>End_None_None_None</title></ellipse>
+<text x="356.0" y="290.0">11</text>
+<ellipse cx="380.0" cy="260.0" rx="18.0" ry="18.0" stroke-width="3" stroke="red" fill-opacity="0.6" fill="white"><title>End_None_None_None</title></ellipse>
+<text x="356.0" y="390.0">12</text>
+<ellipse cx="380.0" cy="360.0" rx="18.0" ry="18.0" stroke-width="3" stroke="red" fill-opacity="0.6" fill="white"><title>End_None_None_None</title></ellipse>
+</svg>
+

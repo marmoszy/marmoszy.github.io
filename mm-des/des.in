@@ -1,0 +1,5 @@
+# a single task
+1 Start()
+2 Task()
+3 End()
+1->2; 2->3;

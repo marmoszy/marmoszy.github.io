@@ -1,0 +1,243 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="550" height="324">
+<text x="8" y="56">1</text>
+<rect y="44" x="20.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [0.00, 0.00, 0.00]</title></rect>
+<text x="8" y="80">2</text>
+<rect y="68" x="20.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [0.00, 0.00, 0.00]</title></rect>
+<text x="8" y="128">4</text>
+<rect y="116" x="20.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [0.00, 0.00, 0.00]</title></rect>
+<text x="8" y="200">7</text>
+<rect y="188" x="20.0" width="60.87729411071966" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [0.00, 0.00, 3.80]</title></rect>
+<text x="22.0" y="206">1</text><text x="8" y="248">9</text>
+<rect y="236" x="80.87729411071966" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [3.80, 3.80, 3.80]</title></rect>
+<text x="8" y="272">10</text>
+<rect y="260" x="80.87729411071966" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [3.80, 3.80, 3.80]</title></rect>
+<text x="8" y="56">1</text>
+<rect y="44" x="88.07566682485879" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [4.25, 4.25, 4.25]</title></rect>
+<text x="8" y="80">2</text>
+<rect y="68" x="88.07566682485879" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [4.25, 4.25, 4.25]</title></rect>
+<text x="8" y="152">5</text>
+<rect y="140" x="88.07566682485879" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [4.25, 4.25, 4.25]</title></rect>
+<text x="8" y="224">8</text>
+<rect y="212" x="88.07566682485879" width="72.93272828599913" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [4.25, 4.25, 8.81]</title></rect>
+<text x="90.07566682485879" y="230">2</text><text x="8" y="248">9</text>
+<rect y="236" x="161.00839511085792" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [8.81, 8.81, 8.81]</title></rect>
+<text x="8" y="272">10</text>
+<rect y="260" x="161.00839511085792" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [8.81, 8.81, 8.81]</title></rect>
+<text x="8" y="56">1</text>
+<rect y="44" x="152.20485141918996" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [8.26, 8.26, 8.26]</title></rect>
+<text x="8" y="80">2</text>
+<rect y="68" x="152.20485141918996" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [8.26, 8.26, 8.26]</title></rect>
+<text x="8" y="104">3</text>
+<rect y="92" x="152.20485141918996" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [8.26, 8.26, 8.26]</title></rect>
+<text x="8" y="176">6</text>
+<rect y="164" x="152.20485141918996" width="49.78457099340102" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [8.26, 8.26, 11.37]</title></rect>
+<text x="154.20485141918996" y="182">3</text><text x="8" y="248">9</text>
+<rect y="236" x="201.98942241259098" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [11.37, 11.37, 11.37]</title></rect>
+<text x="8" y="272">10</text>
+<rect y="260" x="201.98942241259098" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [11.37, 11.37, 11.37]</title></rect>
+<text x="8" y="56">1</text>
+<rect y="44" x="157.9306626930688" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [8.62, 8.62, 8.62]</title></rect>
+<text x="8" y="80">2</text>
+<rect y="68" x="157.9306626930688" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [8.62, 8.62, 8.62]</title></rect>
+<text x="8" y="128">4</text>
+<rect y="116" x="157.9306626930688" width="3.0777324177891217" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [8.62, 8.62, 8.81]</title></rect>
+<text x="8" y="200">7</text>
+<rect y="188" x="161.00839511085792" width="63.76739693013951" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [8.81, 8.81, 12.80]</title></rect>
+<text x="163.00839511085792" y="206">4</text><text x="8" y="248">9</text>
+<rect y="236" x="224.77579204099743" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [12.80, 12.80, 12.80]</title></rect>
+<text x="8" y="272">10</text>
+<rect y="260" x="224.77579204099743" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>4 [12.80, 12.80, 12.80]</title></rect>
+<text x="8" y="56">1</text>
+<rect y="44" x="166.73066769849305" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [9.17, 9.17, 9.17]</title></rect>
+<text x="8" y="80">2</text>
+<rect y="68" x="166.73066769849305" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [9.17, 9.17, 9.17]</title></rect>
+<text x="8" y="104">3</text>
+<rect y="92" x="166.73066769849305" width="58.04512434250438" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [9.17, 9.17, 12.80]</title></rect>
+<text x="168.73066769849305" y="110">6</text><text x="8" y="176">6</text>
+<rect y="164" x="224.77579204099743" width="33.752853172752" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [12.80, 12.80, 14.91]</title></rect>
+<text x="226.77579204099743" y="182">6</text><text x="8" y="248">9</text>
+<rect y="236" x="258.5286452137494" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [14.91, 14.91, 14.91]</title></rect>
+<text x="8" y="272">10</text>
+<rect y="260" x="258.5286452137494" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [14.91, 14.91, 14.91]</title></rect>
+<text x="8" y="56">1</text>
+<rect y="44" x="162.18332110036846" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [8.89, 8.89, 8.89]</title></rect>
+<text x="8" y="80">2</text>
+<rect y="68" x="162.18332110036846" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [8.89, 8.89, 8.89]</title></rect>
+<text x="8" y="152">5</text>
+<rect y="140" x="162.18332110036846" width="39.80610131222252" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [8.89, 8.89, 11.37]</title></rect>
+<text x="164.18332110036846" y="158">5</text><text x="8" y="224">8</text>
+<rect y="212" x="201.98942241259098" width="65.78119322123015" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [11.37, 11.37, 15.49]</title></rect>
+<text x="203.98942241259098" y="230">5</text><text x="8" y="248">9</text>
+<rect y="236" x="267.77061563382114" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [15.49, 15.49, 15.49]</title></rect>
+<text x="8" y="272">10</text>
+<rect y="260" x="267.77061563382114" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [15.49, 15.49, 15.49]</title></rect>
+<text x="8" y="56">1</text>
+<rect y="44" x="171.43203715617258" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [9.46, 9.46, 9.46]</title></rect>
+<text x="8" y="80">2</text>
+<rect y="68" x="171.43203715617258" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [9.46, 9.46, 9.46]</title></rect>
+<text x="8" y="128">4</text>
+<rect y="116" x="171.43203715617258" width="87.09660805757684" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [9.46, 9.46, 14.91]</title></rect>
+<text x="173.43203715617258" y="134">7</text><text x="8" y="200">7</text>
+<rect y="188" x="258.5286452137494" width="49.088791761416985" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [14.91, 14.91, 17.98]</title></rect>
+<text x="260.5286452137494" y="206">7</text><text x="8" y="248">9</text>
+<rect y="236" x="307.6174369751664" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [17.98, 17.98, 17.98]</title></rect>
+<text x="8" y="272">10</text>
+<rect y="260" x="307.6174369751664" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [17.98, 17.98, 17.98]</title></rect>
+<text x="8" y="56">1</text>
+<rect y="44" x="186.8921988932188" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [10.43, 10.43, 10.43]</title></rect>
+<text x="8" y="80">2</text>
+<rect y="68" x="186.8921988932188" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [10.43, 10.43, 10.43]</title></rect>
+<text x="8" y="152">5</text>
+<rect y="140" x="201.98942241259098" width="65.78119322123015" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [11.37, 11.37, 15.49]</title></rect>
+<text x="203.98942241259098" y="158">8</text><text x="8" y="224">8</text>
+<rect y="212" x="267.77061563382114" width="51.61095426310203" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [15.49, 15.49, 18.71]</title></rect>
+<text x="269.77061563382114" y="230">8</text><text x="8" y="248">9</text>
+<rect y="236" x="319.38156989692317" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [18.71, 18.71, 18.71]</title></rect>
+<text x="8" y="272">10</text>
+<rect y="260" x="319.38156989692317" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>8 [18.71, 18.71, 18.71]</title></rect>
+<text x="8" y="56">1</text>
+<rect y="44" x="188.21117017359444" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [10.51, 10.51, 10.51]</title></rect>
+<text x="8" y="80">2</text>
+<rect y="68" x="188.21117017359444" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [10.51, 10.51, 10.51]</title></rect>
+<text x="8" y="104">3</text>
+<rect y="92" x="224.77579204099743" width="82.84164493416898" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [12.80, 12.80, 17.98]</title></rect>
+<text x="226.77579204099743" y="110">9</text><text x="8" y="176">6</text>
+<rect y="164" x="307.6174369751664" width="59.22725070478174" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [17.98, 17.98, 21.68]</title></rect>
+<text x="309.6174369751664" y="182">9</text><text x="8" y="248">9</text>
+<rect y="236" x="366.84468767994815" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [21.68, 21.68, 21.68]</title></rect>
+<text x="8" y="272">10</text>
+<rect y="260" x="366.84468767994815" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [21.68, 21.68, 21.68]</title></rect>
+<text x="8" y="56">1</text>
+<rect y="44" x="226.38474025374762" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [12.90, 12.90, 12.90]</title></rect>
+<text x="8" y="80">2</text>
+<rect y="68" x="226.38474025374762" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [12.90, 12.90, 12.90]</title></rect>
+<text x="8" y="128">4</text>
+<rect y="116" x="258.5286452137494" width="60.85292468317374" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [14.91, 14.91, 18.71]</title></rect>
+<text x="260.5286452137494" y="134">10</text><text x="8" y="200">7</text>
+<rect y="188" x="319.38156989692317" width="49.221811344826165" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [18.71, 18.71, 21.79]</title></rect>
+<text x="321.38156989692317" y="206">10</text><text x="8" y="248">9</text>
+<rect y="236" x="368.60338124174933" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [21.79, 21.79, 21.79]</title></rect>
+<text x="8" y="272">10</text>
+<rect y="260" x="368.60338124174933" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [21.79, 21.79, 21.79]</title></rect>
+<text x="8" y="56">1</text>
+<rect y="44" x="234.3777188515422" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [13.40, 13.40, 13.40]</title></rect>
+<text x="8" y="80">2</text>
+<rect y="68" x="234.3777188515422" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [13.40, 13.40, 13.40]</title></rect>
+<text x="8" y="104">3</text>
+<rect y="92" x="307.6174369751664" width="60.98594426658292" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [17.98, 17.98, 21.79]</title></rect>
+<text x="309.6174369751664" y="110">12</text><text x="8" y="176">6</text>
+<rect y="164" x="368.60338124174933" width="55.36469255591595" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [21.79, 21.79, 25.25]</title></rect>
+<text x="370.60338124174933" y="182">12</text><text x="8" y="248">9</text>
+<rect y="236" x="423.9680737976653" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [25.25, 25.25, 25.25]</title></rect>
+<text x="8" y="272">10</text>
+<rect y="260" x="423.9680737976653" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>12 [25.25, 25.25, 25.25]</title></rect>
+<text x="8" y="56">1</text>
+<rect y="44" x="229.89349302507384" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [13.12, 13.12, 13.12]</title></rect>
+<text x="8" y="80">2</text>
+<rect y="68" x="229.89349302507384" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [13.12, 13.12, 13.12]</title></rect>
+<text x="8" y="152">5</text>
+<rect y="140" x="267.77061563382114" width="99.07407204612701" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [15.49, 15.49, 21.68]</title></rect>
+<text x="269.77061563382114" y="158">11</text><text x="8" y="224">8</text>
+<rect y="212" x="366.84468767994815" width="73.13024470070599" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [21.68, 21.68, 26.25]</title></rect>
+<text x="368.84468767994815" y="230">11</text><text x="8" y="248">9</text>
+<rect y="236" x="439.97493238065414" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [26.25, 26.25, 26.25]</title></rect>
+<text x="8" y="272">10</text>
+<rect y="260" x="439.97493238065414" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>11 [26.25, 26.25, 26.25]</title></rect>
+<text x="8" y="56">1</text>
+<rect y="44" x="237.45387303336972" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [13.59, 13.59, 13.59]</title></rect>
+<text x="8" y="80">2</text>
+<rect y="68" x="237.45387303336972" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [13.59, 13.59, 13.59]</title></rect>
+<text x="8" y="128">4</text>
+<rect y="116" x="319.38156989692317" width="104.58650390074212" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [18.71, 18.71, 25.25]</title></rect>
+<text x="321.38156989692317" y="134">13</text><text x="8" y="200">7</text>
+<rect y="188" x="423.9680737976653" width="49.7875301184755" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [25.25, 25.25, 28.36]</title></rect>
+<text x="425.9680737976653" y="206">13</text><text x="8" y="248">9</text>
+<rect y="236" x="473.7556039161408" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [28.36, 28.36, 28.36]</title></rect>
+<text x="8" y="272">10</text>
+<rect y="260" x="473.7556039161408" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>13 [28.36, 28.36, 28.36]</title></rect>
+<text x="8" y="56">1</text>
+<rect y="44" x="269.2974294798239" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [15.58, 15.58, 15.58]</title></rect>
+<text x="8" y="80">2</text>
+<rect y="68" x="269.2974294798239" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [15.58, 15.58, 15.58]</title></rect>
+<text x="8" y="152">5</text>
+<rect y="140" x="366.84468767994815" width="73.13024470070599" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [21.68, 21.68, 26.25]</title></rect>
+<text x="368.84468767994815" y="158">14</text><text x="8" y="224">8</text>
+<rect y="212" x="439.97493238065414" width="50.39348995997932" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [26.25, 26.25, 29.40]</title></rect>
+<text x="441.97493238065414" y="230">14</text><text x="8" y="248">9</text>
+<rect y="236" x="490.36842234063346" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [29.40, 29.40, 29.40]</title></rect>
+<text x="8" y="272">10</text>
+<rect y="260" x="490.36842234063346" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>14 [29.40, 29.40, 29.40]</title></rect>
+<rect x="20" y="10" width="486" height="2"/>
+<rect x="20" y="314" width="486" height="2"/>
+<rect x="20" y="10" width="1" height="10"/>
+<rect x="20" y="304" width="1" height="10"/>
+<text x="12" y="32">0</text>
+<text x="12" y="304">0</text>
+<rect x="36" y="10" width="1" height="10"/>
+<rect x="36" y="304" width="1" height="10"/>
+<rect x="52" y="10" width="1" height="10"/>
+<rect x="52" y="304" width="1" height="10"/>
+<rect x="68" y="10" width="1" height="10"/>
+<rect x="68" y="304" width="1" height="10"/>
+<rect x="84" y="10" width="1" height="10"/>
+<rect x="84" y="304" width="1" height="10"/>
+<rect x="100" y="10" width="1" height="10"/>
+<rect x="100" y="304" width="1" height="10"/>
+<rect x="116" y="10" width="1" height="10"/>
+<rect x="116" y="304" width="1" height="10"/>
+<rect x="132" y="10" width="1" height="10"/>
+<rect x="132" y="304" width="1" height="10"/>
+<rect x="148" y="10" width="1" height="10"/>
+<rect x="148" y="304" width="1" height="10"/>
+<rect x="164" y="10" width="1" height="10"/>
+<rect x="164" y="304" width="1" height="10"/>
+<rect x="180" y="10" width="1" height="10"/>
+<rect x="180" y="304" width="1" height="10"/>
+<text x="172" y="32">10</text>
+<text x="172" y="304">10</text>
+<rect x="196" y="10" width="1" height="10"/>
+<rect x="196" y="304" width="1" height="10"/>
+<rect x="212" y="10" width="1" height="10"/>
+<rect x="212" y="304" width="1" height="10"/>
+<rect x="228" y="10" width="1" height="10"/>
+<rect x="228" y="304" width="1" height="10"/>
+<rect x="244" y="10" width="1" height="10"/>
+<rect x="244" y="304" width="1" height="10"/>
+<rect x="260" y="10" width="1" height="10"/>
+<rect x="260" y="304" width="1" height="10"/>
+<rect x="276" y="10" width="1" height="10"/>
+<rect x="276" y="304" width="1" height="10"/>
+<rect x="292" y="10" width="1" height="10"/>
+<rect x="292" y="304" width="1" height="10"/>
+<rect x="308" y="10" width="1" height="10"/>
+<rect x="308" y="304" width="1" height="10"/>
+<rect x="324" y="10" width="1" height="10"/>
+<rect x="324" y="304" width="1" height="10"/>
+<rect x="340" y="10" width="1" height="10"/>
+<rect x="340" y="304" width="1" height="10"/>
+<text x="332" y="32">20</text>
+<text x="332" y="304">20</text>
+<rect x="356" y="10" width="1" height="10"/>
+<rect x="356" y="304" width="1" height="10"/>
+<rect x="372" y="10" width="1" height="10"/>
+<rect x="372" y="304" width="1" height="10"/>
+<rect x="388" y="10" width="1" height="10"/>
+<rect x="388" y="304" width="1" height="10"/>
+<rect x="404" y="10" width="1" height="10"/>
+<rect x="404" y="304" width="1" height="10"/>
+<rect x="420" y="10" width="1" height="10"/>
+<rect x="420" y="304" width="1" height="10"/>
+<rect x="436" y="10" width="1" height="10"/>
+<rect x="436" y="304" width="1" height="10"/>
+<rect x="452" y="10" width="1" height="10"/>
+<rect x="452" y="304" width="1" height="10"/>
+<rect x="468" y="10" width="1" height="10"/>
+<rect x="468" y="304" width="1" height="10"/>
+<rect x="484" y="10" width="1" height="10"/>
+<rect x="484" y="304" width="1" height="10"/>
+<rect x="500" y="10" width="1" height="10"/>
+<rect x="500" y="304" width="1" height="10"/>
+<text x="492" y="32">30</text>
+<text x="492" y="304">30</text>
+</svg>
+

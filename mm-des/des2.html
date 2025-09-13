@@ -1,0 +1,570 @@
+<head>
+  <title>DES v2.0</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.23.2/full/pyodide.js">
+</script>
+
+<style>
+body, input, pre, button, textarea, a, div {
+   font-size: 18px;
+}
+input {
+  padding: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  background-color: #cfe2ff;
+  font-size: larger;
+  color: steelblue;
+  border: solid 1px;
+  border-color: #aaa;
+  outline: none;
+}
+h1,h2,h3 {
+  color: steelblue;
+  font-weight: normal;
+}
+.accordion {
+  background-color: #cfe2ff;
+  color: black;
+  cursor: pointer;
+  padding: 24px;
+  width: 100%;
+  max-width: 960px;
+  font-size:larger;
+  color:steelblue;
+  text-align: left;
+  border: solid 1px;
+  border-color: #aaa;
+  outline: none;
+  transition: 0.4s;
+}
+button.accordion:after {
+  content: '\2303';
+  transform: scale(1, -1);
+  color: steelblue;
+  font-weight: normal;
+  float: right;
+  margin-left: 5px;
+}
+
+button.accordion.active:after {
+  content: '\2303';
+  transform: scale(1, 1);
+}
+.active, .accordion:hover {
+  background-color: #ccc;
+}
+.panel {
+  padding: 0 18px;
+  background-color: white;
+  display: none;
+  max-width: 960px;
+}
+</style>
+</head>
+
+<script>
+ex1=`# Two sequential tasks
+1 Start(E,[2.0],20.0)  ## 20 units of exponential events with mean of 2 time units
+2 Task(U,[2.0,3.0])    ## a task with execution time from 2 to 3 units
+3 Task(U,[1.0,3.0])
+4 End()
+1->2; 2->3; 3->4
+`
+ex2=`# A process with two parallel tasks
+1 Start(E,[2.0],20.0)
+2 AndGate()
+3 Task(U,[2.0,3.0]) 
+4 Task(U,[1.0,3.0])
+5 AndGate()
+6 End()
+1->2; 2->3; 2->4; 3->5; 4->5; 5->6;
+`
+ex3=`# A process with sequential and parallel tasks
+1 Start(E,[1.0],20.0)
+2 Task(E,[2.0]) 
+3 Task(E,[3.0])
+4 AndGate()
+5 Task(U,[1.0,2.0])
+6 Timer(1.0)
+7 AndGate() 
+8 End()
+1->2; 2->3; 3->4; 4->5; 5->7; 4->6; 6->7; 7->8
+`
+ex4=`# Two doctors
+1 Start(E,[2.0],-20.0)
+2 XorGate("=B(0.5)")
+3 XorGate()
+4 XorGate()
+5 Task(U,[2.0,3.0],"tsk1=1")
+6 Task(U,[1.0,3.0],"tsk2=1")
+7 XorGate("=(tsk2==1)")
+8 XorGate("=(tsk1==1)")
+9 XorGate()
+10 End()
+1->2; 2->3; 2->4; 3->5; 4->6; 5->7; 6->8; 7->9; 7->4; 8->9; 8->3; 9->10
+`
+ex5=`# Bikeshare
+1 Start(E,[2.0],-100.0,"S.bA=3")       ## start with 3 bikes in A
+2 Start(E,[2.0],-100.0,"S.bB=3")       ## start with 3 bikes in B
+3 XorGate("=S.bA>0; S.bA-1 if S.bA=S.bA>0 else 0")  # any bike in A? #yes: take it
+4 XorGate("=S.bB>0; S.bB-1 if S.bB=S.bB>0 else 0")  # any bike in B? #yes: take it
+5 Timer(U,[4.0,5.0],"S.bB=S.bB+1")     ## ride and leave taken bike at B
+6 Timer(U,[15.0,20.0])                 ## walk to B
+7 Timer(U,[4.0,5.0],"S.bA=S.bA+1")     ## ride and leave taken bike at A
+8 Timer(U,[15.0,20.0])                 ## walk to A
+9 End()                                ## end of riding from A to B
+10 End()                               ## end of walking from A to B
+11 End()                               ## end of riding from B to A
+12 End()                               ## end of walking from B to A
+1->3; 2->4; 3->5; 3->6; 4->7; 4->8; 5->9; 6->10; 7->11; 8->12
+`
+ex6=`# Timer test
+1 Start(U,[2.0],6)
+2 Timer(3.0)            # delay all events by 3.0  
+3 End()
+1->2; 2->3
+`
+ex7=`# An activity variable test (A.n - client number)
+1 Start(U,[2.0],-100.0) ## hundread events every 2 time units
+2 XorGate("=(A.n-1)%2") ## switch every second to different task
+3 Task(U,[3.0])
+4 Task(U,[3.0])
+5 End()
+6 Terminate()
+1->2; 2->3; 2->4; 3->5; 4->6;
+`
+ex8=`# A four phases process
+1 Start(E,[2.0],20.0)
+2 Task(U,[2.0,3.0])
+3 Throw()
+4 Throw()
+5 End()
+6 AndGate()
+7 Task(U,[1.0,3.0])
+8 Task(U,[1.0,3.0])
+9 Task(U,[1.0,3.0])
+10 Task(U,[1.0,3.0])
+11 AndGate()
+12 XorGate("=C([0.33,0.34,0.33])")
+13 Task(U,[1.0,3.0])
+14 Task(U,[1.0,3.0])
+15 Task(U,[1.0,3.0])
+16 XorGate()
+17 Timer(1.0)
+18 Script("print('Task 17 times for %s: %.2f %.2f %.2f'%(cname,__t17a,__t17b,__t17e))")
+19 End()
+1->2; 2->4; 4->6; 6->7; 6->8; 6->9; 6->10; 7->11; 8->11; 9->11; 10->11; 11->12; 12->13; 12->14; 12->15; 13->16; 14->16; 15->16; 16->17; 17->18; 18->19; 1->3; 3->5;
+`
+ex9=`# Condition test: from three parallel tasks only two could be executed as only two resources are available
+1 Start(E,[2.0],20.0,"S.x=2")     ## two abstract resources
+2 XorGate("=(A.n-1)%3")           ## pass to 3 lines
+3 Condition("=S.x>0;S.x=S.x-1")   ## check availability and decrement if available
+4 Condition("=S.x>0;S.x=S.x-1")   ## ...
+5 Condition("=S.x>0;S.x=S.x-1")   ## ...
+6 Task(U,[2.0,4.0],"S.x=S.x+1")   ## release resource when finished
+7 Task(U,[3.0,4.0],"S.x=S.x+1")   ## ...
+8 Task(U,[3.0,5.0],"S.x=S.x+1")   # ...
+9 XorGate()
+10 End()
+1->2; 2->3; 2->4; 2->5; 3->6; 4->7; 5->8; 6->9; 7->9; 8->9; 9->10;
+`
+ex10=`# Credit card application - time in 10min units
+1 Start(E,[1],-40)      ## 2 clerks (25$/h), 3 credit officers (50$/h) 
+2 AndGate()
+3 Task(N,[1,2/10])      ## check credit history (clerk)
+4 Task(N,[2,4/10])      ## check income sources  (clerk)
+5 AndGate()
+6 XorGate()
+7 Task(E,[2])           ## assess application (credit officer)
+8 XorGate("=B(0.8)")    ## decision review requested (20/80)
+9 Task(N,[1,2/10])      ## make credit offer  (credit officer)
+10 Task(N,[1,2/10])     ## notify rejection   (credit officer)
+11/10/1 End()
+12 XorGate("=B(0.8)")   ## notify rejection (20/80)
+13 End()
+1->2; 2->3; 2->4; 3->5; 4->5; 5->6; 6->7; 7->8; 8->9; 8->10; 9->11; 10->12; 12->13; 12->6
+`
+ex11=`# G/G/2 test  
+1 Start(U,[1],-20)       
+2 AndGate()
+3 Task(U,[4])       ## G/G/1
+4 Task(U,[4],"",2)  ## G/G/2
+5 Task(U,[4])       ## G/G/1
+6 Task(U,[4],"",2)  ## G/G/2
+7 End()
+8 End()
+1->2; 2->3; 2->4; 3->5; 4->6; 5->7; 6->8
+`
+ex12=`# Procurement Process 
+1 Start(E,[1],-40)      
+2 Task(N,[1,2/10])      ## handle quotation
+3 Task(N,[2,4/10])      ## approve order
+4 XorGate()             ## approved/not approved
+5 AndGate()             ## approved trajectory
+6 Terminate()           ## not approved trajectory
+7 Task(E,[2])           ## handle order
+8 Task(E,[2])           ## handle shipment
+9 AndGate()             ## 
+10 Task(N,[1,2/10])     ## review order
+11 End()
+1->2; 2->3; 3->4; 4->5; 4->6; 5->7; 5->8; 7->9; 8->9; 9->10; 10->11;
+`
+ex13=`# Order (one time unit -> 5 min)
+1 Start(U,[2],-20.0,"S.r=100")      # 20 orders            # every 2 time units, 100 resources available
+2 Task(T,[1,3],"o=int(N([10,3]))")  # order registration   # 5-15 min, normally order of 10 resources
+3 AndGate()                         #                      # split into two parallel paths
+4 Task(T,[1,3])                     # invoice preparation  # 5-15 min
+5 Task(T,[3,4])                     # check availability   # 15-20 min
+6 XorGate("=B(0.9)")                # correction needed?   # 90% is good
+7 Timer(U,[8,16])                   # correction request
+8 Task(T,[1,2])                     # invoice corrected
+9 XorGate()                         #                      # joins XorGate 6
+10 Timer(T,[0,14])                  # payment request
+11 Task(T,[1,2])                    # payment registration # 5-10 min
+12 AndGate()
+13 XorGate("=(S.r>=o)")             # available?
+14 Task(T,[3,4],"S.r=S.r-o")        # product packaging    # 15-20 min
+15 AndGate() 
+16 Task(T,[4,6])                    # order from supplier
+17 AndGate()
+18 Timer([40,24],"S.r=S.r+100")     # wait for delivery    # every 40 since 24
+19 Task(T,[4,6],"S.r=S.r-o")        # repackaging          # 20-30 min
+20 Task(T,[4,6])                    # preparation for shipment
+21 Timer(U,[16,24])                 # delivery               
+22 End()                            # order completed
+23 Task(T,[1,2])                    # info to customer     # 5-10 min
+24 XorGate("=B(0.1)")               # not accepted?        # 10% do not accept
+25 Task(T,[1,2])                    # refund and cancel
+26 XorGate()
+27 Terminate()
+1->2; 2->3; 3->4; 4->6;                   6->9;   9->10; 10->11;         11->12; 12->20; 20->21; 21->22;
+                          6->7;   7->8;   8->9;                          
+            3->5; 5->13; 13->14;                                 14->26; 26->12; 
+                         13->15; 15->16; 16->17; 17->18; 18->19; 19->26;  
+                                 15->23; 23->24; 24->25; 24->17; 25->27; 
+`
+function ex(id,s) {
+	document.getElementById(id).innerHTML = s;
+}
+
+// ---- pyodide worker (using pycode variable) ----
+
+const workerCode=`
+importScripts("https://cdn.jsdelivr.net/pyodide/v0.28.1/full/pyodide.js");
+
+let pyodideReadyPromise = loadPyodide();
+
+self.onmessage = async (event) => {
+	const pyodide = await pyodideReadyPromise;
+	const { id, python, context } = event.data;
+	await pyodide.loadPackagesFromImports(python);
+	const dict = pyodide.globals.get("dict");
+	const globals = dict(Object.entries(context));
+	try {
+		const result = await pyodide.runPythonAsync(python, { globals });
+		self.postMessage({ result, id });
+	} catch (error) {
+		self.postMessage({ error: error.message, id });
+	}
+};
+`;
+function getPromiseAndResolve() {
+	let resolve;
+	let promise = new Promise((res) => { resolve = res; });
+	return { promise, resolve };
+}
+let lastId = 1; // Each message needs a unique id to identify the response
+function getId() { return lastId++; }
+// Add an id to msg, send it to worker, then wait for a response with the same id.
+// When we get such a response, use it to resolve the promise.
+function requestResponse(worker, msg) {
+	const { promise, resolve } = getPromiseAndResolve();
+	const idWorker = getId();
+	worker.addEventListener("message", function listener(event) {
+		if (event.data?.id !== idWorker) {
+			return;
+		}
+		// This listener is done so remove it.
+		worker.removeEventListener("message", listener);
+		// Filter the id out of the result
+		const { id, ...rest } = event.data;
+		resolve(rest);
+	});
+	worker.postMessage({ id: idWorker, ...msg });
+	return promise;
+}
+let blob = new Blob([workerCode], {type:"application/javascript"});
+const pyodideWorker  = new Worker(URL.createObjectURL(blob));
+function asyncRun(script, context) {
+	return requestResponse(pyodideWorker, {context, python: script});
+}
+async function py_main(s, n) {
+	console.log("py_main:\n" + s + "\n"+parseInt(n));
+	const context = { input: [ s, parseInt(n)] };
+	const { result, error } = await asyncRun(atob(pycode), context);
+	//console.log("result:\n" + result);
+	el = document.getElementById("out");
+	if (result) {
+		el.innerHTML = result;
+	} else if (error) {
+		el.innerHTML = "pyodideWorker error:" + error;
+	}
+}
+
+</script>
+
+<center>
+<h1>mm-des - micro discrete event simulator</h1>
+<p>MM February 2024, September 2025</p>
+
+<table style="width:960px;"><tr><td>
+
+<p>
+The implementation of a discrete event simulator with a BPMN-like elements and Python-like scripting. The simulator uses text-defined elements (events, tasks, gates) and their connections as an input for execution.
+The results are in the form of animated or static BPMN diagram, the timeline for each element, both in the form of svg image and the time of process execution.
+</p>
+
+<div>
+
+<button class="accordion">1. Introduction</button>
+<div class="panel">
+<p>
+ 
+The code implements basic BPMN elements:
+<ol>
+	<li>Start(fun, param, tnmax, script) - start event
+	<li>Task(fun, param, script, nservers=1) - sequential task activity with n-servers inside
+	<li>XorGate(script) - exclusive gateway (two-output: value==true passes the event to the first defined connection, value==false - to the second (more than two: must have algebraic choice-like function with results as a number starting from 0) multi-input: pass trough the event from all connected)
+	<li>AndGate(script) - parallel gateway (multi-output: passes through the event to all connected, multi-input: waits for all)
+	<li>Timer(fun, param, script) - timer delay event
+	<li>Condition(script) - conditional event with a script containing logical expression as the first one ("=&lt;expr&gt;;..."); the instructions after first semicolon will be executed only when condition evaluates to true
+	<li>End() - end event
+	<li>Terminate() - terminate event
+</ol>
+where:
+<ol>
+	<li>fun - random functions: E([mean]), N([mean,std]), U([min,max]), T([min,max,mean,std]), B(p), C([p1,p2,p3,...]), None 
+	<li>param - array of fun params (fun==None: deterministic time delay in param[0])
+	<li>tnmax - tnmax&gt;	0: maximum time for start generator; tnmax&lt;0: -tnmax represents maximum number of generated events
+	<li>script - string with semicolon separated codes for evaluation during event execution "[var]=&lt;expr&gt;; ... ;", empty var defaults to 'value' variable which is tested in XorGate and Condtion, var starting with 'S.' are scenario ones, starting with 'A.' event ones and without prefix - token/customer ones. Variable 'A.n' is event counter which is initiated with 0 and increased by 1 at exec of each token/customer event. Token/customer have variable 'cname' (customer name) and may have variables '__t&lt;id&gt;a', '__t&lt;id&gt;b' and '__t&lt;id&gt;e' when the token visited event with identifier id. They mark arrival, begin and end times.
+</ol>
+The text description of a process contains list of events that should be ordered by number (event identifier) and semicolon separated list of connections. 
+The events should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '/x[/y]' values after event identifier<!-- (see example 10) -->. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of event number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram.
+
+<p>
+Minimum working example with default values for all events looks like:
+<pre style="font-size:smaller;border:1px solid gray;background-color:#ddd;padding:8px">
+# a single task
+1 Start()
+2 Task()
+3 End()
+1->2; 2->3
+</pre>
+Default parameters for Start() are (E,[1],50) what generates exponential events with mean of 1 time unit ongoing 50 time units. Default values for Task() are (U,[1,2]) what means that this task takes from 1 to 2 time units uniformly distributed.
+As a result the bpmn-like schematic is generated along with single process implementation diagram and the time of process execution:
+
+<!--<pre id="ex0"><script>document.getElementById("ex0").innerHTML=ex0;</script></pre>-->
+<br><object type="image/svg+xml" data="ex0_bpmn.svg"></object>
+<br><object type="image/svg+xml" data="ex0_des.svg"></object>
+<pre style="font-size:smaller">
+76.31941273749922
+</pre>
+</p>
+
+<p>
+When number of simulations are greater than 1 the bpmn diagram is not animated and execution timeline is not generated.
+</p>  
+
+</div>
+
+<!--- ------------- --->
+
+<button class="accordion">2. Examples</button>
+<div class="panel">
+<p>
+<table><tr><td>
+<div style="width:960px;overflow-x:scroll;">
+
+<ol>
+<h3><li>A process with two serial tasks</li></h3>
+	<pre id="ex1"><script>ex("ex1",ex1)</script></pre>
+	<br><object type="image/svg+xml" data="ex1_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex1_des.svg"></object>
+<h3><li>A process with two parallel tasks</li></h3>
+	<pre id="ex2"><script>ex("ex2",ex2)</script></pre>
+	<br><object type="image/svg+xml" data="ex2_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex2_des.svg"></object>
+<h3><li>A process with serial and parallel tasks</li></h3>
+	<pre id="ex3"><script>ex("ex3",ex3)</script></pre>
+	<br><object type="image/svg+xml" data="ex3_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex3_des.svg"></object>
+<h3><li>A process with two parallel tasks both must be executed</li></h3>
+	<pre id="ex4"><script>ex("ex4",ex4)</script></pre>
+	<br><object type="image/svg+xml" data="ex4_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex4_des.svg"></object>
+<h3><li>A bicycle sharing systems</li></h3>
+	<pre id="ex5"><script>ex("ex5",ex5)</script></pre>
+	<br><object type="image/svg+xml" data="ex5_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex5_des.svg"></object>
+<!--
+<h3><li>A timer test</h3>
+	<pre id="ex6"><script>document.getElementById("ex6").innerHTML=ex6</script></pre>
+	<br><object type="image/svg+xml" data="ex6_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex6_des.svg"></object>
+<h3><li>An event variable test</h3>
+	<pre id="ex7"><script>document.getElementById("ex7").innerHTML=ex7</script></pre>
+	<br><object type="image/svg+xml" data="ex7_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex7_des.svg"></object>
+<h3><li>A four phases process</h3>
+	<pre id="ex8"><script>document.getElementById("ex8").innerHTML=ex8</script></pre>
+	<br><object type="image/svg+xml" data="ex8_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex8_des.svg"></object>
+-->
+<h3><li>A conditional event example with abstract resource</li></h3>
+	<pre id="ex9"><script>ex("ex9",ex9)</script></pre>
+	<br><object type="image/svg+xml" data="ex9_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex9_des.svg"></object>
+<h3><li>Credit card application</li></h3>
+	<pre id="ex10"><script>ex("ex10",ex10)</script></pre>
+	<br><object type="image/svg+xml" data="ex10_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex10_des.svg"></object>
+<h3><li>G/G/2 queue test</li></h3>
+	<pre id="ex11"><script>ex("ex11",ex11)</script></pre>
+	<br><object type="image/svg+xml" data="ex11_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex11_des.svg"></object>
+<h3><li>Procurement process</li></h3>
+	<pre id="ex12"><script>ex("ex12",ex12)</script></pre>
+	<br><object type="image/svg+xml" data="ex12_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex12_des.svg"></object>
+<h3><li>Order process</li></h3>
+	<pre id="ex13"><script>ex("ex13",ex13)</script></pre>
+	<br><object type="image/svg+xml" data="ex13_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex13_des.svg"></object>
+</ol>
+</div>
+
+</td></tr></table>
+
+</p>
+</div>
+
+<!--- ------------- --->
+
+<button class="accordion">3. Running code</button>
+<div class="panel">
+<p>
+
+<input type=button onclick='preload(ex1);' value="1." />
+<input type=button onclick='preload(ex2);' value="2." />
+<input type=button onclick='preload(ex3);' value="3." />
+<input type=button onclick='preload(ex4);' value="4." />
+<input type=button onclick='preload(ex5);' value="5." />
+<!--
+<input type=button onclick='preload(ex6);' value="6." />
+<input type=button onclick='preload(ex7);' value="7." />
+<input type=button onclick='preload(ex8);' value="8." />
+-->
+<input type=button onclick='preload(ex9);' value="6." />
+<input type=button onclick='preload(ex10);' value="7." />
+<input type=button onclick='preload(ex11);' value="8." />
+<input type=button onclick='preload(ex12);' value="9." />
+<input type=button onclick='preload(ex13);' value="10." />
+<table>
+	<tr>
+		<td>
+			<textarea id="in" rows=15 cols=80 wrap='off' style="font-family: monospace !important;"></textarea>
+		</td>
+	</tr>
+	<tr>
+		<td>
+Number of simulations: <select id="n" style="font-size: 16px;">
+	<option value="1">1</option>
+	<option value="10">10</option>
+	<option value="20">20</option>
+	<option value="50">50</option>
+	<option value="100">100</option>
+	<option value="200">200</option>
+	<option value="500">500</option>
+	<option value="1000">1000</option>
+</select>
+<input type=button value="Run" onclick="py_main(document.getElementById('in').value,document.getElementById('n').value)">
+
+<!--			
+<input type=button value="Run once" onclick="f(document.getElementById('in').value)">
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="des.bpmn">Last run bpmn file (xml)</a>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="des.php?bpmn=des.bpmn">Last run bpmn file (preview)</a>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="des.php?dot=des.dot">Last run dot schemtic</a>
+-->
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<div id="out">
+			
+			</div>
+		</td>
+	</tr>
+</table>
+</p>
+</div>
+
+
+</div> <!--- end of accordion block -->
+
+</td></tr></table>
+</center>
+
+<script>
+function preload(s) {
+	document.getElementById("in").value = s;
+	document.getElementById("out").innerHTML="";
+	//f(document.getElementById("in").value)
+}
+
+function f(s) {
+	if(window.location.protocol.startsWith("file:")) {
+		//alert(s);
+		py_main(s,1);
+		return
+	}
+	url="des.php?ex="+encodeURIComponent(s);
+	fetch(url, {cache:"reload"})
+	.then(response => {return response.text();})
+	.then(s => {
+		document.getElementById("out").innerHTML=s;
+	})
+}
+var acc = document.getElementsByClassName("accordion");
+for(var i = 0; i < acc.length; i++) {
+	acc[i].addEventListener("click", function() {
+		this.classList.toggle("active");
+		var panel = this.nextElementSibling;
+		if (panel.style.display === "block") {
+			panel.style.display = "none";
+		} else {
+			panel.style.display = "block";
+    		}
+  	});
+}
+document.getElementById("in").value=ex1;
+if(!window.location.protocol.startsWith("file:")) {
+	f(document.getElementById("in").value);
+}
+
+</script>
+
+<script>
+// pycode simple example
+pycode =`
+s = input[0]
+n = int(input[1])
+s # output
+`;
+</script>
+
+<!-- base64 -i des2.py | perl -e '$_=<>;chomp;print "var pycode=\"$_\";"' > des2.js -->
+<script src="des2.js"> </script>
+

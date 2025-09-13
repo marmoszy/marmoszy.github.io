@@ -1,0 +1,61 @@
+digraph BPMN2 { rankdir="LR" nodesep=0.6
+  startEvent_1 [label="1" xlabel="" style="" shape="circle" fillcolor="" penwidth="1" ]
+  task_2 [label="2" xlabel="" style="rounded,filled" shape="rect" fillcolor="lightblue" penwidth="1" width=1.1 height=0.8]
+  parallelGateway_3 [label="+" xlabel="3" style="" shape="diamond" fillcolor="" penwidth="1" height=0.7]
+  task_4 [label="4" xlabel="" style="rounded,filled" shape="rect" fillcolor="lightblue" penwidth="1" width=1.1 height=0.8]
+  task_5 [label="5" xlabel="" style="rounded,filled" shape="rect" fillcolor="lightblue" penwidth="1" width=1.1 height=0.8]
+  exclusiveGateway_6 [label="X" xlabel="6" style="" shape="diamond" fillcolor="" penwidth="1" height=0.7]
+  intermediateCatchEvent_7 [label="7" xlabel="" style="" shape="doublecircle" fillcolor="" penwidth="1" ]
+  task_8 [label="8" xlabel="" style="rounded,filled" shape="rect" fillcolor="lightblue" penwidth="1" width=1.1 height=0.8]
+  exclusiveGateway_9 [label="X" xlabel="9" style="" shape="diamond" fillcolor="" penwidth="1" height=0.7]
+  intermediateCatchEvent_10 [label="10" xlabel="" style="" shape="doublecircle" fillcolor="" penwidth="1" ]
+  task_11 [label="11" xlabel="" style="rounded,filled" shape="rect" fillcolor="lightblue" penwidth="1" width=1.1 height=0.8]
+  parallelGateway_12 [label="+" xlabel="12" style="" shape="diamond" fillcolor="" penwidth="1" height=0.7]
+  exclusiveGateway_13 [label="X" xlabel="13" style="" shape="diamond" fillcolor="" penwidth="1" height=0.7]
+  task_14 [label="14" xlabel="" style="rounded,filled" shape="rect" fillcolor="lightblue" penwidth="1" width=1.1 height=0.8]
+  parallelGateway_15 [label="+" xlabel="15" style="" shape="diamond" fillcolor="" penwidth="1" height=0.7]
+  task_16 [label="16" xlabel="" style="rounded,filled" shape="rect" fillcolor="lightblue" penwidth="1" width=1.1 height=0.8]
+  parallelGateway_17 [label="+" xlabel="17" style="" shape="diamond" fillcolor="" penwidth="1" height=0.7]
+  intermediateCatchEvent_18 [label="18" xlabel="" style="" shape="doublecircle" fillcolor="" penwidth="1" ]
+  task_19 [label="19" xlabel="" style="rounded,filled" shape="rect" fillcolor="lightblue" penwidth="1" width=1.1 height=0.8]
+  task_20 [label="20" xlabel="" style="rounded,filled" shape="rect" fillcolor="lightblue" penwidth="1" width=1.1 height=0.8]
+  intermediateCatchEvent_21 [label="21" xlabel="" style="" shape="doublecircle" fillcolor="" penwidth="1" ]
+  endEvent_22 [label="22" xlabel="" style="filled" shape="circle" fillcolor="" penwidth="3" ]
+  task_23 [label="23" xlabel="" style="rounded,filled" shape="rect" fillcolor="lightblue" penwidth="1" width=1.1 height=0.8]
+  exclusiveGateway_24 [label="X" xlabel="24" style="" shape="diamond" fillcolor="" penwidth="1" height=0.7]
+  task_25 [label="25" xlabel="" style="rounded,filled" shape="rect" fillcolor="lightblue" penwidth="1" width=1.1 height=0.8]
+  exclusiveGateway_26 [label="X" xlabel="26" style="" shape="diamond" fillcolor="" penwidth="1" height=0.7]
+  terminateEndEvent_27 [label="27" xlabel="" style="" shape="circle" fillcolor="" penwidth="1" ]
+  startEvent_1 -> task_2
+  task_2 -> parallelGateway_3
+  parallelGateway_3 -> task_4
+  parallelGateway_3 -> task_5
+  {rank=same; task_4; task_5; }
+  task_4 -> exclusiveGateway_6
+  task_5 -> exclusiveGateway_13
+  exclusiveGateway_6 -> exclusiveGateway_9
+  exclusiveGateway_6 -> intermediateCatchEvent_7
+  intermediateCatchEvent_7 -> task_8
+  task_8 -> exclusiveGateway_9
+  exclusiveGateway_9 -> intermediateCatchEvent_10
+  intermediateCatchEvent_10 -> task_11
+  task_11 -> parallelGateway_12
+  parallelGateway_12 -> task_20
+  exclusiveGateway_13 -> task_14
+  exclusiveGateway_13 -> parallelGateway_15
+  {rank=same; task_14; parallelGateway_15; }
+  task_14 -> exclusiveGateway_26
+  parallelGateway_15 -> task_16
+  parallelGateway_15 -> task_23
+  task_16 -> parallelGateway_17
+  parallelGateway_17 -> intermediateCatchEvent_18
+  intermediateCatchEvent_18 -> task_19
+  task_19 -> exclusiveGateway_26
+  task_20 -> intermediateCatchEvent_21
+  intermediateCatchEvent_21 -> endEvent_22
+  task_23 -> exclusiveGateway_24
+  exclusiveGateway_24 -> task_25
+  exclusiveGateway_24 -> parallelGateway_17
+  task_25 -> terminateEndEvent_27
+  exclusiveGateway_26 -> parallelGateway_12
+}

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="338" height="110">
+<defs><marker id="triangle" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="strokeWidth" markerWidth="10" markerHeight="10" orient="auto"> <path d="M 0 0 L 10 5 L 0 10 z" fill="black" /></marker></defs>
+<text x="56.0" y="90.0">1</text>
+<ellipse cx="80.0" cy="60.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Start_U_[2.0]_None</title></ellipse>
+<path marker-end="url(#triangle)" d="M98 60 L162 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="156.0" y="90.0">2</text>
+<ellipse cx="180.0" cy="60.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Timer_None_3.0_None</title></ellipse>
+<ellipse cx="180.0" cy="60.0" rx="15.0" ry="15.0" stroke-width="1" stroke="darkgreen" fill="none"/>
+<ellipse cx="180.0" cy="60.0" rx="12.0" ry="12.0" stroke-width="1" stroke="black" fill="none"/>
+<path d="M175 57 L180 60 186 54 M192 60 L189 60 M190.392 66 L187.794 64.5 M186 70.3923 L184.5 67.7942 M180 72 L180 69 M174 70.3923 L175.5 67.7942 M169.608 66 L172.206 64.5 M168 60 L171 60 M169.608 54 L172.206 55.5 M174 49.6077 L175.5 52.2058 M180 48 L180 51 M186 49.6077 L184.5 52.2058 M190.392 54 L187.794 55.5 " stroke="black" stroke-width="1" fill="none"/><path marker-end="url(#triangle)" d="M198 60 L262 60 " style="fill:none;stroke:brown;stroke-width:1"/>
+<text x="256.0" y="90.0">3</text>
+<ellipse cx="280.0" cy="60.0" rx="18.0" ry="18.0" stroke-width="3" stroke="red" fill-opacity="0.6" fill="white"><title>End_None_None_None</title></ellipse>
+</svg>
+
