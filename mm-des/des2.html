@@ -94,14 +94,14 @@ ex3=`# A process with sequential and parallel tasks
 1->2; 2->3; 3->4; 4->5; 5->7; 4->6; 6->7; 7->8
 `
 ex4=`# Two doctors
-1 Start(E,[2.0],-20.0)
-2 XorGate("=B(0.5)")
+1 Start(E,[2.0],-20.0)       # 20 patients
+2 XorGate("=B(0.5)")         # split equally
 3 XorGate()
 4 XorGate()
-5 Task(U,[2.0,3.0],"tsk1=1")
-6 Task(U,[1.0,3.0],"tsk2=1")
-7 XorGate("=(tsk2==1)")
-8 XorGate("=(tsk1==1)")
+5 Task(U,[2.0,3.0],"tsk1=1") # first doctor
+6 Task(U,[1.0,3.0],"tsk2=1") # second doctor
+7 XorGate("=(tsk2==1)")      # second visited?
+8 XorGate("=(tsk1==1)")      # first visited?
 9 XorGate()
 10 End()
 1->2; 2->3; 2->4; 3->5; 4->6; 5->7; 6->8; 7->9; 7->4; 8->9; 8->3; 9->10

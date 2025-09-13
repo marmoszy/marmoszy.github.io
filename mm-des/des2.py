@@ -690,7 +690,7 @@ def bpmn_tosvg(bpmnstring,isanim,W=100,H=80):
                         s+='<text x="'+str(x-6)+'" y="'+str(y+h+12)+'">'+id+'</text>\n'
                         s+='<text font-size="smaller" style="fill:gray" x="'+str(x-12)+'" y="'+str(y-6)+'"><tspan xml:space="preserve">'+name+'</tspan></text>\n'
                         id3=id2.split("_")
-                        if len(id3)>3 and id3[3] != "None" : s+='<text class="t1" font-size="smaller" style="fill:gray" x="'+str(x+18)+'" y="'+str(y+h+12)+'"><tspan xml:space="preserve">'+id3[3]+'</tspan></text>\n'
+                        if len(id3)>3 and id3[3] != "None" : s+='<text class="t1" font-size="smaller" style="fill:gray" x="'+str(x+18)+'" y="'+str(y+h+12+("Event" in it.attrib["id"] and 12 or 0))+'"><tspan xml:space="preserve">'+id3[3]+'</tspan></text>\n'
                         if "Event" in it.attrib["id"]:
                               stroke = "end" in it.attrib["id"] and "3" or "1"
                               color = "end" in it.attrib["id"] and "red" or "darkgreen"
@@ -741,7 +741,7 @@ def to_anim():
                   for c in e.queue.objects:
                         for i in range(len(ne.ee)):
                               x, y, a = ne.ee[i].x, ne.ee[i].y, c.attr 
-                              s +='<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="'+str(x-16)+'" y="'+str(y+13)+'" visibility="hidden">'+str(c.name)+'\n'
+                              s +='<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="'+str(x-20)+'" y="'+str(y+13)+'" visibility="hidden">'+str(c.name)+'\n'
                               t="__t"+str(i+1)
                               if t+"a" in a:
                                     t0 = a[t+"a"]
