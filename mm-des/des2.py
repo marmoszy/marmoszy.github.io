@@ -328,12 +328,17 @@ def connect(a, b):
                   a.servers[i].output.append(b)
 def dict_tostring(a):
       return "\n".join([k+":\t"+str(v) for k,v in a.items()])
-"""
 def hist(a=[0,1], b=20, c='orange'):
       import matplotlib.pyplot as plt
       plt.hist(a,b,color=c)
-      plt.savefig("des_plot.svg", format="svg")
-      plt.show()
+      #plt.savefig("des_plot.svg", format="svg")
+      #plt.show()
+      import io, base64
+      buf = io.BytesIO()
+      plt.savefig(buf, format='svg')
+      buf.seek(0)
+      return 'data:image/svg+xml;base64,' + base64.b64encode(buf.read()).decode('UTF-8')
+"""
 def from_file(fname):
       with open(fname,"r") as fp:
             return fp.read()
@@ -761,7 +766,6 @@ def main_fun(exn,n): # string representation, number of simulation
       data=[]  # list of events, array of results
       s = ''
       for i in range(n):
-            print("main_fun:",i,"(%d)"%n)
             global ne
             ne = EventNetwork(exn)
             sim = Simulator()
@@ -769,7 +773,7 @@ def main_fun(exn,n): # string representation, number of simulation
                   if isinstance(e,Generator):  # add generating events
                         sim.add(e)  
             sim.run()
-            data.append(sim.time)   # save end time of simulation
+            data.append([sim.time,BpmnEvent.S])   # save end time of simulation
             
             #if exn==ex5:
             #      data.append(BpmnEvent.S["S.bA"]) # save global variable S.bA
@@ -777,9 +781,10 @@ def main_fun(exn,n): # string representation, number of simulation
             #      data.append(sim.time)   # save end time of simulation
             if i==0:
                   bpmnstring = to_bpmn(ne.ee,ne.pp)
-                  s3 = bpmn_tosvg(bpmnstring,(n==1))
-                  s4 = to_svg()
-      s += "\n".join(["%d %.2f"%(i+1,data[i]) for i in range(len(data))])
+                  s2 = bpmn_tosvg(bpmnstring,(n==1))
+                  s3 = to_svg()
+      s += "#n t "+" ".join(data[0][1].keys())+"\n"
+      s += "\n".join(["%d %.2f %s"%(i+1,data[i][0]," ".join([str(v) for v in [*data[i][1].values()]])) for i in range(len(data))])
       #for e in ne:
       #      if len(e.queue)>0:
       #            s += str(e.id) + ("(%d):"%len(e.queue)) + str(e.queue)+'\n'
@@ -789,26 +794,29 @@ def main_fun(exn,n): # string representation, number of simulation
       #      s += str(e.id)+str(e.A)+' '
       #      if isinstance(e,Task):
       #            for i in range(len(e.servers)):
-      #                  s += str(e.servers[i].id)+'/'+str(i+1)+str(e.servers[i].A)+' '                        
-      #if len(data)>100:
-      #      if exn==ex4:
-      #            hist(data,7)
-      #      else:
-      #            hist(data)
-      return s3+'<br>\n'+(s4 if n==1 else '')+'<br>\n'+'<pre>'+s+'</pre>'
+      #                  s += str(e.servers[i].id)+'/'+str(i+1)+str(e.servers[i].A)+' '
+      s4=''
+      if len(data)>=100:
+            #if exn==ex4:
+            #      s4 = hist(data,7)
+            #else:
+            #      s4 = hist(data)
+            pass # s4 = hist(data)
+      return (s,s2,s3,s4) # s2+'<br>\n'+(s3 if n==1 else '')+'<br>\n'+'<pre>'+s+'</pre>'
+
 
 """
-# ----- main with args ------
 if __name__=="__main__":
       import sys
-      import ex
-      s = len(sys.argv)>1 and from_file(sys.argv[1]) or eval('ex'+str(30))
-      n = len(sys.argv)>2 and int(sys.argv[2]) or 1
+      #import ex
+      ex30 = '1 Start()\n2 Task()\n3 End()\n1->2;2->3\n'
+      s = len(sys.argv)>1 and from_file(sys.argv[1]) or eval('ex%d'%(30))
+      n = len(sys.argv)>2 and int(sys.argv[2]) or 100
       s = main_fun(s,n)
-      print(s)
+      print(s[3])
 """
 s = input[0]
 n = int(input[1])
-s = main_fun(s, n)
-s
+output = main_fun(s, n)
+output[1]+'<br>\n'+(output[2] if n==1 else '')+'<br>\n'+'<pre>'+output[0]+'</pre>'#+'<img src="'+output[3]+'">'
 

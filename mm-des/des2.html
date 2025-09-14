@@ -109,8 +109,8 @@ ex4=`# Two doctors
 ex5=`# Bikeshare
 1 Start(E,[2.0],-100.0,"S.bA=3")       ## start with 3 bikes in A
 2 Start(E,[2.0],-100.0,"S.bB=3")       ## start with 3 bikes in B
-3 XorGate("=S.bA>0; S.bA-1 if S.bA=S.bA>0 else 0")  # any bike in A? #yes: take it
-4 XorGate("=S.bB>0; S.bB-1 if S.bB=S.bB>0 else 0")  # any bike in B? #yes: take it
+3 XorGate("=S.bA>0;S.bA=(S.bA>0 and S.bA-1 or 0)")  # any bike in A? #yes: take it
+4 XorGate("=S.bB>0;S.bB=(S.bB>0 and S.bB-1 or 0)")  # any bike in B? #yes: take it
 5 Timer(U,[4.0,5.0],"S.bB=S.bB+1")     ## ride and leave taken bike at B
 6 Timer(U,[15.0,20.0])                 ## walk to B
 7 Timer(U,[4.0,5.0],"S.bA=S.bA+1")     ## ride and leave taken bike at A
@@ -257,6 +257,8 @@ importScripts("https://cdn.jsdelivr.net/pyodide/v0.28.1/full/pyodide.js");
 
 let pyodideReadyPromise = loadPyodide();
 
+var o="";
+
 self.onmessage = async (event) => {
 	const pyodide = await pyodideReadyPromise;
 	const { id, python, context } = event.data;
@@ -302,7 +304,7 @@ function asyncRun(script, context) {
 	return requestResponse(pyodideWorker, {context, python: script});
 }
 async function py_main(s, n) {
-	console.log("py_main:\n" + s + "\n"+parseInt(n));
+	//console.log("py_main:\n" + s + "\n"+parseInt(n));
 	const context = { input: [ s, parseInt(n)] };
 	const { result, error } = await asyncRun(atob(pycode), context);
 	//console.log("result:\n" + result);
@@ -313,6 +315,7 @@ async function py_main(s, n) {
 		el.innerHTML = "pyodideWorker error:" + error;
 	}
 }
+
 
 </script>
 
