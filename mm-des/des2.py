@@ -660,7 +660,7 @@ def bpmn_tosvg0(bpmnfile,W=100,H=80):
                         items=[p for p in d if "BPMNPlane" in d.tag]
       return items
 #def bpmn_tosvg(bpmnfile,W=100,H=80):
-def bpmn_tosvg(bpmnstring,isanim,W=100,H=80):
+def bpmn_tosvg(bpmnstring,isanim,iscomments,isscripts,W=100,H=80):
       s = '<defs><marker id="triangle" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="strokeWidth" markerWidth="10" markerHeight="10" orient="auto"> <path d="M 0 0 L 10 5 L 0 10 z" fill="black" /></marker></defs>\n'
       s += '<text x="10" y="12">'+en_title+'</text>\n';
       import xml.etree.ElementTree as ET
@@ -693,11 +693,13 @@ def bpmn_tosvg(bpmnstring,isanim,W=100,H=80):
                               ids[4]=base64.b16decode(ids[4],'ascii').decode('ascii')
                         id2="_".join(ids[2:]).replace('<','&lt;').replace('>','&gt;')
                         s+='<text x="'+str(x-6)+'" y="'+str(y+h+12)+'">'+id+'</text>\n'
-                        s+='<text font-size="smaller" style="fill:gray" x="'+str(x-12)+'" y="'+str(y-6)+'"><tspan xml:space="preserve">'+name+'</tspan></text>\n'
+                        if iscomments:
+                              s+='<text font-size="smaller" style="fill:gray" x="'+str(x-12)+'" y="'+str(y-6)+'"><tspan xml:space="preserve">'+name+'</tspan></text>\n'
                         id3=id2.split("_")
                         #if len(id3)>3 and id3[3] != "None" : s+='<text class="t1" font-size="smaller" style="fill:gray" x="'+str(x+18)+'" y="'+str(y+h+12+("Event" in it.attrib["id"] and 12 or 0))+'"><tspan xml:space="preserve">'+id3[3]+'</tspan></text>\n'
-                        id3a="_".join(ids[2:]).split("_")
-                        if len(id3a)>3 and id3a[3] != "None": s+='<text class="t1" font-size="smaller" style="fill:gray" x="'+str(x+18)+'" y="'+str(y+h+12)+'"><tspan xml:space="preserve">'+id3a[3].split(';')[0].replace('<','&lt;').replace('>','&gt;')+'</tspan></text>\n'
+                        if isscripts:
+                              id3a="_".join(ids[2:]).split("_")
+                              if len(id3a)>3 and id3a[3] != "None": s+='<text class="t1" font-size="smaller" style="fill:gray" x="'+str(x+18)+'" y="'+str(y+h+12)+'"><tspan xml:space="preserve">'+id3a[3].split(';')[0].replace('<','&lt;').replace('>','&gt;')+'</tspan></text>\n'
                         if "Event" in it.attrib["id"]:
                               stroke = "end" in it.attrib["id"] and "3" or "1"
                               color = "end" in it.attrib["id"] and "red" or "darkgreen"
@@ -764,7 +766,7 @@ def to_anim():
 
 ne=[]
 # ---- simulation -----
-def main_fun(exn,n): # string representation, number of simulation
+def main_fun(exn,n,anim,comments,scripts): # string representation, number of simulation
       data=[]  # list of events, array of results
       s = ''
       for i in range(n):
@@ -782,11 +784,11 @@ def main_fun(exn,n): # string representation, number of simulation
             #else:
             #      data.append(sim.time)   # save end time of simulation
             if i==0:
-                  bpmnstring = to_bpmn(ne.ee,ne.pp)
-                  s2 = bpmn_tosvg(bpmnstring,(n==1))
+                  s1 = to_bpmn(ne.ee,ne.pp)
+                  s2 = bpmn_tosvg(s1,anim,comments,scripts)
                   s3 = to_svg()
-      s += "#n t "+" ".join(data[0][1].keys())+"\n"
-      s += "\n".join(["%d %.2f %s"%(i+1,data[i][0]," ".join([str(v) for v in [*data[i][1].values()]])) for i in range(len(data))])
+      s += "#n\tt\t"+"\t".join(data[0][1].keys())+"\n"
+      s += "\n".join(["%d\t%.2f\t%s"%(i+1,data[i][0],"\t".join([str(v) for v in [*data[i][1].values()]])) for i in range(len(data))])
       #for e in ne:
       #      if len(e.queue)>0:
       #            s += str(e.id) + ("(%d):"%len(e.queue)) + str(e.queue)+'\n'
@@ -804,7 +806,7 @@ def main_fun(exn,n): # string representation, number of simulation
             #else:
             #      s4 = hist(data)
             pass # s4 = hist(data)
-      return (s,s2,s3,s4) # s2+'<br>\n'+(s3 if n==1 else '')+'<br>\n'+'<pre>'+s+'</pre>'
+      return (s,s1,s2,s3,s4) # s2+'<br>\n'+(s3 if n==1 else '')+'<br>\n'+'<pre>'+s+'</pre>'
 
 
 """
@@ -819,6 +821,19 @@ if __name__=="__main__":
 """
 s = input[0]
 n = int(input[1])
-output = main_fun(s, n)
-output[1]+'<br>\n'+(output[2] if n==1 else '')+'<br>\n'+'<pre>'+output[0]+'</pre>'#+'<img src="'+output[3]+'">'
+anim = int(input[2])
+comments = int(input[3])
+scripts = int(input[4])
+output = main_fun(s, n, anim, comments, scripts)
+s = '<div id="div1" hidden>'+output[1]+'</div><br>\n'
+s += '<div id="div2">'+output[2]+'</div><br>\n'
+s +='<input hidden type=button value="Save bpmn to xml file" onclick="writeFile1();"></input>\n'
+s +='<input type=button value="Save bpmn to svg file" onclick="writeFile2();"></input><br>\n'
+if n==1:
+      s += '<div id="div3">'+output[3] +'</div><br>\n'
+      s +='<input type=button value="Save timeline to svg file" onclick="writeFile3();"></input><br><br>\n'
+s +='<textarea id="ta4" rows="16" cols="80">'+output[0]+'</textarea><br>\n' #+'<img src="'+output[3]+'">'
+s +='<input type=button value="Save to txt file" onclick="writeFile4();"></input><br><br>\n'
+s
+
 

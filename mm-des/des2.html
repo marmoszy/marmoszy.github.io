@@ -322,9 +322,9 @@ const pyodideWorker  = new Worker(URL.createObjectURL(blob));
 function asyncRun(script, context) {
 	return requestResponse(pyodideWorker, {context, python: script});
 }
-async function py_main(s, n, id) {
+async function py_main(s, n, anim, comments, scripts, id) {
 	//console.log("py_main:\n" + s + "\n"+parseInt(n));
-	const context = { input: [ s, parseInt(n)] };
+	const context = { input: [ s, parseInt(n||1), parseInt(anim||0), parseInt(comments||0), parseInt(scripts||0)] };
 	const { result, error } = await asyncRun(atob(pycode), context);
 	//console.log("result:\n" + result);
 	el = document.getElementById(id||"out");
@@ -334,6 +334,13 @@ async function py_main(s, n, id) {
 		el.innerHTML = "pyodideWorker error:" + error;
 	}
 }
+async function py_main1() { py_main(
+	document.getElementById('in').value
+	,document.getElementById('n').value
+	,document.getElementById('anim').checked?1:0
+	,document.getElementById('comments').checked?1:0
+	,document.getElementById('scripts').checked?1:0
+);}
 
 
 </script>
@@ -514,7 +521,10 @@ Number of simulations: <select id="n" style="font-size: 16px;">
 	<option value="500">500</option>
 	<option value="1000">1000</option>
 </select>
-<input type=button value="Run" onclick="py_main(document.getElementById('in').value,document.getElementById('n').value)">
+&nbsp;&nbsp; <input type=button value="Run" onclick="py_main1()">
+&nbsp;&nbsp; Add token animation: <input type="checkbox" id="anim" checked/>
+&nbsp;&nbsp; Add comment info: <input type="checkbox" id="comments" checked/>
+&nbsp;&nbsp; Add script info: <input type="checkbox" id="scripts" checked/>
 <br><br>
 <!--			
 <input type=button value="Run once" onclick="f(document.getElementById('in').value)">
@@ -577,6 +587,34 @@ for(var i = 0; i < acc.length; i++) {
 document.getElementById("in").value=ex1;
 if(!window.location.protocol.startsWith("file:")) {
 	f(document.getElementById("in").value);
+}
+
+function writeFile(data, filename, type) {
+	var file = new Blob([data], {type: type||"plain/text;charset=utf-8"});
+	if (window.navigator.msSaveOrOpenBlob) // IE10+
+		window.navigator.msSaveOrOpenBlob(file, filename);
+	else { // Others
+		var a = document.createElement("a");
+		a.href = URL.createObjectURL(file); 
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		setTimeout(function() {
+			document.body.removeChild(a);
+			window.URL.revokeObjectURL(a.href);  
+		}, 0); 
+	}
+}
+function writeFile1() {
+	writeFile(document.getElementById("div1").innerHTML,"mm-des.bpmn");
+}
+function writeFile2() {
+	writeFile(document.getElementById("div2").innerHTML,"mm-bpmn.svg");	}
+function writeFile3() {
+	writeFile(document.getElementById("div3").innerHTML,"mm-des.svg");
+}
+function writeFile4() {
+	writeFile(document.getElementById("ta4").value,"mm-des.txt");
 }
 
 </script>
