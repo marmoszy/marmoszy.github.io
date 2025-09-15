@@ -606,7 +606,7 @@ function writeFile(data, filename, type) {
 	}
 }
 function writeFile1() {
-	writeFile(document.getElementById("div1").innerHTML,"mm-des.bpmn");
+	writeFile(document.getElementById("div1").innerHTML,"mm-des.bpmn","text/xml");
 }
 function writeFile2() {
 	writeFile(document.getElementById("div2").innerHTML,"mm-bpmn.svg");	}
@@ -615,6 +615,9 @@ function writeFile3() {
 }
 function writeFile4() {
 	writeFile(document.getElementById("ta4").value,"mm-des.txt");
+}
+function writeFile5() {
+	writeFile(document.getElementById("ta5").value,"mm-bpmn.xml	");
 }
 
 </script>
