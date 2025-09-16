@@ -827,16 +827,16 @@ scripts = int(input[4])
 output = main_fun(s, n, anim, comments, scripts)
 s = ''
 #s += '<div id="div1" hidden>'+output[1]+'</div><br>\n'
-s += '<div id="div2">'+output[2]+'</div><br>\n'
+s += '<div id="div2" tabindex="-1">'+output[2]+'</div><br>\n'
 #s +='<input type=button value="Save bpmn to xml file" onclick="writeFile1();"></input>\n'
-s +='<input type=button value="Save bpmn to svg file" onclick="writeFile2();"></input><br>\n'
+s +='<input type=button value="Save bpmn to svg file" onclick="writeFile2();"></input>\n'
+s +='<input type=button value="Save bpmn to xml file" onclick="writeFile5();"></input><br><br>\n'
 if n==1:
       s += '<div id="div3">'+output[3] +'</div><br>\n'
       s +='<input type=button value="Save timeline to svg file" onclick="writeFile3();"></input><br><br>\n'
-s +='<textarea id="ta4" rows="16" cols="80">'+output[0]+'</textarea><br>\n' #+'<img src="'+output[3]+'">'
+s +='<textarea id="ta4" rows="10" cols="80">'+output[0]+'</textarea><br>\n' #+'<img src="'+output[3]+'">'
 s +='<input type=button value="Save results to txt file" onclick="writeFile4();"></input><br><br>\n'
-s +='<textarea id="ta5" rows="16" cols="80">'+output[1]+'</textarea><br>\n' #+'<img src="'+output[3]+'">'
-s +='<input type=button value="Save bpmn to xml file" onclick="writeFile5();"></input><br><br>\n'
+s +='<textarea hidden id="ta5" rows="10" cols="80">'+output[1]+'</textarea><br>\n' #+'<img src="'+output[3]+'">'
 s
 
 
