@@ -411,27 +411,40 @@ The section <b>Running code</b> allows for defining a process and running simula
 <table><tr><td>
 <div style="width:960px;overflow-x:scroll;">
 
+<script>
+function h(e) {e.parentNode.nextElementSibling.hidden^=1}
+</script>
+
 <ol>
-<h3><li>A process with two serial tasks</li></h3>
+<h3><li onclick='h(this)'>A process with two serial tasks</li></h3>
+<div hidden>
 	<pre id="ex1"><script>ex("ex1",ex1)</script></pre>
 	<br><object type="image/svg+xml" data="ex1_bpmn.svg"></object>
 	<br><object type="image/svg+xml" data="ex1_des.svg"></object>
-<h3><li>A process with two parallel tasks</li></h3>
+</div>
+<h3><li  onclick='h(this)'>A process with two parallel tasks</li></h3>
+<div hidden>
 	<pre id="ex2"><script>ex("ex2",ex2)</script></pre>
 	<br><object type="image/svg+xml" data="ex2_bpmn.svg"></object>
 	<br><object type="image/svg+xml" data="ex2_des.svg"></object>
-<h3><li>A process with serial and parallel tasks</li></h3>
+</div>
+<h3><li onclick='h(this)'>A process with serial and parallel tasks</li></h3>
+<div hidden>
 	<pre id="ex3"><script>ex("ex3",ex3)</script></pre>
 	<br><object type="image/svg+xml" data="ex3_bpmn.svg"></object>
 	<br><object type="image/svg+xml" data="ex3_des.svg"></object>
-<h3><li>A process with two parallel tasks both must be executed</li></h3>
+</div>
+<h3><li onclick='h(this)'>A process with two parallel tasks both must be executed</li></h3>
+<div hidden>
 	<pre id="ex4"><script>ex("ex4",ex4)</script></pre>
 	<br><object type="image/svg+xml" data="ex4_bpmn.svg"></object>
 	<br><object type="image/svg+xml" data="ex4_des.svg"></object>
-<h3><li>A bicycle sharing systems</li></h3>
-	<pre id="ex5"><script>ex("ex5",ex5)</script></pre>
+</div>
+<h3><li onclick='h(this)'>A bicycle sharing systems</li></h3>
+<div hidden>	<pre id="ex5"><script>ex("ex5",ex5)</script></pre>
 	<br><object type="image/svg+xml" data="ex5_bpmn.svg"></object>
 	<br><object type="image/svg+xml" data="ex5_des.svg"></object>
+</div>
 <!--
 <h3><li>A timer test</h3>
 	<pre id="ex6"><script>document.getElementById("ex6").innerHTML=ex6</script></pre>
@@ -446,26 +459,36 @@ The section <b>Running code</b> allows for defining a process and running simula
 	<br><object type="image/svg+xml" data="ex8_bpmn.svg"></object>
 	<br><object type="image/svg+xml" data="ex8_des.svg"></object>
 -->
-<h3><li>A conditional event example with abstract resource</li></h3>
+<h3><li onclick='h(this)'>A conditional event example with abstract resource</li></h3>
+<div hidden>
 	<pre id="ex9"><script>ex("ex9",ex9)</script></pre>
 	<br><object type="image/svg+xml" data="ex9_bpmn.svg"></object>
 	<br><object type="image/svg+xml" data="ex9_des.svg"></object>
-<h3><li>Credit card application</li></h3>
+</div>
+<h3><li onclick='h(this)'>Credit card application</li></h3>
+<div hidden>
 	<pre id="ex10"><script>ex("ex10",ex10)</script></pre>
 	<br><object type="image/svg+xml" data="ex10_bpmn.svg"></object>
 	<br><object type="image/svg+xml" data="ex10_des.svg"></object>
-<h3><li>G/G/2 queue test</li></h3>
+</div>
+<h3><li onclick='h(this)'>G/G/2 queue test</li></h3>
+<div hidden>	
 	<pre id="ex11"><script>ex("ex11",ex11)</script></pre>
 	<br><object type="image/svg+xml" data="ex11_bpmn.svg"></object>
 	<br><object type="image/svg+xml" data="ex11_des.svg"></object>
-<h3><li>Procurement process</li></h3>
+</div>
+<h3><li onclick='h(this)'>Procurement process</li></h3>
+<div hidden>
 	<pre id="ex12"><script>ex("ex12",ex12)</script></pre>
 	<br><object type="image/svg+xml" data="ex12_bpmn.svg"></object>
 	<br><object type="image/svg+xml" data="ex12_des.svg"></object>
-<h3><li>Order process</li></h3>
+</div>
+<h3><li onclick='h(this)'>Order process</li></h3>
+<div hidden>	
 	<pre id="ex13"><script>ex("ex13",ex13)</script></pre>
 	<br><object type="image/svg+xml" data="ex13_bpmn.svg"></object>
 	<br><object type="image/svg+xml" data="ex13_des.svg"></object>
+</div>
 </ol>
 </div>
 
