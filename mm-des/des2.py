@@ -258,8 +258,10 @@ class Sink(BpmnEvent):
             cust.attr["__t"+str(self.id)+"b"] = sim.now()  # mark time in customer attributes
             cust.attr["__t"+str(self.id)+"e"] = sim.now()  # mark time in customer attributes
             self.A["A.n"] += 1
-            self.queue.push(cust)     # insert only to its queue 
-
+            self.queue.push(cust)     # insert only to its queue
+            self.customer=cust
+            if self.code!=None :
+                  self._eval(self.code)   # evaluate script code
 # ---- bpmn derived classes (from Generator, Service, ConditionalEvent or Sink) ----
 class XorGate(Service):    # random output if two outputs 
       def __init__(self,code=None):  # defaults to binary random selection
@@ -328,6 +330,7 @@ def connect(a, b):
                   a.servers[i].output.append(b)
 def dict_tostring(a):
       return "\n".join([k+":\t"+str(v) for k,v in a.items()])
+"""
 def hist(a=[0,1], b=20, c='orange'):
       import matplotlib.pyplot as plt
       plt.hist(a,b,color=c)
@@ -338,7 +341,6 @@ def hist(a=[0,1], b=20, c='orange'):
       plt.savefig(buf, format='svg')
       buf.seek(0)
       return 'data:image/svg+xml;base64,' + base64.b64encode(buf.read()).decode('UTF-8')
-"""
 def from_file(fname):
       with open(fname,"r") as fp:
             return fp.read()
@@ -737,7 +739,7 @@ def bpmn_tosvg(bpmnstring,isanim,iscomments,isscripts,W=100,H=80):
                   s1=svg_roundedPath(pp,12)
                   s += '<path marker-end="url(#triangle)" d="'+s1+'" style="fill:none;stroke:brown;stroke-width:1"/>\n'
       s += "<script>function on_click() {[...document.getElementsByClassName('t1')].forEach(e=>e.style.display=(e.style.display=='none'?'':'none'));}</script>"
-      s = '<svg onclick="on_click()" xmlns="http://www.w3.org/2000/svg" width="%d" height="%d">\n'%(W+40,H+30)+s
+      s = '<svg onclick="on_click()" xmlns="http://www.w3.org/2000/svg" width="%d" height="%d">\n'%(W+40+60,H+30)+s
       return s + (to_anim() if isanim else '') + '</svg>\n'
 def to_anim():
       #return s
