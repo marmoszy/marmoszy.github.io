@@ -463,25 +463,16 @@ ex30="""
 
 ex31="""
 # OrGate test
-1 Start(E,[2.0],20.0,"S.v1=[];S.v2=[];S.v3=[]")  #E(2)t20 # 20 units of exponential events with mean of 2 time units
-2 OrGate()
-3 Task(U,[2.0,3.0])    #U(2,3)  # a task with execution time from 2 to 3 units
-4 Task(U,[1.0,3.0])    #U(1,3)
-5 Task(U,[3.0,4.0])    #U(3,4)
-6 End("S.v1=S.v1+[cname]")
-7 End("S.v2=S.v2+[cname]")
-8 End("S.v3=S.v3+[cname]")
-1->2; 2->3; 2->4; 2->5; 3->6; 4->7; 5->8
-"""
-
-ex31a="""
-# OrGate test
-1 Start(E,[2.0],20.0,"S.v1=[];S.v2=[];S.v3=[]")  #E(2)t20 # 20 units of exponential events with mean of 2 time units
-2 OrGate("=[1,B(0.5),0]")
-3 Task(U,[2.0,3.0])    #U(2,3)  # a task with execution time from 2 to 3 units
-4 Task(U,[1.0,3.0])    #U(1,3)
-5 Task(U,[3.0,4.0])    #U(3,4)
-6 OrGate()
-7 End("S.v3=S.v3+[cname]")
-1->2; 2->3; 2->4; 2->5; 3->6; 4->6; 5->6; 6->7
+1 Start(E,[2.0],-20.0,"S.v1=[]")  #E(2)t20 # 20 units of exponential events with mean of 2 time units
+2 OrGate("=[1,B(0.25)]") #1-always
+3 XorGate()
+4 Task(U,[1.0,3.0]) #U(1,3)
+5 Task(U,[3.0,4.0]) #U(3,4)
+6/4 Task(U,[2.0,3.0],"S.v1=S.v1+[cname];S.v2=len(S.v1)") #U(2,3)  # collecting its customers in S.v1
+7 XorGate()  #  # collecting its customers in S.v2
+8 OrGate()
+9 End()
+1->2; 2->3; 3->4; 4->7; 7->8; 8->9;
+            3->5; 5->7;
+      2->6;             6->8;
 """

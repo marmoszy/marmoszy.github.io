@@ -100,7 +100,7 @@ class QueuedEvent(Event):
                         if len(self.output)>2:  # more than 2 outputs
                               idx=int(self.customer.attr["value"])
                         self.output[idx].insert(self.customer, sim)
-                  elif len(self.output)>0 and isinstance(self,OrGate):
+                  elif len(self.output)>1 and isinstance(self,OrGate):
                         #pass
                         N = 0
                         for i in range(len(self.output)):
@@ -358,10 +358,11 @@ def hist(a=[0,1], b=20, c='orange'):
       plt.savefig(buf, format='svg')
       buf.seek(0)
       return 'data:image/svg+xml;base64,' + base64.b64encode(buf.read()).decode('UTF-8')
+"""
 def from_file(fname):
       with open(fname,"r") as fp:
             return fp.read()
-"""
+
 # ---- conversions --------      
 def attr_tostring(a):
       s="name: "+a["name"]+"\n"
@@ -830,7 +831,6 @@ def main_fun(exn,n,anim,comments,scripts): # string representation, number of si
             pass # s4 = hist(data)
       return (s,s1,s2,s3,s4) # s2+'<br>\n'+(s3 if n==1 else '')+'<br>\n'+'<pre>'+s+'</pre>'
 
-
 """
 if __name__=="__main__":
       import sys
@@ -838,8 +838,13 @@ if __name__=="__main__":
       ex30 = '1 Start()\n2 Task()\n3 End()\n1->2;2->3\n'
       s = len(sys.argv)>1 and from_file(sys.argv[1]) or eval('ex%d'%(30))
       n = len(sys.argv)>2 and int(sys.argv[2]) or 100
-      s = main_fun(s,n)
-      print(s[3])
+      anim = 1
+      comments = 1
+      scripts = 1
+      output = main_fun(s,n,anim,comments,scripts)
+      print(output[2])      
+      print(output[3])
+      print('<pre>',output[0],'</pre>')
 """
 s = input[0]
 n = int(input[1])
