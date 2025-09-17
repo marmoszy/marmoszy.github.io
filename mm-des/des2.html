@@ -111,21 +111,21 @@ ex5a=`# Bikeshare
 1->3; 2->4; 3->5; 3->6; 4->7; 4->8; 5->9; 6->10; 7->11; 8->12
 `;
 ex5=`# Bikeshare
-# S.bA,S.bB - number of bicycles in A and B
-# S.rA,S.rB - number of riding from A and from B
-# S.wA,S.wB - number of walking from A and from B
-1 Start(E,[2.0],-100.0,"S.bA=3;S.rA=0;S.wA=0")       ## start with 3 bikes in A
-2 Start(E,[2.0],-100.0,"S.bB=3;S.rB=0;S.wB=0")       ## start with 3 bikes in B
+# S.bA, S.bB - number of bicycles in A and B
+# S.rA, S.rB - number of riding from A and from B
+# S.wA, S.wB - number of walking from A and from B
+1 Start(E,[2.0],-100.0,"S.bA=3;S.rA=0;S.wA=0")      ## start with 3 bikes in A
+2 Start(E,[2.0],-100.0,"S.bB=3;S.rB=0;S.wB=0")      ## start with 3 bikes in B
 3 XorGate("=S.bA>0;S.bA=(S.bA>0 and S.bA-1 or 0)")  # any bike in A? #yes: take it
 4 XorGate("=S.bB>0;S.bB=(S.bB>0 and S.bB-1 or 0)")  # any bike in B? #yes: take it
-5 Timer(U,[4.0,5.0],"S.bB=S.bB+1;S.rA=S.rA+1")     ## ride and leave taken bike at B
-6 Timer(U,[15.0,20.0],"S.wA=S.wA+1")                 ## walk to B
-7 Timer(U,[4.0,5.0],"S.bA=S.bA+1;S.rB=S.rB+1")     ## ride and leave taken bike at A
-8 Timer(U,[15.0,20.0],"S.wB=S.wB+1")                 ## walk to A
-9 End()                                ## end of riding from A to B
-10 End()                               ## end of walking from A to B
-11 End()                               ## end of riding from B to A
-12 End()                               ## end of walking from B to A
+5 Timer(U,[4.0,5.0],"S.bB=S.bB+1;S.rA=S.rA+1")      ## ride and leave taken bike at B
+6 Timer(U,[15.0,20.0],"S.wA=S.wA+1")                ## walk to B
+7 Timer(U,[4.0,5.0],"S.bA=S.bA+1;S.rB=S.rB+1")      ## ride and leave taken bike at A
+8 Timer(U,[15.0,20.0],"S.wB=S.wB+1")                ## walk to A
+9 End()                                             ## end of riding from A to B
+10 End()                                            ## end of walking from A to B
+11 End()                                            ## end of riding from B to A
+12 End()                                            ## end of walking from B to A
 1->3; 2->4; 3->5; 3->6; 4->7; 4->8; 5->9; 6->10; 7->11; 8->12
 `;
 
@@ -166,7 +166,9 @@ ex8=`# A four phases process
 19 End()
 1->2; 2->4; 4->6; 6->7; 6->8; 6->9; 6->10; 7->11; 8->11; 9->11; 10->11; 11->12; 12->13; 12->14; 12->15; 13->16; 14->16; 15->16; 16->17; 17->18; 18->19; 1->3; 3->5;
 `
-ex9=`# Condition test: from three parallel tasks only two could be executed as only two resources are available
+ex9=`# Condition test
+# from three parallel tasks only two could be executed 
+# as only two resources are available
 1 Start(E,[2.0],20.0,"S.x=2")     ## two abstract resources
 2 XorGate("=(A.n-1)%3")           ## pass to 3 lines
 3 Condition("=S.x>0;S.x=S.x-1")   ## check availability and decrement if available
@@ -179,7 +181,8 @@ ex9=`# Condition test: from three parallel tasks only two could be executed as o
 10 End()
 1->2; 2->3; 2->4; 2->5; 3->6; 4->7; 5->8; 6->9; 7->9; 8->9; 9->10;
 `
-ex10=`# Credit card application - time in 10min units
+ex10=`# Credit card application
+# time in 10min units
 1 Start(E,[1],-40)      ## 2 clerks (25$/h), 3 credit officers (50$/h) 
 2 AndGate()
 3 Task(N,[1,2/10])      ## check credit history (clerk)
@@ -220,7 +223,9 @@ ex12=`# Procurement Process
 11 End()
 1->2; 2->3; 3->4; 4->5; 4->6; 5->7; 5->8; 7->9; 8->9; 9->10; 10->11;
 `
-ex13=`# Order (one time unit -> 5 min)
+ex13=`# Order process
+# one time unit -> 5 min
+# S.r - number of available products
 1 Start(U,[2],-20.0,"S.r=100")      # 20 orders            # every 2 time units, 100 resources available
 2 Task(T,[1,3],"o=int(N([10,3]))")  # order registration   # 5-15 min, normally order of 10 resources
 3 AndGate()                         #                      # split into two parallel paths
@@ -353,12 +358,13 @@ The results are in the form of animated or static BPMN diagram, the timeline for
 <div class="panel">
 <p>
 
-<b>mm-des</b> allows to run simulations of process models defined in text form as the list of elements and the list of connections. The code implements eight basic BPMN elements and six random generators:
+<b>mm-des</b> allows to run simulations of process models defined in text form as the list of elements and the list of connections. The code implements nine basic BPMN elements and six random generators:
 <ol>
 	<li>Start(fun, param, tnmax, script) - start event
 	<li>Task(fun, param, script, nservers=1) - sequential task activity with n-servers inside
 	<li>XorGate(script) - exclusive gateway (two-output: value==true passes the event to the first defined connection, value==false - to the second (more than two: must have algebraic choice-like function with result being a number starting from 0) multi-input: pass trough the event from all connected), default script is "=B(0.5)" meaning binomial equally distributed choice for two outputs
 	<li>AndGate(script) - parallel gateway (multi-output: passes through the event to all connected, multi-input: waits for all)
+	<li>OrGate(script) - inclusive gateway (multi-output: passes through the event to those for which script values are true (i.e for three output lines default script is "=[1,0,0]" meaning that only first is passed, multi-input: waits for those that were true)
 	<li>Timer(fun, param, script) - timer delay event
 	<li>Condition(script) - conditional event with a script containing logical expression as the first one ("=&lt;expr&gt;;..."); the instructions after first semicolon will be executed only when condition evaluates to true
 	<li>Terminate(script) - terminate event
@@ -372,7 +378,7 @@ where:
 	<li>script - string with semicolon separated codes for evaluation during event execution "[var]=&lt;expr&gt;; ... ;", empty var defaults to 'value' variable which is tested in XorGate and Condtion, var starting with 'S.' are scenario ones, starting with 'A.' element ones and without prefix - token/customer ones. Variable 'A.n' is element event counter which is initiated with 0 and increased by 1 at exec of each token/customer event. Token/customer have variable 'cname' (customer name) and may have variables '__t&lt;id&gt;a', '__t&lt;id&gt;b' and '__t&lt;id&gt;e' when the token visited the element with identifier id. They mark arrival, begin and end times.
 </ul>
 The text description of a process contains list of elements that should be ordered by number (element identifier) and semicolon separated list of connections. 
-The elements should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '/x[/y]' values after event identifier<!-- (see example 10) -->. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of element number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram.
+The elements should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '/x[/y]' values after event identifier<!-- (see example 10) -->. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of element number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram. Additionally, the Condition element could be play a role of the edge event of the Task element by adding to that Condition element number the Task number joined with the '.' character.   
 
 <p>
 Minimum working example (MWE) with default values for all events looks like:

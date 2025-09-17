@@ -94,15 +94,23 @@ class QueuedEvent(Event):
             if self.customer!=None:
                   if len(self.output)>0 and isinstance(self,XorGate):  
                         idx = 1  # send to second output
-#                        if self.customer.attr["value"] or len(self.output)<2:
+                        #if self.customer.attr["value"] or len(self.output)<2:
                         if ("value" in self.customer.attr and self.customer.attr["value"]) or len(self.output)<2:
                               idx=0 # send rather to first output
                         if len(self.output)>2:  # more than 2 outputs
                               idx=int(self.customer.attr["value"])
                         self.output[idx].insert(self.customer, sim)
+                  elif len(self.output)>0 and isinstance(self,OrGate):
+                        #pass
+                        N = 0
+                        for i in range(len(self.output)):
+                              if int(self.customer.attr["value"][i]):
+                                    N += 1
+                                    self.output[i].insert(self.customer, sim)
+                        self.customer.N = N
                   else:
                         for i in range(len(self.output)):  # split to all
-                              self.output[i].insert(self.customer, sim)
+                              self.output[i].insert(self.customer,sim)
       def prev(self):
             ep=[]
             for e0 in QueuedEvent.instances:
@@ -207,11 +215,14 @@ class Service(BpmnEvent):
       def __init__(self, fun, param, code=None): 
             BpmnEvent.__init__(self,"Activity",code)  
             self.fun, self.param = fun, param 
-            self.N = 1 # N number of tokens to wait (used for AndGate)
+            self.N = 1 # N number of tokens to wait (used for AndGate,OrGate)
       def insert(self, cust, sim):
             if isinstance(self,XorGate):
                   if len(self.output)>1 and self.code==None:
                         self.code="=B(0.5)"
+            elif isinstance(self,OrGate):
+                  if len(self.output)>1 and self.code==None:
+                        self.code="=[1,"+",".join(['0']*(len(self.output)-1))+"]"
             if self.customer == None: # if free add to simulator with end time
                   self.customer,t = cust,self._fun()
                   if isinstance(t,list):  # [cycle,begin=0] cyclic timer (MM 1.11.2024)
@@ -246,6 +257,8 @@ class Service(BpmnEvent):
                   self._eval(self.code)   # evaluate script code ([var]=<value>)
             if self.customer!=None:
                   self.customer.attr["__n"+str(self.id)] += 1
+                  if isinstance(self,OrGate) and len(self.output)==1:
+                        self.N = self.customer.N
                   if (self.customer.attr["__n"+str(self.id)]%self.N) == 0: #self.N:
                         self.out(sim)     # pass customer to connected object
             self.customer = None    # mark that now the service is free !!!
@@ -267,6 +280,10 @@ class XorGate(Service):    # random output if two outputs
       def __init__(self,code=None):  # defaults to binary random selection
             Service.__init__(self,None,0,code)
             self.setName("exclusiveGateway")
+class OrGate(Service):    # output condition must be defined by array of values! 
+      def __init__(self,code=None):
+            Service.__init__(self,None,0,code)
+            self.setName("inclusiveGateway")
 class AndGate(Service):    
       def __init__(self,code=None):
             Service.__init__(self,None,0,code)
@@ -412,6 +429,7 @@ def to_dot(ee=QueuedEvent.instances):
             elif "end" in ee[i].name: style="filled"; pen="3"
             if "exclusive" in ee[i].name: xlabel=label; label="X"
             elif "parallel" in ee[i].name: xlabel=label; label="+"
+            elif "inclusive" in ee[i].name: xlabel=label; label="O"
             s += '  '+ee[i].name +' [label="'+label+'" xlabel="'+xlabel
             s += '" style="'+style+'" shape="'+shape+'" fillcolor="'
             s += color+'" penwidth="'+pen+'" '+size+']' +'\n'
@@ -730,6 +748,8 @@ def bpmn_tosvg(bpmnstring,isanim,iscomments,isscripts,W=100,H=80):
                                     s+='<path d="M%g %g L%g %g M%g %g L%g %g" stroke="black" stroke-width="3" />\n'%(x+w/2-6,y+h/2-6,x+w/2+6,y+h/2+6,x+w/2+6,y+h/2-6,x+w/2-6,y+h/2+6)
                               elif "parallel" in it.attrib["id"]:
                                     s+='<path d="M%g %g L%g %g M%g %g L%g %g" stroke="black" stroke-width="3" />\n'%(x+w/2-8,y+h/2,x+w/2+8,y+h/2,x+w/2,y+h/2-8,x+w/2,y+h/2+8)
+                              elif "inclusive" in it.attrib["id"]:
+                                    s+='<circle cx="%g" cy="%g" r="7" fill="none" stroke="black" stroke-width="3" />\n'%(x+w/2,y+h/2)
                         else:
                               s+= '<rect rx="7" ry="7" x="'+str(x)+'" y="'+str(y)+'" width="'+str(w)+'" height="'+str(h)+'" stroke="darkblue" fill="white"><title>'+id2+'</title></rect>\n'
                               if "script" in it.attrib["id"]:
