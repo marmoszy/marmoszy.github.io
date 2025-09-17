@@ -361,8 +361,8 @@ The results are in the form of animated or static BPMN diagram, the timeline for
 	<li>AndGate(script) - parallel gateway (multi-output: passes through the event to all connected, multi-input: waits for all)
 	<li>Timer(fun, param, script) - timer delay event
 	<li>Condition(script) - conditional event with a script containing logical expression as the first one ("=&lt;expr&gt;;..."); the instructions after first semicolon will be executed only when condition evaluates to true
-	<li>Terminate() - terminate event
-	<li>End() - end event
+	<li>Terminate(script) - terminate event
+	<li>End(script) - end event
 </ol>
 where:
 <ul>
