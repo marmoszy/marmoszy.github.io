@@ -101,7 +101,6 @@ class QueuedEvent(Event):
                               idx=int(self.customer.attr["value"])
                         self.output[idx].insert(self.customer, sim)
                   elif len(self.output)>1 and isinstance(self,OrGate):
-                        #pass
                         N = 0
                         for i in range(len(self.output)):
                               if int(self.customer.attr["value"][i]):
@@ -113,10 +112,11 @@ class QueuedEvent(Event):
                               self.output[i].insert(self.customer,sim)
       def prev(self):
             ep=[]
-            for e0 in QueuedEvent.instances:
+            for e0 in filter(None,QueuedEvent.instances):
                   for i in range(len(e0.output)):
                         if e0.output[i]==self:
                               ep.append(e0)
+            #print("prev:",str(ep))
             return ep
 
 # ---- basic model classes (QueueEvent derived) ----
@@ -421,6 +421,7 @@ def to_dot0(ee=QueuedEvent.instances):
 def to_dot(ee=QueuedEvent.instances):
       s ='digraph BPMN2 { rankdir="LR" nodesep=0.6\n'
       for i in range(len(ee)):
+            if ee[i]==None: continue
             label,xlabel,shape,style,color,pen = str(ee[i].id),"","rect","","","1"
             size=""
             if "vent" in ee[i].name: shape="circle"
@@ -435,6 +436,7 @@ def to_dot(ee=QueuedEvent.instances):
             s += '" style="'+style+'" shape="'+shape+'" fillcolor="'
             s += color+'" penwidth="'+pen+'" '+size+']' +'\n'
       for i in range(len(ee)):
+            if ee[i]==None: continue
             s1 = '  {rank=same; '
             for j in range(len(ee[i].output)):
                   s += "  "+ee[i].name + " -> " + ee[i].output[j].name +"\n"
@@ -445,6 +447,9 @@ def to_dot(ee=QueuedEvent.instances):
 def to_position(ee=QueuedEvent.instances):
       pp=[]
       for i in range(len(ee)):   # set x position to tree level
+            if ee[i]==None:
+                  pp.append(None)
+                  continue
             x,ep = 0,ee[i].prev()
             for idx in range(len(ep)-1,-1,-1):
                   if ep[idx].pp[0]!=-1:
@@ -454,12 +459,13 @@ def to_position(ee=QueuedEvent.instances):
             pp.append(ee[i].pp)
       #print([_.pp for _ in ee])
       for i in range(1,len(pp)): # increase y position for all at the same level
-            if pp[i][0]==pp[i-1][0]:
+            if pp[i]!=None and pp[i-1]!=None and pp[i][0]==pp[i-1][0]:
                   pp[i][1] = pp[i-1][1]+1
                   ee[i].pp=pp[i]
       #print([_.pp for _ in ee])
       #"""
       for i in range(len(ee)-1,-1,-1):   # set y position to the level of previous 
+            if ee[i]==None: continue
             e = ee[i].prev()
             if len(e)>0 and e[0].output[0]==ee[i]:
                   pp[i][1] = e[0].pp[1]
@@ -470,22 +476,25 @@ def to_position(ee=QueuedEvent.instances):
       #print([_.pp for _ in ee])
       #"""
       for i in range(len(ee)-1,-1,-1): # move previous to the level of its first next
+            if ee[i]==None: continue
             ep=ee[i].prev()
             if len(ep)>0 and ep[0].output[0]==ee[i] and ep[0].pp[0]==ee[i].pp[0]-1:
                   if ep[0].pp[1]!=ee[i].pp[1]:
                         ep[0].pp[1]=ee[i].pp[1]
       #print([_.pp for _ in ee])      
       for i in range(len(ee)):  # force position from pp2
+            if ee[i]==None: continue
             if ee[i].pp2[0]!=-1:
                   ee[i].pp[0]=ee[i].pp2[0]
             if ee[i].pp2[1]!=-1:
                   ee[i].pp[1]=ee[i].pp2[1]
-      for e in ee:   # correct position of boundary events 
+      for e in ee:   # correct position of boundary events
+            if e==None: continue
             #if(e.pp[0]==0 and e.pp[1]==0):
             if(e.id!=e.id2):
                   id2=int(str(e.id2).split(".")[1])
                   e.pp[0],e.pp[1] = ee[id2-1].pp[0],ee[id2-1].pp[1]
-      return [e.pp for e in ee]
+      return [e.pp for e in filter(None,ee)]
 def to_bpmn(ee=QueuedEvent.instances,pp=None):
       s ='<?xml version="1.0" encoding="UTF-8"?>\n'
       s+='<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
@@ -502,10 +511,11 @@ def to_bpmn(ee=QueuedEvent.instances,pp=None):
       j1 = 0  # flow counter
       W,H,W0,H0 = 100,100,40,30
       if not pp:
-            pp = [e.pp for e in ee]
+            pp = [e.pp for e in filter(None,ee)]
             if pp[0][0]==-1:
-                  pp = to_position(ee)
+                  pp = to_position(filter(None,ee))
       for i in range(len(ee)):
+            if ee[i]==None: continue
             name = ee[i].name
             if "terminate" in name:
                   name=name[len("terminate"):]
@@ -602,7 +612,7 @@ class EventNetwork():
             ss = s.split('\n')
             for s0 in ss:
                   s1 = s0.strip()
-                  if len(s1)<2 or s1[0]=='#':
+                  if len(s1)<1 or s1[0]=='#':
                         if s1==ss[0]: # title in first line
                               en_title = ss[0][1:]
                         continue
@@ -615,7 +625,8 @@ class EventNetwork():
                                         if code[0][0]=='(': code[0]=code[0][1:-1]
                                         if code[1][0]=='(': code[1]=code[1][1:-1]
                                         import re
-                                        src,dst = re.split('[,|\|]',code[0]),re.split('[,|\|]',code[1])
+                                        src = re.split('[,|]',code[0])
+                                        dst = re.split('[,|]',code[1])
                                         for s in src:
                                               for d in dst:
                                                     i,j = int(s)-1, int(d)-1
@@ -629,15 +640,17 @@ class EventNetwork():
                   else:          # event definition
                         code=s1.split(" ")
                         if len(code)>1:
-                                code1=" ".join(code[1:]).split('#')
-                                ee.append(eval(code1[0]))
-                                ee[-1].id2=float(code[0].split('/')[0]) # id as written in source 
-                                ee[-1].title=code1[1].strip() if len(code1)>1 else ''
-                                cc=code[0].split("/")  # check identifier field
-                                ee[-1].pp2[0] = float(cc[1])-1 if len(cc)>1 else -1 
-                                ee[-1].pp2[1] = float(cc[2])-1 if len(cc)>2 else -1
-            if len(set([e.pp2[1] for e in ee]))==1: # verify if multi-line description
-                  for e in ee:      # if yes
+                              code1=" ".join(code[1:]).split('#')
+                              ee.append(eval(code1[0]))
+                              ee[-1].id2=float(code[0].split('/')[0]) # id as written in source 
+                              ee[-1].title=code1[1].strip() if len(code1)>1 else ''
+                              cc=code[0].split("/")  # check identifier field
+                              ee[-1].pp2[0] = float(cc[1])-1 if len(cc)>1 else -1 
+                              ee[-1].pp2[1] = float(cc[2])-1 if len(cc)>2 else -1
+                        elif len(code)==1:
+                              ee.append(None)  # empty element 
+            if len(set([e.pp2[1] for e in filter(None,ee)]))==1: # verify if multi-line description
+                  for e in filter(None,ee):      # if yes
                         e.pp2[1]=-1 # clear all y-levels to unknown
             return ee
       def to_string(self):
@@ -842,9 +855,9 @@ def main_fun(exn,n,anim,comments,scripts): # string representation, number of si
 if __name__=="__main__":
       import sys
       #import ex
-      ex30 = '1 Start()\n2 Task()\n3 End()\n1->2;2->3\n'
+      ex30 = '1 Start()\n2 Task()\n3 End()\n1->2->3\n'
       s = len(sys.argv)>1 and from_file(sys.argv[1]) or eval('ex%d'%(30))
-      n = len(sys.argv)>2 and int(sys.argv[2]) or 100
+      n = len(sys.argv)>2 and int(sys.argv[2]) or 1
       anim = 1
       comments = 1
       scripts = 1
@@ -872,5 +885,6 @@ s +='<textarea id="ta4" rows="10" cols="80">'+output[0]+'</textarea><br>\n' #+'<
 s +='<input type=button value="Save results to txt file" onclick="writeFile4();"></input><br><br>\n'
 s +='<textarea hidden id="ta5" rows="10" cols="80">'+output[1]+'</textarea><br>\n' #+'<img src="'+output[3]+'">'
 s
+
 
 
