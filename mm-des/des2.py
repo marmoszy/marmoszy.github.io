@@ -614,7 +614,8 @@ class EventNetwork():
                                         code[1]=code[1].split("#")[0]
                                         if code[0][0]=='(': code[0]=code[0][1:-1]
                                         if code[1][0]=='(': code[1]=code[1][1:-1]
-                                        src,dst = code[0].split(','),code[1].split(',')
+                                        import re
+                                        src,dst = re.split('[,|\|]',code[0]),re.split('[,|\|]',code[1])
                                         for s in src:
                                               for d in dst:
                                                     i,j = int(s)-1, int(d)-1
