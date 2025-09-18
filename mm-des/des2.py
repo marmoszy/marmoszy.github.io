@@ -612,7 +612,7 @@ class EventNetwork():
             ss = s.split('\n')
             for s0 in ss:
                   s1 = s0.strip()
-                  if len(s1)<1 or s1[0]=='#':
+                  if len(s1)<2 or s1[0]=='#':
                         if s1==ss[0]: # title in first line
                               en_title = ss[0][1:]
                         continue
@@ -647,8 +647,8 @@ class EventNetwork():
                               cc=code[0].split("/")  # check identifier field
                               ee[-1].pp2[0] = float(cc[1])-1 if len(cc)>1 else -1 
                               ee[-1].pp2[1] = float(cc[2])-1 if len(cc)>2 else -1
-                        elif len(code)==1:
-                              ee.append(None)  # empty element 
+                        #elif len(code)==1:
+                        #      ee.append(None)  # empty element 
             if len(set([e.pp2[1] for e in filter(None,ee)]))==1: # verify if multi-line description
                   for e in filter(None,ee):      # if yes
                         e.pp2[1]=-1 # clear all y-levels to unknown
