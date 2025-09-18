@@ -349,7 +349,7 @@ async function py_main1() { py_main(
 </script>
 
 <center>
-<h1>mm-des - minimalistic discrete event simulator</h1>
+<h1 style="font-family:helvetica">mm-des - minimalistic discrete event simulator</h1>
 <p><span title="marek.moszynski@pg.edu.pl">MM</span> February 2024 (v.1), September 2025 (v.2)</p>
 
 <table style="width:960px;"><tr><td>
@@ -385,7 +385,7 @@ where:
 	<li>script - string with semicolon separated codes for evaluation during event execution "[var]=&lt;expr&gt;; ... ;", empty var defaults to 'value' variable which is tested in XorGate and Condtion, var starting with 'S.' are scenario ones, starting with 'A.' element ones and without prefix - token/customer ones. Variable 'A.n' is element event counter which is initiated with 0 and increased by 1 at exec of each token/customer event. Token/customer have variable 'cname' (customer name) and may have variables '__t&lt;id&gt;a', '__t&lt;id&gt;b' and '__t&lt;id&gt;e' when the token visited the element with identifier id. They mark arrival, begin and end times.
 </ul>
 The text description of a process contains list of elements that should be ordered by number (element identifier) and semicolon separated list of connections. 
-The elements should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '/x[/y]' values after event identifier<!-- (see example 10) -->. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of element number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram. Additionally, the Condition element could be play a role of the edge event of the Task element by adding to that Condition element number the Task number joined with the '.' character.   
+The elements should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '/x[/y]' values after event identifier<!-- (see example 10) -->. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of element number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram. <!-- Additionally, the Condition element could be play a role of the edge event of the Task element by adding to that Condition element number the Task number joined with the '.' character.-->   
 
 <p>
 Minimum working example (MWE) with default values for all events looks like:
