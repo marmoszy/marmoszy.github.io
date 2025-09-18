@@ -612,13 +612,18 @@ class EventNetwork():
                                 code = s1a.strip().split("->")
                                 while len(code)>1:
                                         code[1]=code[1].split("#")[0]
-                                        i,j = int(code[0])-1, int(code[1])-1
-                                        if i>-1 and j>-1:
-                                              connect(ee[i],ee[j])
-                                        if i>-1 and ee[i].pp2[1]==-1: # if not set yet
-                                              ee[i].pp2[1]=ylevel # force y position
-                                        if j>-1 and ee[j].pp2[1]==-1: # if not set yet
-                                              ee[j].pp2[1]=ylevel # force y position
+                                        if code[0][0]=='(': code[0]=code[0][1:-1]
+                                        if code[1][0]=='(': code[1]=code[1][1:-1]
+                                        src,dst = code[0].split(','),code[1].split(',')
+                                        for s in src:
+                                              for d in dst:
+                                                    i,j = int(s)-1, int(d)-1
+                                                    if i>-1 and j>-1:
+                                                          connect(ee[i],ee[j])
+                                                    if i>-1 and ee[i].pp2[1]==-1: # if not set yet
+                                                          ee[i].pp2[1]=ylevel # force y position
+                                                    if j>-1 and ee[j].pp2[1]==-1: # if not set yet
+                                                          ee[j].pp2[1]=ylevel # force y position
                                         code.pop(0)
                   else:          # event definition
                         code=s1.split(" ")

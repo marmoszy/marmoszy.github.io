@@ -69,8 +69,7 @@ ex2=`# A process with two parallel tasks
 4 Task(U,[1.0,3.0])
 5 AndGate()
 6 End()
-1->2->3->5->6;
-   2->4->5; 
+1->2->(3,4)->5->6;
 `
 ex3=`# A process with sequential and parallel tasks
 1 Start(E,[1.0],20.0)
