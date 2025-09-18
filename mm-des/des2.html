@@ -206,10 +206,10 @@ ex10=`# Credit card application
 `;
 ex11=`# G/G/2 test
 # S.v4 collecting customers 
-1 Start(U,[1],-10,"S.v4=[]")      # 10 customers
+1 Start(U,[1],-10,"S.v=[]")      # 10 customers
 2 OrGate("=[1,A.n%2]")            ## 1.every,2.every second
 3 Task(U,[4],"",2)                # G/G/2
-4 Task(U,[4],"S.v4=S.v4+[cname]") # G/G/1
+4 Task(U,[4],"S.v=S.v+[cname]") # G/G/1
 5 OrGate()
 6 Timer(1)
 7 End()
