@@ -629,16 +629,21 @@ class EventNetwork():
                                         src = re.split('[,|]',code[0])
                                         dst = re.split('[,|]',code[1])
                                         for s in src:
-                                              si=s.split('-')
+                                              si=re.split('-[>]*',s)
                                               for d in dst:
-                                                    di=d.split('-')
-                                                    i,j = int(si[0])-1, int(di[0])-1
-                                                    if i>-1 and j>-1:
-                                                          connect(ee[i],ee[j])
-                                                    if i>-1 and ee[i].pp2[1]==-1: # if not set yet
-                                                          ee[i].pp2[1]=ylevel # force y position
-                                                    if j>-1 and ee[j].pp2[1]==-1: # if not set yet
-                                                          ee[j].pp2[1]=ylevel # force y position
+                                                    di=re.split('-[>]*',d)
+                                                    if len(si)==1: di=[si[0]]+di
+                                                    if len(di)==1: di=[si[-1]]+di
+                                                    for k in range(len(di)-1):
+                                                          if di[k+1]=='': z=di[k]; continue
+                                                          if di[k]=='': di[k]=z
+                                                          i,j = int(di[k])-1, int(di[k+1])-1
+                                                          if i>-1 and j>-1:
+                                                                connect(ee[i],ee[j])
+                                                          if i>-1 and ee[i].pp2[1]==-1: # if not set yet
+                                                                ee[i].pp2[1]=ylevel # force y position
+                                                          if j>-1 and ee[j].pp2[1]==-1: # if not set yet
+                                                                ee[j].pp2[1]=ylevel # force y position
                                         code.pop(0)
                   else:          # event definition
                         code=s1.split(" ")
