@@ -619,17 +619,20 @@ class EventNetwork():
                   if "->" in s1: # connection definition
                         ylevel += 1   # used for marking required y position
                         for s1a in s1.split(";"):
-                                code = s1a.strip().split("->")
+                                import re
+                                #code = s1a.strip().split('->')
+                                code = re.split(r'-[>]*(?=(?:(?:[^\(\)]*+(?<!\\)[\(\)]){2})*+[^\(\)]*+\Z)',s1a.strip())
                                 while len(code)>1:
                                         code[1]=code[1].split("#")[0]
                                         if code[0][0]=='(': code[0]=code[0][1:-1]
                                         if code[1][0]=='(': code[1]=code[1][1:-1]
-                                        import re
                                         src = re.split('[,|]',code[0])
                                         dst = re.split('[,|]',code[1])
                                         for s in src:
+                                              si=s.split('-')
                                               for d in dst:
-                                                    i,j = int(s)-1, int(d)-1
+                                                    di=d.split('-')
+                                                    i,j = int(si[0])-1, int(di[0])-1
                                                     if i>-1 and j>-1:
                                                           connect(ee[i],ee[j])
                                                     if i>-1 and ee[i].pp2[1]==-1: # if not set yet
