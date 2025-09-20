@@ -597,6 +597,7 @@ def to_bpmn(ee=QueuedEvent.instances,pp=None):
       return s+s1+s2+'</bpmn:definitions>\n'
 
 en_title = ""
+import re
 class EventNetwork():
       def __init__(self,s):
             Event.cnt, Customer.cnt = 0, 0
@@ -608,7 +609,7 @@ class EventNetwork():
             return self.ee[i]
       def from_string(self,s):
             global en_title
-            ee, Event.cnt, ylevel, en_title = [], 0, -1, ''
+            ee, Event.cnt, ylevel, en_title, id2 = [], 0, -1, '', 0
             ss = s.split('\n')
             for s0 in ss:
                   s1 = s0.strip()
@@ -619,7 +620,6 @@ class EventNetwork():
                   if "->" in s1: # connection definition
                         ylevel += 1   # used for marking required y position
                         for s1a in s1.split(";"):
-                                import re
                                 #code = s1a.strip().split('->')
                                 code = re.split(r'-[>]*(?=(?:(?:[^\(\)]*+(?<!\\)[\(\)]){2})*+[^\(\)]*+\Z)',s1a.strip())
                                 while len(code)>1:
@@ -646,17 +646,21 @@ class EventNetwork():
                                                                 ee[j].pp2[1]=ylevel # force y position
                                         code.pop(0)
                   else:          # event definition
-                        code=s1.split(" ")
-                        if len(code)>1:
-                              code1=" ".join(code[1:]).split('#')
-                              ee.append(eval(code1[0]))
-                              ee[-1].id2=float(code[0].split('/')[0]) # id as written in source 
-                              ee[-1].title=code1[1].strip() if len(code1)>1 else ''
-                              cc=code[0].split("/")  # check identifier field
-                              ee[-1].pp2[0] = float(cc[1])-1 if len(cc)>1 else -1 
-                              ee[-1].pp2[1] = float(cc[2])-1 if len(cc)>2 else -1
-                        #elif len(code)==1:
-                        #      ee.append(None)  # empty element 
+                        s1a=re.split(r'''((?:[^;"']|"[^"]*"|'[^']*')+)''',s1)
+                        for s1b in s1a:
+                              code=s1b.strip().split(" ")
+                              if len(code)>1 and len(code[0])>0:
+                                    id2 += 1 # id counter
+                                    #if not code[0][:1].isdigit(): code = [str(id2)] + code
+                                    code1=" ".join(code[1:]).split('#')
+                                    ee.append(eval(code1[0]))
+                                    ee[-1].id2=float(code[0].split('/')[0]) # id as written in source 
+                                    ee[-1].title=code1[1].strip() if len(code1)>1 else ''
+                                    cc=code[0].split("/")  # check identifier field
+                                    ee[-1].pp2[0] = float(cc[1])-1 if len(cc)>1 and len(cc[1])>0 else -1 
+                                    ee[-1].pp2[1] = float(cc[2])-1 if len(cc)>2 and len(cc[2])>0 else -1
+                              #elif len(code)==1:
+                              #      ee.append(None)  # empty element 
             if len(set([e.pp2[1] for e in filter(None,ee)]))==1: # verify if multi-line description
                   for e in filter(None,ee):      # if yes
                         e.pp2[1]=-1 # clear all y-levels to unknown
