@@ -64,10 +64,7 @@ ex1=`# Two sequential tasks
 `
 ex2=`# A process with two parallel tasks
 1 Start(E,[2.0],20.0)
-2 AndGate()
-3 Task(U,[2.0,3.0]) 
-4 Task(U,[1.0,3.0])
-5 AndGate()
+2 AndGate(); 3 Task(U,[2.0,3.0]); 4 Task(U,[1.0,3.0]); 5 AndGate()
 6 End()
 1->2->(3|4)->5->6;
 `
@@ -75,10 +72,7 @@ ex3=`# A process with sequential and parallel tasks
 1 Start(E,[1.0],20.0)
 2 Task(E,[2.0]) 
 3 Task(E,[3.0])
-4 AndGate()
-5 Task(U,[1.0,2.0])
-6 Timer(1.0)
-7 AndGate() 
+4 AndGate(); 5 Task(U,[1.0,2.0]); 6 Timer(1.0); 7 AndGate() 
 8 End()
 1->2->3->4->(5|6)->7->8
 `
@@ -131,13 +125,10 @@ ex5=`# Bikeshare
    3->6->10
 2->4->7->11
    4->8->12
-
 `;
 
 ex6=`# Timer test
-1 Start(U,[2.0],6)
-2 Timer(3.0)            # delay all events by 3.0  
-3 End()
+1 Start(U,[2.0],6); 2 Timer(3.0) # delay all events by 3.0; 3 End()
 1->2->3
 `
 ex7=`# An activity variable test (A.n - client number)
@@ -207,14 +198,14 @@ ex10=`# Credit card application
 `;
 ex11=`# G/G/2 test
 # S.v4 collecting customers 
-1 Start(U,[1],-10,"S.v=[]")      # 10 customers
-2 OrGate("=[1,A.n%2]")            ## 1.every,2.every second
-3 Task(U,[4],"",2)                # G/G/2
+1 Start(U,[1],-10,"S.v=[]")     # 10 customers
+2 OrGate("=[1,A.n%2]")          ## 1.every,2.every second
+3 Task(U,[4],"",2)              # G/G/2
 4 Task(U,[4],"S.v=S.v+[cname]") # G/G/1
 5 OrGate()
-6 Timer(1)
+6 Timer(1)                      # 1 delay
 7 End()
-1->2->(3|4)->5->6->7
+1->2->(3|4)->5->6->7            # 3|4 parallel
 `;
 ex12=`# Procurement process
 1 Start(E,[1],-40)      
