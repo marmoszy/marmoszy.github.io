@@ -217,14 +217,14 @@ ex11=`# The tests
 3 OrGate("=[A.n%2,1]")              ## 1.every second,2.every
 4 Task(U,[4],"S.v1=S.v1+[cname]")   # G/G/1
 5 Task(U,[4],"S.v2=S.v2+[cname]",2) # G/G/2
-6 Task()
+6/4 Task()                          ## "/4" - draw in 4th column
 7 OrGate()
 8 OrGate()
 9 Task()
 10 Timer(1)                          # 1 delay
 11 End("S.v3=S.v3+[cname]")
 12.9 Condition("=cname%4==0")  ## boundary event for the customer with cname equal to multiple of 4 
-13/8 Throw("S.v4=S.v4+[cname]")  ## "/8" - draw in 8th column
+13/7 Throw("S.v4=S.v4+[cname]")  ## "/7" - draw in 7th column
 1->2->3->4->7->8->9->10->11
       3->5->7;   12->13
    2 ->  6  -> 8
