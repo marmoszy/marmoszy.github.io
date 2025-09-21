@@ -1,0 +1,245 @@
+<svg onclick="on_click()" xmlns="http://www.w3.org/2000/svg" width="464" height="348">
+<text x="8" y="56">1<title>startEvent_1 10 customers</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">10 customers<title>startEvent_1</title></text>
+<rect y="44" x="20.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [0.00, 0.00, 0.00]</title></rect>
+<text x="8" y="80">2<title>inclusiveGateway_2 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80"><title>inclusiveGateway_2</title></text>
+<rect y="68" x="20.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [0.00, 0.00, 0.00]</title></rect>
+<text x="8" y="104">3<title>task_3 G/G/1</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104">G/G/1<title>task_3</title></text>
+<rect y="92" x="20.0" width="64.0" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [0.00, 0.00, 4.00]</title></rect>
+<text x="22.0" y="110">1</text><text x="8" y="128">4<title>task_4 G/G/2</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">G/G/2<title>task_4</title></text>
+<rect y="116" x="20.0" width="64.0" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [0.00, 0.00, 4.00]</title></rect>
+<text x="22.0" y="134">1</text><text x="8" y="152">5<title>inclusiveGateway_5 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152"><title>inclusiveGateway_5</title></text>
+<rect y="140" x="84.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [4.00, 4.00, 4.00]</title></rect>
+<text x="8" y="176">6<title>intermediateCatchEvent_6 1 delay</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">1 delay<title>intermediateCatchEvent_6</title></text>
+<rect y="164" x="84.0" width="16.0" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [4.00, 4.00, 5.00]</title></rect>
+<text x="86.0" y="182">1</text><text x="8" y="200">7<title>task_7 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="200"><title>task_7</title></text>
+<rect y="188" x="100.0" width="29.33134385064872" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [5.00, 5.00, 6.83]</title></rect>
+<text x="102.0" y="206">1</text><text x="8" y="224">8<title>endEvent_8 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="224"><title>endEvent_8</title></text>
+<rect y="212" x="129.33134385064872" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>1 [6.83, 6.83, 6.83]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 10 customers</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">10 customers<title>startEvent_1</title></text>
+<rect y="44" x="36.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [1.00, 1.00, 1.00]</title></rect>
+<text x="8" y="80">2<title>inclusiveGateway_2 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80"><title>inclusiveGateway_2</title></text>
+<rect y="68" x="36.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [1.00, 1.00, 1.00]</title></rect>
+<text x="8" y="128">4<title>task_4 G/G/2</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">G/G/2<title>task_4</title></text>
+<rect y="116" x="36.0" width="64.0" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [1.00, 1.00, 5.00]</title></rect>
+<text x="38.0" y="134">2</text><text x="8" y="152">5<title>inclusiveGateway_5 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152"><title>inclusiveGateway_5</title></text>
+<rect y="140" x="100.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [5.00, 5.00, 5.00]</title></rect>
+<text x="8" y="176">6<title>intermediateCatchEvent_6 1 delay</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">1 delay<title>intermediateCatchEvent_6</title></text>
+<rect y="164" x="100.0" width="16.0" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [5.00, 5.00, 6.00]</title></rect>
+<text x="102.0" y="182">2</text><text x="8" y="200">7<title>task_7 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="200"><title>task_7</title></text>
+<rect y="188" x="129.33134385064872" width="24.735673967241553" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [6.00, 6.83, 8.38]</title></rect>
+<text x="131.33134385064872" y="206">2</text><text x="8" y="224">8<title>endEvent_8 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="224"><title>endEvent_8</title></text>
+<rect y="212" x="154.06701781789027" width="1" height="22" stroke="black" fill-opacity="0.7" fill="cornflowerblue"><title>2 [8.38, 8.38, 8.38]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 10 customers</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">10 customers<title>startEvent_1</title></text>
+<rect y="44" x="52.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [2.00, 2.00, 2.00]</title></rect>
+<text x="8" y="80">2<title>inclusiveGateway_2 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80"><title>inclusiveGateway_2</title></text>
+<rect y="68" x="52.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [2.00, 2.00, 2.00]</title></rect>
+<text x="8" y="104">3<title>task_3 G/G/1</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104">G/G/1<title>task_3</title></text>
+<rect y="92" x="84.0" width="64.0" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [2.00, 4.00, 8.00]</title></rect>
+<text x="86.0" y="110">3</text><text x="8" y="128">4<title>task_4 G/G/2</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">G/G/2<title>task_4</title></text>
+<rect y="116" x="84.0" width="64.0" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [2.00, 4.00, 8.00]</title></rect>
+<text x="86.0" y="134">3</text><text x="8" y="152">5<title>inclusiveGateway_5 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152"><title>inclusiveGateway_5</title></text>
+<rect y="140" x="148.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [8.00, 8.00, 8.00]</title></rect>
+<text x="8" y="176">6<title>intermediateCatchEvent_6 1 delay</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">1 delay<title>intermediateCatchEvent_6</title></text>
+<rect y="164" x="148.0" width="16.0" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [8.00, 8.00, 9.00]</title></rect>
+<text x="150.0" y="182">3</text><text x="8" y="200">7<title>task_7 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="200"><title>task_7</title></text>
+<rect y="188" x="164.0" width="30.25549721379238" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [9.00, 9.00, 10.89]</title></rect>
+<text x="166.0" y="206">3</text><text x="8" y="224">8<title>endEvent_8 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="224"><title>endEvent_8</title></text>
+<rect y="212" x="194.25549721379238" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>3 [10.89, 10.89, 10.89]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 10 customers</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">10 customers<title>startEvent_1</title></text>
+<rect y="44" x="84.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [4.00, 4.00, 4.00]</title></rect>
+<text x="8" y="80">2<title>inclusiveGateway_2 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80"><title>inclusiveGateway_2</title></text>
+<rect y="68" x="84.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [4.00, 4.00, 4.00]</title></rect>
+<text x="8" y="104">3<title>task_3 G/G/1</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104">G/G/1<title>task_3</title></text>
+<rect y="92" x="148.0" width="64.0" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [4.00, 8.00, 12.00]</title></rect>
+<text x="150.0" y="110">5</text><text x="8" y="128">4<title>task_4 G/G/2</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">G/G/2<title>task_4</title></text>
+<rect y="116" x="148.0" width="64.0" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [4.00, 8.00, 12.00]</title></rect>
+<text x="150.0" y="134">5</text><text x="8" y="152">5<title>inclusiveGateway_5 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152"><title>inclusiveGateway_5</title></text>
+<rect y="140" x="212.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [12.00, 12.00, 12.00]</title></rect>
+<text x="8" y="176">6<title>intermediateCatchEvent_6 1 delay</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">1 delay<title>intermediateCatchEvent_6</title></text>
+<rect y="164" x="212.0" width="16.0" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [12.00, 12.00, 13.00]</title></rect>
+<text x="214.0" y="182">5</text><text x="8" y="200">7<title>task_7 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="200"><title>task_7</title></text>
+<rect y="188" x="228.0" width="24.721333732117046" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [13.00, 13.00, 14.55]</title></rect>
+<text x="230.0" y="206">5</text><text x="8" y="224">8<title>endEvent_8 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="224"><title>endEvent_8</title></text>
+<rect y="212" x="252.72133373211705" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumpurple"><title>5 [14.55, 14.55, 14.55]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 10 customers</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">10 customers<title>startEvent_1</title></text>
+<rect y="44" x="100.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [5.00, 5.00, 5.00]</title></rect>
+<text x="8" y="80">2<title>inclusiveGateway_2 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80"><title>inclusiveGateway_2</title></text>
+<rect y="68" x="100.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [5.00, 5.00, 5.00]</title></rect>
+<text x="8" y="128">4<title>task_4 G/G/2</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">G/G/2<title>task_4</title></text>
+<rect y="116" x="164.0" width="64.0" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [5.00, 9.00, 13.00]</title></rect>
+<text x="166.0" y="134">6</text><text x="8" y="152">5<title>inclusiveGateway_5 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152"><title>inclusiveGateway_5</title></text>
+<rect y="140" x="228.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [13.00, 13.00, 13.00]</title></rect>
+<text x="8" y="176">6<title>intermediateCatchEvent_6 1 delay</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">1 delay<title>intermediateCatchEvent_6</title></text>
+<rect y="164" x="228.0" width="16.0" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [13.00, 13.00, 14.00]</title></rect>
+<text x="230.0" y="182">6</text><text x="8" y="200">7<title>task_7 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="200"><title>task_7</title></text>
+<rect y="188" x="252.72133373211705" width="18.811139554818993" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [14.00, 14.55, 15.72]</title></rect>
+<text x="254.72133373211705" y="206">6</text><text x="8" y="224">8<title>endEvent_8 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="224"><title>endEvent_8</title></text>
+<rect y="212" x="271.532473286936" width="1" height="22" stroke="black" fill-opacity="0.7" fill="hotpink"><title>6 [15.72, 15.72, 15.72]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 10 customers</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">10 customers<title>startEvent_1</title></text>
+<rect y="44" x="116.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [6.00, 6.00, 6.00]</title></rect>
+<text x="8" y="80">2<title>inclusiveGateway_2 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80"><title>inclusiveGateway_2</title></text>
+<rect y="68" x="116.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [6.00, 6.00, 6.00]</title></rect>
+<text x="8" y="104">3<title>task_3 G/G/1</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104">G/G/1<title>task_3</title></text>
+<rect y="92" x="212.0" width="64.0" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [6.00, 12.00, 16.00]</title></rect>
+<text x="214.0" y="110">7</text><text x="8" y="128">4<title>task_4 G/G/2</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">G/G/2<title>task_4</title></text>
+<rect y="116" x="212.0" width="64.0" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [6.00, 12.00, 16.00]</title></rect>
+<text x="214.0" y="134">7</text><text x="8" y="152">5<title>inclusiveGateway_5 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152"><title>inclusiveGateway_5</title></text>
+<rect y="140" x="276.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [16.00, 16.00, 16.00]</title></rect>
+<text x="8" y="176">6<title>intermediateCatchEvent_6 1 delay</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">1 delay<title>intermediateCatchEvent_6</title></text>
+<rect y="164" x="276.0" width="16.0" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [16.00, 16.00, 17.00]</title></rect>
+<text x="278.0" y="182">7</text><text x="8" y="200">7<title>task_7 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="200"><title>task_7</title></text>
+<rect y="188" x="292.0" width="17.07801096777115" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [17.00, 17.00, 18.07]</title></rect>
+<text x="294.0" y="206">7</text><text x="8" y="224">8<title>endEvent_8 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="224"><title>endEvent_8</title></text>
+<rect y="212" x="309.07801096777115" width="1" height="22" stroke="black" fill-opacity="0.7" fill="limegreen"><title>7 [18.07, 18.07, 18.07]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 10 customers</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">10 customers<title>startEvent_1</title></text>
+<rect y="44" x="148.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [8.00, 8.00, 8.00]</title></rect>
+<text x="8" y="80">2<title>inclusiveGateway_2 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80"><title>inclusiveGateway_2</title></text>
+<rect y="68" x="148.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [8.00, 8.00, 8.00]</title></rect>
+<text x="8" y="104">3<title>task_3 G/G/1</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="104">G/G/1<title>task_3</title></text>
+<rect y="92" x="276.0" width="64.0" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [8.00, 16.00, 20.00]</title></rect>
+<text x="278.0" y="110">9</text><text x="8" y="128">4<title>task_4 G/G/2</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">G/G/2<title>task_4</title></text>
+<rect y="116" x="276.0" width="64.0" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [8.00, 16.00, 20.00]</title></rect>
+<text x="278.0" y="134">9</text><text x="8" y="152">5<title>inclusiveGateway_5 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152"><title>inclusiveGateway_5</title></text>
+<rect y="140" x="340.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [20.00, 20.00, 20.00]</title></rect>
+<text x="8" y="176">6<title>intermediateCatchEvent_6 1 delay</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">1 delay<title>intermediateCatchEvent_6</title></text>
+<rect y="164" x="340.0" width="16.0" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [20.00, 20.00, 21.00]</title></rect>
+<text x="342.0" y="182">9</text><text x="8" y="200">7<title>task_7 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="200"><title>task_7</title></text>
+<rect y="188" x="356.0" width="30.29627618634663" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [21.00, 21.00, 22.89]</title></rect>
+<text x="358.0" y="206">9</text><text x="8" y="224">8<title>endEvent_8 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="224"><title>endEvent_8</title></text>
+<rect y="212" x="386.29627618634663" width="1" height="22" stroke="black" fill-opacity="0.7" fill="coral"><title>9 [22.89, 22.89, 22.89]</title></rect>
+<text x="8" y="56">1<title>startEvent_1 10 customers</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="56">10 customers<title>startEvent_1</title></text>
+<rect y="44" x="164.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [9.00, 9.00, 9.00]</title></rect>
+<text x="8" y="80">2<title>inclusiveGateway_2 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="80"><title>inclusiveGateway_2</title></text>
+<rect y="68" x="164.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [9.00, 9.00, 9.00]</title></rect>
+<text x="8" y="128">4<title>task_4 G/G/2</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="128">G/G/2<title>task_4</title></text>
+<rect y="116" x="292.0" width="64.0" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [9.00, 17.00, 21.00]</title></rect>
+<text x="294.0" y="134">10</text><text x="8" y="152">5<title>inclusiveGateway_5 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="152"><title>inclusiveGateway_5</title></text>
+<rect y="140" x="356.0" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [21.00, 21.00, 21.00]</title></rect>
+<text x="8" y="176">6<title>intermediateCatchEvent_6 1 delay</title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="176">1 delay<title>intermediateCatchEvent_6</title></text>
+<rect y="164" x="356.0" width="16.0" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [21.00, 21.00, 22.00]</title></rect>
+<text x="358.0" y="182">10</text><text x="8" y="200">7<title>task_7 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="200"><title>task_7</title></text>
+<rect y="188" x="386.29627618634663" width="18.44334884505969" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [22.00, 22.89, 24.05]</title></rect>
+<text x="388.29627618634663" y="206">10</text><text x="8" y="224">8<title>endEvent_8 </title></text>
+<text class="t1" style="display:none;fill:gray" x="32" y="224"><title>endEvent_8</title></text>
+<rect y="212" x="404.7396250314063" width="1" height="22" stroke="black" fill-opacity="0.7" fill="mediumseagreen"><title>10 [24.05, 24.05, 24.05]</title></rect>
+<rect x="20" y="10" width="400" height="2"></rect>
+<rect x="20" y="338" width="400" height="2"></rect>
+<rect x="20" y="10" width="1" height="10"></rect>
+<rect x="20" y="328" width="1" height="10"></rect>
+<text x="12" y="32">0</text>
+<text x="12" y="328">0</text>
+<rect x="36" y="10" width="1" height="10"></rect>
+<rect x="36" y="328" width="1" height="10"></rect>
+<rect x="52" y="10" width="1" height="10"></rect>
+<rect x="52" y="328" width="1" height="10"></rect>
+<rect x="68" y="10" width="1" height="10"></rect>
+<rect x="68" y="328" width="1" height="10"></rect>
+<rect x="84" y="10" width="1" height="10"></rect>
+<rect x="84" y="328" width="1" height="10"></rect>
+<rect x="100" y="10" width="1" height="10"></rect>
+<rect x="100" y="328" width="1" height="10"></rect>
+<rect x="116" y="10" width="1" height="10"></rect>
+<rect x="116" y="328" width="1" height="10"></rect>
+<rect x="132" y="10" width="1" height="10"></rect>
+<rect x="132" y="328" width="1" height="10"></rect>
+<rect x="148" y="10" width="1" height="10"></rect>
+<rect x="148" y="328" width="1" height="10"></rect>
+<rect x="164" y="10" width="1" height="10"></rect>
+<rect x="164" y="328" width="1" height="10"></rect>
+<rect x="180" y="10" width="1" height="10"></rect>
+<rect x="180" y="328" width="1" height="10"></rect>
+<text x="172" y="32">10</text>
+<text x="172" y="328">10</text>
+<rect x="196" y="10" width="1" height="10"></rect>
+<rect x="196" y="328" width="1" height="10"></rect>
+<rect x="212" y="10" width="1" height="10"></rect>
+<rect x="212" y="328" width="1" height="10"></rect>
+<rect x="228" y="10" width="1" height="10"></rect>
+<rect x="228" y="328" width="1" height="10"></rect>
+<rect x="244" y="10" width="1" height="10"></rect>
+<rect x="244" y="328" width="1" height="10"></rect>
+<rect x="260" y="10" width="1" height="10"></rect>
+<rect x="260" y="328" width="1" height="10"></rect>
+<rect x="276" y="10" width="1" height="10"></rect>
+<rect x="276" y="328" width="1" height="10"></rect>
+<rect x="292" y="10" width="1" height="10"></rect>
+<rect x="292" y="328" width="1" height="10"></rect>
+<rect x="308" y="10" width="1" height="10"></rect>
+<rect x="308" y="328" width="1" height="10"></rect>
+<rect x="324" y="10" width="1" height="10"></rect>
+<rect x="324" y="328" width="1" height="10"></rect>
+<rect x="340" y="10" width="1" height="10"></rect>
+<rect x="340" y="328" width="1" height="10"></rect>
+<text x="332" y="32">20</text>
+<text x="332" y="328">20</text>
+<rect x="356" y="10" width="1" height="10"></rect>
+<rect x="356" y="328" width="1" height="10"></rect>
+<rect x="372" y="10" width="1" height="10"></rect>
+<rect x="372" y="328" width="1" height="10"></rect>
+<rect x="388" y="10" width="1" height="10"></rect>
+<rect x="388" y="328" width="1" height="10"></rect>
+<rect x="404" y="10" width="1" height="10"></rect>
+<rect x="404" y="328" width="1" height="10"></rect>
+<rect x="420" y="10" width="1" height="10"></rect>
+<rect x="420" y="328" width="1" height="10"></rect>
+<script>function on_click() {[...document.getElementsByClassName('t1')].forEach(e=&gt;e.style.display=(e.style.display=='none'?'':'none'));}</script></svg>

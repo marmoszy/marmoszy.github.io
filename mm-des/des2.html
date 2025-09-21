@@ -196,7 +196,7 @@ ex10=`# Credit card application
 13 End()
 1->2->(3|4)->5->6->7->8->9->11; 8->10->12->13; 12->6
 `;
-ex11=`# G/G/2 test
+ex11a=`# G/G/2 test
 # S.v4 collecting customers 
 1 Start(U,[1],-10,"S.v=[]")     # 10 customers
 2 OrGate("=[1,A.n%2]")          ## 1.every,2.every second
@@ -206,6 +206,24 @@ ex11=`# G/G/2 test
 6 Timer(1)                      # 1 delay
 7 End()
 1->2->(3|4)->5->6->7            # 3|4 parallel
+`;
+ex11=`# The tests 
+# 1) OrGate()
+# 2) G/G/2 (task with two servers)
+# 3) Boundary conditional event 
+# S.vn variables collect visited customers 
+1 Start(U,[1],-10,"S.v1=[];S.v2=[];S.v3=[];S.v4=[]")     # 10 customers
+2 OrGate("=[A.n%2,1]")              ## 1.every second,2.every
+3 Task(U,[4],"S.v1=S.v1+[cname]")   # G/G/1
+4 Task(U,[4],"S.v2=S.v2+[cname]",2) # G/G/2
+5 OrGate()
+6 Timer(1)                          # 1 delay
+7 Task()
+8 End("S.v3=S.v3+[cname]")
+9.7 Condition("=cname%4==0")    ## throw every customer with id equal to multiple of 4 
+10/6 Throw("S.v4=S.v4+[cname]")
+1->2->3->5->6->7->8
+2->4->5; 9->10
 `;
 ex12=`# Procurement process
 1 Start(E,[1],-40)      
@@ -357,16 +375,17 @@ The results are in the form of animated or static BPMN diagram, the timeline for
 <div class="panel">
 <p>
 
-<b>mm-des</b> allows to run simulations of process models defined in text form as the list of elements and the list of connections. The code implements nine basic BPMN elements and six random generators:
+<b>mm-des</b> allows to run simulations of process models defined in text form as the list of elements and the list of connections. The code implements ten basic BPMN elements and six random generators:
 <ol>
 	<li>Start(fun, param, tnmax, script) - start event
 	<li>Task(fun, param, script, nservers=1) - sequential task activity with n-servers inside
 	<li>XorGate(script) - exclusive gateway (two-output: value==true passes the event to the first defined connection, value==false - to the second (more than two: must have algebraic choice-like function with result being a number starting from 0) multi-input: pass trough the event from all connected), default script is "=B(0.5)" meaning binomial equally distributed choice for two outputs
 	<li>AndGate(script) - parallel gateway (multi-output: passes through the event to all connected, multi-input: waits for all)
-	<li>OrGate(script) - inclusive gateway (multi-output: passes through the event to those for which script values are true (i.e for three output lines default script is "=[1,0,0]" meaning that only first is passed, multi-input: waits for those that were true)
+	<li>OrGate(script) - inclusive gateway (multi-output: passes through the event to those for which script values are true (i.e for three output lines default script is "=[1,0,0]" meaning that only first is passed, multi-input: waits for those that were true on previous mutioutput OrGate)
 	<li>Timer(fun, param, script) - timer delay event
 	<li>Condition(script) - conditional event with a script containing logical expression as the first one ("=&lt;expr&gt;;..."); the instructions after first semicolon will be executed only when condition evaluates to true
 	<li>Terminate(script) - terminate event
+	<li>Throw(script) - throw event
 	<li>End(script) - end event
 </ol>
 where:
@@ -377,7 +396,7 @@ where:
 	<li>script - string with semicolon separated codes for evaluation during event execution "[var]=&lt;expr&gt;; ... ;", empty var defaults to 'value' variable which is tested in XorGate and Condtion, var starting with 'S.' are scenario ones, starting with 'A.' element ones and without prefix - token/customer ones. Variable 'A.n' is element event counter which is initiated with 0 and increased by 1 at exec of each token/customer event. Token/customer have variable 'cname' (customer name) and may have variables '__t&lt;id&gt;a', '__t&lt;id&gt;b' and '__t&lt;id&gt;e' when the token visited the element with identifier id. They mark arrival, begin and end times.
 </ul>
 The text description of a process contains list of elements that should be ordered by number (element identifier) and semicolon separated list of connections. 
-The elements should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '/x[/y]' values after event identifier<!-- (see example 10) -->. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of element number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram. <!-- Additionally, the Condition element could be play a role of the edge event of the Task element by adding to that Condition element number the Task number joined with the '.' character.-->   
+The elements should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '/x[/y]' values after event identifier<!-- (see example 10) -->. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of element number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram. Additionally, the Condition element could play a role of the boundary event of the Task element.  To do that you need to add to the Condition element number the Task number joined with the '.' character.
 
 <p>
 Minimum working example (MWE) with default values for all events looks like:

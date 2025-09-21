@@ -101,12 +101,12 @@ class QueuedEvent(Event):
                               idx=int(self.customer.attr["value"])
                         self.output[idx].insert(self.customer, sim)
                   elif len(self.output)>1 and isinstance(self,OrGate):
-                        N = 0
+                        N, self.customer.N = 0, []
                         for i in range(len(self.output)):
                               if int(self.customer.attr["value"][i]):
                                     N += 1
                                     self.output[i].insert(self.customer, sim)
-                        self.customer.N = N
+                        self.customer.N=N#.append(N)
                   else:
                         for i in range(len(self.output)):  # split to all
                               self.output[i].insert(self.customer,sim)
@@ -144,7 +144,7 @@ class BpmnEvent(QueuedEvent):
                   cc = cc.replace(k,str(v))
             return cc
       def _eval(self,code,n=-1):
-            codes=self.code.split(";")
+            codes=code.split(";")
             if n!=-1:
                   codes=len(codes)>n and [codes[n]] or []
             for code in codes:
@@ -258,9 +258,20 @@ class Service(BpmnEvent):
             if self.customer!=None:
                   self.customer.attr["__n"+str(self.id)] += 1
                   if isinstance(self,OrGate) and len(self.output)==1:
-                        self.N = self.customer.N
+                        #if not hasattr(self,'N'):
+                        self.N = self.customer.N #.pop()
                   if (self.customer.attr["__n"+str(self.id)]%self.N) == 0: #self.N:
-                        self.out(sim)     # pass customer to connected object
+                        do_out=True
+                        if isinstance(self,Task):
+                              for e in EN: # find boundary elements asigned to current Task
+                                    if e.id2%1>0 and str(e.id2).split('.')[1]==str(self.id) and e.code!=None:
+                                          self._eval(e.code)
+                                          if self.customer.attr["value"]:
+                                                e.customer=self.customer
+                                                e.out(sim) # out there
+                                                do_out=False
+                        if do_out:
+                              self.out(sim)     # pass customer to connected object
             self.customer = None    # mark that now the service is free !!!
             if len(self.queue)>0 :  # but if anybody in queue
                   Service.insert(self,self.queue.pop(), sim)  # get and insert into simulator
@@ -293,8 +304,8 @@ class AndGate(Service):
             self.N=len(set(ids)) # set number of inputs (with unique ids) to wait
             Service.insert(self,cust,sim)
 class Start(Generator):
-      def __init__(self,fun=E,param=[1],tnmax=50.0,code=None):
-            Generator.__init__(self,fun,param,tnmax,code)
+      def __init__(self,fun=E,param=[1],tmax=50.0,code=None):
+            Generator.__init__(self,fun,param,tmax,code)
             self.setName("startEvent")
 class Task(Service):
       def __init__(self,fun=U,param=[1,2],code=None,M=1):
@@ -323,8 +334,8 @@ class End(Sink):
       def __init__(self,code=None):
             Sink.__init__(self,"endEvent",code)
 class Throw(Service):
-      def __init__(self):
-            Service.__init__(self,None,0)
+      def __init__(self,code=None):
+            Service.__init__(self,None,0,code)
             self.setName("intermediateThrowEvent")
 class Terminate(End):
       def __init__(self,code=None):
@@ -372,14 +383,14 @@ def attr_tostring(a):
                   s+=t+" "+"%.3f"%a[t+"b"]+" "+"%.3f"%a[t+"e"]+"\n"
       return s
 def attr_tosvgstring(o,wmax,w=16,h=24):
-      global ne
+      global EN
       a,s = o.attr,""
       c=['hotpink','limegreen','cornflowerblue','coral','mediumseagreen','mediumpurple']
       for i in range(100):
             t="__t"+str(i)
             if t+"b" in a:
-                  s+='<text x="8" y="'+str(32+h*i)+'">'+str(i)+'<title>'+str(ne.ee[i-1].name)+' '+str(ne.ee[i-1].title)+'</title></text>\n'
-                  s+='<text class="t1" style="display:none;fill:gray" x="32" y="'+str(32+h*i)+'">'+str(ne.ee[i-1].title)+'<title>'+str(ne.ee[i-1].name)+'</title></text>\n'
+                  s+='<text x="8" y="'+str(32+h*i)+'">'+str(i)+'<title>'+str(EN.ee[i-1].name)+' '+str(EN.ee[i-1].title)+'</title></text>\n'
+                  s+='<text class="t1" style="display:none;fill:gray" x="32" y="'+str(32+h*i)+'">'+str(EN.ee[i-1].title)+'<title>'+str(EN.ee[i-1].name)+'</title></text>\n'
                   t0,t1,t2 = a[t+"a"],a[t+"b"],a[t+"e"]
                   s+='<rect y="'+str(20+h*i)+'" x="'+str(20+w*t1)
                   s+='" width="'+str(t2-t1==0 and 1 or w*(t2-t1))+'" height="'+str(h-2)+'" stroke="black" fill-opacity="0.7" fill="'
@@ -532,9 +543,11 @@ def to_bpmn(ee=QueuedEvent.instances,pp=None):
             if "task" in type:
                   if len(ee[i].output)>1: type = "sendTask"
                   if len(set([e.id for e in ee[i].prev()]))>1: type = "receiveTask"
+            dyo = 0
             if ee[i].id != ee[i].id2:  # for boundary events
                   id2 = int(str(ee[i].id2).split('.')[1])
                   xo,yo = ee[id2-1].x+22.5,ee[id2-1].y+42.5
+                  dyo = 30
                   type = "boundaryEvent"
             ee[i].x,ee[i].y = xo,yo
             s1+='  <bpmn:'+type+' id="'+name+'" name="'+name.split("_")[1]+'\n'+ee[i].title+'">\n'
@@ -566,6 +579,7 @@ def to_bpmn(ee=QueuedEvent.instances,pp=None):
                               s1+='   <bpmn:conditionalEventDefinition/>\n'
                         else:
                               s1+='   <bpmn:timerEventDefinition/>\n'
+                  y1 += dyo
                   s1a+='    <bpmn:sequenceFlow id="'+flow+'" sourceRef="'+name+'" targetRef="'+name2+'" />\n'
                   s2+='   <bpmndi:BPMNEdge id="'+flow+'_'+eflow+'" bpmnElement="'+flow+'">\n'
                   s2+='    <di:waypoint x="'+str(x1)+'" y="'+str(y1)+'" />\n'
@@ -655,6 +669,7 @@ class EventNetwork():
                                     code1=" ".join(code[1:]).split('#')
                                     ee.append(eval(code1[0]))
                                     ee[-1].id2=float(code[0].split('/')[0]) # id as written in source 
+                                    #print(ee[-1].id2,ee[-1].id)
                                     ee[-1].title=code1[1].strip() if len(code1)>1 else ''
                                     cc=code[0].split("/")  # check identifier field
                                     ee[-1].pp2[0] = float(cc[1])-1 if len(cc)>1 and len(cc[1])>0 else -1 
@@ -665,20 +680,21 @@ class EventNetwork():
                   for e in filter(None,ee):      # if yes
                         e.pp2[1]=-1 # clear all y-levels to unknown
             return ee
+      def __repr__(self): return self.to_string()
       def to_string(self):
             s=''
             for e in self.ee:
-                  s += str(e.id) + " " + e.__class__.__name__+"("
-                  if e.__class__.__name__!='End':
-                        if "Gate" not in e.__class__.__name__:
-                              s += e.fun and e.fun.__name__ or 'None'
-                              s +=","+str(e.param)+","
-                        if e.__class__.__name__!='Start':
-                              s+= e.code!=None and "\""+str(e.code)+"\"" or "None"
-                        else:
-                              s+=str(e.tnmax)
+                  s += "%g"%(e.id2) + " " + e.__class__.__name__+"("
+                  #if e.__class__.__name__!='End':
+                  if "Gate" not in e.__class__.__name__:
+                        s += e.fun and e.fun.__name__ or 'None'
+                        s +=","+str(e.param)+","
+                  if e.__class__.__name__!='Start':
+                        s+= e.code!=None and "\""+str(e.code)+"\"" or "None"
+                  else:
+                        s+=str(e.tmax)
                   s +=")\n"
-            for e in ee:
+            for e in self.ee:
                   for i in range(len(e.output)):
                         s += str(e.id) + "->" + str(e.output[i].id) +';'
             return s + '\n'
@@ -796,15 +812,15 @@ def bpmn_tosvg(bpmnstring,isanim,iscomments,isscripts,W=100,H=80):
       return s + (to_anim() if isanim else '') + '</svg>\n'
 def to_anim():
       #return s
-      global ne
+      global EN
       s =  '<defs><filter x="0" y="0" width="1" height="1" id="fi">\n'
       s += '<feFlood flood-color="white"/>\n'
       s += '<feComposite in="SourceGraphic" operator="atop"/></filter></defs>\n'
-      for e in ne.ee:
+      for e in EN.ee:
             if isinstance(e,End):
                   for c in e.queue.objects:
-                        for i in range(len(ne.ee)):
-                              x, y, a = ne.ee[i].x, ne.ee[i].y, c.attr 
+                        for i in range(len(EN.ee)):
+                              x, y, a = EN.ee[i].x, EN.ee[i].y, c.attr 
                               s +='<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="'+str(x-20)+'" y="'+str(y+13)+'" visibility="hidden">'+str(c.name)+'\n'
                               t="__t"+str(i+1)
                               if t+"a" in a:
@@ -818,17 +834,16 @@ def to_anim():
                                                 s += '<animate attributeName="visibility" from="visible" to="hidden" begin="'+str(t2)+'s" dur="0.01s" fill="freeze"/>\n'
                               s +='</text>\n'
       return s
-
-ne=[]
+EN=[]
 # ---- simulation -----
 def main_fun(exn,n,anim,comments,scripts): # string representation, number of simulation
       data=[]  # list of events, array of results
       s = ''
       for i in range(n):
-            global ne
-            ne = EventNetwork(exn)
+            global EN
+            EN = EventNetwork(exn)
             sim = Simulator()
-            for e in ne:
+            for e in EN:
                   if isinstance(e,Generator):  # add generating events
                         sim.add(e)  
             sim.run()
@@ -839,7 +854,7 @@ def main_fun(exn,n,anim,comments,scripts): # string representation, number of si
             #else:
             #      data.append(sim.time)   # save end time of simulation
             if i==0:
-                  s1 = to_bpmn(ne.ee,ne.pp)
+                  s1 = to_bpmn(EN.ee,EN.pp)
                   s2 = bpmn_tosvg(s1,anim,comments,scripts)
                   s3 = to_svg()
       s += "#n\tt\t"+"\t".join(data[0][1].keys())+"\n"
@@ -867,15 +882,16 @@ def main_fun(exn,n,anim,comments,scripts): # string representation, number of si
 if __name__=="__main__":
       import sys
       #import ex
-      ex30 = '1 Start()\n2 Task()\n3 End()\n1->2->3\n'
+      #ex30 = '1 Start()\n2 Task()\n3 End()\n1->2->3\n'
       s = len(sys.argv)>1 and from_file(sys.argv[1]) or eval('ex%d'%(30))
       n = len(sys.argv)>2 and int(sys.argv[2]) or 1
       anim = 1
       comments = 1
       scripts = 1
       output = main_fun(s,n,anim,comments,scripts)
-      print(output[2])      
-      print(output[3])
+      print(EN)
+      #print(output[2])      
+      #print(output[3])
       print('<pre>',output[0],'</pre>')
 """
 s = input[0]

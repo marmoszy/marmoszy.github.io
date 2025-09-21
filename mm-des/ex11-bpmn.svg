@@ -1,0 +1,402 @@
+<svg onclick="on_click()" xmlns="http://www.w3.org/2000/svg" width="798" height="220">
+<defs><marker id="triangle" viewBox="0 0 10 10" refX="10" refY="5" markerUnits="strokeWidth" markerWidth="10" markerHeight="10" orient="auto"> <path d="M 0 0 L 10 5 L 0 10 z" fill="black"></path></marker></defs>
+<text x="10" y="12"></text>
+<text x="56.0" y="90.0">1</text>
+<text font-size="smaller" style="fill:gray" x="50.0" y="36.0"><tspan xml:space="preserve">10 customers</tspan></text>
+<text class="t1" font-size="smaller" style="fill:gray" x="80.0" y="90.0"><tspan xml:space="preserve">S.v1=[]</tspan></text>
+<ellipse cx="80.0" cy="60.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Start_U_[1]_S.v1=[];S.v2=[];S.v3=[];S.v4=[]</title></ellipse>
+<path marker-end="url(#triangle)" d="M98 60 L162 60 " style="fill:none;stroke:brown;stroke-width:1"></path>
+<text x="156.0" y="90.0">2</text>
+<text font-size="smaller" style="fill:gray" x="150.0" y="36.0"><tspan xml:space="preserve"></tspan></text>
+<text class="t1" font-size="smaller" style="fill:gray" x="180.0" y="90.0"><tspan xml:space="preserve">=[A.n%2,1]</tspan></text>
+<path d="M162 60 L180 42 L198 60 L180 78 Z" stroke="orange" fill="white"><title>OrGate_None_0_=[A.n%2,1]</title></path>
+<circle cx="180" cy="60" r="7" fill="none" stroke="black" stroke-width="3"></circle>
+<path marker-end="url(#triangle)" d="M198 60 L240 60 " style="fill:none;stroke:brown;stroke-width:1"></path>
+<path marker-end="url(#triangle)" d="M180 78 L180 148.001 Q180 160 192 160 L240 160 " style="fill:none;stroke:brown;stroke-width:1"></path>
+<text x="234.0" y="102.0">3</text>
+<text font-size="smaller" style="fill:gray" x="228.0" y="24.0"><tspan xml:space="preserve">G/G/1</tspan></text>
+<text class="t1" font-size="smaller" style="fill:gray" x="258.0" y="102.0"><tspan xml:space="preserve">S.v1=S.v1+[cname]</tspan></text>
+<rect rx="7" ry="7" x="240.0" y="30.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_U_[4]_S.v1=S.v1+[cname]</title></rect>
+<path marker-end="url(#triangle)" d="M320 60 L362 60 " style="fill:none;stroke:brown;stroke-width:1"></path>
+<text x="234.0" y="202.0">4</text>
+<text font-size="smaller" style="fill:gray" x="228.0" y="124.0"><tspan xml:space="preserve">G/G/2</tspan></text>
+<text class="t1" font-size="smaller" style="fill:gray" x="258.0" y="202.0"><tspan xml:space="preserve">S.v2=S.v2+[cname]</tspan></text>
+<rect rx="7" ry="7" x="240.0" y="130.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_U_[4]_S.v2=S.v2+[cname]</title></rect>
+<path marker-end="url(#triangle)" d="M320 160 L368 160 Q380 160 380 147.999 L380 78 " style="fill:none;stroke:brown;stroke-width:1"></path>
+<text x="356.0" y="90.0">5</text>
+<text font-size="smaller" style="fill:gray" x="350.0" y="36.0"><tspan xml:space="preserve"></tspan></text>
+<path d="M362 60 L380 42 L398 60 L380 78 Z" stroke="orange" fill="white"><title>OrGate_None_0_None</title></path>
+<circle cx="380" cy="60" r="7" fill="none" stroke="black" stroke-width="3"></circle>
+<path marker-end="url(#triangle)" d="M398 60 L462 60 " style="fill:none;stroke:brown;stroke-width:1"></path>
+<text x="456.0" y="90.0">6</text>
+<text font-size="smaller" style="fill:gray" x="450.0" y="36.0"><tspan xml:space="preserve">1 delay</tspan></text>
+<ellipse cx="480.0" cy="60.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Timer_None_1_None</title></ellipse>
+<ellipse cx="480.0" cy="60.0" rx="15.0" ry="15.0" stroke-width="1" stroke="darkgreen" fill="white"></ellipse>
+<ellipse cx="480.0" cy="60.0" rx="12.0" ry="12.0" stroke-width="1" stroke="black" fill="white"></ellipse>
+<path d="M475 57 L480 60 486 54 M492 60 L489 60 M490.392 66 L487.794 64.5 M486 70.3923 L484.5 67.7942 M480 72 L480 69 M474 70.3923 L475.5 67.7942 M469.608 66 L472.206 64.5 M468 60 L471 60 M469.608 54 L472.206 55.5 M474 49.6077 L475.5 52.2058 M480 48 L480 51 M486 49.6077 L484.5 52.2058 M490.392 54 L487.794 55.5 " stroke="black" stroke-width="1" fill="none"></path><path marker-end="url(#triangle)" d="M498 60 L540 60 " style="fill:none;stroke:brown;stroke-width:1"></path>
+<text x="534.0" y="102.0">7</text>
+<text font-size="smaller" style="fill:gray" x="528.0" y="24.0"><tspan xml:space="preserve"></tspan></text>
+<rect rx="7" ry="7" x="540.0" y="30.0" width="80.0" height="60.0" stroke="darkblue" fill="white"><title>Task_U_[1, 2]_None</title></rect>
+<path marker-end="url(#triangle)" d="M620 60 L662 60 " style="fill:none;stroke:brown;stroke-width:1"></path>
+<text x="656.0" y="90.0">8</text>
+<text font-size="smaller" style="fill:gray" x="650.0" y="36.0"><tspan xml:space="preserve"></tspan></text>
+<text class="t1" font-size="smaller" style="fill:gray" x="680.0" y="90.0"><tspan xml:space="preserve">S.v3=S.v3+[cname]</tspan></text>
+<ellipse cx="680.0" cy="60.0" rx="18.0" ry="18.0" stroke-width="3" stroke="red" fill-opacity="0.6" fill="white"><title>End_None_None_S.v3=S.v3+[cname]</title></ellipse>
+<text x="556.5" y="120.5">9</text>
+<text font-size="smaller" style="fill:gray" x="550.5" y="66.5"><tspan xml:space="preserve"></tspan></text>
+<text class="t1" font-size="smaller" style="fill:gray" x="580.5" y="120.5"><tspan xml:space="preserve">=cname%4==0</tspan></text>
+<ellipse cx="580.5" cy="90.5" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Condition_None_None_=cname%4==0</title></ellipse>
+<ellipse cx="580.5" cy="90.5" rx="15.0" ry="15.0" stroke-width="1" stroke="darkgreen" fill="white"></ellipse>
+<rect x="573.5" y="81.5" width="14" height="18" stroke="black" fill="none"></rect><path d="M575.5 84.5 L585.5 84.5 M575.5 87.5 L585.5 87.5 M575.5 90.5 L585.5 90.5 M575.5 93.5 L585.5 93.5 M575.5 96.5 L585.5 96.5 " stroke="black" stroke-width="1" fill="none"></path><path marker-end="url(#triangle)" d="M580 108 L580 142 " style="fill:none;stroke:brown;stroke-width:1"></path>
+<text x="556.0" y="190.0">10</text>
+<text font-size="smaller" style="fill:gray" x="550.0" y="136.0"><tspan xml:space="preserve"></tspan></text>
+<text class="t1" font-size="smaller" style="fill:gray" x="580.0" y="190.0"><tspan xml:space="preserve">S.v4=S.v4+[cname]</tspan></text>
+<ellipse cx="580.0" cy="160.0" rx="18.0" ry="18.0" stroke-width="1" stroke="darkgreen" fill-opacity="0.6" fill="white"><title>Throw_None_0_S.v4=S.v4+[cname]</title></ellipse>
+<ellipse cx="580.0" cy="160.0" rx="15.0" ry="15.0" stroke-width="1" stroke="darkgreen" fill="white"></ellipse>
+<script>function on_click() {[...document.getElementsByClassName('t1')].forEach(e=&gt;e.style.display=(e.style.display=='none'?'':'none'));}</script><defs><filter x="0" y="0" width="1" height="1" id="fi">
+<feFlood flood-color="white"></feFlood>
+<feComposite in="SourceGraphic" operator="atop"></feComposite></filter></defs>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="42" y="55" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="0.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="100" begin="0.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="0.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="142" y="55" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="0.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="200" begin="0.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="0.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="43" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="0.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="278" begin="0.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="4.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="143" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="0.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="278" begin="0.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="4.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="342" y="55" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="4.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="400" begin="4.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="4.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="442" y="55" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="4.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="500" begin="4.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="5.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="520" y="43" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="5.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="578" begin="5.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="6.833208990665545s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="642" y="55" visibility="hidden">1
+<animate attributeName="visibility" from="hidden" to="visible" begin="6.833208990665545s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="700" begin="6.833208990665545s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="6.833208990665545s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.5" y="85.5" visibility="hidden">1
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.0" y="155" visibility="hidden">1
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="42" y="55" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="1.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="100" begin="1.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="1.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="142" y="55" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="1.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="200" begin="1.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="1.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="43" visibility="hidden">2
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="143" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="1.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="278" begin="1.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="5.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="342" y="55" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="5.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="400" begin="5.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="5.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="442" y="55" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="5.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="500" begin="5.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="6.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="520" y="43" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="6.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="578" begin="6.833208990665545s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="8.379188613618142s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="642" y="55" visibility="hidden">2
+<animate attributeName="visibility" from="hidden" to="visible" begin="8.379188613618142s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="700" begin="8.379188613618142s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="8.379188613618142s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.5" y="85.5" visibility="hidden">2
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.0" y="155" visibility="hidden">2
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="42" y="55" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="2.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="100" begin="2.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="2.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="142" y="55" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="2.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="200" begin="2.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="2.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="43" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="2.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="278" begin="4.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="8.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="143" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="2.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="278" begin="4.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="8.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="342" y="55" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="8.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="400" begin="8.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="8.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="442" y="55" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="8.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="500" begin="8.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="9.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="520" y="43" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="9.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="578" begin="9.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="10.890968575862024s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="642" y="55" visibility="hidden">3
+<animate attributeName="visibility" from="hidden" to="visible" begin="10.890968575862024s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="700" begin="10.890968575862024s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="10.890968575862024s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.5" y="85.5" visibility="hidden">3
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.0" y="155" visibility="hidden">3
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="42" y="55" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="4.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="100" begin="4.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="4.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="142" y="55" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="4.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="200" begin="4.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="4.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="43" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="4.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="278" begin="8.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="12.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="143" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="4.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="278" begin="8.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="12.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="342" y="55" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="12.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="400" begin="12.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="12.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="442" y="55" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="12.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="500" begin="12.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="13.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="520" y="43" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="13.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="578" begin="13.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="14.545083358257315s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="642" y="55" visibility="hidden">5
+<animate attributeName="visibility" from="hidden" to="visible" begin="14.545083358257315s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="700" begin="14.545083358257315s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="14.545083358257315s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.5" y="85.5" visibility="hidden">5
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.0" y="155" visibility="hidden">5
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="42" y="55" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="5.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="100" begin="5.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="5.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="142" y="55" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="5.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="200" begin="5.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="5.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="43" visibility="hidden">6
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="143" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="5.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="278" begin="9.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="13.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="342" y="55" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="13.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="400" begin="13.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="13.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="442" y="55" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="13.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="500" begin="13.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="14.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="520" y="43" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="14.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="578" begin="14.545083358257315s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="15.720779580433502s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="642" y="55" visibility="hidden">6
+<animate attributeName="visibility" from="hidden" to="visible" begin="15.720779580433502s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="700" begin="15.720779580433502s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="15.720779580433502s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.5" y="85.5" visibility="hidden">6
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.0" y="155" visibility="hidden">6
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="42" y="55" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="6.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="100" begin="6.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="6.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="142" y="55" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="6.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="200" begin="6.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="6.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="43" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="6.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="278" begin="12.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="16.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="143" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="6.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="278" begin="12.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="16.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="342" y="55" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="16.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="400" begin="16.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="16.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="442" y="55" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="16.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="500" begin="16.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="17.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="520" y="43" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="17.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="578" begin="17.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="18.067375685485697s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="642" y="55" visibility="hidden">7
+<animate attributeName="visibility" from="hidden" to="visible" begin="18.067375685485697s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="700" begin="18.067375685485697s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="18.067375685485697s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.5" y="85.5" visibility="hidden">7
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.0" y="155" visibility="hidden">7
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="42" y="55" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="8.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="100" begin="8.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="8.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="142" y="55" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="8.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="200" begin="8.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="8.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="43" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="8.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="278" begin="16.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="20.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="143" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="8.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="278" begin="16.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="20.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="342" y="55" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="20.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="400" begin="20.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="20.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="442" y="55" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="20.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="500" begin="20.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="21.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="520" y="43" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="21.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="578" begin="21.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="22.893517261646664s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="642" y="55" visibility="hidden">9
+<animate attributeName="visibility" from="hidden" to="visible" begin="22.893517261646664s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="700" begin="22.893517261646664s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="22.893517261646664s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.5" y="85.5" visibility="hidden">9
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.0" y="155" visibility="hidden">9
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="42" y="55" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="9.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="100" begin="9.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="9.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="142" y="55" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="9.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="200" begin="9.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="9.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="43" visibility="hidden">10
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="220" y="143" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="9.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="278" begin="17.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="21.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="342" y="55" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="21.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="400" begin="21.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="21.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="442" y="55" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="21.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="500" begin="21.0s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="22.0s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="520" y="43" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="22.0s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="578" begin="22.893517261646664s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="24.046226564462895s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="642" y="55" visibility="hidden">10
+<animate attributeName="visibility" from="hidden" to="visible" begin="24.046226564462895s" dur="0.01s" fill="freeze"></animate>
+<animate attributeName="x" to="700" begin="24.046226564462895s" dur="0.5s" fill="freeze"></animate>
+<animate attributeName="visibility" from="visible" to="hidden" begin="24.046226564462895s" dur="0.01s" fill="freeze"></animate>
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.5" y="85.5" visibility="hidden">10
+</text>
+<text class="t1" filter="url(#fi)" style="font-size:small;fill:red" x="542.0" y="155" visibility="hidden">10
+</text>
+</svg>
