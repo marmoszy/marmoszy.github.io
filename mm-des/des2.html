@@ -213,17 +213,21 @@ ex11=`# The tests
 # 3) Boundary conditional event 
 # S.vn variables collect visited customers 
 1 Start(U,[1],-10,"S.v1=[];S.v2=[];S.v3=[];S.v4=[]")     # 10 customers
-2 OrGate("=[A.n%2,1]")              ## 1.every second,2.every
-3 Task(U,[4],"S.v1=S.v1+[cname]")   # G/G/1
-4 Task(U,[4],"S.v2=S.v2+[cname]",2) # G/G/2
-5 OrGate()
-6 Timer(1)                          # 1 delay
-7 Task()
-8 End("S.v3=S.v3+[cname]")
-9.7 Condition("=cname%4==0")    ## throw every customer with id equal to multiple of 4 
-10/6 Throw("S.v4=S.v4+[cname]")
-1->2->3->5->6->7->8
-2->4->5; 9->10
+2 OrGate("=[1,A.n%2]")              ## 1.every,2.every second
+3 OrGate("=[A.n%2,1]")              ## 1.every second,2.every
+4 Task(U,[4],"S.v1=S.v1+[cname]")   # G/G/1
+5 Task(U,[4],"S.v2=S.v2+[cname]",2) # G/G/2
+6 Task()
+7 OrGate()
+8 OrGate()
+9 Task()
+10 Timer(1)                          # 1 delay
+11 End("S.v3=S.v3+[cname]")
+12.9 Condition("=cname%4==0")  ## boundary event for the customer with cname equal to multiple of 4 
+13/8 Throw("S.v4=S.v4+[cname]")  ## "/8" - draw in 8th column
+1->2->3->4->7->8->9->10->11
+      3->5->7;   12->13
+   2 ->  6  -> 8
 `;
 ex12=`# Procurement process
 1 Start(E,[1],-40)      

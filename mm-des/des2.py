@@ -101,12 +101,15 @@ class QueuedEvent(Event):
                               idx=int(self.customer.attr["value"])
                         self.output[idx].insert(self.customer, sim)
                   elif len(self.output)>1 and isinstance(self,OrGate):
-                        N, self.customer.N = 0, []
+                        N = 0
+                        if not hasattr(self.customer,"N"): # used only by OrGates
+                              self.customer.N=[]
                         for i in range(len(self.output)):
                               if int(self.customer.attr["value"][i]):
                                     N += 1
                                     self.output[i].insert(self.customer, sim)
-                        self.customer.N=N#.append(N)
+                        self.customer.N.append(N)
+                        #print("append:",self.customer.name,self.customer.N)
                   else:
                         for i in range(len(self.output)):  # split to all
                               self.output[i].insert(self.customer,sim)
@@ -258,8 +261,8 @@ class Service(BpmnEvent):
             if self.customer!=None:
                   self.customer.attr["__n"+str(self.id)] += 1
                   if isinstance(self,OrGate) and len(self.output)==1:
-                        #if not hasattr(self,'N'):
-                        self.N = self.customer.N #.pop()
+                        #print(self.customer.name,self.customer.N)
+                        self.N = self.customer.N[-1]
                   if (self.customer.attr["__n"+str(self.id)]%self.N) == 0: #self.N:
                         do_out=True
                         if isinstance(self,Task):
@@ -272,6 +275,9 @@ class Service(BpmnEvent):
                                                 do_out=False
                         if do_out:
                               self.out(sim)     # pass customer to connected object
+                        if isinstance(self,OrGate) and len(self.output)==1:
+                              #print("pop:",self.customer.name,self.customer.N)
+                              self.customer.N.pop()
             self.customer = None    # mark that now the service is free !!!
             if len(self.queue)>0 :  # but if anybody in queue
                   Service.insert(self,self.queue.pop(), sim)  # get and insert into simulator
@@ -333,9 +339,9 @@ class End(Sink):
       #      self.setName("endEvent")
       def __init__(self,code=None):
             Sink.__init__(self,"endEvent",code)
-class Throw(Service):
+class Throw(End):
       def __init__(self,code=None):
-            Service.__init__(self,None,0,code)
+            End.__init__(self,code)
             self.setName("intermediateThrowEvent")
 class Terminate(End):
       def __init__(self,code=None):
@@ -878,12 +884,35 @@ def main_fun(exn,n,anim,comments,scripts): # string representation, number of si
             pass # s4 = hist(data)
       return (s,s1,s2,s3,s4) # s2+'<br>\n'+(s3 if n==1 else '')+'<br>\n'+'<pre>'+s+'</pre>'
 
+ex11="""# The tests 
+# 1) OrGate()
+# 2) G/G/2 (task with two servers)
+# 3) Boundary conditional event 
+# S.vn variables collect visited customers 
+1 Start(U,[1],-10,"S.v1=[];S.v2=[];S.v3=[];S.v4=[]")     # 10 customers
+2 OrGate()
+3 OrGate("=[A.n%2,1]")              ## 1.every second,2.every
+4 Task(U,[4],"S.v1=S.v1+[cname]")   # G/G/1
+5 Task(U,[4],"S.v2=S.v2+[cname]",2) # G/G/2
+6 Task()
+7 OrGate()
+8 OrGate()
+9 Task()
+10 Timer(1)                          # 1 delay
+11 End("S.v3=S.v3+[cname]")
+12.9 Condition("=cname%4==0")    ## throw every customer with id equal to multiple of 4 
+13/8 Throw("S.v4=S.v4+[cname]")
+1->2->3->4->7->8->9->10->11
+      3->5->7;       12->13
+   2->   6   ->8
+""";
+
 """
 if __name__=="__main__":
       import sys
       #import ex
       #ex30 = '1 Start()\n2 Task()\n3 End()\n1->2->3\n'
-      s = len(sys.argv)>1 and from_file(sys.argv[1]) or eval('ex%d'%(30))
+      s = len(sys.argv)>1 and from_file(sys.argv[1]) or eval('ex%d'%(11))
       n = len(sys.argv)>2 and int(sys.argv[2]) or 1
       anim = 1
       comments = 1
