@@ -267,8 +267,12 @@ class Service(BpmnEvent):
                         do_out=True
                         if isinstance(self,Task):
                               for e in EN: # find boundary elements asigned to current Task
-                                    if e.id2%1>0 and str(e.id2).split('.')[1]==str(self.id) and e.code!=None:
-                                          self._eval(e.code)
+                                    if e.id2%1>0 and str(e.id2).split('.')[1]==str(self.id):
+                                          if e.code != None:
+                                                self._eval(e.code)
+                                          dt = self.customer.attr["__t"+str(self.id)+"e"]-self.customer.attr["__t"+str(self.id)+"b"]
+                                          if isinstance(e,Timer):
+                                                self.customer.attr["value"]= dt > e.param      
                                           if self.customer.attr["value"]:
                                                 e.customer=self.customer
                                                 e.out(sim) # out there

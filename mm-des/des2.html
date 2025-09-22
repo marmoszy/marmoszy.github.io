@@ -212,22 +212,24 @@ ex11=`# The tests
 # 2) G/G/2 (task with two servers)
 # 3) Boundary conditional event 
 # S.vn variables collect visited customers 
-1 Start(U,[1],-10,"S.v1=[];S.v2=[];S.v3=[];S.v4=[]")     # 10 customers
+1 Start(U,[1],-10,"S.v1=[];S.v2=[];S.v3=[];S.v4=[];S.v5=[]")     # 10 customers
 2 OrGate("=[1,A.n%2]")              ## 1.every,2.every second
 3 OrGate("=[A.n%2,1]")              ## 1.every second,2.every
-4 Task(U,[4],"S.v1=S.v1+[cname]")   # G/G/1
-5 Task(U,[4],"S.v2=S.v2+[cname]",2) # G/G/2
-6/4 Task()                          ## "/4" - draw in 4th column
+4 Task(U,[4],"S.v1=S.v1+[cname]")   # G/G/1 # with execution time always equal to 4
+5 Task(U,[4],"S.v2=S.v2+[cname]",2) # G/G/2 # with execution time always equal to 4
+6/4 Task(U,[2,3])                   # U(2,3) # "/4" - draw in 4th column
 7 OrGate()
 8 OrGate()
 9 Task()
-10 Timer(1)                          # 1 delay
+10.6 Timer(2.5)                     # 2.5 # change path if Task6 time > 2.5 
 11 End("S.v3=S.v3+[cname]")
 12.9 Condition("=cname%4==0")  ## boundary event for the customer with cname equal to multiple of 4 
-13/7 Throw("S.v4=S.v4+[cname]")  ## "/7" - draw in 7th column
-1->2->3->4->7->8->9->10->11
+13/7 Terminate("S.v4=S.v4+[cname]")  ## "/7" - draw in 7th column
+14/4 Terminate("S.v5=S.v5+[cname]")  ## "/4" - draw in 4th column
+1->2->3->4->7->8->9->11
       3->5->7;   12->13
    2 ->  6  -> 8
+        10->14
 `;
 ex12=`# Procurement process
 1 Start(E,[1],-40)      
@@ -399,8 +401,7 @@ where:
 	<li>tnmax - tnmax&gt;0: maximum time for start generator; tnmax&lt;0: -tnmax represents maximum number of generated events
 	<li>script - string with semicolon separated codes for evaluation during event execution "[var]=&lt;expr&gt;; ... ;", empty var defaults to 'value' variable which is tested in XorGate and Condtion, var starting with 'S.' are scenario ones, starting with 'A.' element ones and without prefix - token/customer ones. Variable 'A.n' is element event counter which is initiated with 0 and increased by 1 at exec of each token/customer event. Token/customer have variable 'cname' (customer name) and may have variables '__t&lt;id&gt;a', '__t&lt;id&gt;b' and '__t&lt;id&gt;e' when the token visited the element with identifier id. They mark arrival, begin and end times.
 </ul>
-The text description of a process contains list of elements that should be ordered by number (element identifier) and semicolon separated list of connections. 
-The elements should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '/x[/y]' values after event identifier<!-- (see example 10) -->. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of element number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram. Additionally, the Condition element could play a role of the boundary event of the Task element.  To do that you need to add to the Condition element number the Task number joined with the '.' character.
+There are several rules when defining a process. The list of elements should be ordered by number (element identifier). The semicolon separated list of connections should use arrow characters "->". The elements should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '/x[/y]' values after event identifier. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of element number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram. Additionally, the Condition and Timer elements could play a role of the boundary events of the Task element. To do that you need to add the Task number to the element number joining both numbers with the '.' character.
 
 <p>
 Minimum working example (MWE) with default values for all events looks like:
