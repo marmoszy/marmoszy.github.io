@@ -339,9 +339,9 @@ class End(Sink):
       #      self.setName("endEvent")
       def __init__(self,code=None):
             Sink.__init__(self,"endEvent",code)
-class Throw(End):
+class Throw(Service):
       def __init__(self,code=None):
-            End.__init__(self,code)
+            Service.__init__(self,None,0,code)
             self.setName("intermediateThrowEvent")
 class Terminate(End):
       def __init__(self,code=None):
@@ -900,8 +900,8 @@ ex11="""# The tests
 9 Task()
 10 Timer(1)                          # 1 delay
 11 End("S.v3=S.v3+[cname]")
-12.9 Condition("=cname%4==0")    ## throw every customer with id equal to multiple of 4 
-13/8 Throw("S.v4=S.v4+[cname]")
+12.9 Condition("=cname%4==0") ## every customer with id equal to multiple of 4 
+13/8 Terminate("S.v4=S.v4+[cname]")
 1->2->3->4->7->8->9->10->11
       3->5->7;       12->13
    2->   6   ->8
