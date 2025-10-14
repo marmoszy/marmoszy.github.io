@@ -14,7 +14,7 @@
 html,body,textarea,select,optgroup {font-size: 16px;}
 input[type='file'],input[type='button'] {font-size: 16px; }
 .hdr {width:100%;text-align:center;font-size:32;padding:20px 0 20px 0}
-@media screen and (max-width:540px){
+@media screen and (max-width:960px){
 	#split td {display:block; width:100%;}
 	#nosplit td {display:inline-block;}
 }
@@ -206,14 +206,8 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 	<tr>
 		<td>
 
+<!------------ svg plot3D -------------->
 <div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#F5EDEA;#E4EFF2;#eee">
- <!--
-    <button onclick="alert(about)" 
-	  style="float:left;border:none;margin-left:0;background-color:transparent;font-size:14px">
-		 <img style="width:20px;height:20px;" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGlkPSJPdXRsaW5lIiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIj4KPHJlY3QgeT0iMTEiIHdpZHRoPSIyMiIgaGVpZ2h0PSIzIiByeD0iMSIgZmlsbD0id2hpdGUiLz4KPHJlY3QgeT0iNCIgd2lkdGg9IjIyIiBoZWlnaHQ9IjMiIHJ4PSIxIiAgZmlsbD0id2hpdGUiLz4KPHJlY3QgeT0iMTgiIHdpZHRoPSIyMiIgaGVpZ2h0PSIzIiByeD0iMSIgIGZpbGw9IndoaXRlIi8+Cjwvc3ZnPgo=">
- 	</button>
--->	
-
     <button  style="border:none;color:white;background-color:#0080FF;border-radius:12px;width:24px;height:24px;font-size:14px"
 		onclick="zoomout();update();"><b>&minus;</b></button>
 	<input type="range" min="-180" max="180" value="0" class="slider" id="a_slider" style="width:116;position:relative;top:4px"
@@ -224,19 +218,18 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 		oninput="c_changed(this);"> 
     <button  style="border:none;color:white;background-color:#0080FF;border-radius:12px;width:24px;height:24px;font-size:14px"
 		onclick="zoomin();update();"><b>&plus;</b></button>
-   <br>   
-  
+   <br>     
    <svg xmlns="http://www.w3.org/2000/svg" id="svg1" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
       <g id="gt" transform="translate(0,20)">	   	   	   
       </g>
    </svg>
 </div>
-
 <input type=button value="Save to svg file" onclick='writeFile(document.getElementById("svg1").outerHTML,"mm-bem-polar.svg");' /> 
 	
 		</td>
 		<td>
 
+<!------------ svg plot2D -------------->
 <div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#F5EDEA;#eee">
 <svg xmlns="http://www.w3.org/2000/svg" id="svg" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
 <text x="10" y="10" id="title" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
@@ -296,7 +289,6 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 </g>
 </svg>
 </div>
-
 <input type=button value="Save to svg file" onclick='writeFile(document.getElementById("svg").outerHTML,"mm-bem-mesh.svg");' /> 
 
 		</td>
@@ -304,15 +296,21 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 	<tr>
 		<td>
 
-<table style="padding:0"><tr><td>
+<!---------------- msh --------------->
+<table style="padding:0">
+	<tr>
+		<td>
 <textarea id="msh" style="width:480px;height:440px;background-color:#B0D2A2;#e6fff2">
 </textarea>
-</td></tr></table>
 <input type=button value="Save to msh file" onclick='writeFile(document.getElementById("msh").value,"mm-bem.msh");' /> 
+		</td>
+	</tr>
+</table>
 
 		</td>
 		<td>
 
+<!------------- txt,txt -------------->
 <table id="nosplit" style="width:100%;padding:0;vertical-align:top;border-spacing:0" cellspacing=0 cellpadding=0 border=0>
 	<tr>
 		<td style="text-align:top;width:50%">
@@ -327,15 +325,12 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 	</tr>
 </table>
 
-<!--
-<input type=button value="Save to msh file" onclick='generated_mesh.length>0?writeFile(generated_mesh,"mm-bem.msh"):alert("Mesh not generated!\nSelect scanning options for both angles to have 3D data");' /> 
--->
-
 		</td>
 	</tr>
 	<tr>
 		<td>
-
+			
+<!----------- footer ------------->
 <span title="marek.moszynski@pg.edu.pl 2025">MM 13.10.2025 (mm-bem v1.83)</span>
 </td><td>
 <span>
