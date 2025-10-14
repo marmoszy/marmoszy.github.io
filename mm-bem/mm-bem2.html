@@ -11,8 +11,8 @@
 -->
 
 <style> 
-html,body,textarea,select,optgroup {font-size: 16px;}
-input[type='file'],input[type='button'] {font-size: 16px; }
+html,body,textarea,select,optgroup {font-size: 18px;}
+input[type='file'],input[type='button'] {font-size: 18px; }
 .hdr {width:100%;text-align:center;font-size:32;padding:20px 0 20px 0}
 @media screen and (max-width:1080px){
 	#split td {display:block; width:100%;}
@@ -23,6 +23,7 @@ input[type='file'],input[type='button'] {font-size: 16px; }
 
 	<link rel="icon" type="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld2JveD0iMCAwIDk2IDk2Ij4KCTxwYXRoIGQ9Ik0gMTAgNTAgTCA0MCA1MCBMIDQwIDc1LjUgTCAyMCA3MCBaIiBzdHJva2U9Im5vbmUiIGZpbGw9IiMzMUIxRUQiIC8+Cgk8cGF0aCBkPSJNIDQwIDc1LjUgTCA0MCA1MCBMIDgwIDUwIEwgNjAgNzAgWiIgc3Ryb2tlPSJub25lIiBmaWxsPSIjNDc4M0Q3IiAvPgoJPHBhdGggZD0iTSA0MCAyNC41IEwgNDAgNTAgTCA4MCA1MCBMIDYwIDMwIFoiIHN0cm9rZT0ibm9uZSIgZmlsbD0iIzMxRURDQSIgLz4KCTxwYXRoIGQ9Ik0gMTAgNTAgTCA0MCA1MCBMIDQwIDI0LjUgTCAyMCAzMCBaIiBzdHJva2U9Im5vbmUiIGZpbGw9IiM3M0U4RTgiIC8+Cgk8cGF0aCBkPSJNIDEwIDUwIEwgMjAgMzEgTCA0MCAyNC41IEwgNjAgMzEgTCA4MCA1MCBMIDk1IDM1IEwgODkgNTAgTCA5NSA2NSBMIDgwIDUwIEwgNjAgNjkgTCA0MCA3NS41IEwgMjAgNjkgTCAxMCA1MCBNIDEyIDUwIEwgMjQgNTAiIHN0cm9rZT0iIzJGNzJFRSIgc3Ryb2tlLXdpZHRoPSI0IiBmaWxsPSJub25lIiAvPgoJPHBhdGggZD0iTSAxMCAxMCBMIDIwIDIwIE0gNjAgMjAgTCA3MCAxMCBNIDEwIDkwIEwgMjAgODAgTSA2MCA4MCBMIDcwIDkwIiBzdHJva2U9ImRhcmtibHVlIiBzdHJva2UtZGFzaGFycmF5PSIxLDAiIHN0cm9rZS13aWR0aD0iMwkiIC8+Cgk8Y2lyY2xlIHI9IjQiIGN4PSIzMCIgY3k9IjQwIiBmaWxsPSIjMDBiZmZmIiBzdHJva2U9ImRhcmtibHVlIi8+Cgk8ZWxsaXBzZSByeD0iMTIiIHJ5PSI1IiBjeD0iNDUiIGN5PSI2MCIgZmlsbD0id2hpdGUiIHN0cm9rZT0ibm9uZSIgdHJhbnNmb3JtPSJyb3RhdGUoMTEgNDUgNjApIi8+Cjwvc3ZnPgo=" />
 
+<body style="background-color:#eee">
 <div style="width:100%;max-width:960px;margin:0 auto"> <!-- begin of container -->
 	
 <!--
@@ -36,7 +37,7 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 </small>
 </div>
 
-<table id="split" cellpadding=0 cellspacing=0 border=0 style="border-collapse:collapse;border:0;border-spacing:0">
+<table id="split" cellpadding=0 cellspacing=0 border=0 style="margin:0 auto;border-collapse:collapse;border:0;border-spacing:0">
 	<tr>
 		<td>
 
@@ -207,7 +208,7 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 		<td>
 
 <!------------ svg plot3D -------------->
-<div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#F5EDEA;#E4EFF2;#eee">
+<div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#fafcff;white;#F5EDEA;#E4EFF2;#eee">
     <button  style="border:none;color:white;background-color:#0080FF;border-radius:12px;width:24px;height:24px;font-size:14px"
 		onclick="zoomout();update();"><b>&minus;</b></button>
 	<input type="range" min="-180" max="180" value="0" class="slider" id="a_slider" style="width:116;position:relative;top:4px"
@@ -230,7 +231,7 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 		<td>
 
 <!------------ svg plot2D -------------->
-<div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#F5EDEA;#eee">
+<div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#fafcff;white;#F5EDEA;#eee">
 <svg xmlns="http://www.w3.org/2000/svg" id="svg" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
 <text x="10" y="10" id="title" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
 <text x="280" y="10" id="title2" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
@@ -333,10 +334,14 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 		<td>
 			
 <!----------- footer ------------->
-<span title="marek.moszynski@pg.edu.pl 2025">MM 13.10.2025 (mm-bem v1.83)</span>
-</td><td>
+<br>
+<span title="marek.moszynski@pg.edu.pl">mm-bem v1.83 (13.10.2025)</span>
+
+		</td>
+		<td>
+
 <span>
-<label for="engine">Calculation engine: </label> 
+<label for="engine">calculation engine: </label> 
 <select id="engine" onchange="select()" style="background-color:#ffe6e6">
 <optgroup>
   <option value="wasm_soft_worker" selected>wasm</option>
@@ -357,6 +362,7 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 
 <textarea id="ta" style="opacity:0;position:absolute;z-index:-9999;pointer-events:none;"></textarea>
 </div> <!--end of container -->
+</body>
 
 <script>
 // globals
