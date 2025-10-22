@@ -14,6 +14,7 @@ h1,h2,h3 {
   color: steelblue;
   font-weight: normal;
 }
+/*
 .accordion {
   background-color: #cfe2ff;
   color: black;
@@ -51,6 +52,42 @@ button.accordion.active:after {
   display: none;
   max-width: 960px;
 }
+*/
+
+:root {
+--col-1: #977967;     /* (brown) accordion-color */	
+--col-2: #c5b2a5;     /* (lightbrown) accordion2-color */	
+--col-3: #375162;     /* (navy) link-text-color */	
+--col-4: saddlebrown; /* (saddlebrown) table-header-text-color */	
+--col-5: #eee;        /* (lightgray) body background-color */
+--col-6: #efe9dd;     /* (gardenia) table cell background-color */
+--col-7: #fff;        /* (white) table-header, non-active-accordion background-color */
+--col-8: #e08600;     /* (orange) link-hover-color */
+}
+body {color:var(--col-3);background-color:var(--col-5);font-family:Arial,Helvetica,sans-serif;margin:0;font-size:16px;}
+button {font-size:28px;font-weight:normal;text-align:left;color:var(--col-1); margin:0;padding:0;width:100%}
+
+.acc, .acc2 {background-color:var(--col-7);color:black;cursor:pointer;text-align:left;
+  padding:20px;margin:0;width:100%;max-width:960px;border:solid 1px;outline:none;transition:0.1s;
+}
+.acc:after, .acc2:after {content:'\2303';transform:scale(1,-1);font-weight:normal;float: right;margin-left:5px;}
+.acc.active:after, .acc2.active:after {content:'\2303';transform:scale(1, 1);}
+
+.acc {border-color:var(--col-1);}
+.acc.active, .acc:hover {background-color:var(--col-1);color:white;} /* brown */
+.acc2 {border-color:var(--col-2);}
+.acc2.active, .acc2:hover {background-color:var(--col-2);color:white;} /* lightbrown */
+
+.frame {background-color:white;padding:20;border-color:var(--col-1);border:solid 1px;outline:none;}
+
+table.sortable {border-spacing:0;margin:0 auto;}
+table.sortable td {background-color:var(--col-6);color:black;border:1px solid var(--col-2);padding:5px;margin:0;font-size:18px;}
+table.sortable th {background-color:var(--col-7);color:var(--col-4);padding:5px;margin:0px;font-size:18px;font-weight:normal;}
+
+a:link {color:var(--col-3);text-decoration:none;}
+a:visited {color:var(--col-3)}
+a:hover {color:var(--col-8);text-decoration:none;}
+
 </style>
 </head>
 
@@ -375,10 +412,10 @@ The implementation of a discrete event simulator with a BPMN-like elements and P
 The results are in the form of animated or static BPMN diagram, the timeline for each element and the text table with the time of process execution along with final values of scenario variables.
 </p>
 
-<div>
+<div style="width:100%;margin:0 auto;max-width:960px;">
 
-<button class="accordion">Introduction</button>
-<div class="panel">
+<button class="acc">Introduction</button>
+<div class="frame" hidden>
 <p>
 
 <b>mm-des</b> allows to run simulations of process models defined in text form as the list of elements and the list of connections. The code implements ten basic BPMN elements and six random generators:
@@ -434,8 +471,8 @@ The section <b>Running code</b> allows for defining a process and running simula
 
 <!--- ------------- --->
 
-<button class="accordion">Examples</button>
-<div class="panel">
+<button class="acc">Examples</button>
+<div class="frame" hidden>
 <p>
 <table><tr><td>
 <div style="width:960px;overflow-x:scroll;">
@@ -539,8 +576,8 @@ document.querySelectorAll(".sub").forEach(el => el.onclick = () => h(el));
 
 <!--- ------------- --->
 
-<button class="accordion">Running code</button>
-<div class="panel">
+<button class="acc">Running code</button>
+<div class="frame" hidden>
 <p>
 Examples:
 <input type=button onclick='preload(ex1);' value="1." />
@@ -717,4 +754,10 @@ s # output
 
 <!-- base64 -i des2.py | perl -e '$_=<>;chomp;print "var pycode=\"$_\";"' > des2.js -->
 <script src="des2.js"> </script>
+
+<script>
+function h(e) {e.nextElementSibling.hidden^=1}
+document.querySelectorAll(".acc, .acc2").forEach(el => {el.onclick = () => {h(el); el.classList.toggle("active");}});
+document.querySelectorAll(".sub").forEach(el => el.onclick = () => h(el.parentNode));
+</script>
 
