@@ -209,30 +209,36 @@ The section <b>Running code</b> allows for defining a process and running simula
 <div class="frame" hidden>
 
 <p>
-Examples:
-<input type=button onclick='preload(ex1);' value="1." />
-<input type=button onclick='preload(ex2);' value="2." />
-<input type=button onclick='preload(ex3);' value="3." />
-<input type=button onclick='preload(ex4);' value="4." />
-<input type=button onclick='preload(ex5);' value="5." />
+<div style="display:flex;flex-wrap:wrap">
+ <div>Examples:&nbsp;</div>
+ <div>
+  <input type=button onclick='preload(ex1);' value="1." />
+  <input type=button onclick='preload(ex2);' value="2." />
+  <input type=button onclick='preload(ex3);' value="3." />
+  <input type=button onclick='preload(ex4);' value="4." />
+  <input type=button onclick='preload(ex5);' value="5." />
 <!--
 <input type=button onclick='preload(ex6);' value="6." />
 <input type=button onclick='preload(ex7);' value="7." />
 <input type=button onclick='preload(ex8);' value="8." />
 -->
-<input type=button onclick='preload(ex9);' value="6." />
-<input type=button onclick='preload(ex10);' value="7." />
-<input type=button onclick='preload(ex11);' value="8." />
-<input type=button onclick='preload(ex12);' value="9." />
-<input type=button onclick='preload(ex13);' value="10." />
-&nbsp;&nbsp;<input type="file" accept="text/plain" title="Open"  onchange="readFile(this);"/>
-&nbsp;&nbsp;<input type=button onclick='writeFile0();' value="Save" />
+  <input type=button onclick='preload(ex9);' value="6." />
+  <input type=button onclick='preload(ex10);' value="7." />
+  <input type=button onclick='preload(ex11);' value="8." />
+  <input type=button onclick='preload(ex12);' value="9." />
+  <input type=button onclick='preload(ex13);' value="10." />
+ </div>
+ <div>&nbsp;&nbsp;<input type="file" accept="text/plain" title="Open"  onchange="readFile(this);"/></div>
+ <div>&nbsp;&nbsp;<input type=button onclick='writeFile0();' value="Save" /></div>
+</div>
 
 <p>
 	<textarea id="in" wrap='off' style="field-sizing: content;min-height:15rem;width:100%;overflow-x:auto;font-family:monospace!important;"></textarea>
 
 <p>
-Number of simulations: <select id="n" style="font-size: 16px;">
+<div style="display:flex;flex-wrap:wrap;">
+ <div>Number of simulations: 
+   <select id="n" style="font-size: 16px;">
 	<option value="1">1</option>
 	<option value="10">10</option>
 	<option value="20">20</option>
@@ -241,20 +247,21 @@ Number of simulations: <select id="n" style="font-size: 16px;">
 	<option value="200">200</option>
 	<option value="500">500</option>
 	<option value="1000">1000</option>
-</select>
-&nbsp;&nbsp; <input type=button value="Run" onclick="py_main1()">
-&nbsp;&nbsp; <span>Add token animation:&nbsp;<input type="checkbox" id="anim" checked/></span>
-&nbsp;&nbsp; <span>Add comment info:&nbsp;<input type="checkbox" id="comments" checked/></span>
-&nbsp;&nbsp; <span>Add script info:&nbsp;<input type="checkbox" id="scripts" checked/></span>
-<br><br>
+  </select>
+ </div>
+ <div>&nbsp;&nbsp; <input type=button value="Run" onclick="py_main1()"> </div>
+ <div>&nbsp;&nbsp; <span>Add token animation: <input type="checkbox" id="anim" checked/></span></div>
+ <div>&nbsp;&nbsp; <span>Add comment info: <input type="checkbox" id="comments" checked/></span></div>
+ <div>&nbsp;&nbsp; <span>Add script info: <input type="checkbox" id="scripts" checked/></span></div>
+</div>
 <!--			
 <input type=button value="Run once" onclick="f(document.getElementById('in').value)">
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="des.bpmn">Last run bpmn file (xml)</a>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="des.php?bpmn=des.bpmn">Last run bpmn file (preview)</a>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="des.php?dot=des.dot">Last run dot schemtic</a>
 -->
-
-	<div id="out"></div>
+<p>
+ <div id="out"></div>
 
 </div>
 
