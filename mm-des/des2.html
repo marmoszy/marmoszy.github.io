@@ -78,7 +78,7 @@ button {font-size:28px;font-weight:normal;text-align:left;color:var(--col-1); ma
 .acc2 {border-color:var(--col-2);}
 .acc2.active, .acc2:hover {background-color:var(--col-2);color:white;} /* lightbrown */
 
-.frame {width:100%;max-width:917;background-color:white;padding:20;border-color:var(--col-1);border:solid 1px;outline:none;}
+.frame {width:100%;max-width:918;background-color:white;padding:20;border-color:var(--col-1);border:solid 1px;outline:none;}
 
 table.sortable {border-spacing:0;margin:0 auto;}
 table.sortable td {background-color:var(--col-6);color:black;border:1px solid var(--col-2);padding:5px;margin:0;font-size:18px;}
@@ -454,7 +454,7 @@ Default parameters for Start() are (E,[1],50) what generates exponential events 
 As a result the bpmn-like schematic is generated along with single process implementation diagram and the time of process execution:
 
 <!--<pre id="ex0"><script>document.getElementById("ex0").innerHTML=ex0;</script></pre>-->
-<br><div style="overflow-x:auto"><object type="image/svg+xml" data="ex0_bpmn.svg"></object></div>
+<br><<object type="image/svg+xml" data="ex0_bpmn.svg"></object>
 <br><object type="image/svg+xml" data="ex0_des.svg"></object>
 <pre style="font-size:smaller">
 #n t
@@ -611,9 +611,9 @@ Number of simulations: <select id="n" style="font-size: 16px;">
 	<option value="1000">1000</option>
 </select>
 &nbsp;&nbsp; <input type=button value="Run" onclick="py_main1()">
-&nbsp;&nbsp; Add token animation:&nbsp;<input type="checkbox" id="anim" checked/>
-&nbsp;&nbsp; Add comment info:&nbsp;<input type="checkbox" id="comments" checked/>
-&nbsp;&nbsp; Add script info:&nbsp;<input type="checkbox" id="scripts" checked/>
+&nbsp;&nbsp; <span>Add token animation:&nbsp;<input type="checkbox" id="anim" checked/></span>
+&nbsp;&nbsp; <span>Add comment info:&nbsp;<input type="checkbox" id="comments" checked/></span>
+&nbsp;&nbsp; <span>Add script info:&nbsp;<input type="checkbox" id="scripts" checked/></span>
 <br><br>
 <!--			
 <input type=button value="Run once" onclick="f(document.getElementById('in').value)">
