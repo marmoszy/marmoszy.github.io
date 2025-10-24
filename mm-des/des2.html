@@ -17,9 +17,11 @@
 --col-7: #fff;        /* (white) table-header, non-active-accordion background-color */
 --col-8: #e08600;     /* (orange) link-hover-color */
 }
+* {margin:0;border-sizing:border-box;}
 body, input, pre, p, button, textarea, a, div {font-size:18px;}
 body {background-color:var(--col-5);font-family:Arial,Helvetica,sans-serif;margin:0;}
-h1,h2,h3 {color:var(--col-3);font-weight:normal;}
+h1,h4 {background-color:var(--col-1);color:var(--col-7);font-weight:normal;padding:20;}
+h3 {color:var(--col-3);font-weight:normal;padding:10;}
 button {font-size:28px;font-weight:normal;text-align:left;color:var(--col-1); margin:0;padding:0;width:100%}
 
 .acc, .acc2 {background-color:var(--col-7);color:black;cursor:pointer;text-align:left;
@@ -53,7 +55,7 @@ a:hover {color:var(--col-8);text-decoration:none;}
 <!--------- 0 ---------->
 
 <h1 style="text-align:center" title="marek.moszynski@pg.edu.pl">mm-des - minimalistic discrete event simulator</h1>
-<h5 style="text-align:center"> February 2024 (v.1), September 2025 (v.2)</h5>
+<h4 style="text-align:center"> February&nbsp;2024&nbsp;(v.1), September&nbsp;2025&nbsp;(v.2)</h4>
 
 
 <p style="text-align:justify!important;padding:12">
@@ -215,8 +217,8 @@ The section <b>Running code</b> allows for defining a process and running simula
 
 <p>
 <div style="display:flex;flex-wrap:wrap;flex-direction:var(--flex-dir)">
- <div>&nbsp;&nbsp;Examples:&nbsp;</div>
- <div>&nbsp;&nbsp;
+ <div>&nbsp;Examples:</div>
+ <div>&nbsp;
   <input type=button onclick='preload(ex1);' value="1." />
   <input type=button onclick='preload(ex2);' value="2." />
   <input type=button onclick='preload(ex3);' value="3." />
@@ -233,13 +235,15 @@ The section <b>Running code</b> allows for defining a process and running simula
   <input type=button onclick='preload(ex12);' value="9." />
   <input type=button onclick='preload(ex13);' value="10." />
  </div>
- <div>&nbsp;&nbsp;<input type="file" accept="text/plain" title="Open"  onchange="readFile(this);"/></div>
- <div>&nbsp;&nbsp;<input type=button onclick='writeFile0();' value="Save" /></div>
+ <div>&nbsp;<input type="file" accept="text/plain" title="Open"  onchange="readFile(this);"/></div>
+ <div>&nbsp;<input type=button onclick='writeFile0();' value="Save" /></div>
 </div>
 
+<br>
 <p>
 	<textarea id="in" wrap='off' style="field-sizing: content;min-height:15rem;width:100%;overflow-x:auto;font-family:monospace!important;"></textarea>
 
+<br><br>
 <p>
 <div style="display:flex;flex-wrap:wrap;flex-direction:var(--flex-dir)">
  <div>&nbsp;&nbsp; Number of simulations: 
@@ -265,6 +269,7 @@ The section <b>Running code</b> allows for defining a process and running simula
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="des.php?bpmn=des.bpmn">Last run bpmn file (preview)</a>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="des.php?dot=des.dot">Last run dot schemtic</a>
 -->
+<br>
 <p>
  <div id="out"></div>
 
