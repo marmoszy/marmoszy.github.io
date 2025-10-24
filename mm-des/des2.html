@@ -205,11 +205,16 @@ The section <b>Running code</b> allows for defining a process and running simula
 
 <!-------- 3 ----------->
 
+<style>
+:root { --flex-dir: row; }
+@media (max-width: 480px) {:root { --flex-dir: column; }}
+</style>
+	
 <button class="acc">Running code</button>
 <div class="frame" hidden>
 
 <p>
-<div style="display:flex;flex-wrap:wrap">
+<div style="display:flex;flex-wrap:wrap;flex-direction:var(--flex-dir)">
  <div>Examples:&nbsp;</div>
  <div>
   <input type=button onclick='preload(ex1);' value="1." />
@@ -236,7 +241,7 @@ The section <b>Running code</b> allows for defining a process and running simula
 	<textarea id="in" wrap='off' style="field-sizing: content;min-height:15rem;width:100%;overflow-x:auto;font-family:monospace!important;"></textarea>
 
 <p>
-<div style="display:flex;flex-wrap:wrap;">
+<div style="display:flex;flex-wrap:wrap;flex-direction:var(--flex-dir)">
  <div>Number of simulations: 
    <select id="n" style="font-size: 16px;">
 	<option value="1">1</option>
