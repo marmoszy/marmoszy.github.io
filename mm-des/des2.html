@@ -7,59 +7,19 @@
 </script>
 
 <style>
-body, input, pre, p, button, textarea, a, div {font-size:18px;}
-h1,h2,h3 {color:steelblue;font-weight:normal;}
-/*
-.accordion {
-  background-color: #cfe2ff;
-  color: black;
-  cursor: pointer;
-  padding: 24px;
-  width: 100%;
-  max-width: 960px;
-  font-size:larger;
-  color:steelblue;
-  text-align: left;
-  border: solid 1px;
-  border-color: #aaa;
-  outline: none;
-  transition: 0.4s;
-}
-button.accordion:after {
-  content: '\2303';
-  transform: scale(1, -1);
-  color: steelblue;
-  font-weight: normal;
-  float: right;
-  margin-left: 5px;
-}
-
-button.accordion.active:after {
-  content: '\2303';
-  transform: scale(1, 1);
-}
-.active, .accordion:hover {
-  background-color: #ccc;
-}
-.panel {
-  padding: 0 18px;
-  background-color: white;
-  display: none;
-  max-width: 960px;
-}
-*/
-
 :root {
 --col-1: #977967;     /* (brown) accordion-color */	
 --col-2: #c5b2a5;     /* (lightbrown) accordion2-color */	
---col-3: #375162;     /* (navy) link-text-color */	
+--col-3: steelblue;     /* (navy #375162) headers and link-text-color */	
 --col-4: saddlebrown; /* (saddlebrown) table-header-text-color */	
 --col-5: #eee;        /* (lightgray) body background-color */
 --col-6: #efe9dd;     /* (gardenia) table cell background-color */
 --col-7: #fff;        /* (white) table-header, non-active-accordion background-color */
 --col-8: #e08600;     /* (orange) link-hover-color */
 }
-body {color:var(--col-3);background-color:var(--col-5);font-family:Arial,Helvetica,sans-serif;margin:0;font-size:16px;}
+body, input, pre, p, button, textarea, a, div {font-size:18px;}
+body {background-color:var(--col-5);font-family:Arial,Helvetica,sans-serif;margin:0;}
+h1,h2,h3 {color:var(--col-3);font-weight:normal;}
 button {font-size:28px;font-weight:normal;text-align:left;color:var(--col-1); margin:0;padding:0;width:100%}
 
 .acc, .acc2 {background-color:var(--col-7);color:black;cursor:pointer;text-align:left;
@@ -74,6 +34,7 @@ button {font-size:28px;font-weight:normal;text-align:left;color:var(--col-1); ma
 .acc2.active, .acc2:hover {background-color:var(--col-2);color:white;} /* lightbrown */
 
 .frame {max-width:100%;background-color:white;padding:20;border-color:var(--col-1);border:solid 1px;outline:none;}
+input {background-color:var(--col-2);}
 
 table.sortable {border-spacing:0;margin:0 auto;}
 table.sortable td {background-color:var(--col-6);color:black;border:1px solid var(--col-2);padding:5px;margin:0;font-size:18px;}
@@ -86,12 +47,228 @@ a:hover {color:var(--col-8);text-decoration:none;}
 </style>
 </head>
 
+
+<div style="width:100%;max-width:960;margin:0 auto;font-family:helvetica">
+
+<!--------- 0 ---------->
+
+<h1 style="text-align:center" title="marek.moszynski@pg.edu.pl">mm-des - minimalistic discrete event simulator</h1>
+<h5 style="text-align:center"> February 2024 (v.1), September 2025 (v.2)</h5>
+
+
+<p style="text-align:justify!important;padding:12">
+The implementation of a discrete event simulator with a BPMN-like elements and Python-like scripting. The simulator uses text-defined elements (events, tasks, gates) and their connections as an input for execution.
+The results are in the form of animated or static BPMN diagram, the timeline for each element and the text table with the time of process execution along with final values of scenario variables.
+</p>
+
+<!--------- 1 ---------->
+
+<button class="acc">Introduction</button>
+<div class="frame" hidden>
+
+<p>
+<b>mm-des</b> allows to run simulations of process models defined in text form as the list of elements and the list of connections. The code implements ten basic BPMN elements and six random generators:
+<ol>
+	<li>Start(fun, param, tnmax, script) - start event
+	<li>Task(fun, param, script, nservers=1) - sequential task activity with n-servers inside
+	<li>XorGate(script) - exclusive gateway (two-output: value==true passes the event to the first defined connection, value==false - to the second (more than two: must have algebraic choice-like function with result being a number starting from 0) multi-input: pass trough the event from all connected), default script is "=B(0.5)" meaning binomial equally distributed choice for two outputs
+	<li>AndGate(script) - parallel gateway (multi-output: passes through the event to all connected, multi-input: waits for all)
+	<li>OrGate(script) - inclusive gateway (multi-output: passes through the event to those for which script values are true (i.e for three output lines default script is "=[1,0,0]" meaning that only first is passed, multi-input: waits for those that were true on previous mutioutput OrGate)
+	<li>Timer(fun, param, script) - timer delay event
+	<li>Condition(script) - conditional event with a script containing logical expression as the first one ("=&lt;expr&gt;;..."); the instructions after first semicolon will be executed only when condition evaluates to true
+	<li>Terminate(script) - terminate event
+	<li>Throw(script) - throw event
+	<li>End(script) - end event
+</ol>
+where:
+<ul>
+	<li>fun - random functions: E([mean]), N([mean,std]), U([min,max]), T([min,max,mean,std]), B(p), C([p1,p2,p3,...]), None 
+	<li>param - array of fun params (fun==None: deterministic time delay in param[0])
+	<li>tnmax - tnmax&gt;0: maximum time for start generator; tnmax&lt;0: -tnmax represents maximum number of generated events
+	<li>script - string with semicolon separated codes for evaluation during event execution "[var]=&lt;expr&gt;; ... ;", empty var defaults to 'value' variable which is tested in XorGate and Condtion, var starting with 'S.' are scenario ones, starting with 'A.' element ones and without prefix - token/customer ones. Variable 'A.n' is element event counter which is initiated with 0 and increased by 1 at exec of each token/customer event. Token/customer have variable 'cname' (customer name) and may have variables '__t&lt;id&gt;a', '__t&lt;id&gt;b' and '__t&lt;id&gt;e' when the token visited the element with identifier id. They mark arrival, begin and end times.
+</ul>
+There are several rules when defining a process. The list of elements should be ordered by number (element identifier). The semicolon separated list of connections should use arrow characters "->". The elements should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '/x[/y]' values after event identifier. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of element number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram. Additionally, the Condition and Timer elements could play a role of the boundary events of the Task element. To do that you need to add the Task number to the element number joining both numbers with the '.' character.
+
+<p>
+Minimum working example (MWE) with default values for all events looks like:
+<pre style="font-size:smaller;border:1px solid gray;background-color:#ddd;padding:8px">
+# A single task
+1 Start()
+2 Task()
+3 End()
+1->2->3
+</pre>
+Default parameters for Start() are (E,[1],50) what generates exponential events with mean of 1 time unit ongoing 50 time units. Default values for Task() are (U,[1,2]) what means that this task takes from 1 to 2 time units uniformly distributed.
+As a result the bpmn-like schematic is generated along with single process implementation diagram and the time of process execution:
+
+<!--<pre id="ex0"><script>document.getElementById("ex0").innerHTML=ex0;</script></pre>-->
+<br><<object type="image/svg+xml" data="ex0_bpmn.svg"></object>
+<br><object type="image/svg+xml" data="ex0_des.svg"></object>
+<pre style="font-size:smaller">
+#n t
+1 76.31941273749922
+</pre>
+</p>
+
+<p>
+When defining a process it is possible to use '#' as the comment character. If the first line starts with the # it plays a role of title of the process. When using '#' after definition of an element it plays a role of the comment that could be added to the bpmn-like diagram above the element. The next '#' in the same line allows to add additional comment that is not visible in the diagram. See next section with examples.
+<p>   
+The section <b>Running code</b> allows for defining a process and running simulation. The examples presented in next section could be inserted by clicking numbered buttons. Before running simulation it is possible to define the number of simulations. When only one simulation is selected, animated bpmn diagram is generated along with timeline chart. It allows for detailed analysis of token flows in the process. When the number of simulations are greater than 1 the bpmn execution timeline is not generated. It is possible to configure the bpmn-like diagram to include token animations, comments and the first script command.
+</p>  
+
+</div>
+
+<!--------- 2 ---------->
+
+<button class="acc">Examples</button>
+<div class="frame" hidden>
+<div style="max-width:920px;overflow-x:auto;">
+
+<ol>
+<h3><li class="sub">A process with two serial tasks</li></h3>
+<div hidden>
+	<pre id="ex1"><script>ex("ex1",ex1)</script></pre>
+	<br><object type="image/svg+xml" data="ex1_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex1_des.svg"></object>
+</div>
+<h3><li class="sub">A process with two parallel tasks</li></h3>
+<div hidden>
+	<pre id="ex2"><script>ex("ex2",ex2)</script></pre>
+	<br><object type="image/svg+xml" data="ex2_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex2_des.svg"></object>
+</div>
+<h3><li class="sub">A process with serial and parallel tasks</li></h3>
+<div hidden>
+	<pre id="ex3"><script>ex("ex3",ex3)</script></pre>
+	<br><object type="image/svg+xml" data="ex3_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex3_des.svg"></object>
+</div>
+<h3><li class="sub">A process with two parallel tasks both must be executed</li></h3>
+<div hidden>
+	<pre id="ex4"><script>ex("ex4",ex4)</script></pre>
+	<br><object type="image/svg+xml" data="ex4_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex4_des.svg"></object>
+</div>
+<h3><li class="sub">A bicycle sharing systems</li></h3>
+<div hidden>	<pre id="ex5"><script>ex("ex5",ex5)</script></pre>
+	<br><object type="image/svg+xml" data="ex5_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex5_des.svg"></object>
+</div>
+<!--
+<h3><li>A timer test</h3>
+	<pre id="ex6"><script>document.getElementById("ex6").innerHTML=ex6</script></pre>
+	<br><object type="image/svg+xml" data="ex6_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex6_des.svg"></object>
+<h3><li>An event variable test</h3>
+	<pre id="ex7"><script>document.getElementById("ex7").innerHTML=ex7</script></pre>
+	<br><object type="image/svg+xml" data="ex7_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex7_des.svg"></object>
+<h3><li>A four phases process</h3>
+	<pre id="ex8"><script>document.getElementById("ex8").innerHTML=ex8</script></pre>
+	<br><object type="image/svg+xml" data="ex8_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex8_des.svg"></object>
+-->
+<h3><li class="sub">A conditional event example with abstract resource</li></h3>
+<div hidden>
+	<pre id="ex9"><script>ex("ex9",ex9)</script></pre>
+	<br><object type="image/svg+xml" data="ex9_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex9_des.svg"></object>
+</div>
+<h3><li class="sub">Credit card application</li></h3>
+<div hidden>
+	<pre id="ex10"><script>ex("ex10",ex10)</script></pre>
+	<br><object type="image/svg+xml" data="ex10_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex10_des.svg"></object>
+</div>
+<h3><li class="sub">G/G/2 queue test</li></h3>
+<div hidden>	
+	<pre id="ex11"><script>ex("ex11",ex11)</script></pre>
+	<br><object type="image/svg+xml" data="ex11_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex11_des.svg"></object>
+</div>
+<h3><li class="sub">Procurement process</li></h3>
+<div hidden>
+	<pre id="ex12"><script>ex("ex12",ex12)</script></pre>
+	<br><object type="image/svg+xml" data="ex12_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex12_des.svg"></object>
+</div>
+<h3><li class="sub">Order process</li></h3>
+<div hidden>	
+	<pre id="ex13"><script>ex("ex13",ex13)</script></pre>
+	<br><object type="image/svg+xml" data="ex13_bpmn.svg"></object>
+	<br><object type="image/svg+xml" data="ex13_des.svg"></object>
+</div>
+</ol>
+</div>
+
+</div>
+
+<!-------- 3 ----------->
+
+<button class="acc">Running code</button>
+<div class="frame" hidden>
+
+<p>
+Examples:
+<input type=button onclick='preload(ex1);' value="1." />
+<input type=button onclick='preload(ex2);' value="2." />
+<input type=button onclick='preload(ex3);' value="3." />
+<input type=button onclick='preload(ex4);' value="4." />
+<input type=button onclick='preload(ex5);' value="5." />
+<!--
+<input type=button onclick='preload(ex6);' value="6." />
+<input type=button onclick='preload(ex7);' value="7." />
+<input type=button onclick='preload(ex8);' value="8." />
+-->
+<input type=button onclick='preload(ex9);' value="6." />
+<input type=button onclick='preload(ex10);' value="7." />
+<input type=button onclick='preload(ex11);' value="8." />
+<input type=button onclick='preload(ex12);' value="9." />
+<input type=button onclick='preload(ex13);' value="10." />
+&nbsp;&nbsp;<input type="file" accept="text/plain" title="Open"  onchange="readFile(this);"/>
+&nbsp;&nbsp;<input type=button onclick='writeFile0();' value="Save" />
+
+<p>
+	<textarea id="in" wrap='off' style="field-sizing: content;min-height:15rem;width:100%;overflow-x:auto;font-family:monospace!important;"></textarea>
+
+<p>
+Number of simulations: <select id="n" style="font-size: 16px;">
+	<option value="1">1</option>
+	<option value="10">10</option>
+	<option value="20">20</option>
+	<option value="50">50</option>
+	<option value="100">100</option>
+	<option value="200">200</option>
+	<option value="500">500</option>
+	<option value="1000">1000</option>
+</select>
+&nbsp;&nbsp; <input type=button value="Run" onclick="py_main1()">
+&nbsp;&nbsp; <span>Add token animation:&nbsp;<input type="checkbox" id="anim" checked/></span>
+&nbsp;&nbsp; <span>Add comment info:&nbsp;<input type="checkbox" id="comments" checked/></span>
+&nbsp;&nbsp; <span>Add script info:&nbsp;<input type="checkbox" id="scripts" checked/></span>
+<br><br>
+<!--			
+<input type=button value="Run once" onclick="f(document.getElementById('in').value)">
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="des.bpmn">Last run bpmn file (xml)</a>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="des.php?bpmn=des.bpmn">Last run bpmn file (preview)</a>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="des.php?dot=des.dot">Last run dot schemtic</a>
+-->
+
+	<div id="out"></div>
+
+</div>
+
+<!-------- 0 ----------->
+
+</div> <!--- end of accordion block -->
+
+
 <script>
 ex1=`# Two sequential tasks
 1 Start(E,[2.0],20.0)  #E(2)t20 # 20 units of exponential events with mean of 2 time units
 2 Task(U,[2.0,3.0])    #U(2,3)  # a task with execution time from 2 to 3 units
 3 Task(U,[1.0,3.0])    #U(1,3)
-4 End()s
+4 End()
 1->2->3->4
 `
 ex2=`# A process with two parallel tasks
@@ -393,240 +570,6 @@ async function py_main1() { py_main(
 	,document.getElementById('scripts').checked?1:0
 );}
 
-</script>
-
-<div style="width:100%;max-width:960;margin:0 auto;font-family:helvetica">
-
-<!--------- 0 ---------->
-
-<h1 style="text-align:center">mm-des - minimalistic discrete event simulator</h1>
-<h5 style="text-align:center"><span title="marek.moszynski@pg.edu.pl">MM</span> February 2024 (v.1), September 2025 (v.2)</h5>
-
-
-<p style="text-align:justify!important;padding:12">
-The implementation of a discrete event simulator with a BPMN-like elements and Python-like scripting. The simulator uses text-defined elements (events, tasks, gates) and their connections as an input for execution.
-The results are in the form of animated or static BPMN diagram, the timeline for each element and the text table with the time of process execution along with final values of scenario variables.
-</p>
-
-<!--------- 1 ---------->
-
-<button class="acc">Introduction</button>
-<div class="frame" hidden>
-
-<p>
-<b>mm-des</b> allows to run simulations of process models defined in text form as the list of elements and the list of connections. The code implements ten basic BPMN elements and six random generators:
-<ol>
-	<li>Start(fun, param, tnmax, script) - start event
-	<li>Task(fun, param, script, nservers=1) - sequential task activity with n-servers inside
-	<li>XorGate(script) - exclusive gateway (two-output: value==true passes the event to the first defined connection, value==false - to the second (more than two: must have algebraic choice-like function with result being a number starting from 0) multi-input: pass trough the event from all connected), default script is "=B(0.5)" meaning binomial equally distributed choice for two outputs
-	<li>AndGate(script) - parallel gateway (multi-output: passes through the event to all connected, multi-input: waits for all)
-	<li>OrGate(script) - inclusive gateway (multi-output: passes through the event to those for which script values are true (i.e for three output lines default script is "=[1,0,0]" meaning that only first is passed, multi-input: waits for those that were true on previous mutioutput OrGate)
-	<li>Timer(fun, param, script) - timer delay event
-	<li>Condition(script) - conditional event with a script containing logical expression as the first one ("=&lt;expr&gt;;..."); the instructions after first semicolon will be executed only when condition evaluates to true
-	<li>Terminate(script) - terminate event
-	<li>Throw(script) - throw event
-	<li>End(script) - end event
-</ol>
-where:
-<ul>
-	<li>fun - random functions: E([mean]), N([mean,std]), U([min,max]), T([min,max,mean,std]), B(p), C([p1,p2,p3,...]), None 
-	<li>param - array of fun params (fun==None: deterministic time delay in param[0])
-	<li>tnmax - tnmax&gt;0: maximum time for start generator; tnmax&lt;0: -tnmax represents maximum number of generated events
-	<li>script - string with semicolon separated codes for evaluation during event execution "[var]=&lt;expr&gt;; ... ;", empty var defaults to 'value' variable which is tested in XorGate and Condtion, var starting with 'S.' are scenario ones, starting with 'A.' element ones and without prefix - token/customer ones. Variable 'A.n' is element event counter which is initiated with 0 and increased by 1 at exec of each token/customer event. Token/customer have variable 'cname' (customer name) and may have variables '__t&lt;id&gt;a', '__t&lt;id&gt;b' and '__t&lt;id&gt;e' when the token visited the element with identifier id. They mark arrival, begin and end times.
-</ul>
-There are several rules when defining a process. The list of elements should be ordered by number (element identifier). The semicolon separated list of connections should use arrow characters "->". The elements should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '/x[/y]' values after event identifier. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of element number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram. Additionally, the Condition and Timer elements could play a role of the boundary events of the Task element. To do that you need to add the Task number to the element number joining both numbers with the '.' character.
-
-<p>
-Minimum working example (MWE) with default values for all events looks like:
-<pre style="font-size:smaller;border:1px solid gray;background-color:#ddd;padding:8px">
-# A single task
-1 Start()
-2 Task()
-3 End()
-1->2->3
-</pre>
-Default parameters for Start() are (E,[1],50) what generates exponential events with mean of 1 time unit ongoing 50 time units. Default values for Task() are (U,[1,2]) what means that this task takes from 1 to 2 time units uniformly distributed.
-As a result the bpmn-like schematic is generated along with single process implementation diagram and the time of process execution:
-
-<!--<pre id="ex0"><script>document.getElementById("ex0").innerHTML=ex0;</script></pre>-->
-<br><<object type="image/svg+xml" data="ex0_bpmn.svg"></object>
-<br><object type="image/svg+xml" data="ex0_des.svg"></object>
-<pre style="font-size:smaller">
-#n t
-1 76.31941273749922
-</pre>
-</p>
-
-<p>
-When defining a process it is possible to use '#' as the comment character. If the first line starts with the # it plays a role of title of the process. When using '#' after definition of an element it plays a role of the comment that could be added to the bpmn-like diagram above the element. The next '#' in the same line allows to add additional comment that is not visible in the diagram. See next section with examples.
-<p>   
-The section <b>Running code</b> allows for defining a process and running simulation. The examples presented in next section could be inserted by clicking numbered buttons. Before running simulation it is possible to define the number of simulations. When only one simulation is selected, animated bpmn diagram is generated along with timeline chart. It allows for detailed analysis of token flows in the process. When the number of simulations are greater than 1 the bpmn execution timeline is not generated. It is possible to configure the bpmn-like diagram to include token animations, comments and the first script command.
-</p>  
-
-</div>
-
-<!--------- 2 ---------->
-
-<button class="acc">Examples</button>
-<div class="frame" hidden>
-<p>
-<div style="max-width:920px;overflow-x:auto;">
-
-<ol>
-<!--
-<style>
-body {counter-reset:section}
-.accordion {counter-reset:subsection}
-.accordion::before {counter-increment:section; content: counter(section) ". "}
-.sub::marker {content:''}
-.sub::before {counter-increment:subsection; content: counter(section) "." counter(subsection) ". ";}
-</style>
--->
-<h3><li class="sub">A process with two serial tasks</li></h3>
-<div hidden>
-	<pre id="ex1"><script>ex("ex1",ex1)</script></pre>
-	<br><object type="image/svg+xml" data="ex1_bpmn.svg"></object>
-	<br><object type="image/svg+xml" data="ex1_des.svg"></object>
-</div>
-<h3><li class="sub">A process with two parallel tasks</li></h3>
-<div hidden>
-	<pre id="ex2"><script>ex("ex2",ex2)</script></pre>
-	<br><object type="image/svg+xml" data="ex2_bpmn.svg"></object>
-	<br><object type="image/svg+xml" data="ex2_des.svg"></object>
-</div>
-<h3><li class="sub">A process with serial and parallel tasks</li></h3>
-<div hidden>
-	<pre id="ex3"><script>ex("ex3",ex3)</script></pre>
-	<br><object type="image/svg+xml" data="ex3_bpmn.svg"></object>
-	<br><object type="image/svg+xml" data="ex3_des.svg"></object>
-</div>
-<h3><li class="sub">A process with two parallel tasks both must be executed</li></h3>
-<div hidden>
-	<pre id="ex4"><script>ex("ex4",ex4)</script></pre>
-	<br><object type="image/svg+xml" data="ex4_bpmn.svg"></object>
-	<br><object type="image/svg+xml" data="ex4_des.svg"></object>
-</div>
-<h3><li class="sub">A bicycle sharing systems</li></h3>
-<div hidden>	<pre id="ex5"><script>ex("ex5",ex5)</script></pre>
-	<br><object type="image/svg+xml" data="ex5_bpmn.svg"></object>
-	<br><object type="image/svg+xml" data="ex5_des.svg"></object>
-</div>
-<!--
-<h3><li>A timer test</h3>
-	<pre id="ex6"><script>document.getElementById("ex6").innerHTML=ex6</script></pre>
-	<br><object type="image/svg+xml" data="ex6_bpmn.svg"></object>
-	<br><object type="image/svg+xml" data="ex6_des.svg"></object>
-<h3><li>An event variable test</h3>
-	<pre id="ex7"><script>document.getElementById("ex7").innerHTML=ex7</script></pre>
-	<br><object type="image/svg+xml" data="ex7_bpmn.svg"></object>
-	<br><object type="image/svg+xml" data="ex7_des.svg"></object>
-<h3><li>A four phases process</h3>
-	<pre id="ex8"><script>document.getElementById("ex8").innerHTML=ex8</script></pre>
-	<br><object type="image/svg+xml" data="ex8_bpmn.svg"></object>
-	<br><object type="image/svg+xml" data="ex8_des.svg"></object>
--->
-<h3><li class="sub">A conditional event example with abstract resource</li></h3>
-<div hidden>
-	<pre id="ex9"><script>ex("ex9",ex9)</script></pre>
-	<br><object type="image/svg+xml" data="ex9_bpmn.svg"></object>
-	<br><object type="image/svg+xml" data="ex9_des.svg"></object>
-</div>
-<h3><li class="sub">Credit card application</li></h3>
-<div hidden>
-	<pre id="ex10"><script>ex("ex10",ex10)</script></pre>
-	<br><object type="image/svg+xml" data="ex10_bpmn.svg"></object>
-	<br><object type="image/svg+xml" data="ex10_des.svg"></object>
-</div>
-<h3><li class="sub">G/G/2 queue test</li></h3>
-<div hidden>	
-	<pre id="ex11"><script>ex("ex11",ex11)</script></pre>
-	<br><object type="image/svg+xml" data="ex11_bpmn.svg"></object>
-	<br><object type="image/svg+xml" data="ex11_des.svg"></object>
-</div>
-<h3><li class="sub">Procurement process</li></h3>
-<div hidden>
-	<pre id="ex12"><script>ex("ex12",ex12)</script></pre>
-	<br><object type="image/svg+xml" data="ex12_bpmn.svg"></object>
-	<br><object type="image/svg+xml" data="ex12_des.svg"></object>
-</div>
-<h3><li class="sub">Order process</li></h3>
-<div hidden>	
-	<pre id="ex13"><script>ex("ex13",ex13)</script></pre>
-	<br><object type="image/svg+xml" data="ex13_bpmn.svg"></object>
-	<br><object type="image/svg+xml" data="ex13_des.svg"></object>
-</div>
-</ol>
-<script>
-//function h(e) {e.parentNode.nextElementSibling.hidden^=1}
-//document.querySelectorAll(".sub").forEach(el => el.onclick = () => h(el));
-</script>
-
-</div>
-
-</p>
-</div>
-
-<!-------- 3 ----------->
-
-<button class="acc">Running code</button>
-<div class="frame" hidden>
-
-<p>
-Examples:
-<input type=button onclick='preload(ex1);' value="1." />
-<input type=button onclick='preload(ex2);' value="2." />
-<input type=button onclick='preload(ex3);' value="3." />
-<input type=button onclick='preload(ex4);' value="4." />
-<input type=button onclick='preload(ex5);' value="5." />
-<!--
-<input type=button onclick='preload(ex6);' value="6." />
-<input type=button onclick='preload(ex7);' value="7." />
-<input type=button onclick='preload(ex8);' value="8." />
--->
-<input type=button onclick='preload(ex9);' value="6." />
-<input type=button onclick='preload(ex10);' value="7." />
-<input type=button onclick='preload(ex11);' value="8." />
-<input type=button onclick='preload(ex12);' value="9." />
-<input type=button onclick='preload(ex13);' value="10." />
-&nbsp;&nbsp;<input type="file" accept="text/plain" title="Open"  onchange="readFile(this);"/>
-&nbsp;&nbsp;<input type=button onclick='writeFile0();' value="Save" />
-
-<p>
-	<textarea id="in" wrap='off' style="field-sizing: content;min-height:15rem;width:100%;overflow-x:auto;font-family:monospace!important;"></textarea>
-
-<p>
-Number of simulations: <select id="n" style="font-size: 16px;">
-	<option value="1">1</option>
-	<option value="10">10</option>
-	<option value="20">20</option>
-	<option value="50">50</option>
-	<option value="100">100</option>
-	<option value="200">200</option>
-	<option value="500">500</option>
-	<option value="1000">1000</option>
-</select>
-&nbsp;&nbsp; <input type=button value="Run" onclick="py_main1()">
-&nbsp;&nbsp; <span>Add token animation:&nbsp;<input type="checkbox" id="anim" checked/></span>
-&nbsp;&nbsp; <span>Add comment info:&nbsp;<input type="checkbox" id="comments" checked/></span>
-&nbsp;&nbsp; <span>Add script info:&nbsp;<input type="checkbox" id="scripts" checked/></span>
-<br><br>
-<!--			
-<input type=button value="Run once" onclick="f(document.getElementById('in').value)">
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="des.bpmn">Last run bpmn file (xml)</a>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="des.php?bpmn=des.bpmn">Last run bpmn file (preview)</a>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="des.php?dot=des.dot">Last run dot schemtic</a>
--->
-
-	<div id="out"></div>
-
-</div>
-
-<!-------- 0 ----------->
-
-</div> <!--- end of accordion block -->
-
-
-<script>
 function preload(s) {
 	document.getElementById("in").value = s;
 	document.getElementById("out").innerHTML="";
@@ -647,6 +590,9 @@ function f_old(s) {
 		document.getElementById("out").innerHTML=s;
 	})
 }
+
+//----------------------------------------------------
+
 var acc = document.getElementsByClassName("accordion");
 for(var i = 0; i < acc.length; i++) {
 	acc[i].addEventListener("click", function() {
