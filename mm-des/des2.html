@@ -19,6 +19,7 @@
 }
 * {margin:0;border-sizing:border-box;}
 body, input, pre, p, button, textarea, a, div {font-size:18px;}
+p {text-align:justify!important;}
 body {background-color:var(--col-5);font-family:Arial,Helvetica,sans-serif;margin:0;}
 h1,h4 {background-color:var(--col-1);color:var(--col-7);font-weight:normal;padding:20;}
 h3 {color:var(--col-3);font-weight:normal;padding:10;}
@@ -55,10 +56,10 @@ a:hover {color:var(--col-8);text-decoration:none;}
 <!--------- 0 ---------->
 
 <h1 style="text-align:center" title="marek.moszynski@pg.edu.pl">mm-des - minimalistic discrete event simulator</h1>
-<h4 style="text-align:center"> February&nbsp;2024&nbsp;(v.1), September&nbsp;2025&nbsp;(v.2)</h4>
+<h4 style="text-align:center"> February&nbsp;2024&nbsp;(v.1) September&nbsp;2025&nbsp;(v.2)</h4>
 
 
-<p style="text-align:justify!important;padding:12">
+<p style="padding:12">
 The implementation of a discrete event simulator with a BPMN-like elements and Python-like scripting. The simulator uses text-defined elements (events, tasks, gates) and their connections as an input for execution.
 The results are in the form of animated or static BPMN diagram, the timeline for each element and the text table with the time of process execution along with final values of scenario variables.
 </p>
@@ -69,30 +70,34 @@ The results are in the form of animated or static BPMN diagram, the timeline for
 <div class="frame" hidden>
 
 <p>
-<b>mm-des</b> allows to run simulations of process models defined in text form as the list of elements and the list of connections. The code implements ten basic BPMN elements and six random generators:
+<b>mm-des</b> allows running simulations of process models defined in text form as the list of elements and the list of connections. It implements ten basic BPMN elements and six random generators:
 <ol>
-	<li>Start(fun, param, tnmax, script) - start event
-	<li>Task(fun, param, script, nservers=1) - sequential task activity with n-servers inside
-	<li>XorGate(script) - exclusive gateway (two-output: value==true passes the event to the first defined connection, value==false - to the second (more than two: must have algebraic choice-like function with result being a number starting from 0) multi-input: pass trough the event from all connected), default script is "=B(0.5)" meaning binomial equally distributed choice for two outputs
-	<li>AndGate(script) - parallel gateway (multi-output: passes through the event to all connected, multi-input: waits for all)
-	<li>OrGate(script) - inclusive gateway (multi-output: passes through the event to those for which script values are true (i.e for three output lines default script is "=[1,0,0]" meaning that only first is passed, multi-input: waits for those that were true on previous mutioutput OrGate)
-	<li>Timer(fun, param, script) - timer delay event
-	<li>Condition(script) - conditional event with a script containing logical expression as the first one ("=&lt;expr&gt;;..."); the instructions after first semicolon will be executed only when condition evaluates to true
-	<li>Terminate(script) - terminate event
-	<li>Throw(script) - throw event
-	<li>End(script) - end event
+	<li><span style="font-family:monospace">Start(fun, param, tnmax, script)</span> - start event
+	<li><span style="font-family:monospace">Task(fun, param, script, nservers=1)</span> - sequential task activity with n-servers inside
+	<li><span style="font-family:monospace">XorGate(script)</span> - exclusive gateway (two-output: value==true passes the event to the first defined connection, value==false - to the second (more than two: must have algebraic choice-like function with result being a number starting from 0) multi-input: pass trough the event from all connected), default script is "=B(0.5)" meaning binomial equally distributed choice for two outputs
+	<li><span style="font-family:monospace">AndGate(script)</span> - parallel gateway (multi-output: passes through the event to all connected, multi-input: waits for all)
+	<li><span style="font-family:monospace">OrGate(script)</span> - inclusive gateway (multi-output: passes through the event to those for which script values are true (i.e for three output lines default script is "=[1,0,0]" meaning that only first is passed, multi-input: waits for those that were true on previous mutioutput OrGate)
+	<li><span style="font-family:monospace">Timer(fun, param, script)</span> - timer delay event
+	<li><span style="font-family:monospace">Condition(script)</span> - conditional event with a script containing logical expression as the first one ("=&lt;expr&gt;;..."); the instructions after first semicolon will be executed only when condition evaluates to true
+	<li><span style="font-family:monospace">Terminate(script)</span> - terminate event
+	<li><span style="font-family:monospace">Throw(script)</span> - throw event
+	<li><span style="font-family:monospace">End(script)</span> - end event
 </ol>
 where:
 <ul>
-	<li>fun - random functions: E([mean]), N([mean,std]), U([min,max]), T([min,max,mean,std]), B(p), C([p1,p2,p3,...]), None 
-	<li>param - array of fun params (fun==None: deterministic time delay in param[0])
-	<li>tnmax - tnmax&gt;0: maximum time for start generator; tnmax&lt;0: -tnmax represents maximum number of generated events
-	<li>script - string with semicolon separated codes for evaluation during event execution "[var]=&lt;expr&gt;; ... ;", empty var defaults to 'value' variable which is tested in XorGate and Condtion, var starting with 'S.' are scenario ones, starting with 'A.' element ones and without prefix - token/customer ones. Variable 'A.n' is element event counter which is initiated with 0 and increased by 1 at exec of each token/customer event. Token/customer have variable 'cname' (customer name) and may have variables '__t&lt;id&gt;a', '__t&lt;id&gt;b' and '__t&lt;id&gt;e' when the token visited the element with identifier id. They mark arrival, begin and end times.
+	<li><span style="font-family:monospace">fun</span> - random functions: E([mean]), N([mean,std]), U([min,max]), T([min,max,mean,std]), B(p), C([p1,p2,p3,...]), None 
+	<li><span style="font-family:monospace">param</span> - array of fun params (fun==None: deterministic time delay in param[0])
+	<li><span style="font-family:monospace">tnmax</span> - tnmax&gt;0: maximum time for start generator; tnmax&lt;0: -tnmax represents maximum number of generated events
+	<li><span style="font-family:monospace">script</span> - string with semicolon separated codes for evaluation during event execution "[var]=&lt;expr&gt;; ... ;", empty var defaults to 'value' variable which is tested in XorGate and Condtion, var starting with 'S.' are scenario ones, starting with 'A.' element ones and without prefix - token/customer ones. Variable 'A.n' is element event counter which is initiated with 0 and increased by 1 at exec of each token/customer event. Token/customer have variable 'cname' (customer name) and may have variables '__t&lt;id&gt;a', '__t&lt;id&gt;b' and '__t&lt;id&gt;e' when the token visited the element with identifier id. They mark arrival, begin and end times.
 </ul>
-There are several rules when defining a process. The list of elements should be ordered by number (element identifier). The semicolon separated list of connections should use arrow characters "->". The elements should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '/x[/y]' values after event identifier. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of element number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram. Additionally, the Condition and Timer elements could play a role of the boundary events of the Task element. To do that you need to add the Task number to the element number joining both numbers with the '.' character.
-
+<br>
 <p>
-Minimum working example (MWE) with default values for all events looks like:
+There are several rules when defining a process. The list of elements should be ordered by number (element identifier). The semicolon separated list of connections should use arrow characters "<span style="font-family:monospace">-></span>". The elements should be numbered using left to right rule. It allows for using simple automatic layout algorithm for presentation (which is not perfect). In case of presence of overlaying elements in final diagram it is possible to force position of an element by adding slash-separated '<span style="font-family:monospace">/x[/y]</span>' values after event identifier. Moreover, one-line description of connections could be split into multi-line one and then the first appearance of element number in the connection forces the y position of the element to be according to line sequence. This approach is recommended for more complicated processes as it helps to achieve nice-looking diagram. Additionally, the Condition and Timer elements could play a role of the boundary events of the Task element. To do that you need to add the Task number to the element number joining both numbers with the '.' character.
+</p>
+<br>
+<p>
+Minimum working example (MWE) with default values for all events looks like:<br>
+<br>
 <pre style="font-size:smaller;border:1px solid gray;background-color:#ddd;padding:8px">
 # A single task
 1 Start()
@@ -100,7 +105,9 @@ Minimum working example (MWE) with default values for all events looks like:
 3 End()
 1->2->3
 </pre>
-Default parameters for Start() are (E,[1],50) what generates exponential events with mean of 1 time unit ongoing 50 time units. Default values for Task() are (U,[1,2]) what means that this task takes from 1 to 2 time units uniformly distributed.
+<br>
+<p>
+Default parameters for <span style="font-family:monospace">Start()</span> are <span style="font-family:monospace">(E,[1],50)</span> what generates exponential events with mean of 1 time unit ongoing 50 time units. Default values for <span style="font-family:monospace">Task()</span> are <span style="font-family:monospace">(U,[1,2])</span> what means that this task takes from 1 to 2 time units uniformly distributed.
 As a result the bpmn-like schematic is generated along with single process implementation diagram and the time of process execution:
 
 <!--<pre id="ex0"><script>document.getElementById("ex0").innerHTML=ex0;</script></pre>-->
@@ -109,16 +116,22 @@ As a result the bpmn-like schematic is generated along with single process imple
 <br>
 <div style="overflow-x:auto"><object type="image/svg+xml" data="ex0_des.svg"></object></div>
 <br>
-<pre style="font-size:smaller;border:1px solid gray;background-color:#ddd;padding:8px">>
+<pre style="font-size:smaller;border:1px solid gray;background-color:#ddd;padding:8px">
 #n t
 1 76.31941273749922
+
+
 </pre>
 </p>
 
+<br>
 <p>
 When defining a process it is possible to use '#' as the comment character. If the first line starts with the # it plays a role of title of the process. When using '#' after definition of an element it plays a role of the comment that could be added to the bpmn-like diagram above the element. The next '#' in the same line allows to add additional comment that is not visible in the diagram. See next section with examples.
+</p>
+<br>
+
 <p>   
-The section <b>Running code</b> allows for defining a process and running simulation. The examples presented in next section could be inserted by clicking numbered buttons. Before running simulation it is possible to define the number of simulations. When only one simulation is selected, animated bpmn diagram is generated along with timeline chart. It allows for detailed analysis of token flows in the process. When the number of simulations are greater than 1 the bpmn execution timeline is not generated. It is possible to configure the bpmn-like diagram to include token animations, comments and the first script command.
+The section <b>Running code</b> allows defining a process and running simulation. The examples presented in next section could be inserted by clicking numbered buttons. Before running simulation it is possible to define the number of simulations. When only one simulation is selected, animated bpmn diagram is generated along with timeline chart. It allows for detailed analysis of token flows in the process. When the number of simulations are greater than 1 the bpmn execution timeline is not generated. It is possible to configure the bpmn-like diagram to include token animations, comments and the first script command.
 </p>  
 
 </div>
