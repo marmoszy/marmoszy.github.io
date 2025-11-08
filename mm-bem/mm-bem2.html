@@ -48,7 +48,7 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 <select id="def" onchange="select0();select();" style="background-color:#e6fff2;max-width:360px">
 <optgroup>
   <option value="generated_mesh">Generated 3D backscattering length</option>
-  <option disabled>_____</option>
+  <option disabled>-----    Analytical examples   -----</option>
   <option value="[sphere(0.01905), [0, 0, 0]]" selected>Low resolution sphere</option>
   <option value="[sphere(0.01905,3), [0, 0, 0]]">Medium resolution sphere</option>
   <option value="[sphere(0.01905,4), [0, 0, 0]]">High resolution sphere</option>
@@ -66,12 +66,16 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
   <option value="[sphere(0.005), [-0.01, 0, 0]],|[sphere(0.005), [0.01, 0, 0]]">Two spheres</option>
   <option value="[sphere(0.005), [-0.01, 0, 0]],|[sphere(0.005), [0.01, 0, 0]],|[sphere(0.005), [0,-0.01, 0]],|[sphere(0.005), [0, 0.01, 0]]">Four spheres</option>
   <option value="[sphere(0.005), [-0.01, 0, -0.01]],|[sphere(0.005), [0.01, 0, -0.01]],|[sphere(0.005), [0,-0.01, -0.01]],|[sphere(0.005), [0, 0.01, -0.01]],|[sphere(0.005), [-0.01, 0, 0.01]],|[sphere(0.005), [0.01, 0, 0.01]],|[sphere(0.005), [0,-0.01, 0.01]],|[sphere(0.005), [0, 0.01, 0.01]]">Eight spheres</option>
-  <!-- <option value="[specimenshape(0,0),[0,0,0]]">Gadus_morhua_A_L17.3_body</option> -->
-  <option value="[specimenshape(0,1),[0,0,0]]">Gadus_morhua_A_L17.3_swimbladder</option>
+  <option disabled>----- Swimmbladder examples -----</option>
   <option value="simplify10_YFT_swimbladder_origin_msh">simplify10_YFT_swimbladder_origin</option>
   <option value="simplify20_YFT_swimbladder_origin_msh">simplify20_YFT_swimbladder_origin</option>
-  <option disabled>_____</option>
-  <option disabled>NOAA models:</option>
+  <!-- <option value="[specimenshape(0,0),[0,0,0]]">Gadus_morhua_A_L17.3_body</option> -->
+  <option disabled>-----     echoSMs models     -----</option>
+  <option value="[specimenshape(0,1),[0.07,0,0]]">Gadus_morhua_A_L17.3_swimbladder</option>
+  <option value="[specimenshape(1,1),[0.06,0,0]]">Gadus_morhua_B_L15.6_swimbladder</option>
+  <option value="[specimenshape(2,1),[0.13,0,0]]">Gadus_morhua_C_L32.3_swimbladder</option>
+  <option value="[specimenshape(3,1),[0.15,0,0]]">Gadus_morhua_D_L38.0_swimbladder</option>
+  <option disabled>-----      NOAA models       -----</option>
   <!-- <option value="[noaashape(0,0,5),[-0.105,0,0]]">sardine_body</option> -->
   <option value="[noaashape(0,1,5),[-0.105,0,0]]">Sardine_swimbladder</option>
   <option value="[noaashape(1,1,5),[-0.166,0,0]]">Cod_swimbladder</option>
@@ -354,7 +358,7 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 			
 <!----------- footer ------------->
 <br>
-<span title="marek.moszynski@pg.edu.pl">mm-bem v1.84 (7.11.2025)</span>
+<span title="marek.moszynski@pg.edu.pl">mm-bem v1.85 (8.11.2025)</span>
 
 		</td>
 		<td>
