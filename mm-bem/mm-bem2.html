@@ -14,7 +14,7 @@
 <style> 
 html,body,textarea,select,optgroup {font-size: 18px;}
 input[type='file'],input[type='button'] {font-size: 18px; }
-.hdr {width:100%;text-align:center;font-size:32;padding:20px 0 20px 0}
+.hdr {width:100%;text-align:center;font-size:32;padding:12px 0 12px 0}
 @media screen and (max-width:1080px){
 	#split td {display:block; width:100%;}
 	#nosplit td {display:inline-block;}
@@ -32,8 +32,8 @@ input[type='file'],input[type='button'] {font-size: 18px; }
 <img style="height:48px;width:80px;vertical-align:middle"  src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI5NiIgaGVpZ2h0PSI5NiIgdmlld2JveD0iMCAwIDk2IDk2Ij4KCTxwYXRoIGQ9Ik0gMTAgNTAgTCA0MCA1MCBMIDQwIDc1LjUgTCAyMCA3MCBaIiBzdHJva2U9Im5vbmUiIGZpbGw9IiMzMUIxRUQiIC8+Cgk8cGF0aCBkPSJNIDQwIDc1LjUgTCA0MCA1MCBMIDgwIDUwIEwgNjAgNzAgWiIgc3Ryb2tlPSJub25lIiBmaWxsPSIjNDc4M0Q3IiAvPgoJPHBhdGggZD0iTSA0MCAyNC41IEwgNDAgNTAgTCA4MCA1MCBMIDYwIDMwIFoiIHN0cm9rZT0ibm9uZSIgZmlsbD0iIzMxRURDQSIgLz4KCTxwYXRoIGQ9Ik0gMTAgNTAgTCA0MCA1MCBMIDQwIDI0LjUgTCAyMCAzMCBaIiBzdHJva2U9Im5vbmUiIGZpbGw9IiM3M0U4RTgiIC8+Cgk8cGF0aCBkPSJNIDEwIDUwIEwgMjAgMzEgTCA0MCAyNC41IEwgNjAgMzEgTCA4MCA1MCBMIDk1IDM1IEwgODkgNTAgTCA5NSA2NSBMIDgwIDUwIEwgNjAgNjkgTCA0MCA3NS41IEwgMjAgNjkgTCAxMCA1MCBNIDEyIDUwIEwgMjQgNTAiIHN0cm9rZT0iIzJGNzJFRSIgc3Ryb2tlLXdpZHRoPSI0IiBmaWxsPSJub25lIiAvPgoJPHBhdGggZD0iTSAxMCAxMCBMIDIwIDIwIE0gNjAgMjAgTCA3MCAxMCBNIDEwIDkwIEwgMjAgODAgTSA2MCA4MCBMIDcwIDkwIiBzdHJva2U9ImRhcmtibHVlIiBzdHJva2UtZGFzaGFycmF5PSIxLDAiIHN0cm9rZS13aWR0aD0iMwkiIC8+Cgk8Y2lyY2xlIHI9IjQiIGN4PSIzMCIgY3k9IjQwIiBmaWxsPSIjMDBiZmZmIiBzdHJva2U9ImRhcmtibHVlIi8+Cgk8ZWxsaXBzZSByeD0iMTIiIHJ5PSI1IiBjeD0iNDUiIGN5PSI2MCIgZmlsbD0id2hpdGUiIHN0cm9rZT0ibm9uZSIgdHJhbnNmb3JtPSJyb3RhdGUoMTEgNDUgNjApIi8+Cjwvc3ZnPgo=" />
 -->
 	
-<div onclick="alert(about);" class="hdr">Scattering from soft targets
-<br>
+<div onclick="alert(about);" class="hdr">Scattering from soft targets</div>
+<div class="hdr">
 <small>
 web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy/mm-bem">github</a>)
 </small>
@@ -72,24 +72,24 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
   <option value="simplify20_YFT_swimbladder_origin_msh">simplify20_YFT_swimbladder_origin</option>
   <!-- <option value="[specimenshape(0,0),[0,0,0]]">Gadus_morhua_A_L17.3_body</option> -->
   <option disabled>-----     echoSMs models     -----</option>
-  <option value="[specimenshape(0,1,3),[0.07,0,0]]">Gadus_morhua_A_L17.3_swimbladder</option>
-  <option value="[specimenshape(1,1,3),[0.06,0,0]]">Gadus_morhua_B_L15.6_swimbladder</option>
-  <option value="[specimenshape(2,1,3),[0.13,0,0]]">Gadus_morhua_C_L32.3_swimbladder</option>
-  <option value="[specimenshape(3,1,3),[0.15,0,0]]">Gadus_morhua_D_L38.0_swimbladder</option>
+  <option value="[specimenshape(0,1,3),[0.07,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_A_L17.3_swimbladder</option>
+  <option value="[specimenshape(1,1,3),[0.06,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_B_L15.6_swimbladder</option>
+  <option value="[specimenshape(2,1,3),[0.13,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_C_L32.3_swimbladder</option>
+  <option value="[specimenshape(3,1,3),[0.15,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_D_L38.0_swimbladder</option>
   <option disabled>-----      NOAA models       -----</option>
   <!-- <option value="[noaashape(0,0,5),[-0.105,0,0]]">sardine_body</option> -->
-  <option value="[noaashape(0,1,5),[-0.105,0,0],Rx(0)]">Sardine_swimbladder</option>
-  <option value="[noaashape(1,1,5),[-0.166,0,0],Rx(0)]">Cod_swimbladder</option>
-  <option value="[noaashape(2,1,20),[-0.256,0,0],Rx(0)]">Bocaccio_swimbladder</option>
-  <option value="[noaashape(3,1,10),[-0.156,0,0],Rx(0)]">LargemouthBass_620_swimbladder</option>
-  <option value="[noaashape(4,1,10),[-0.156,0,0],Rx(0)]">LargemouthBass_620_Lateral_swimbladder</option>
-  <option value="[noaashape(5,1,15),[-0.156,0,0],Rx(0)]">LargemouthBass_627_swimbladder</option>
-  <option value="[noaashape(6,1,15),[-0.11,0,0],Rx(0)]">StripedBass_205_swimbladder</option>
-  <option value="[noaashape(7,1,15),[-0.11,0,0],Rx(0)]">StripedBass_205_Lateral_swimbladder</option>
-  <option value="[noaashape(8,1,15),[-0.145,0,0],Rx(0)]">StripedBass_628_swimbladder</option>
-  <option value="[noaashape(9,1,15),[-0.145,0,0],Rx(0)]">StripedBass_628_Lateral_swimbladder</option>
-  <option value="[noaashape(10,1,15),[-0.135,0,0],Rx(0)]">ChannelCatfish_1086_swimbladder</option>
-  <option value="[noaashape(11,1,15),[-0.135,0,0],Rx(0)]">ChannelCatfish_1086_Lateral_swimbladder</option>
+  <option value="[noaashape(0,1,5),[-0.105,0,0],Rx(-90)]">Sardine_swimbladder</option>
+  <option value="[noaashape(1,1,5),[-0.166,0,0],Rx(-90)]">Cod_swimbladder</option>
+  <option value="[noaashape(2,1,20),[-0.256,0,0],Rx(-90)]">Bocaccio_swimbladder</option>
+  <option value="[noaashape(3,1,10),[-0.156,0,0],Rx(-90)]">LargemouthBass_620_swimbladder</option>
+  <option value="[noaashape(4,1,10),[-0.156,0,0],Rx(-90)]">LargemouthBass_620_Lateral_swimbladder</option>
+  <option value="[noaashape(5,1,15),[-0.156,0,0],Rx(-90)]">LargemouthBass_627_swimbladder</option>
+  <option value="[noaashape(6,1,15),[-0.11,0,0],Rx(-90)]">StripedBass_205_swimbladder</option>
+  <option value="[noaashape(7,1,15),[-0.11,0,0],Rx(-90)]">StripedBass_205_Lateral_swimbladder</option>
+  <option value="[noaashape(8,1,15),[-0.145,0,0],Rx(-90)]">StripedBass_628_swimbladder</option>
+  <option value="[noaashape(9,1,15),[-0.145,0,0],Rx(-90)]">StripedBass_628_Lateral_swimbladder</option>
+  <option value="[noaashape(10,1,15),[-0.135,0,0],Rx(-90)]">ChannelCatfish_1086_swimbladder</option>
+  <option value="[noaashape(11,1,15),[-0.135,0,0],Rx(-90)]">ChannelCatfish_1086_Lateral_swimbladder</option>
 
 </optgroup>
 </select>
@@ -114,7 +114,7 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
   <option value="-10">10&deg;scan</option>
   <option value="-15">15&deg;scan</option>
   <option disabled>_____</option>
-  <option value="0" selected>0&deg;</option>
+  <option value="0">0&deg;</option>
   <option value="15">15&deg;</option>
   <option value="30">30&deg;</option>
   <option value="45">45&deg;</option>
@@ -259,6 +259,8 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 <svg xmlns="http://www.w3.org/2000/svg" id="svg" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
 <text x="10" y="10" id="title" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
 <text x="280" y="10" id="title2" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
+<text x="340" y="432" id="title3" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
+<text x="10"  y="432" id="title4" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
 <g id="svg0" transform="translate(20,20)">
 <line x1="210" y1="200" x2="400" y2="200" stroke="gray"/>
 <line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform ="rotate(30 200 200)" stroke-dasharray="1,1"/>
@@ -359,7 +361,7 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 			
 <!----------- footer ------------->
 <br>
-<span title="marek.moszynski@pg.edu.pl">mm-bem v1.87 (8.11.2025)</span>
+<span title="marek.moszynski@pg.edu.pl">mm-bem v1.89 (8.11.2025)</span>
 
 		</td>
 		<td>
@@ -987,14 +989,14 @@ function change1() {
 				s = '# mm-bem-wasm: '+ t.toFixed(3) + 's ' + JSON.parse(s);
 				document.getElementById("txt").value = s;
 				plot();
-				// extract ph0,th0,f0,c0,bsl
-				var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+bsl=(\S+)/);
+				// extract ph0,th0,f0,c0,lbs
+				var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
 				if(v) {
 				   var svg1 = document.getElementById("svg1");							   update_wave_direction(svg1,parseFloat(v[1])
 					,parseFloat(v[2]),parseFloat(v[3]),parseFloat(v[4]));
-				   var th_bsl = (parseFloat(v[1])+180)%360;
+				   var th_lbs = (parseFloat(v[1])+180)%360;
 				   var TS = 20*Math.log10(parseFloat(v[5]));
-//console.log(th_bsl+' '+TS);
+//console.log(th_lbs+' '+TS);
 				}
 
 			}
@@ -1069,11 +1071,13 @@ function drop2(e) {
 function plot(id2,s,c) {
 	s = s||document.getElementById("txt").value;
 	var m=0,n=0;
-	var th = undefined, ph = undefined;
-	var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+bsl=(\S+)/);
+	var th = undefined, ph = undefined, lbs = undefined, TS = undefined;
+	var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
 	if(v) {
-		th=parseFloat(v[1]);		
-		ph=parseFloat(v[2]);		
+		th=parseFloat(v[1]);
+		ph=parseFloat(v[2]);
+		lbs=parseFloat(v[5]);
+		TS=20*Math.log10(lbs);
 	}
 	var ss=s.split('\n');
 	var x=[],y=[],x2=[],ncols=0;
@@ -1120,6 +1124,8 @@ function plot(id2,s,c) {
 	if(ncols==2) {
 		svg_title("&theta;<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+th+"&deg; <tspan font-style='italic'>&phi;</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+ph+"&deg;</tspan>");
 		svg_title2("f<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+(f0/1000)+"kHz <tspan font-style='italic'>c</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+c0+"m/s</tspan>");
+		svg_title3("TS = "+(TS.toFixed(2))+" dB");
+		svg_title4("l<tspan dy='6' font-size='0.8em'>BS</tspan><tspan dy='-6' font-style='normal'> = "+(lbs.toFixed(6))+" ");
 
 	} else {
 		svg_title("");
@@ -1132,6 +1138,14 @@ function svg_title(s) {
 }
 function svg_title2(s) {
 	var el = document.getElementById("title2");
+	if(el) el.innerHTML = s;
+}
+function svg_title3(s) {
+	var el = document.getElementById("title3");
+	if(el) el.innerHTML = s;
+}
+function svg_title4(s) {
+	var el = document.getElementById("title4");
 	if(el) el.innerHTML = s;
 }
 
@@ -2390,7 +2404,7 @@ postMessage("[... Gauss1 Wasm Solver]");
         else {phmin=ph;phmax=ph;phstep=1;}
 	if(th<0) {thmin=0;thmax=360;thstep=-th;} else { thmin=th;thmax=th;thstep=1; }
 
-	var BSL=[];
+	var LBS=[];
 	const l=thstep;
 	for(var ph0=phmin;ph0<=phmax;ph0+=phstep) {
         for(var th0=thmin;th0<=thmax;th0+=thstep) {
@@ -2411,25 +2425,25 @@ postMessage("[... Far field solution]");
 	const psc = multiplyMatrixVector(Sff, phi);
 
 	var idx = (th0/l+180/l)%(360/l);
-	var bsl = psc[idx].abs();
+	var lbs = psc[idx].abs();
 	// Return results
-	var s = '# th0='+th0+' ph0='+ph0+' f0='+f0+' c0='+c0+' bsl='+bsl.toFixed(6)+'\n';
+	var s = '# th0='+th0+' ph0='+ph0+' f0='+f0+' c0='+c0+' lbs='+lbs.toFixed(6)+'\n';
 	for(let i=0; i<psc.length; i++) {
 		s += l*i + ' ' + psc[i].abs().toFixed(6) + '\n';
 	}
 	postMessage(JSON.stringify(s));
-	BSL.push([(th0+180)%360,ph0,bsl]);
+	LBS.push([(th0+180)%360,ph0,lbs]);
         }
-	BSL.push(["\n"]); // append empty line as the block separator
+	LBS.push(["\n"]); // append empty line as the block separator
 	}
 
 	if(thmin!=thmax || phmin!=phmax) {
 		s = '# '+ ((thmax-thmin)/thstep+1) + 'x' +((phmax-phmin)/phstep+1) + '\n';
-		for(var i=0; i<BSL.length; i++) {
-			if( BSL[i]=='\n') 
+		for(var i=0; i<LBS.length; i++) {
+			if( LBS[i]=='\n') 
 				s+='\n'; 
 			else
-				s+=BSL[i][0]+' '+BSL[i][1]+' '+ BSL[i][2].toFixed(6)+'\n';
+				s+=LBS[i][0]+' '+LBS[i][1]+' '+ LBS[i][2].toFixed(6)+'\n';
 		}
 		postMessage(JSON.stringify(s));
 	}
@@ -2450,7 +2464,7 @@ function url_params() { // overwrite globals from url params
 
 // --------
 
-var th = 0;
+var th = 270;
 var ph = 0;
 var engine = 'wasm_soft_worker'; // 'py_soft_worker';
 
