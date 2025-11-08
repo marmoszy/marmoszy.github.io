@@ -46,16 +46,18 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 <div style="width:440px;height:180;height1:100%;overflow-y:auto;border-width:1;border-style:solid;padding:20px;background-color:#C8DFBE;#EDF5EA;#D6BEDF;#ffffe6">
 <label for="def">Target: </label>
 <select id="def" onchange="select0();select();" style="background-color:#e6fff2;max-width:360px">
-<optgroup>
-  <option value="generated_mesh">Generated 3D backscattering length</option>
-  <option disabled>-----    Analytical spheres   -----</option>
+<optgroup label="Generated mesh">
+  <option value="generated_mesh">3D backscattering length</option>
+</optgroup>
+<optgroup label="Analytical spheres">
   <option value="[sphere(0.01905), [0, 0, 0]]" selected>Low resolution sphere</option>
   <option value="[sphere(0.01905,3), [0, 0, 0]]">Medium resolution sphere</option>
   <option value="[sphere(0.01905,4), [0, 0, 0]]">High resolution sphere</option>
   <option value="[sphere(0.005), [-0.01, 0, 0]],|[sphere(0.005), [0.01, 0, 0]]">Two spheres</option>
   <option value="[sphere(0.005), [-0.01, 0, 0]],|[sphere(0.005), [0.01, 0, 0]],|[sphere(0.005), [0,-0.01, 0]],|[sphere(0.005), [0, 0.01, 0]]">Four spheres</option>
   <option value="[sphere(0.005), [-0.01, 0, -0.01]],|[sphere(0.005), [0.01, 0, -0.01]],|[sphere(0.005), [0,-0.01, -0.01]],|[sphere(0.005), [0, 0.01, -0.01]],|[sphere(0.005), [-0.01, 0, 0.01]],|[sphere(0.005), [0.01, 0, 0.01]],|[sphere(0.005), [0,-0.01, 0.01]],|[sphere(0.005), [0, 0.01, 0.01]]">Eight spheres</option>
-  <option disabled>-----    Other analytical targets   -----</option>
+</optgroup>
+<optgroup label="Other analytical targets">
   <option value="[ellipsoid(0.01905,0.01,0.01), [0, 0, 0]]">Prolate spheroid</option>
   <option value="[ellipsoid(0.01905,0.005,0.01), [0, 0, 0]]">Ellipsoid</option>
   <option value="[ellipsoid(0.01905,0.005,0.01), [0, 0, 0], Rz(-45)]">Ellipsoid z-axis rotated</option>
@@ -67,16 +69,19 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 [frustum([0.006,0.0021],[0.01,0.002],0.01905,24,2), [0, 0, 0.01905]]">Three elliptical frustums</option>
   <option value="[mfrustum([0.002,0.005,0.005,0.005,0.002],[0.002,0.0075,0.0075,0.0075,0.002],[-2*0.01905,-0.01905,0,0.01905,2*0.01905],[0,0,0,0,0],[0.02,0.01,0.005,0.0025,0]), [0, 0, 0]]">Multiple frustums</option>
   <option value="[mfrustum([0.007,0.0115,0.0088,0.007,0.0053,0.0035,0.0008],[0.0018,0.0053,0.008,0.0062,0.0044,0.0026,0.0008],[0.0487,0.0532,0.0621,0.0709,0.0798,0.0887,0.0958],[0,0,0,0,0,0,0],[-0.0026,-0.00175,0.0005,0.0023,0.0049,0.0067,0.00679]), [-0.07, 0, 0]]">Shifted multiple frustum</option>
-  <option disabled>----- Swimmbladder examples -----</option>
+</optgroup>
+<optgroup label="Swimmbladder examples">
   <option value="simplify10_YFT_swimbladder_origin_msh">simplify10_YFT_swimbladder_origin</option>
   <option value="simplify20_YFT_swimbladder_origin_msh">simplify20_YFT_swimbladder_origin</option>
+</optgroup>
   <!-- <option value="[specimenshape(0,0),[0,0,0]]">Gadus_morhua_A_L17.3_body</option> -->
-  <option disabled>-----     echoSMs models     -----</option>
+<optgroup label="echoSMs models">
   <option value="[specimenshape(0,1,3),[0.07,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_A_L17.3_swimbladder</option>
   <option value="[specimenshape(1,1,3),[0.06,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_B_L15.6_swimbladder</option>
   <option value="[specimenshape(2,1,3),[0.13,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_C_L32.3_swimbladder</option>
   <option value="[specimenshape(3,1,3),[0.15,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_D_L38.0_swimbladder</option>
-  <option disabled>-----      NOAA models       -----</option>
+</optgroup>
+<optgroup label="NOAA models">
   <!-- <option value="[noaashape(0,0,5),[-0.105,0,0]]">sardine_body</option> -->
   <option value="[noaashape(0,1,5),[-0.105,0,0],Rx(-90)]">Sardine_swimbladder</option>
   <option value="[noaashape(1,1,5),[-0.166,0,0],Rx(-90)]">Cod_swimbladder</option>
@@ -90,7 +95,6 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
   <option value="[noaashape(9,1,15),[-0.145,0,0],Rx(-90)]">StripedBass_628_Lateral_swimbladder</option>
   <option value="[noaashape(10,1,15),[-0.135,0,0],Rx(-90)]">ChannelCatfish_1086_swimbladder</option>
   <option value="[noaashape(11,1,15),[-0.135,0,0],Rx(-90)]">ChannelCatfish_1086_Lateral_swimbladder</option>
-
 </optgroup>
 </select>
 
@@ -361,7 +365,7 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 			
 <!----------- footer ------------->
 <br>
-<span title="marek.moszynski@pg.edu.pl">mm-bem v1.89 (8.11.2025)</span>
+<span title="marek.moszynski@pg.edu.pl">mm-bem v1.90 (8.11.2025)</span>
 
 		</td>
 		<td>
@@ -459,7 +463,16 @@ document.onkeydown = function(e) {
 	  if(e.ctrlKey) {e.preventDefault(); alert(about);}
   }
   if(e.keyCode==82 ) { // ctl R
-	  if(e.ctrlKey) {e.preventDefault(); zoom=1; xoff=0; yoff=0;}
+	  if(e.ctrlKey) {e.preventDefault(); a=0.4; b=-0.2; c=0.0; init3d(); /*zoom=1; xoff=0; yoff=0;*/}
+  }
+  if(e.keyCode==88 ) { // ctl X
+	  if(e.ctrlKey) {e.preventDefault(); a=(a==1.57?-1.57:1.57); b=0;  init3d(); }
+  }
+  if(e.keyCode==89 ) { // ctl Y
+	  if(e.ctrlKey) {e.preventDefault(); b=(b==1.57?-1.57:1.57); a=0; init3d();}
+  }
+  if(e.keyCode==90 ) { // ctl Z
+	  if(e.ctrlKey) {e.preventDefault(); a=(a==0?3.1459:0.0); b=0; init3d();}
   }
   if(e.keyCode==187 ) { // ctl +
 	  zoomin();
@@ -712,7 +725,7 @@ function update_axes() {
 }
 
 function update_wave_direction(svg,th,ph,f0,c0) {
-  var r = c0/f0/2 * Math.sqrt(2);
+  var r = c0/f0/2 * 3; //Math.sqrt(2);
 
 // --- two circles for showing wave direction
 
@@ -802,12 +815,16 @@ function main() {
 
 var about =`mm-bem web-demo MM 2025
 
+3d view shortcuts:
 ctrl A - axes on/off
 ctrl B - box on/off
 ctrl C - circle on/off
 ctrl + - zoom in
 ctrl - - zoom out
-ctrl R - zoom to unit distance
+Ctrl X - view from +x/-x
+Ctrl Y - view from +y/-y
+Ctrl Z - view from +z/-z
+ctrl R - defualt orientation
 ctrl-shift-cursors - move
 
 marek.moszynski@pg.edu.pl`;
