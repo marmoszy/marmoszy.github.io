@@ -71,8 +71,8 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
   <option value="[mfrustum([0.007,0.0115,0.0088,0.007,0.0053,0.0035,0.0008],[0.0018,0.0053,0.008,0.0062,0.0044,0.0026,0.0008],[0.0487,0.0532,0.0621,0.0709,0.0798,0.0887,0.0958],[0,0,0,0,0,0,0],[-0.0026,-0.00175,0.0005,0.0023,0.0049,0.0067,0.00679]), [-0.07, 0, 0]]">Shifted multiple frustum</option>
 </optgroup>
 <optgroup label="Swimmbladder examples">
-  <option value="simplify10_YFT_swimbladder_origin_msh">simplify10_YFT_swimbladder_origin</option>
-  <option value="simplify20_YFT_swimbladder_origin_msh">simplify20_YFT_swimbladder_origin</option>
+  <option value="[msh(simplify10_YFT_swimbladder_origin)]">simplify10_YFT_swimbladder_origin</option>
+  <option value="[msh(simplify20_YFT_swimbladder_origin)]">simplify20_YFT_swimbladder_origin</option>
 </optgroup>
   <!-- <option value="[specimenshape(0,0),[0,0,0]]">Gadus_morhua_A_L17.3_body</option> -->
 <optgroup label="echoSMs models">
@@ -366,7 +366,7 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 			
 <!----------- footer ------------->
 <br>
-<span title="marek.moszynski@pg.edu.pl">mm-bem v1.90 (8.11.2025)</span>
+<span title="marek.moszynski@pg.edu.pl">mm-bem v1.91 (9.11.2025)</span>
 
 		</td>
 		<td>
@@ -1142,7 +1142,7 @@ function plot(id2,s,c) {
 	if(ncols==2) {
 		svg_title("&theta;<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+th+"&deg; <tspan font-style='italic'>&phi;</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+ph+"&deg;</tspan>");
 		svg_title2("f<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+(f0/1000)+" kHz <tspan font-style='italic'>c</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+c0+" m/s</tspan>");
-		svg_title3("TS = "+(TS.toFixed(2))+" dB");
+		svg_title3("TS<tspan font-style='normal'> = "+(TS.toFixed(2))+" dB</tspan>");
 		svg_title4("l<tspan dy='6' font-size='0.8em'>BS</tspan><tspan dy='-6' font-style='normal'> = "+(lbs.toFixed(4))+" m");
 
 	} else {
@@ -1586,6 +1586,19 @@ function ellipsoid(rx, ry, rz, N = 2) {
       return [vx, fx];
 }
 
+function msh(s) { /* parse msh string to [vx,fx] */
+	var lines = s.split('\n');
+	
+	const n = parseInt(lines[4]);
+	const v = lines.slice(5, 5 + n).map(line =>
+	  line.trim().split(/\s+/).slice(1, 4).map(parseFloat)
+	);
+	const m = parseInt(lines[n + 7]);
+	const e = lines.slice(n + 8, n + 8 + m).map(line =>
+	  line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x) - 1)  // 0-based indexing
+	);
+	return [v, e];
+}
 
 // Mesh generation logic
 let Nn = 0, Ne = 0;
@@ -2497,7 +2510,7 @@ main();
 
 // --------  
 
-const simplify10_YFT_swimbladder_origin_msh = `$MeshFormat
+const simplify10_YFT_swimbladder_origin = `$MeshFormat
 2.2 0 8
 $EndMeshFormat
 $Nodes
@@ -7295,7 +7308,7 @@ sphere_1_905_0_38_1480_js=`0 0.05498534572869942
 359 0.05494934910212791
 `;
 
-var simplify20_YFT_swimbladder_origin_msh=`$MeshFormat
+var simplify20_YFT_swimbladder_origin=`$MeshFormat
 2.2 0 8
 $EndMeshFormat
 $Nodes
@@ -12390,6 +12403,10 @@ function specimenshape(i, j, mm) {
 function noaashape(i,j,nn) {
 	var n = nn||5; 
 	if(j==0) { /* body */
+		for(var k=0;k<noaa[i].w_b.length;k++) {
+			if(noaa[i].w_b[k]==0) noaa[i].w_b[k]=0.00001;
+			if(noaa[i].z_bU[k]==noaa[i].z_bL[k]) noaa[i].z_bU[k]+=0.00001;
+		}
 		return mfrustum(noaa[i].w_b, noaa[i].z_bU.map((a,idx)=>Math.abs(a-noaa[i].z_bL[idx])), 
 			noaa[i].x_b, noaa[i].x_b.map(x=>0), noaa[i].z_bU.map((a,idx)=>(a+noaa[i].z_bL[idx])/2), 24, n );		
 	} else {   /* swimbladder */
