@@ -41,7 +41,7 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 
 <table id="split" cellpadding=0 cellspacing=0 border=0 style="border-collapse:collapse;border:0;border-spacing:0;margin:0 auto">
 	<tr>
-		<td style="height:1px">
+		<td>
 
 <div style="width:440px;height:180;height1:100%;overflow-y:auto;border-width:1;border-style:solid;padding:20px;background-color:#C8DFBE;#EDF5EA;#D6BEDF;#ffffe6">
 <label for="def">Target: </label>
@@ -99,14 +99,14 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 </optgroup>
 </select>
 
-<br><span style="margin-left:32px"/> or <input accept="model/mesh"  id="openfile" title="Load from msh (ascii 2.0) file" type="file" onchange="readFile(this);" multiple/>
+<br><span style="margin-left:32px"></span> or <input accept="model/mesh" id="openfile" title="Load from msh (ascii 2.0) file" type="file" onchange="readFile(this);" multiple/>
 <p>
 <textarea id="obj" style="width:430;height:100" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905), [0, 0, 0]]</textarea>
 
 </div>
 
 		</td>
-		<td height=1px>
+		<td>
 
 <div style="width:440px;height:180;height1:100%;overflow-y:auto;border-width:1;border-style:solid;padding:20px;background-color:#DFC5BE;#C8DFBE;#EDF5EA;#D6BEDF;#C4A2D2;#ffffe6">
 
@@ -697,12 +697,12 @@ function update_axes() {
   var svg = document.getElementById("svg1");
 
 // ---- 3 positive and negative axes
-  svg_createpath(svg,"Xp",[[V(P([0,0,0])),V(P([1,0,0]))]],axes_onoff?'red':'none',0.5,"1,0");
-  svg_createpath(svg,"Xn",[[V(P([0,0,0])),V(P([-1,0,0]))]],axes_onoff?'red':'none',0.5,"2,4");
-  svg_createpath(svg,"Yp",[[V(P([0,0,0])),V(P([0,1,0]))]],axes_onoff?'green':'none',0.5,"1,0");
-  svg_createpath(svg,"Yn",[[V(P([0,0,0])),V(P([0,-1,0]))]],axes_onoff?'green':'none',0.5,"2,4");
-  svg_createpath(svg,"Zp",[[V(P([0,0,0])),V(P([0,0,1]))]],axes_onoff?'blue':'none',0.5,"1,0");
-  svg_createpath(svg,"Zn",[[V(P([0,0,0])),V(P([0,0,-1]))]],axes_onoff?'blue':'none',0.5,"2,4");
+  svg_createpath(svg,"Xp",[[V(P([0,0,0])),V(P([1,0,0]))]],axes_onoff?'red':'none',0.875,"1,0");
+  svg_createpath(svg,"Xn",[[V(P([0,0,0])),V(P([-1,0,0]))]],axes_onoff?'red':'none',0.875,"2,4");
+  svg_createpath(svg,"Yp",[[V(P([0,0,0])),V(P([0,1,0]))]],axes_onoff?'green':'none',0.875,"1,0");
+  svg_createpath(svg,"Yn",[[V(P([0,0,0])),V(P([0,-1,0]))]],axes_onoff?'green':'none',0.875,"2,4");
+  svg_createpath(svg,"Zp",[[V(P([0,0,0])),V(P([0,0,1]))]],axes_onoff?'blue':'none',0.875,"1,0");
+  svg_createpath(svg,"Zn",[[V(P([0,0,0])),V(P([0,0,-1]))]],axes_onoff?'blue':'none',0.875,"2,4");
 
 // ---- point for center of axes
   svg_createpoint(svg,"O",V(P([0,0,0])),axes_onoff?"black":"none","[0,0,0]");
@@ -907,6 +907,18 @@ function writeFile(data, filename, type) {
 	}
 }
 
+function test() {
+	var x=[],y=[],s='# mm-bem-test:\n# th0=0 ph0=0 f0=38000 c0=1480 lbs=0.01\n';
+	for(var i=0;i<360;i++) {
+		x.push(i);
+		y.push(0.01);
+	}
+	for(var i=0;i<y.length;i++) {
+		s += '' + x[i] + '\t'+ y[i] + '\n';
+	}
+	return(s);
+}
+
 var worker = undefined;
 
 function change() {change1();}
@@ -926,7 +938,16 @@ function change1() {
 	} else if(obj=="generated_mesh" && generated_mesh!='') {
 		document.getElementById("msh").value=generated_mesh; 
 	} else {		
-		document.getElementById("msh").value=eval(obj);  	
+		document.getElementById("msh").value=eval(obj); 
+		if(document.getElementById("msh").value!='$') {
+			document.getElementById("txt").value=document.getElementById("msh").value;
+			document.getElementById("msh").value='';
+		}
+	}
+// check if "msh" contains mesh
+	if(document.getElementById("msh").value==='' && document.getElementById("txt").value.length>0) {
+		plot();
+		return;
 	}
 // 3d update()
 	init_mesh()
@@ -1143,7 +1164,7 @@ function plot(id2,s,c) {
 		svg_title("&theta;<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+th+"&deg; <tspan font-style='italic'>&phi;</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+ph+"&deg;</tspan>");
 		svg_title2("f<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+(f0/1000)+" kHz <tspan font-style='italic'>c</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+c0+" m/s</tspan>");
 		svg_title3("TS<tspan font-style='normal'> = "+(TS.toFixed(2))+" dB</tspan>");
-		svg_title4("l<tspan dy='6' font-size='0.8em'>BS</tspan><tspan dy='-6' font-style='normal'> = "+(lbs.toFixed(4))+" m");
+		svg_title4("&#8466;<tspan dy='6' font-size='0.8em'>BS</tspan><tspan dy='-6' font-style='normal'> = "+(lbs.toFixed(4))+" m");
 
 	} else {
 		svg_title("");
@@ -1582,13 +1603,14 @@ function ellipsoid(rx, ry, rz, N = 2) {
         }
         fx = newFaces;
       }
-
       return [vx, fx];
 }
 
 function msh(s) { /* parse msh string to [vx,fx] */
-	var lines = s.split('\n');
-	
+	var lines = s;
+	if(typeof s === 'string' || s instanceof String) {
+		lines = s.split('\n');
+	}
 	const n = parseInt(lines[4]);
 	const v = lines.slice(5, 5 + n).map(line =>
 	  line.trim().split(/\s+/).slice(1, 4).map(parseFloat)
