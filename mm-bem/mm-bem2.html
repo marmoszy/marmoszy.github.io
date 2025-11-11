@@ -467,25 +467,25 @@ document.onkeydown = function(e) {
   if(e.keyCode==67 ) { // ctrl C
     if(e.ctrlKey) {e.preventDefault(); circle_onoff^=1;}
   }
-  if(e.keyCode==72 ) { // ctl H
+  if(e.keyCode==72 ) { // ctrl H
 	  if(e.ctrlKey) {e.preventDefault(); alert(about);}
   }
-  if(e.keyCode==82 ) { // ctl R
+  if(e.keyCode==82 ) { // ctrl R
 	  if(e.ctrlKey) {e.preventDefault(); a=0.4; b=-0.2; c=0.0; init3d(); /*zoom=1; xoff=0; yoff=0;*/}
   }
-  if(e.keyCode==88 ) { // ctl X
+  if(e.keyCode==49 ) { // ctrl 1
 	  if(e.ctrlKey) {e.preventDefault(); a=(a==1.57?-1.57:1.57); b=0;  init3d(); }
   }
-  if(e.keyCode==89 ) { // ctl Y
+  if(e.keyCode==50 ) { // ctrl 2
 	  if(e.ctrlKey) {e.preventDefault(); b=(b==1.57?-1.57:1.57); a=0; init3d();}
   }
-  if(e.keyCode==90 ) { // ctl Z
+  if(e.keyCode==51 ) { // ctrl 3
 	  if(e.ctrlKey) {e.preventDefault(); a=(a==0?3.1459:0.0); b=0; init3d();}
   }
-  if(e.keyCode==187 ) { // ctl +
+  if(e.keyCode==187 ) { // ctrl +
 	  zoomin();
   }
-  if(e.keyCode==189 ) { // ctl -
+  if(e.keyCode==189 ) { // ctrl -
 	  zoomout();
   }
   if(e.keyCode==37 ) { /* left key */
@@ -873,14 +873,14 @@ function main() {
 var about =`mm-bem web-demo MM 2025
 
 3d view shortcuts:
-ctrl A - Axes on/off (x-red, y-green, z-blue)
+ctrl A - Axes on/off (axis numbers: 1-red, 2-green, 3-blue)
 ctrl B - wave Box on/off (size of wavelength)
 ctrl C - scanning Circles on/off (size of 3*wavelength)
 ctrl + - zoom in
 ctrl - - zoom out
-Ctrl X - view from +X/-X
-Ctrl Y - view from +Y/-Y
-Ctrl Z - view from +Z/-Z
+Ctrl 1 - view from first axis (+/-)
+Ctrl 2 - view from second axis (+/-)
+Ctrl 3 - view from third axis (+/-)
 ctrl R - defualt orientation
 ctrl-shift-cursors - move
 
@@ -11934,6 +11934,9 @@ $Elements
 3000 2 2 0 1 28 703 705
 $EndElements
 `;
+
+// https://github.com/ices-tools-dev/echoSMs/raw/main/data_store/resources/example_metadata.json
+// https://raw.githubusercontent.com/ices-tools-dev/echoSMs/main/data_store/resources/example_metadata.json
 
 const echoSMs = [
 {
