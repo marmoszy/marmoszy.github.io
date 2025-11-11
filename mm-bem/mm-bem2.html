@@ -1,12 +1,15 @@
 <!-- Plane wave scattering from soft target MM 29.7.2025 -->
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- not using math.js nor python since v.1.92
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js">
 </script>
 <script src="https://cdn.jsdelivr.net/pyodide/v0.23.2/full/pyodide.js">
 </script>
+-->
 
-<!--
+<!-- not using bootstrap
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 -->
@@ -19,7 +22,6 @@ input[type='file'],input[type='button'] {font-size: 18px; }
 	#split td {display:block; width:100%;}
 	#nosplit td {display:inline-block;}
 }
-
 </style>
 
 
@@ -53,7 +55,7 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
   <option value="[sphere(0.01905), [0, 0, 0]]" selected>Low resolution sphere</option>
   <option value="[sphere(0.01905,3), [0, 0, 0]]">Medium resolution sphere</option>
   <option value="[sphere(0.01905,4), [0, 0, 0]]">High resolution sphere</option>
-  <option value="soft_sphere(0.01905)">Ideal soft sphere (exact)*</option>
+  <option value="soft_sphere(0.01905)">Exact sphere (theory)*</option>
   <option value="[sphere(0.005), [-0.01, 0, 0]],|[sphere(0.005), [0.01, 0, 0]]">Two spheres</option>
   <option value="[sphere(0.005), [-0.01, 0, 0]],|[sphere(0.005), [0.01, 0, 0]],|[sphere(0.005), [0,-0.01, 0]],|[sphere(0.005), [0, 0.01, 0]]">Four spheres</option>
   <option value="[sphere(0.005), [-0.01, 0, -0.01]],|[sphere(0.005), [0.01, 0, -0.01]],|[sphere(0.005), [0,-0.01, -0.01]],|[sphere(0.005), [0, 0.01, -0.01]],|[sphere(0.005), [-0.01, 0, 0.01]],|[sphere(0.005), [0.01, 0, 0.01]],|[sphere(0.005), [0,-0.01, 0.01]],|[sphere(0.005), [0, 0.01, 0.01]]">Eight spheres</option>
@@ -76,11 +78,11 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
   <option value="[msh(simplify20_YFT_swimbladder_origin)]">simplify20_YFT_swimbladder_origin</option>
 </optgroup>
   <!-- <option value="[specimenshape(0,0),[0,0,0]]">Gadus_morhua_A_L17.3_body</option> -->
-<optgroup label="echoSMs models">
-  <option value="[specimenshape(0,1,3),[0.07,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_A_L17.3_swimbladder</option>
-  <option value="[specimenshape(1,1,3),[0.06,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_B_L15.6_swimbladder</option>
-  <option value="[specimenshape(2,1,3),[0.13,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_C_L32.3_swimbladder</option>
-  <option value="[specimenshape(3,1,3),[0.15,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_D_L38.0_swimbladder</option>
+<optgroup id="echoSMs" label="echoSMs models">
+  <option value="[specimenshape(0,0,1,3),[0.07,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_A_L17.3_swimbladder</option>
+  <option value="[specimenshape(0,1,1,3),[0.06,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_B_L15.6_swimbladder</option>
+  <option value="[specimenshape(0,2,1,3),[0.13,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_C_L32.3_swimbladder</option>
+  <option value="[specimenshape(0,3,1,3),[0.15,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_D_L38.0_swimbladder</option>
 </optgroup>
 <optgroup label="NOAA models">
   <!-- <option value="[noaashape(0,0,5),[-0.105,0,0]]">sardine_body</option> -->
@@ -97,6 +99,8 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
   <option value="[noaashape(10,1,15),[-0.145,0,0],Rx(-90)]">StripedBass_628_Lateral_swimbladder</option>
   <option value="[noaashape(11,1,15),[-0.135,0,0],Rx(-90)]">ChannelCatfish_1086_swimbladder</option>
   <option value="[noaashape(12,1,15),[-0.135,0,0],Rx(-90)]">ChannelCatfish_1086_Lateral_swimbladder</option>
+</optgroup>
+<optgroup id="files" label="Opened files">
 </optgroup>
 </select>
 
@@ -367,7 +371,7 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 			
 <!----------- footer ------------->
 <br>
-<span title="marek.moszynski@pg.edu.pl">mm-bem v1.93 (10.11.2025)</span>
+<span title="marek.moszynski@pg.edu.pl">mm-bem v1.94 (11.11.2025)</span>
 
 		</td>
 		<td>
@@ -378,10 +382,12 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 <optgroup>
   <option value="wasm_soft_worker" selected>wasm</option>
   <option value="none">none</option>
+<!--  
   <option disabled>_____</option>
   <option value="js2_soft_worker">javascript</option>
   <option value="js_soft_worker">math.js</option>
   <option value="py_soft_worker">pyodide</option>
+-->
 <!--  <option value="js_soft">math.js</option> -->
 <!--  <option value="py_soft">pyodide</option> -->
 </optgroup>
@@ -576,8 +582,8 @@ function draw_box(svg,id,xmin,xmax,ymin,ymax,zmin,zmax,color,w) {
 ] , color||'gray', w||0.5, "2,4");
 }
 
-// ----- Complex functions -----
-const cmath = {
+
+const cmath = { // Complex math functions 
   cplx: (re, im) => ({ re, im }),
   cabs: (c) => Math.sqrt(c.re * c.re + c.im * c.im),
   cmul: (a, b) => ({re: a.re * b.re - a.im * b.im,im: a.re * b.im + a.im * b.re}),
@@ -585,22 +591,22 @@ const cmath = {
     return {re: (a.re * b.re + a.im * b.im) / denom,im: (a.im * b.re - a.re * b.im) / denom};
   }
 };
-
 function LP(n, x) { // Legendre Polynomial P(n, x)
   if (n > 1) { return ((2 * n - 1) * x * LP(n - 1, x) - (n - 1) * LP(n - 2, x)) / n;} 
   else if (n === 1) {return x;} else { return 1; }
 }
 function j(n, x) { // spherical Bessel Function j(n, x)
   if (n > 1) {return ((2 * n - 1) / x) * j(n - 1, x) - j(n - 2, x);} 
-  else if (n === 1) {return Math.sin(x)/(x*x) - Math.cos(x)/x;} else {return Math.sin(x)/x;}
+  else if (n === 1) {return Math.sin(x)/(x*x)-Math.cos(x)/x;} else {return Math.sin(x)/x;}
 }
 function y(n, x) { // spherical Neumann Function y(n, x)
   if (n > 1) {return ((2 * n - 1) / x) * y(n - 1, x) - y(n - 2, x);} 
-  else if (n === 1) { return -Math.cos(x)/(x*x) - Math.sin(x)/x;} else {return -Math.cos(x)/x;}
+  else if (n === 1) {return -Math.cos(x)/(x*x)-Math.sin(x)/x;} else {return -Math.cos(x)/x;}
 }
 function h(m, x) {return cmath.cplx(j(m, x), y(m, x));} // complex Hankel Function h(m, x) = j(m, x) + i*y(m, x)
 
-// ----- soft sphere scattering function 
+// ----- soft sphere scattering function (exact solution)
+
 function ss(ka, th, a) { // ka=k*a, th=angle, a=sphere radius
   let sum = cmath.cplx(0, 0);
   const M = Math.floor(ka) + 5;
@@ -610,7 +616,7 @@ function ss(ka, th, a) { // ka=k*a, th=angle, a=sphere radius
   }
   return cmath.cmul(cmath.cplx(a/ka, 0), sum);
 }
-function soft_sphere(aa, ff0, cc0) {
+function soft_sphere(aa, ff0, cc0) { // using document parameters, for 360 angles, returning two-column string
 	var a = aa||0.01905; 
 	var f0 = ff0||parseFloat(document.getElementById('f0').value); //38e3; 
 	var c0 = cc0||parseFloat(document.getElementById('c0').value); //1480.;
@@ -620,9 +626,9 @@ function soft_sphere(aa, ff0, cc0) {
 	for(var i=0;i<=360;i++) {
 		var r = cmath.cabs(ss(2*Math.PI*f0/c0*a,(i-th0)*Math.PI/180,a))
 		s += ''+i+'\t'+r.toFixed(6)+'\n';
-		if(i==((th0)%360)) lbs=r;
+		if(i==((th0+180)%360)) lbs=r;
 	}
-	return('# mm-bem-soft-sphere:\n# th0='+(th0)+' ph0='+(ph0)+' f0='+(f0)+' c0='+(c0)+' lbs='+(lbs.toFixed(6))+'\n'+s);
+	return('# mm-bem soft_sphere('+(a)+')\n# th0='+(th0)+' ph0='+(ph0)+' f0='+(f0)+' c0='+(c0)+' lbs='+(lbs.toFixed(6))+'\n'+s);
 }
 
 // ---- vector function
@@ -900,6 +906,10 @@ function stl2msh(s) {
 	msh_str([[v,e]]);
 	return(msh_flush());
 }
+
+files = {};
+function file(s) {return files[s];}
+
 function readFile(e) {  // local file reader
 	let k = 0;
 	let N = e.files.length;
@@ -913,18 +923,38 @@ function readFile(e) {  // local file reader
 		var reader = new FileReader();
 		reader.onload = function(e) {
 			k++;
-			if(e.target.result.substring(0,5)=="solid") { // console.log("STL file");
+			if(e.target.result.substring(0,5)=="solid") {        // console.log("STL file");
 				document.getElementById("msh").value += stl2msh(e.target.result);
+			} else if(e.target.result[0]=='{') {                 // console.log("json file");
+				var s = JSON.parse(e.target.result);
+				if (!("specimens" in s)) {alert("Selected json file does not contain specimens");return;}
+				echoSMs.push(s);
+				var vname = document.getElementById("obj").value.trim();
+				var el = document.getElementById('echoSMs');     // add to echoSMs optgroup
+				var n = echoSMs.length-1;
+				var m = echoSMs[n].specimens.length;
+				for(var i=0;i<m;i++) {
+					var x = echoSMs[n].specimens[i].shapes[1].x; // shapes[1] - swimbladder 
+					var off = -(x[0]+x[x.length-1])/2;           // x offset to move to center
+					if(el) el.innerHTML += '<option value="[specimenshape('+(n)+','+(i)+',1,3),['+(off)+',0,0],mul(Ry(180),Rx(90))]">'+echoSMs[1].species+'_'+echoSMs[n].specimens[i].specimen_id+'_'+(echoSMs[n].specimens[i].length)+'_swimbladder</option>'
+				}
+				document.getElementById("obj").value = '';
+				alert('' + (m) +' targets loaded!\nYou can select them from echoSMs section of tathet input above!');
+				return;
 			} else {
 				document.getElementById("msh").value += e.target.result;
 			}
+			var vname = document.getElementById("obj").value.trim();
+			files[vname] = document.getElementById("msh").value; // save in global variable
+			var el = document.getElementById('files');           // add to files optgroup
+			if(el) el.innerHTML += '<option value="file(\''+vname+'\')">'+vname+'</option>'
 			if(k==N) change(); // start calculations after reading
 		};
-		if(file.name.endsWith(".msh")||file.name.endsWith(".stl")) {
+		if(file.name.endsWith(".msh")||file.name.endsWith(".stl")||file.name.endsWith(".json")) {
 			document.getElementById("obj").value+=' '+file.name;
 			reader.readAsText(file);
 		} else {
-			alert("Only msh (ascii 2.0) files allowed") 
+			alert("Only msh (ascii 2.0) or stl (ascii) files allowed") 
 		}
 	}
 }
@@ -1003,9 +1033,9 @@ function change1() {
 		document.getElementById("msh").value=generated_mesh; 
 	} else {		
 		var s = eval(obj); 
-		if(document.getElementById("msh").value=='$') {
+		if(s[0]=='$') { // result represents msh file
 			document.getElementById("msh").value = s;			
-		} else {
+		} else {        // result represent two-column data
 			document.getElementById("txt2").value = s;
 			change2();
 			return;
@@ -1916,7 +1946,7 @@ async function init() {
   await pyodide.loadPackage('scipy');
   return pyodide;
 }
-let pyodideP = init(); 
+// let pyodideP = init(); // not using python since v1.92
 
 async function py_soft() {
   let pyodide = await pyodideP;
@@ -11905,7 +11935,7 @@ $Elements
 $EndElements
 `;
 
-const clay_horne = [
+const echoSMs = [
 {
   "dataset_id": "CLAY_HORNE",
   "description": "Organisms used in Clay & Horne 1994 paper",
@@ -12471,16 +12501,16 @@ const clay_horne = [
 }
 ];
 
-var specimens = clay_horne[0].specimens;
+// var specimens = echoSMs[0].specimens;
 
-function specimenshape(i, j, mm) {
+function specimenshape(k, i, j, mm) {
 	var m = mm||1; 
-	var n = m*specimens[i].shapes[j].width.length;
-	var w = specimens[i].shapes[j].width;
-	var h = specimens[i].shapes[j].height
-	var x =	specimens[i].shapes[j].x;
-	var y =	specimens[i].shapes[j].y;
-	var z =	specimens[i].shapes[j].z;
+	var n = m*echoSMs[k].specimens[i].shapes[j].width.length;
+	var w = echoSMs[k].specimens[i].shapes[j].width;
+	var h = echoSMs[k].specimens[i].shapes[j].height
+	var x =	echoSMs[k].specimens[i].shapes[j].x;
+	var y =	echoSMs[k].specimens[i].shapes[j].y;
+	var z =	echoSMs[k].specimens[i].shapes[j].z;
 	return mfrustum(linint(w,n),linint(h,n),linint(x,n),linint(y,n),linint(z,n));
 }
 
