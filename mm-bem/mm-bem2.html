@@ -945,7 +945,7 @@ function readFile(e) {  // local file reader
 					if(el) el.innerHTML += '<option value="[specimenshape('+(n)+','+(i)+',1,3),['+(off)+',0,0],mul(Ry(180),Rx(90))]">'+echoSMs[1].species+'_'+echoSMs[n].specimens[i].specimen_id+'_'+(echoSMs[n].specimens[i].length)+'_swimbladder</option>'
 				}
 				document.getElementById("obj").value = '';
-				alert('' + (m) +' targets loaded!\nYou can select them from echoSMs section of tathet input above!');
+				alert('' + (m) +' targets loaded!\nYou can select them from echoSMs section of targets above!');
 				return;
 			} else {
 				document.getElementById("msh").value += e.target.result;
