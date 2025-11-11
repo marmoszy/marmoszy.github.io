@@ -11938,10 +11938,10 @@ $EndElements
 // https://github.com/ices-tools-dev/echoSMs/raw/main/data_store/resources/example_metadata.json
 // https://raw.githubusercontent.com/ices-tools-dev/echoSMs/main/data_store/resources/example_metadata.json
 
-function url(s) {
+function json(s) {
 	fetch(s)
-	   .then( r => r.text() )
-	   .then( t => console.log(t) );
+	   .then( r => r.json() )
+	   .then( json => console.log(json) );
 }
 
 const echoSMs = [
