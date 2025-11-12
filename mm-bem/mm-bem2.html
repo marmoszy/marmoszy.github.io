@@ -195,6 +195,11 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 <label for="f0">Frequency: <i>f<sub>0</sub></i> =</label> 
 <select id="f0" onchange="select()">
 <optgroup>
+  <option value="-1e3">1kHz sweep</option>
+  <option value="-2e3">2kHz sweep</option>
+  <option value="-5e3">5kHz sweep</option>
+  <option value="-10e3">10kHz sweep</option>
+  <option disabled>_________</option>
   <option value="18e3">18 kHz</option>
   <option value="38e3" selected>38 kHz</option>
   <option value="70e3">70 kHz</option>
@@ -377,7 +382,7 @@ web-demo (<a href="mm-bem.pdf">readme</a>,  <a href="https://github.com/marmoszy
 			
 <!----------- footer ------------->
 <br>
-<span title="marek.moszynski@pg.edu.pl">mm-bem v1.94 (11.11.2025)</span>
+<span title="marek.moszynski@pg.edu.pl">mm-bem v1.95 (12.11.2025)</span>
 
 		</td>
 		<td>
@@ -788,6 +793,15 @@ function update_axes() {
 }
 
 function update_wave_direction(svg,th,ph,f0,c0) {
+	
+// ---- wave length box update
+  var l = c0/f0;
+  var p0 = [l/2,0,0]
+  var t0 = '\u03bb/2='+(l/2).toFixed(4);
+  svg_createpoint(svg,"lambda_0",V(P(p0)),axes_onoff?"#FFAA33":"none",t0);
+  draw_box("svg1","B1",-l/2,l/2,-l/2,l/2,-l/2,l/2,box_onoff?'black':'none');
+
+	
   var r = c0/f0/2 * 3; //Math.sqrt(2);
 
 // --- two circles for showing wave direction
@@ -1081,8 +1095,7 @@ function change1() {
 			} else {
 				var t = Date.now()/1000 - start;
 				s = '# mm-bem-math.js: '+ t.toFixed(3) + 's ' + JSON.parse(s);
-				document.getElementById("txt").value = s;
-				
+				document.getElementById("txt").value = s;				
 				plot();
 			}
 		};
@@ -1129,8 +1142,8 @@ function change1() {
 				// extract ph0,th0,f0,c0,lbs
 				var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
 				if(v) {
-				   var svg1 = document.getElementById("svg1");							   update_wave_direction(svg1,parseFloat(v[1])
-					,parseFloat(v[2]),parseFloat(v[3]),parseFloat(v[4]));
+				   var svg1 = document.getElementById("svg1");
+				   update_wave_direction(svg1,parseFloat(v[1]),parseFloat(v[2]),parseFloat(v[3]),parseFloat(v[4]));
 				   var th_lbs = (parseFloat(v[1])+180)%360;
 				   var TS = 20*Math.log10(parseFloat(v[5]));
 //console.log(th_lbs+' '+TS);
@@ -1208,11 +1221,12 @@ function drop2(e) {
 function plot(id2,s,c) {
 	s = s||document.getElementById("txt").value;
 	var m=0,n=0;
-	var th = undefined, ph = undefined, lbs = undefined, TS = undefined;
+	var th = undefined, ph = undefined, f0=undefined, lbs = undefined, TS = undefined;
 	var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
 	if(v) {
 		th=parseFloat(v[1]);
 		ph=parseFloat(v[2]);
+		f0=parseFloat(v[3]);
 		lbs=parseFloat(v[5]);
 		TS=20*Math.log10(lbs);
 	}
@@ -2499,7 +2513,11 @@ function luWasm(S,f) { // using gauss, heap
 function wasm_soft_worker(lines,th,f0,c0,ph) {
 
 //console.log("wasm_soft_worker: "+th+" "+ph);
+var fmin,fmax,fstep;
 
+if(f0<0) {fmin=10e3;fmax=200e3;fstep=-f0;} else {fmin=f0;fmax=f0;fstep=f0;}
+
+for(f0=fmin;f0<=fmax;f0+=fstep) {
 	var k = 2 * pi * f0 / c0;
 	//d = [Math.cos(th*pi/180), Math.sin(th*pi/180), 0];
 
@@ -2598,6 +2616,7 @@ postMessage("[... Far field solution]");
 		}
 		postMessage(JSON.stringify(s));
 	}
+}
 	return(s);
 }
 
