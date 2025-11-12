@@ -1283,7 +1283,7 @@ function plot(id2,s,c,z) {
 			update();
 		}
 	}
-	if(id2!="Q") {
+	if(id2!="F") { // do not change titles when drawing frequency TS in polar plot
 		if(ncols==2) {
 			svg_title("&theta;<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+th+"&deg; <tspan font-style='italic'>&phi;</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+ph+"&deg;</tspan>");
 			svg_title2("f<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+(f0/1000)+" kHz <tspan font-style='italic'>c</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+c0+" m/s</tspan>");
