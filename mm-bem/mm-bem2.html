@@ -1142,11 +1142,16 @@ function change1() {
 				// extract ph0,th0,f0,c0,lbs
 				var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
 				if(v) {
-				   var svg1 = document.getElementById("svg1");
-				   update_wave_direction(svg1,parseFloat(v[1]),parseFloat(v[2]),parseFloat(v[3]),parseFloat(v[4]));
-				   var th_lbs = (parseFloat(v[1])+180)%360;
-				   var TS = 20*Math.log10(parseFloat(v[5]));
-//console.log(th_lbs+' '+TS);
+					var svg1 = document.getElementById("svg1");
+					update_wave_direction(svg1,parseFloat(v[1]),parseFloat(v[2]),parseFloat(v[3]),parseFloat(v[4]));
+					var th_lbs = (parseFloat(v[1])+180)%360;
+					var f00=parseFloat(v[3]);
+					var lbs=parseFloat(v[5]);
+					var TS = 20*Math.log10(lbs);   //console.log(th_lbs+' '+TS);
+					if(f0<0) { // sweep mode
+						document.getElementById("txt2").value += ''+f00/1e3+'\t'+lbs.toFixed(6)+'\n';
+						plot("F",document.getElementById("txt2").value,"#9da6ff",1);  // 1 - no closing 'Z'
+					}
 				}
 
 			}
@@ -1156,6 +1161,8 @@ function change1() {
 		f0 = parseFloat(document.getElementById("f0").value);
 		c0 = parseFloat(document.getElementById("c0").value);
 		ph = parseFloat(document.getElementById("ph").value);
+		if(f0<0) {document.getElementById("txt2").value='# mm-bem: '+(-f0/1e3)+'kHz sweep\n';}
+		else {plot("F",'#');}
 		worker.postMessage(JSON.stringify([lines,th,f0,c0,ph]));
 	} else if(eng=="py_soft_worker") {
 		var lines = document.getElementById("msh").value; //.split('\n');
@@ -1188,6 +1195,7 @@ function change2() {
 	}
 }
 
+
 function drop(e) {
 	e.preventDefault();
 	var file = e.dataTransfer.files[0];
@@ -1218,7 +1226,7 @@ function drop2(e) {
 	}
 }
 
-function plot(id2,s,c) {
+function plot(id2,s,c,z) {
 	s = s||document.getElementById("txt").value;
 	var m=0,n=0;
 	var th = undefined, ph = undefined, f0=undefined, lbs = undefined, TS = undefined;
@@ -1253,16 +1261,19 @@ function plot(id2,s,c) {
 	const H = svg.getAttribute("height")-40;
 
 	svg0 = document.getElementById("svg0");
-	svg_polar(svg0,x,y,W,H,id2||"P",c||(ncols==2?"#ff6633":"#92ba6c"));  
-
-	th = th || parseFloat(document.getElementById("th").value);
-	var idx = (th+180)%360;
-	if(idx<x.length) {
-		svg_polar(svg0,[x[idx]],[y[idx]], W,H
-			,(id2||"P")+"_TS",c||"#ff6633");
-	} else {
-		svg_polar(svg0,[0],[0], W,H,(id2||"P")+"_TS","none");
+	svg_polar(svg0,x,y,W,H,id2||"P",c||(ncols==2?"#ff6633":"#92ba6c"),z);  
+	
+	if(id2!='F') { // not for frequency psuedo-polar plot 
+		th = th || parseFloat(document.getElementById("th").value);
+		var idx = (th+180)%360;
+		if(idx<x.length) {
+			svg_polar(svg0,[x[idx]],[y[idx]], W,H
+				,(id2||"P")+"_TS",c||"#ff6633");
+		} else {
+			svg_polar(svg0,[0],[0], W,H,(id2||"P")+"_TS","none");
+		}
 	}
+
 	if(ncols>=3 && m>1 && n>1) {
 		generated_mesh =  msh_from3cols(m,n,x,x2,y);
 		if(generated_mesh.length>0) {
@@ -1272,14 +1283,15 @@ function plot(id2,s,c) {
 			update();
 		}
 	}
-	if(ncols==2) {
-		svg_title("&theta;<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+th+"&deg; <tspan font-style='italic'>&phi;</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+ph+"&deg;</tspan>");
-		svg_title2("f<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+(f0/1000)+" kHz <tspan font-style='italic'>c</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+c0+" m/s</tspan>");
-		svg_title3("TS<tspan font-style='normal'> = "+(TS.toFixed(2))+" dB</tspan>");
-		svg_title4("&#8466;<tspan dy='6' font-size='0.8em'>BS</tspan><tspan dy='-6' font-style='normal'> = "+(lbs.toFixed(4))+" m");
-
-	} else {
-		svg_title("");
+	if(id2!="Q") {
+		if(ncols==2) {
+			svg_title("&theta;<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+th+"&deg; <tspan font-style='italic'>&phi;</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+ph+"&deg;</tspan>");
+			svg_title2("f<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+(f0/1000)+" kHz <tspan font-style='italic'>c</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+c0+" m/s</tspan>");
+			svg_title3("TS<tspan font-style='normal'> = "+(TS.toFixed(2))+" dB</tspan>");
+			svg_title4("&#8466;<tspan dy='6' font-size='0.8em'>BS</tspan><tspan dy='-6' font-style='normal'> = "+(lbs.toFixed(4))+" m");
+		} else {
+			svg_title("");
+		}
 	}
 }
 
@@ -1331,7 +1343,7 @@ console.log(k2);
 
 // ---- svg functions
 
-function svg_polar(svg,x,y,W,H,id,c) {
+function svg_polar(svg,x,y,W,H,id,c,z) {
 	const tmin=-60,tmax=-20,off=10/200;
 	var t;
 /*
@@ -1359,10 +1371,11 @@ function svg_polar(svg,x,y,W,H,id,c) {
 
 	}
 	if(x.length==1) {
-		svg_createpoint(svg,id,[p[0][0],p[0][1]],c||"red"
-			,"TS("+x[0]+ "&deg;)="+t.toFixed(2),4,c||"red");
+		if(id!='F') // can not draw dynamic one-element array as circle
+			svg_createpoint(svg,id,[p[0][0],p[0][1]],c||"red"
+				,"TS("+x[0]+ "&deg;)="+t.toFixed(2),4,c||"red");
 	} else {
-		svg_createpath(svg,id,[p],c||"red",3,"1,0");
+		svg_createpath(svg,id,[p],c||"red",z==1?1:3,"1,0",z);
 	}
 }
 
@@ -1398,7 +1411,8 @@ function svg_createline(svg,id,x1,y1,x2,y2,color,w) {
 	el.setAttribute("y2",y2);
 }
 
-function svg_createpath(svg,id,p,color,w,dd) { 
+function svg_createpath(svg,id,p,color,w,dd,zz) {
+	var z=zz||0; 
 	var el=document.getElementById(id);
 	if (!el) {
 		el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -1414,7 +1428,7 @@ function svg_createpath(svg,id,p,color,w,dd) {
 		for(var j=0;j<p[i].length;j++) {
 			s+=(j==0?'M':'L')+p[i][j][0].toFixed(2)+' '+p[i][j][1].toFixed(2)+' ';
 		}
-		s+='Z';
+		if(!z) s+='Z';
 	}
 	if(s=='Z') s='';
 	el.setAttribute('d',s);
@@ -2515,7 +2529,7 @@ function wasm_soft_worker(lines,th,f0,c0,ph) {
 //console.log("wasm_soft_worker: "+th+" "+ph);
 var fmin,fmax,fstep;
 
-if(f0<0) {fmin=10e3;fmax=200e3;fstep=-f0;} else {fmin=f0;fmax=f0;fstep=f0;}
+if(f0<0) {fmin=10e3;fmax=360e3;fstep=-f0;} else {fmin=f0;fmax=f0;fstep=f0;}
 
 for(f0=fmin;f0<=fmax;f0+=fstep) {
 	var k = 2 * pi * f0 / c0;
