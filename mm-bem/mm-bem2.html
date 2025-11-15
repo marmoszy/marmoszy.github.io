@@ -83,7 +83,7 @@ This is web-demo of mm-bem codes, that calculates acoustic scattering patterns f
 
 <p style="font-size:20;margin:16;max-width:940;text-align:justify">
 The Input parameters section gives user interface for selecting the parameters required for the algorithm: (1) target mesh (2) plane wave direction angles <small><i>&theta;</i><sub>0</sub></small> and <small><i>&phi;</i><sub>0</sub></small> (3) its frequency <small><i>f</i><sub>0</sub></small> and (4) sound speed <small><i>c</i><sub>0</sub></small> in water. 
-The target mesh could be selected from select input box from several sets of cannonical examples and fish swimbladders. The mesh is presented in the Data Visualisation section in the left 3D panel. The result of BEM calculations is presented in Data Visalisation section in the right panel in the form of 2D polar plot. The wave direction angles could be set into scanning modes that performs calculation for the whole angular range. If both angles are set into scanning mode the result data represents three-dimensional target strength that is presented in Data Visualisation section in 3D View replacing original mesh. The frequency could be also set into sweep mode which calculates target strength for internaly defined frequency range (10&nbsp;kHz - 360&nbsp;kHz).
+The target mesh could be selected from select input box from several sets of cannonical examples and fish swimbladders. The mesh is presented in the Data Visualisation section in the left 3D panel. The result of BEM calculations is presented in Data Visalisation section in the right panel in the form of 2D polar plot. The wave direction angles could be set into scanning modes that performs calculation for the whole angular range. If both angles are set into scanning mode the result data represents three-dimensional target strength that is presented in Data Visualisation section in 3D View replacing original mesh. The frequency could be also set into scan mode which calculates target strength for internaly defined frequency range (10&nbsp;kHz - 360&nbsp;kHz).
 
 <p style="font-size:20;margin:16;max-width:940;text-align:justify">
 The fish swimbladder examples come from (1) scientific studies <sup><small><a href="https://www.researchgate.net/publication/384356288_Acoustic_Techniques_for_Tuna_Biomass_Estimation">1</a>, <a href="https://www.mdpi.com/2077-1312/12/11/2014">2</a></small></sup> (2) <a href="https://ices-tools-dev.github.io/echoSMs/">echoSMs</a> initiative (3) NOAA Fisheries <a href="https://www.fisheries.noaa.gov/data-tools/krm-model">KRM model</a> web-page. Additionally, the target mesh could be entered from external file. It could be in <a href="https://gmsh.info/">GMSH</a> msh ASCII 2.0 format with triangular representation  or <a href="https://en.wikipedia.org/wiki/STL_(file_format)">STL</a> ASCII format or <a href="https://github.com/ices-tools-dev/echoSMs/tree/main/data_store/resources">echoSMs-json</a> data structure. 
@@ -183,7 +183,6 @@ More info about mm-bem in <a href="mm-bem.pdf">readme</a> and <a href="https://g
   <option value="-5">5&deg;scan</option>
   <option value="-10">10&deg;scan</option>
   <option value="-15">15&deg;scan</option>
-  <option value="-30">30&deg;scan</option>
   <option disabled>_____</option>
   <option value="270">270&deg;</option>
   <option value="285">285&deg;</option>
@@ -219,7 +218,6 @@ More info about mm-bem in <a href="mm-bem.pdf">readme</a> and <a href="https://g
   <option value="-5">5&deg;scan</option>
   <option value="-10">10&deg;scan</option>
   <option value="-15">15&deg;scan</option>
-  <option value="-30">30&deg;scan</option>
   <option disabled>_____</option>
   <option value="0">0&deg;</option>
   <option value="15">15&deg;</option>
@@ -251,10 +249,10 @@ More info about mm-bem in <a href="mm-bem.pdf">readme</a> and <a href="https://g
 <label for="f0">Frequency: <i>f<sub>0</sub></i> =</label> 
 <select id="f0" onchange="select()">
 <optgroup>
-  <option value="-1e3">1kHz sweep</option>
-  <option value="-2e3">2kHz sweep</option>
-  <option value="-5e3">5kHz sweep</option>
-  <option value="-10e3">10kHz sweep</option>
+  <option value="-1e3">1kHz scan</option>
+  <option value="-2e3">2kHz scan</option>
+  <option value="-5e3">5kHz scan</option>
+  <option value="-10e3">10kHz scan</option>
   <option disabled>_________</option>
   <option value="18e3">18 kHz</option>
   <option value="38e3" selected>38 kHz</option>
@@ -1178,7 +1176,7 @@ function msave(pname,generated_mesh) {
 	document.getElementById("def").value=pname;
 }
 
-var sweep_str='';
+var scan_str='';
 
 function change() {change1();}
 function change1() {
@@ -1343,9 +1341,9 @@ function change1() {
 					var f00 = parseFloat(v[3]);
 					var lbs = parseFloat(v[5]);
 					var TS = 20*Math.log10(lbs);   // console.log(th_lbs+' '+TS);
-					if(f0<0) { // sweep mode
-						sweep_str += ''+f00/1e3+'\t'+lbs.toFixed(6)+'\n';
-						plot("F",sweep_str,"#AA69D3",1);  // 1 - no closing 'Z'
+					if(f0<0) { // scan mode
+						scan_str += ''+f00/1e3+'\t'+lbs.toFixed(6)+'\n';
+						plot("F",scan_str,"#AA69D3",1);  // 1 - no closing 'Z'
 					}
 					if(th>=0 && ph>=0 && f0>0) {  // only when no scanning
 						psave(document.getElementById("obj").value+','
@@ -1356,7 +1354,7 @@ function change1() {
 					}
 				}
 				var v1 = s.match(/# (\d+)x(\d+)/); // detection of scanning data
-				var v2 = s.match(/# (\d+)-(\d+)/); // detection of sweep data
+				var v2 = s.match(/# (\d+)-(\d+)/); // detection of scan data
 				if( v1||v2 ) {
 					psave(document.getElementById("obj").value + ','
 						+document.getElementById("th").value + ','
@@ -1371,7 +1369,7 @@ function change1() {
 		f0 = parseFloat(document.getElementById("f0").value);
 		c0 = parseFloat(document.getElementById("c0").value);
 		ph = parseFloat(document.getElementById("ph").value);
-		if(f0<0) {sweep_str='# mm-bem-sweep-mode: '+(-f0/1e3)+'kHz sweep\n';}
+		if(f0<0) {scan_str='# mm-bem-scan-mode: '+(-f0/1e3)+'kHz scan\n';}
 		else {plot("F",'#');}
 		worker.postMessage(JSON.stringify([lines,th,f0,c0,ph]));
 	} else if(eng=="py_soft_worker") {
@@ -1472,7 +1470,7 @@ function plot(id2,s,c,z) {
 				m = parseInt(v[1]);
 				n = parseInt(v[2]);
 			}
-			var v = ss[i].match(/# (\d+)-(\d+)/); // detection of sweep mode
+			var v = ss[i].match(/# (\d+)-(\d+)/); // detection of scan mode
 			if(v) {
 				fmin = parseFloat(v[1]);
 				fmax = parseFloat(v[2]);
