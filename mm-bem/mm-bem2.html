@@ -1226,7 +1226,7 @@ function change1() {
 					}
 					s2 += '\n';
 				}
-				LBS2.push([f00,parseFloat(v[5])]);
+				LBS2.push([f00,parseFloat(v[1]),parseFloat(v[2]),parseFloat(v[5])]);
 			}
 			var t = Date.now()/1000 - start2;
 			if( (thmin!=thmax) || (phmin!=phmax)) {
@@ -1238,7 +1238,7 @@ function change1() {
 				s2 = '# mm-bem-soft-sphere: '+t.toFixed(3)+'s\n'
 				s2 += '# ' +  (fmin) + '-' + (fmax) +'\n'; 
 				for(var i=0;i<LBS2.length;i++) {
-					s2 += '' + (LBS2[i][0])+ '\t'+ (LBS2[i][1].toFixed(6))+'\n'; 
+					s2 += '' + (LBS2[i][0])+ ' '+ (LBS2[i][1])+ ' '+(LBS2[i][2])+' ' + (LBS2[i][3].toFixed(6))+'\n'; 
 				}
 				document.getElementById("txt").value = s2;				
 			}
@@ -1345,7 +1345,7 @@ function change1() {
 					var lbs = parseFloat(v[5]);
 					var TS = 20*Math.log10(lbs);   // console.log(th_lbs+' '+TS);
 					if(f0<0) { // scan mode
-						scan_str += ''+f00/1e3+'\t'+lbs.toFixed(6)+'\n';
+						scan_str += ''+f00/1e3+' '+(th0)+' '+(ph0)+' '+lbs.toFixed(6)+'\n';
 						plot("F",scan_str,"#AA69D3",1);  // 1 - no closing 'Z'
 					}
 					if(th>=0 && ph>=0 && f0>0) {  // only when no scanning
@@ -1461,7 +1461,7 @@ function plot(id2,s,c,z) {
 		s2=ss[i].trim().split(/\s+/);
 		if(s2[0][0]!='#' && s2.length>=2) {
 			if(ncols==0) ncols=s2.length;
-			var xval=parseFloat(s2[0]);
+			var xval=parseFloat(s2[m==1?1:0]);  
 			x.push(xval>=1000?xval/1000:xval); // column 1: degrees
 			if(s2[ncols-1].match(/^[a-zA-Z]+/)) ncols-=1; // gp generated table
 			y.push(parseFloat(s2[ncols-1])); // last column: absolute values
@@ -1484,7 +1484,8 @@ function plot(id2,s,c,z) {
 	const H = svg.getAttribute("height")-40;
 
 	svg0 = document.getElementById("svg0");
-	svg_polar(svg0,x,y,W,H,id2||"P",c||(ncols==2?((fmin!=fmax)?"#AA69D3":"#ff6633"):"#92ba6c"),z);  
+//	svg_polar(svg0,x,y,W,H,id2||"P",c||(ncols==2?((fmin!=fmax)?"#AA69D3":"#ff6633"):"#92ba6c"),z);  
+	svg_polar(svg0,x,y,W,H,id2||"P",c||((ncols==2)?"#ff6633":(ncols==3)?"#92ba6c":"#AA69D3"),z);  
 	
 	if(id2!="F") { // not for frequency psuedo-polar plot 
 		th = th || parseFloat(document.getElementById("th").value);
@@ -1498,11 +1499,10 @@ function plot(id2,s,c,z) {
 	}
 
 	var pname = document.getElementById("obj").value;
-	if(ncols>=3 && m>1 && n>1 && !pname.startsWith("lbs:")) {
+	if(ncols>=3 && m>1 && n>1 && !pname.startsWith("lbs:")) { // only when mesh is constructered from 3D scan
 		var gen_mesh =  msh_from3cols(m,n,x,x2,y);
 		if(gen_mesh.length>0) {
 			document.getElementById("msh").value = gen_mesh;
-			//document.getElementById("def").value = "generated_mesh"
 			pname = "lbs:"+pname;
 			document.getElementById("obj").value = pname
 			msave(pname,gen_mesh);
@@ -2845,7 +2845,8 @@ postMessage("[... Far field solution]");
 	}
 	postMessage(JSON.stringify(s));
 	LBS.push([(th0+180)%360,ph0,lbs]);
-        }
+	LBS2.push([f0,th0,ph0,lbs])
+		}
 	LBS.push(["\n"]); // append empty line as the block separator
 	}
 	
@@ -2859,12 +2860,11 @@ postMessage("[... Far field solution]");
 		}
 		postMessage(JSON.stringify(s));
 	}
-	LBS2.push([f0,lbs])
 }
 if(fmin!=fmax) {
 	s = '# ' +  (fmin) + '-' + (fmax) +'\n'; 
 	for(var i=0;i<LBS2.length;i++) {
-		s += '' + (LBS2[i][0])+ '\t'+ (LBS2[i][1].toFixed(6))+'\n'; 
+		s += '' + (LBS2[i][0])+ ' '+ (LBS2[i][1])+ ' '+(LBS2[i][2])+ ' '+(LBS2[i][3].toFixed(6))+'\n'; 
 	}
 	postMessage(JSON.stringify(s));
 }	
