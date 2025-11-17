@@ -1156,7 +1156,7 @@ function psave(pname) {
 	var el = document.getElementById("prevcalc");
 	if(el) {
 		prevs[pname] = document.getElementById("txt").value;
-		el.innerHTML =  '<option value="prevs[\''+pname+'\']" title="'+pname+'">'+pname.slice(0,44)+'' + '</option>' + el.innerHTML;
+		el.innerHTML =  '<option value="prevs[\''+pname+'\']" title="'+pname+'">'+pname.slice(0,40)+'' + '</option>' + el.innerHTML;
 		var a = el.innerHTML.match(/<option\b[^>]*>[\s\S]*?<\/option>/gi)
 		a = [...new Set(a)];
 		el.innerHTML = a.join("");
