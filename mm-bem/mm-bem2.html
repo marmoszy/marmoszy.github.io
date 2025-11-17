@@ -1393,7 +1393,6 @@ function change1() {
 
 function change2() {
 	var out2 = document.getElementById("out2").value;
-	var txt2 = document.getElementById("txt2").value;
 	if(out2!="none") {
 		var s = eval(out2);
 		document.getElementById("txt2").value=s;
@@ -1498,17 +1497,15 @@ function plot(id2,s,c,z) {
 		}
 	}
 
-	if(ncols>=3 && m>1 && n>1) {
-		var generated_mesh =  msh_from3cols(m,n,x,x2,y);
-		if(generated_mesh.length>0) {
-			document.getElementById("msh").value = generated_mesh;
+	var pname = document.getElementById("obj").value;
+	if(ncols>=3 && m>1 && n>1 && !pname.startsWith("lbs:")) {
+		var gen_mesh =  msh_from3cols(m,n,x,x2,y);
+		if(gen_mesh.length>0) {
+			document.getElementById("msh").value = gen_mesh;
 			//document.getElementById("def").value = "generated_mesh"
-			pname = document.getElementById("obj").value;
-			if(!pname.startsWith("lbs:")) {
-				pname = "lbs:"+pname;
-			}
+			pname = "lbs:"+pname;
 			document.getElementById("obj").value = pname
-			msave(pname,generated_mesh);
+			msave(pname,gen_mesh);
 			init_mesh();
 			update();
 		}
