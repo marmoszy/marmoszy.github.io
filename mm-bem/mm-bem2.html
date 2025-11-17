@@ -57,7 +57,7 @@ input[type='file'],input[type='button'] {font-size: 18px; }
 </script>
 -->
 
-<link rel="icon" type="image/svg+xml" size="any" type="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjUwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPGRlZnM+CiAgICAgICAgPGNsaXBQYXRoIGlkPSJtYXNrMSI+CiAgICAgICAgICAgIDxjaXJjbGUgcj0iNDgiIGN4PSI1MCIgY3k9IjAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2U9IiMwMDAiIGZpbGw9Im5vbmUiLz4KICAgICAgICA8L2NsaXBQYXRoPgogICAgICAgIDxjbGlwUGF0aCBpZD0ibWFzazIiPgogICAgICAgICAgICA8cmVjdCB4PSI5IiB3aWR0aD0iODgiIHk9IjAiIGhlaWdodD0iNTAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2U9IiMwMDAiIGZpbGw9Im5vbmUiLz4KICAgICAgICA8L2NsaXBQYXRoPgogICAgPC9kZWZzPgogICAgPGc+CiAgICAgICAgPGNpcmNsZSByPSI0OCIgY3g9IjUwIiBjeT0iNTAiIGZpbGw9IiNBMkM4RDIiIGNsaXAtcGF0aD0idXJsKCNtYXNrMSkiLz4gLS0+CiAgICAgICAgPGNpcmNsZSByPSI0OCIgY3g9IjUwIiBjeT0iMCIgc3Ryb2tlLXdpZHRoPSIxLjUiIGNsaXAtcGF0aD0idXJsKCNtYXNrMikiIHN0cm9rZT0iZGFya2JsdWUiIGZpbGw9Im5vbmUiIC8+CiAgICAgICAgPGNpcmNsZSByPSI0OCIgY3g9IjUwIiBjeT0iNTAiIHN0cm9rZS13aWR0aD0iMS41IiBjbGlwLXBhdGg9InVybCgjbWFzazIpIiBzdHJva2U9ImRhcmtibHVlIiBmaWxsPSJub25lIi8+CiAgICAgICAgPGNpcmNsZSByPSI0IiBjeD0iMzAiIGN5PSIyMCIgc3Ryb2tlLXdpZHRoPSIxIiAgc3Ryb2tlPSJub25lIiBmaWxsPSJkYXJrYmx1ZSIgZmlsbDE9IiNBQTY5RDMiLz4KICAgIDwvZz4KPC9zdmc+Cgo=" />
+<link rel="icon" type="image/svg+xml" size="any" 	type="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjUwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgPGRlZnM+CiAgICAgICAgPGNsaXBQYXRoIGlkPSJtYXNrMSI+CiAgICAgICAgICAgIDxjaXJjbGUgcj0iNDgiIGN4PSI1MCIgY3k9IjAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2U9IiMwMDAiIGZpbGw9Im5vbmUiLz4KICAgICAgICA8L2NsaXBQYXRoPgogICAgICAgIDxjbGlwUGF0aCBpZD0ibWFzazIiPgogICAgICAgICAgICA8cmVjdCB4PSI5IiB3aWR0aD0iODgiIHk9IjAiIGhlaWdodD0iNTAiIHN0cm9rZS13aWR0aD0iMS41IiBzdHJva2U9IiMwMDAiIGZpbGw9Im5vbmUiLz4KICAgICAgICA8L2NsaXBQYXRoPgogICAgPC9kZWZzPgogICAgPGc+CiAgICAgICAgPGNpcmNsZSByPSI0OCIgY3g9IjUwIiBjeT0iNTAiIGZpbGw9IiNBMkM4RDIiIGNsaXAtcGF0aD0idXJsKCNtYXNrMSkiLz4gLS0+CiAgICAgICAgPGNpcmNsZSByPSI0OCIgY3g9IjUwIiBjeT0iMCIgc3Ryb2tlLXdpZHRoPSIxLjUiIGNsaXAtcGF0aD0idXJsKCNtYXNrMikiIHN0cm9rZT0iZGFya2JsdWUiIGZpbGw9Im5vbmUiIC8+CiAgICAgICAgPGNpcmNsZSByPSI0OCIgY3g9IjUwIiBjeT0iNTAiIHN0cm9rZS13aWR0aD0iMS41IiBjbGlwLXBhdGg9InVybCgjbWFzazIpIiBzdHJva2U9ImRhcmtibHVlIiBmaWxsPSJub25lIi8+CiAgICAgICAgPGNpcmNsZSByPSI0IiBjeD0iMzAiIGN5PSIyMCIgc3Ryb2tlLXdpZHRoPSIxIiAgc3Ryb2tlPSJub25lIiBmaWxsPSJkYXJrYmx1ZSIgZmlsbDE9IiNBQTY5RDMiLz4KICAgIDwvZz4KPC9zdmc+Cgo=" />
 
 <body style="background-color:#eee">
 <div style="width:100%;margin:0 auto"> <!-- begin of container -->
@@ -1182,11 +1182,13 @@ function change() {change1();}
 function change1() {
 //console.log("change");
 	var obj = document.getElementById("obj").value;
+/*
 	if((obj=="generated_mesh") && (generated_mesh=='')) {
 		alert('Mesh not generated yet!\nTo generated mesh, please select both plane wave direction angles to one of its scanning option. It will finally generate 3D mesh of backscattering length.');
 		return;
 	} 	
-	if(obj[0]=='[') {
+*/
+		if(obj[0]=='[') {
 		O = eval('['+obj+']');
 		O.forEach(o => msh_str(o));
 		document.getElementById("msh").value=msh_flush();
@@ -1497,13 +1499,16 @@ function plot(id2,s,c,z) {
 	}
 
 	if(ncols>=3 && m>1 && n>1) {
-		generated_mesh =  msh_from3cols(m,n,x,x2,y);
+		var generated_mesh =  msh_from3cols(m,n,x,x2,y);
 		if(generated_mesh.length>0) {
 			document.getElementById("msh").value = generated_mesh;
 			//document.getElementById("def").value = "generated_mesh"
-			pname = "lbs:"+document.getElementById("obj").value;
-			msave(pname,generated_mesh);
+			pname = document.getElementById("obj").value;
+			if(!pname.startsWith("lbs:")) {
+				pname = "lbs:"+pname;
+			}
 			document.getElementById("obj").value = pname
+			msave(pname,generated_mesh);
 			init_mesh();
 			update();
 		}
