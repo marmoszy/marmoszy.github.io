@@ -870,7 +870,9 @@ function update_mesh() {
 	for(var k=0; k<fx.length; k++) {
 		p.push([V(P(vx[fx[k][0]])),V(P(vx[fx[k][1]])),V(P(vx[fx[k][2]]))]);
 	}
-	svg_createpath(svg, "M", p, mshcolor, 0.5, "1,0");	
+	var el = svg_createpath(svg, "M", p, mshcolor, 0.5, "1,0", 0, 'yellow');
+	el.setAttribute('fill','lime');
+	el.setAttribute('fill-rule','nonzero');
 }
 
 function update_axes() {
@@ -1313,7 +1315,7 @@ function change1() {
 		return;
 	} 	
 */
-		if(obj[0]=='[') {
+	if(obj[0]=='[') {
 		O = eval('['+obj+']');
 		O.forEach(o => msh_str(o));
 		document.getElementById("msh").value=msh_flush();
@@ -1326,6 +1328,10 @@ function change1() {
 		if(s[0]=='$') { // result represents msh file
 			document.getElementById("msh").value = s;			
 		} else {        // result represent two-column data
+			msh_str(eval('['+obj.replace('soft_sphere','latlon_sphere')+']'));
+			document.getElementById("msh").value=msh_flush();			
+			init_mesh();
+			init3d();
 			js_soft_sphere();
 /*			
 			document.getElementById("txt").value = '';
@@ -1760,27 +1766,28 @@ function svg_createline(svg,id,x1,y1,x2,y2,color,w) {
 	el.setAttribute("y2",y2);
 }
 
-function svg_createpath(svg,id,p,color,w,dd,zz) {
-	var z=zz||0; 
+function svg_createpath(svg,id,p,color,w,dd,zz,ffcolor) {
+	var z = zz||0; 
 	var el=document.getElementById(id);
 	if (!el) {
 		el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 		el.setAttribute('id',id);
 		svg.appendChild(el);
 	}
-	el.setAttribute('stroke',color||'black');
-	el.setAttribute('stroke-width',w||1);
-  	el.setAttribute("stroke-dasharray",dd||"2,2"); 
-	el.setAttribute('fill','none');
+	el.setAttribute('stroke', color||'black');
+	el.setAttribute('stroke-width', w||1);
+  	el.setAttribute("stroke-dasharray", dd||"2,2"); 
+	el.setAttribute('fill', ffcolor||"none");
 	s = '';
 	for(var i=0;i<p.length;i++) {
 		for(var j=0;j<p[i].length;j++) {
 			s+=(j==0?'M':'L')+p[i][j][0].toFixed(2)+' '+p[i][j][1].toFixed(2)+' ';
 		}
-		if(!z) s+='Z';
+		if(!z) s+='Z ';
 	}
-	if(s=='Z') s='';
+	if(s=='Z ') s='';
 	el.setAttribute('d',s);
+	return(el);
 }
 
 function svg_copy(e) {
@@ -1960,65 +1967,81 @@ function sphere(R = 1, N = 2) {
     return [vx, fx];
 }
 
+function latlon_sphere(R = 1, latSteps = 18, lonSteps = 36) {
+  const vx = [], fx = [];  
+  for (let i = 0; i <= latSteps; i++) {  // Generate vertices
+    const theta = (i * Math.PI) / latSteps; // polar angle from 0 to π
+    const z = R * Math.cos(theta);
+    const r = R * Math.sin(theta);
+    for (let j = 0; j <= lonSteps; j++) {
+      const phi = (j * 2 * Math.PI) / lonSteps; // azimuthal angle from 0 to 2π
+      const x = r * Math.cos(phi);
+      const y = r * Math.sin(phi);
+      vx.push([y, z, x]);
+    }
+  }
+  for (let i = 0; i < latSteps; i++) {   // Generate quad faces (as two triangles per quad)
+    for (let j = 0; j < lonSteps; j++) {
+      const p1 = i * (lonSteps + 1) + j;
+      const p2 = p1 + lonSteps + 1;
+      fx.push([p1, p2, p1 + 1]);
+      fx.push([p1 + 1, p2, p2 + 1]);
+    }
+  }
+  return [vx, fx];
+}
+
 function ellipsoid3d(rx, ry, rz, N = 2) {
-      const vx = [];
-      
-      const t = (1 + Math.sqrt(5)) / 2;
-      const rawVerts = [
-        [-1,  t,  0], [ 1,  t,  0], [-1, -t,  0], [ 1, -t,  0],
-        [ 0, -1,  t], [ 0,  1,  t], [ 0, -1, -t], [ 0,  1, -t],
-        [ t,  0, -1], [ t,  0,  1], [-t,  0, -1], [-t,  0,  1],
-      ];
+	const vx = [];
+	const t = (1 + Math.sqrt(5)) / 2;
+	const rawVerts = [
+		[-1,  t,  0], [ 1,  t,  0], [-1, -t,  0], [ 1, -t,  0],
+		[ 0, -1,  t], [ 0,  1,  t], [ 0, -1, -t], [ 0,  1, -t],
+		[ t,  0, -1], [ t,  0,  1], [-t,  0, -1], [-t,  0,  1],
+	];
+	const rawFaces = [
+		[0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7,10], [0,10,11],
+		[1, 5, 9], [5,11,4], [11,10,2], [10,7,6], [7,1,8],
+		[3,9,4], [3,4,2], [3,2,6], [3,6,8], [3,8,9],
+		[4,9,5], [2,4,11], [6,2,10], [8,6,7], [9,8,1],
+	];
+	function project([x, y, z]) {
+		const length = Math.sqrt(x*x + y*y + z*z);
+		return [rx * x / length, ry * y / length, rz * z / length];
+	}
+	const midpointCache = {};
+	function getMidpoint(a, b) {
+		const key = a < b ? `${a}_${b}` : `${b}_${a}`;
+		if (midpointCache[key] !== undefined) return midpointCache[key];
+		const v1 = vx[a];
+		const v2 = vx[b];
+		const mid = project([
+		  (v1[0] + v2[0]) / 2,
+		  (v1[1] + v2[1]) / 2,
+		  (v1[2] + v2[2]) / 2,
+		]);
+		vx.push(mid);
+		const index = vx.length - 1;
+		midpointCache[key] = index;
+		return index;
+	}
+	rawVerts.forEach(v => vx.push(project(v)));
+	let fx = rawFaces.map(f => [...f]);
+	for (let s = 0; s < N; s++) {
+		const newFaces = [];
+		for (const [a, b, c] of fx) {
+			const ab = getMidpoint(a, b);
+			const bc = getMidpoint(b, c);
+			const ca = getMidpoint(c, a);
 
-      const rawFaces = [
-        [0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7,10], [0,10,11],
-        [1, 5, 9], [5,11,4], [11,10,2], [10,7,6], [7,1,8],
-        [3,9,4], [3,4,2], [3,2,6], [3,6,8], [3,8,9],
-        [4,9,5], [2,4,11], [6,2,10], [8,6,7], [9,8,1],
-      ];
-
-      function project([x, y, z]) {
-        const length = Math.sqrt(x*x + y*y + z*z);
-        return [rx * x / length, ry * y / length, rz * z / length];
-      }
-
-      const midpointCache = {};
-      function getMidpoint(a, b) {
-        const key = a < b ? `${a}_${b}` : `${b}_${a}`;
-        if (midpointCache[key] !== undefined) return midpointCache[key];
-
-        const v1 = vx[a];
-        const v2 = vx[b];
-        const mid = project([
-          (v1[0] + v2[0]) / 2,
-          (v1[1] + v2[1]) / 2,
-          (v1[2] + v2[2]) / 2,
-        ]);
-        vx.push(mid);
-        const index = vx.length - 1;
-        midpointCache[key] = index;
-        return index;
-      }
-
-      rawVerts.forEach(v => vx.push(project(v)));
-      let fx = rawFaces.map(f => [...f]);
-
-      for (let s = 0; s < N; s++) {
-        const newFaces = [];
-        for (const [a, b, c] of fx) {
-          const ab = getMidpoint(a, b);
-          const bc = getMidpoint(b, c);
-          const ca = getMidpoint(c, a);
-
-          newFaces.push([a, ab, ca]);
-          newFaces.push([b, bc, ab]);
-          newFaces.push([c, ca, bc]);
-          newFaces.push([ab, bc, ca]);
-        }
-        fx = newFaces;
-      }
-
-      return [vx, fx];
+			newFaces.push([a, ab, ca]);
+			newFaces.push([b, bc, ab]);
+			newFaces.push([c, ca, bc]);
+			newFaces.push([ab, bc, ca]);
+		}
+		fx = newFaces;
+	}
+	return [vx, fx];
 }
 
 function ellipsoid(rx, ry, rz, N = 2) {
