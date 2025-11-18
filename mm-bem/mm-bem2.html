@@ -133,8 +133,8 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
 -->
 </optgroup>
 <optgroup label="Swimmbladder examples">
-  <option value="[msh(simplify10_YFT_sb)]">Yellowfin_Tuna_752x1500_sb</option>
-  <option value="[msh(simplify20_YFT_sb)]">Yellowfin_Tuna_1502x3000_sb</option>
+  <option value="[msh(YFT_752x1500_sb)]">Yellowfin_Tuna_752x1500_sb</option>
+  <option value="[msh(YFT_1502x3000_sb)]">Yellowfin_Tuna_1502x3000_sb</option>
   <option value="[msh(Atun_B314_sb)]">Atlantic_Bluefin_Tuna_B314_sb</option>
 </optgroup>
   <!-- <option value="[specimen(0,0),[0,0,0]]">Gadus_morhua_A_L17.3_body</option> -->
@@ -488,7 +488,7 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
 			
 <!----------- footer ------------->
 <br>
-<p title="marek.moszynski@pg.edu.pl" style="text-align:center">mm-bem v1.97 (15.11.2025)</p>
+<p title="marek.moszynski@pg.edu.pl" style="text-align:center">mm-bem v1.98 (18.11.2025)</p>
 
 		</td>
 	</tr>
@@ -3041,7 +3041,7 @@ main();
 
 // --------  
 
-const simplify10_YFT_sb = `$MeshFormat
+const YFT_752x1500_sb = `$MeshFormat
 2.2 0 8
 $EndMeshFormat
 $Nodes
@@ -11812,7 +11812,7 @@ $Elements
 $EndElements
 `;
 
-var simplify20_YFT_sb=`$MeshFormat
+var YFT_1502x3000_sb=`$MeshFormat
 2.2 0 8
 $EndMeshFormat
 $Nodes
