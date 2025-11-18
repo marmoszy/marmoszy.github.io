@@ -1265,8 +1265,6 @@ function js_soft_sphere() {
 function js_soft_sphere_worker(obj,th,f0,c0,ph) {
 	var fmin,fmax,fstep,thmin,thmax,thstep,phmin,phmax,phstep;
 
-console.log('[Soft sphere exact solution: ...]');
-
 postMessage('[Soft sphere exact solution: ...]');
 
 	if(f0<0) {fmin=10e3; fmax=360e3; fstep=-f0;} else {fmin=f0; fmax=f0; fstep=f0;}
@@ -1279,10 +1277,10 @@ postMessage('[Soft sphere exact solution: ...]');
 		for(var ph0 = phmin; ph0 <= phmax; ph0 += phstep) {
 			for(var th0 = thmin; th0 <= thmax; th0 += thstep) {
 				var obj2 = obj.replace(')',','+f00+')');
-				s2 = eval(obj2);
+				var s = eval(obj2);
 				//document.getElementById("txt").value += s+'\n\n';
-				postMessage(JSON.stringify(s2));
-				var v = s2.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
+				postMessage(JSON.stringify(s));
+				var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
 				if(v) {
 					s2 += '' +(th0)+' '+(ph0)+' ' + parseFloat(v[5]).toFixed(6)+'\n';
 				}
@@ -1291,6 +1289,9 @@ postMessage('[Soft sphere exact solution: ...]');
 		}
 		LBS2.push([f00,parseFloat(v[1]),parseFloat(v[2]),parseFloat(v[5])]);
 	}
+
+	postMessage(JSON.stringify(s2));
+
 //	var t = Date.now()/1000 - start2;
 	if( (thmin!=thmax) || (phmin!=phmax)) {
 		//s2 = '# mm-bem-soft-sphere: '+t.toFixed(3)+'s\n'
