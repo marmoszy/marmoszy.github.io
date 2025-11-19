@@ -513,7 +513,7 @@ var bkg = bkg1; //"#000077"; // "#ffdd88"; "darkblue"; //
 
 var axcolors = ["red", "green", "blue"];
 var mshcolor = "#0b22ae";
-var axes_onoff = 1, box_onoff = 1, circle_onoff = 1;
+var axes_onoff = 1, box_onoff = 1, circle_onoff = 1; mesh_onoff = 1;
 
 //var wh = Math.max(window.innerHeight-150,400);
 var wh = document.getElementById("svg1").getAttribute("width")-0;
@@ -568,6 +568,9 @@ document.onkeydown = function(e) {
   }
   if(e.keyCode==48 || e.keyCode==82 ) { // ctrl 0 ctrl R
 	  if(e.ctrlKey) {e.preventDefault(); a=0.4; b=-0.2; c=0.0; init3d(); /*zoom=1; xoff=0; yoff=0;*/}
+  }
+  if(e.keyCode==77) { // ctrl M
+	  if(e.ctrlKey) {e.preventDefault(); mesh_onoff^=1;}
   }
   if(e.keyCode==49 ) { // ctrl 1
 	  if(e.ctrlKey) {e.preventDefault(); a=(a==1.57?-1.57:1.57); b=0;  init3d(); }
@@ -874,7 +877,8 @@ function update_mesh() {
 			p.push([V(P(vx[fx[k][0]])),V(P(vx[fx[k][1]])),V(P(vx[fx[k][2]]))]);
 		}
 	}
-	var el = svg_createpath(svg, "M", p, mshcolor, 0.5, "1,0", 0, 'none');
+	
+	var el = svg_createpath(svg, "M", p, mesh_onoff?mshcolor:"none", mesh_onoff?0.5:0, "1,0", 0, 'none');
 	//el.setAttribute('fill','lime');
 	//el.setAttribute('fill-rule','nonzero');
 }
@@ -1022,6 +1026,7 @@ ctrl 1 - view from first axis (+/-)
 ctrl 2 - view from second axis (+/-)
 ctrl 3 - view from third axis (+/-)
 ctrl R - defualt orientation
+ctrl M - Mesh on/off
 ctrl-shift-cursors - move
 
 marek.moszynski@pg.edu.pl`;
