@@ -325,11 +325,11 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
     <button  style="border:none;color:white;background-color:#0080FF;border-radius:12px;width:24px;height:24px;font-size:14px"
 		onclick="zoomout();update();"><b>&minus;</b></button>
 	<input type="range" min="-180" max="180" value="0" class="slider" id="a_slider" style="width:116;position:relative;top:4px"
-		oninput="a_changed(this);"> 
+		oninput="a_changed(this);" onclick="a_clicked(this);"> 
 	<input type="range" min="-180" max="180" value="-20" class="slider" id="b_slider" style="width:116;position:relative;top:4px" 
-	oninput="b_changed(this);"> 
+	oninput="b_changed(this);" onclick="b_clicked(this);"> 
 	<input type="range" min="-180" max="180" value="0" class="slider" id="c_slider" style="width:116;position:relative;top:4px"
-		oninput="c_changed(this);"> 
+		oninput="c_changed(this);" onclick="c_clicked(this);"> 
     <button  style="border:none;color:white;background-color:#0080FF;border-radius:12px;width:24px;height:24px;font-size:14px"
 		onclick="zoomin();update();"><b>&plus;</b></button>
    <br>     
@@ -573,13 +573,13 @@ document.onkeydown = function(e) {
 	  if(e.ctrlKey) {e.preventDefault(); mesh_onoff^=1;}
   }
   if(e.keyCode==49 ) { // ctrl 1
-	  if(e.ctrlKey) {e.preventDefault(); a=(a==1.57?-1.57:1.57); b=0;  init3d(); }
+	  if(e.ctrlKey) {e.preventDefault(); a_fun();}
   }
   if(e.keyCode==50 ) { // ctrl 2
-	  if(e.ctrlKey) {e.preventDefault(); b=(b==1.57?-1.57:1.57); a=0; init3d();}
+	  if(e.ctrlKey) {e.preventDefault(); b_fun();}
   }
   if(e.keyCode==51 ) { // ctrl 3
-	  if(e.ctrlKey) {e.preventDefault(); a=(a==0?3.1459:0.0); b=0; init3d();}
+	  if(e.ctrlKey) {e.preventDefault(); c_fun();}
   }
   if(e.keyCode==187 ) { // ctrl +
 	  zoomin();
@@ -979,9 +979,16 @@ function init_sliders() { // sliders
   document.getElementById("c_slider").value = Math.round(c*180/pi);
 }
 
-function a_changed(el) {a = parseFloat(el.value)*pi/180; init3d(); }
-function b_changed(el) {b = parseFloat(el.value)*pi/180; init3d(); }
-function c_changed(el) {c = parseFloat(el.value)*pi/180; init3d(); }
+var a_bool=0,b_bool=0,c_bool=0;
+function a_changed(el) {a = parseFloat(el.value)*pi/180; init3d(); a_bool=1; }
+function b_changed(el) {b = parseFloat(el.value)*pi/180; init3d(); b_bool=1; }
+function c_changed(el) {c = parseFloat(el.value)*pi/180; init3d(); c_bool=1; }
+function a_clicked(el) {if(!a_bool){a_fun();} a_bool=0; }
+function b_clicked(el) {if(!b_bool){b_fun();} b_bool=0; }
+function c_clicked(el) {if(!c_bool){c_fun();} c_bool=0; }
+function a_fun() {a=(a==1.57?-1.57: 1.57); if(a==1.57&&b==0){a=0.4;b=-0.2;c=0.0;} else b=0; init3d();}
+function b_fun() {b=(b==1.57?-1.57:1.57); if(b==1.57&&a==0){a=0.4;b=-0.2;c=0.0;} else a=0; init3d();}
+function c_fun() {a=(a==0?3.1459:0.0); if(a==0&&b==0){a=0.4;b=-0.2;c=0.0;} else b=0; init3d();}
 
 function update() {
   update_axes();
