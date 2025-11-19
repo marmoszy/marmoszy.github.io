@@ -582,10 +582,10 @@ document.onkeydown = function(e) {
 	  if(e.ctrlKey) {e.preventDefault(); c_fun();}
   }
   if(e.keyCode==187 ) { // ctrl +
-	  zoomin();
+	  if(e.ctrlKey) {e.preventDefault(); zoomin();}
   }
   if(e.keyCode==189 ) { // ctrl -
-	  zoomout();
+	  if(e.ctrlKey) {e.preventDefault(); zoomout();}
   }
   if(e.keyCode==37 ) { /* left key */
      if(e.shiftKey && e.ctrlKey) {e.preventDefault(); xoff -= 20;}
@@ -1491,6 +1491,8 @@ function change1() {
 					var svg1 = document.getElementById("svg1");
 					update_wave_direction(svg1,parseFloat(v[1]),parseFloat(v[2]),parseFloat(v[3]),parseFloat(v[4]));
 					var th_lbs = (parseFloat(v[1])+180)%360;
+					var th0 = parseFloat(v[1]);
+					var ph0 = parseFloat(v[2]);
 					var f00 = parseFloat(v[3]);
 					var lbs = parseFloat(v[5]);
 					var TS = 20*Math.log10(lbs);   // console.log(th_lbs+' '+TS);
