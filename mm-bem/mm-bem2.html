@@ -35,7 +35,7 @@ input[type='file'],input[type='button'] {font-size: 18px; }
 --col-7: #B1A5C5; /* c0add1; #a37364;  #955A49; */    
 --col-8: #EA9E86; /*#AF7769;*/     
 }
-.button1 {font-size:22px;font-weight:normal;text-align:left;background-color:var(--col-7);color:var(--col-1); margin:0;padding:16;width:100%;outline:none;}
+.button1 {font-size:20px;font-weight:normal;text-align:left;background-color:var(--col-7);color:var(--col-1); margin:0;padding:12;width:100%;outline:none;}
 
 .acc, {background-color:var(--col-7);color:black;cursor:pointer;text-align:left;
   padding:20px;margin:0;width:100%;max-width:960px;border:solid 0px;outline:none;transition:0.1s;
@@ -83,7 +83,7 @@ This is a web-based demonstration of the mm-bem code, which calculates acoustic 
 
 <p style="font-size:20;margin:16;max-width:940;text-align:justify">
 The Input parameters section gives user interface for configuring simulations. Users can specify: (1) target mesh (2) plane wave direction angles <small><i>&theta;</i><sub>0</sub></small> and <small><i>&phi;</i><sub>0</sub></small> (3) its frequency <small><i>f</i><sub>0</sub></small> and (4) sound speed <small><i>c</i><sub>0</sub></small> in water. 
-The target mesh could be selected from dropdown menu containing cannonical examples and swimbladder models. The mesh is displayed in the Data Visualisation section on the left 3D panel. The results of BEM calculations are shown in the right panel as 2D polar plot of the scattering pattern. The wave direction angles could be set into scanning modes enabling calculations over a full angular range. When both angles are set into scanning mode, the output represents 3D target strength distribution, which is visualized in 3D View, replacing original mesh. The frequency parametr could be also set into scan mode across predefined frequency range (10&nbsp;kHz - 360&nbsp;kHz).
+The target mesh could be selected from dropdown menu containing cannonical examples and swimbladder models. The mesh is displayed in the Data Visualisation section on the left 3D panel. The results of BEM calculations are shown in the right panel as 2D polar plot of the scattering pattern. The wave direction angles could be set into scanning modes enabling calculations over a full angular range. When both angles are set into scanning mode, the output represents 3D backscattering length distribution, which is visualized in 3D View, replacing original mesh. The frequency parametr could be also set into scan mode across predefined frequency range (10&nbsp;kHz - 360&nbsp;kHz).
 
 <p style="font-size:20;margin:16;max-width:940;text-align:justify">
 The fish swimbladder models included in the demo are sourced from (1) scientific studies <sup><small><a href="https://www.researchgate.net/publication/384356288_Acoustic_Techniques_for_Tuna_Biomass_Estimation">1</a>, <a href="https://www.mdpi.com/2077-1312/12/11/2014">2</a></small></sup> (2) the <a href="https://ices-tools-dev.github.io/echoSMs/">echoSMs</a> initiative (3) the NOAA Fisheries <a href="https://www.fisheries.noaa.gov/data-tools/krm-model">KRM model</a> webpage. Users may also upload custom target meshes in one of the following formats: <a href="https://gmsh.info/">GMSH</a> msh ASCII 2.0 with triangular elements or <a href="https://en.wikipedia.org/wiki/STL_(file_format)">STL</a> ASCII or in the <a href="https://github.com/ices-tools-dev/echoSMs/tree/main/data_store/resources">echoSMs JSON</a> data structure. 
@@ -102,9 +102,9 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
 	</tr>
 
 	<tr class="frame" hidden0>
-		<td>
+		<td style="background-color:#C8DFBE;">
 
-<div style="width:440px;height:196;height1:100%;overflow-y:auto;border-width:0;border-style:solid;padding:20px;background-color:#C8DFBE;#EDF5EA;#D6BEDF;#ffffe6">
+<div style="width:440px;overflow-y:auto;border-width:0;padding:20px;">
 <label for="def">Target: </label>
 <select id="def" onchange="select0();select();" style="background-color:#e6fff2;max-width:360px;">
 <optgroup id="prevmesh" label="Generated 3D backscattering length">
@@ -165,15 +165,15 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
 </select>
 
 <br><span style="margin-left:32px"></span> or <input accept="model/mesh" id="openfile" title="Load from msh (ascii 2.0) or stl (ascii) files" type="file" onchange="readFile(this);" multiple/>
-<p>
-<textarea id="obj" style="width:438;height:100" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905,2),[0,0,0]]</textarea>
+
+<textarea id="obj" style="width:438;height:92" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905,2),[0,0,0]]</textarea>
 
 </div>
 
 		</td>
-		<td>
+		<td style="background-color:#DFC5BE;">
 
-<div style="width:440px;height:196;height1:100%;overflow-y:auto;border-width:1;border-style:solid;padding:20px;background-color:#DFC5BE;#C8DFBE;#EDF5EA;#D6BEDF;#C4A2D2;#ffffe6">
+<div style="width:440px;overflow-y:auto;border-width:0;padding:20px;">
 
 <label for="th">Plane wave: <i>&theta;<sub>0</sub></i> =</label> 
 <select id="th" onchange="select()">
@@ -262,28 +262,11 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
   <option value="420e3">420 kHz</option>
 </optgroup>
 </select>
-<br><br>
-<label for="c0">Sound speed: <i>c<sub>0</sub></i> =</label> 
-<select id="c0" onchange="select()">
-<optgroup>
-  <option value="1470">1470 m/s</option>
-  <option value="1475">1475 m/s</option>
-  <option value="1480" selected>1480 m/s</option>
-  <option value="1485">1485 m/s</option>
-  <option value="1490">1490 m/s</option>
-  <option value="1495">1495 m/s</option>
-  <option value="1500">1500 m/s</option>
-  <option value="1505">1505 m/s</option>
-  <option value="1510">1510 m/s</option>
-  <option value="1515">1515 m/s</option>
-  <option value="1520">1520 m/s</option>
-</optgroup>
-</select>
 <!--<input type="button" value="Calculate" onclick="change1()"></input>-->
 
 <br><br>
 <label for="out2">Add data: </label> 
-<select id="out2" onchange="change2()" style="background-color:#e6ffff;">
+<select id="out2" onchange="change2()" style="background-color:#e6ffff;max-width:360px">
 <optgroup>
   <option value="none">none</option>
 </optgroup>
@@ -318,7 +301,7 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
 
 
 	<tr class="frame" hidden0>
-		<td>
+		<td colspan=1>
 
 <!------------ svg plot3D -------------->
 <div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#fafcff;white;#F5EDEA;#E4EFF2;#eee">
@@ -478,6 +461,23 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
 <!--  <option value="py_soft">pyodide</option> -->
 </optgroup>
 </select>
+<br><br>
+<label for="c0">Sound speed: <i>c<sub>0</sub></i> =</label> 
+<select id="c0" onchange="select()">
+<optgroup>
+  <option value="1470">1470 m/s</option>
+  <option value="1475">1475 m/s</option>
+  <option value="1480" selected>1480 m/s</option>
+  <option value="1485">1485 m/s</option>
+  <option value="1490">1490 m/s</option>
+  <option value="1495">1495 m/s</option>
+  <option value="1500">1500 m/s</option>
+  <option value="1505">1505 m/s</option>
+  <option value="1510">1510 m/s</option>
+  <option value="1515">1515 m/s</option>
+  <option value="1520">1520 m/s</option>
+</optgroup>
+</select>
 </p>
 			
 		</td>
@@ -488,7 +488,7 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
 			
 <!----------- footer ------------->
 <br>
-<p title="marek.moszynski@pg.edu.pl" style="text-align:center">mm-bem v1.98 (18.11.2025)</p>
+<p title="marek.moszynski@pg.edu.pl" style="text-align:center">mm-bem v1.99 (22.11.2025)</p>
 
 		</td>
 	</tr>
@@ -839,7 +839,7 @@ function msh_parse(s) {
 	return [v,e];
 }
 
-var vx=[],fx=[],x0,y0,z0,M=[];
+var vx=[],fx=[],x0,y0,z0,M=[],r0max;
 function init_mesh() {
 	var s=document.getElementById("msh").value;
 	var ss=s.split('$EndElements\n');
@@ -862,6 +862,15 @@ function init_mesh() {
 	//[vx,fx] = ellipsoid(0.01905,0.01,0.01);
 	x0=0.0, y0=0; z0=0; M = R1(); //Ry(-45);
 
+	r0max=0;
+	for(var i=0;i<vx.length;i++) {
+		var r0= Math.sqrt(vx[i][0]**2+vx[i][1]**2+vx[i][2]**2);
+		if(r0>r0max) {
+			r0max=r0;
+		}
+	}
+	console.log('Mesh max: '+r0max.toFixed(6));
+	
 	msh_str([[vx,fx]]);
 	s = msh_flush();
 	document.getElementById("msh").value = s;
@@ -915,7 +924,7 @@ function update_axes() {
 
 }
 
-function update_wave_direction(svg,th,ph,f0,c0) {
+function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
 	
 // ---- wave length box update
   var l = c0/f0;
@@ -924,8 +933,7 @@ function update_wave_direction(svg,th,ph,f0,c0) {
   svg_createpoint(svg,"lambda_0",V(P(p0)),axes_onoff?"#FFAA33":"none",t0);
   draw_box("svg1","B1",-l/2,l/2,-l/2,l/2,-l/2,l/2,box_onoff?'black':'none');
 
-	
-  var r = c0/f0/2 * 5; //Math.sqrt(2);
+  var r = (r0max * 1.6)||(c0/f0/2 * 5); //Math.sqrt(2);
 
 // --- two circles for showing wave direction
 
@@ -1701,10 +1709,10 @@ console.log(m,n);
 				s += '\n';
 				k += 1;
 				if((i<n-1) && (j<m-1)) {
-			if(x[k-1]!=90 && x[k-1]!=270) {
-					k2 += 1;
-					s2 += (k2) + ' 2 2 0 1 ' + (k) + ' ' + (k+1) + ' ' + (k+m) + '\n';
-			}
+					if(x[k-1]!=90 && x[k-1]!=270) {
+							k2 += 1;
+							s2 += (k2) + ' 2 2 0 1 ' + (k) + ' ' + (k+1) + ' ' + (k+m) + '\n';
+					}
 					k2 += 1;
 					s2 += (k2) + ' 2 2 0 1 ' + (k+1) + ' ' + (k+m+1) + ' ' + (k+m) + '\n';
 				}
