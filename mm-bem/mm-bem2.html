@@ -306,15 +306,14 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
 <!------------ svg plot3D -------------->
 <div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#fafcff;white;#F5EDEA;#E4EFF2;#eee">
     <button  style="border:none;color:white;background-color:#0080FF;border-radius:12px;width:24px;height:24px;font-size:14px"
-		onclick="zoomout();update();"><b>&minus;</b></button>
+		onclick="zoomout();update();" title="zoomout" id="zoomout"><b>&minus;</b></button>
 	<input type="range" min="-180" max="180" value="0" class="slider" id="a_slider" style="width:116;position:relative;top:4px"
-		oninput="a_changed(this);" onclick="a_clicked(this);"> 
-	<input type="range" min="-180" max="180" value="-20" class="slider" id="b_slider" style="width:116;position:relative;top:4px" 
-	oninput="b_changed(this);" onclick="b_clicked(this);"> 
+		oninput="a_changed(this);" onclick="a_clicked(this);"  title="first rotation angle"> 
+	<input type="range" min="-180" max="180" value="-20" class="slider" id="b_slider" style="width:116;position:relative;top:4px" oninput="b_changed(this);" onclick="b_clicked(this);"  title="second rotation angle"> 
 	<input type="range" min="-180" max="180" value="0" class="slider" id="c_slider" style="width:116;position:relative;top:4px"
-		oninput="c_changed(this);" onclick="c_clicked(this);"> 
+		oninput="c_changed(this);" onclick="c_clicked(this);"  title="third rotation angle"> 
     <button  style="border:none;color:white;background-color:#0080FF;border-radius:12px;width:24px;height:24px;font-size:14px"
-		onclick="zoomin();update();"><b>&plus;</b></button>
+		onclick="zoomin();update();" title="zoomin" id="zoomin"><b>&plus;</b></button>
    <br>     
    <svg xmlns="http://www.w3.org/2000/svg" id="svg1" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
       <g id="gt" transform="translate(0,20)">	   	   	   
@@ -893,6 +892,12 @@ function update_mesh() {
 }
 
 function update_axes() {
+  var el = document.getElementById("zoomin"); if(el) {el.title="z="+zoom;}	
+  var el = document.getElementById("zoomout"); if(el) {el.title="z="+zoom;}	
+  var el = document.getElementById("a_slider"); if(el) {el.title="a="+(a*180/pi).toFixed(1);}	
+  var el = document.getElementById("b_slider"); if(el) {el.title="b="+(b*180/pi).toFixed(1);}	
+  var el = document.getElementById("c_slider"); if(el) {el.title="c="+(c*180/pi).toFixed(1);}	
+
   var svg = document.getElementById("svg1");
 
 // ---- 3 positive and negative axes
