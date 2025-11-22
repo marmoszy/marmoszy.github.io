@@ -316,11 +316,11 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
 		onclick="zoomin();update();" title="zoomin" id="zoomin"><b>&plus;</b></button>
    <br>     
    <svg xmlns="http://www.w3.org/2000/svg" id="svg1" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
-      <g id="gt" transform="translate(0,20)">	   	   	   
+      <g id="gt" transform="translate(0,20)">
       </g>
    </svg>
 </div>
-<input type=button value="Save to svg file" onclick='writeFile(document.getElementById("svg1").outerHTML,"mm-bem-polar.svg");' /> 
+<input type=button value="Save to svg file" onclick='writeFile(document.getElementById("svg1").outerHTML,"mm-bem-mesh.svg");' /> 
 	
 		</td>
 		<td>
@@ -387,7 +387,7 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
 </g>
 </svg>
 </div>
-<input type=button value="Save to svg file" onclick='writeFile(document.getElementById("svg").outerHTML,"mm-bem-mesh.svg");' /> 
+<input type=button value="Save to svg file" onclick='writeFile(document.getElementById("svg").outerHTML,"mm-bem-polar.svg");' /> 
 
 		</td>
 	</tr>
@@ -540,6 +540,9 @@ function init_mouse() {
 		}
 		sX = event.pageX; sY = event.pageY;
 	}
+	el.ontouchstart=el.onmousedown;
+	el.ontouchmove=el.onmousemove;
+	el.ontouchend=el.onmouseup;
 }
 
 document.onkeydown = function(e) {
@@ -938,7 +941,7 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
   svg_createpoint(svg,"lambda_0",V(P(p0)),axes_onoff?"#FFAA33":"none",t0);
   draw_box("svg1","B1",-l/2,l/2,-l/2,l/2,-l/2,l/2,box_onoff?'black':'none');
 
-  var r = (r0max * 1.6)||(c0/f0/2 * 5); //Math.sqrt(2);
+  var r = (r0max * 1.5)||(c0/f0/2 * 5); //Math.sqrt(2);
 
 // --- two circles for showing wave direction
 
@@ -1009,6 +1012,7 @@ function update() {
 }
 
 function init3d() {
+  wh = document.getElementById("svg1").getAttribute("width")-0;
   init_view();  
   init_sliders();
   update();
@@ -1028,7 +1032,7 @@ function main() {
   zoomin();
   zoomin();
   zoomin();
-  //zoomin();
+  zoomin();
   //zoomin();
   init3d();
 }
