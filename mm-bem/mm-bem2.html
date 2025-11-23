@@ -520,7 +520,7 @@ var wh = document.getElementById("svg1").getAttribute("width")-0;
 function zoomin()  {zoom*=2; xoff-=wh/4*zoom; yoff-=wh/4*zoom;}
 function zoomout() {if(zoom>1/8) {xoff+=wh/4*zoom; yoff+=wh/4*zoom; zoom/=2; }}
 
-function init_mouse() {
+function init_mouse0() {
 	let delta=8, sX, sY, clk=0;
 	var el=document.getElementById("svg1");
 	el.onmousedown = function (event) {sX = event.pageX; sY = event.pageY;  clk=1;}
@@ -540,9 +540,41 @@ function init_mouse() {
 		}
 		sX = event.pageX; sY = event.pageY;
 	}
-//	el.ontouchstart=el.onmousedown;
-//	el.ontouchmove=el.onmousemove;
-//	el.ontouchend=el.onmouseup;
+}
+
+function init_mouse() {
+    let delta = 8, sX, sY, clk = 0;
+    var el = document.getElementById("svg1");
+
+    // --- Mouse events ---
+    el.onmousedown = function (event) {sX = event.pageX; sY = event.pageY; clk = 1;};
+    el.onmouseup = function () { clk = 0; };
+    el.onmousemove = function (event) {if (clk == 0) return;handleMove(event.pageX, event.pageY);};
+
+    // --- Touch events ---
+    el.ontouchstart = function (event) {
+        if (event.touches.length > 0) {sX = event.touches[0].pageX;sY = event.touches[0].pageY;clk = 1;}
+    };
+    el.ontouchend = function () { clk = 0; };
+    el.ontouchmove = function (event) {
+        if (clk == 0 || event.touches.length === 0) return;
+        handleMove(event.touches[0].pageX, event.touches[0].pageY);
+        event.preventDefault(); // Prevent scrolling while dragging
+    };
+    // --- Shared movement logic ---
+    function handleMove(x, y) {
+        var dX = x - sX, dY = y - sY;
+        if (Math.abs(dX) < delta && Math.abs(dY) < delta) {return;
+        } else {
+            if (Math.abs(dX) > Math.abs(dY)) {
+                a -= dX / 4 * pi / 180;
+            } else {
+                b -= dY / 4 * pi / 180;
+            }
+            init3d();
+        }
+        sX = x; sY = y;
+    }
 }
 
 document.onkeydown = function(e) {
