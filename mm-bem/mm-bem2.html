@@ -545,36 +545,45 @@ function init_mouse0() {
 function init_mouse() {
     let delta = 8, sX, sY, clk = 0;
     var el = document.getElementById("svg1");
-
     // --- Mouse events ---
     el.onmousedown = function (event) {sX = event.pageX; sY = event.pageY; clk = 1;};
     el.onmouseup = function () { clk = 0; };
     el.onmousemove = function (event) {if (clk == 0) return;handleMove(event.pageX, event.pageY);};
-
-    // --- Touch events ---
+	// --- Touch events ---
+    let prevDist = null; // for pinch zoom
     el.ontouchstart = function (event) {
-        if (event.touches.length > 0) {sX = event.touches[0].pageX;sY = event.touches[0].pageY;clk = 1;}
+        if (event.touches.length === 1) {sX = event.touches[0].pageX;sY = event.touches[0].pageY;clk = 1;}
+		else if (event.touches.length === 2) { prevDist = getDistance(event.touches); clk = 0;}
     };
-    el.ontouchend = function () { clk = 0; };
+    el.ontouchend = function () { clk = 0; prevDist = null;};
     el.ontouchmove = function (event) {
-        if (clk == 0 || event.touches.length === 0) return;
-        handleMove(event.touches[0].pageX, event.touches[0].pageY);
-        event.preventDefault(); // Prevent scrolling while dragging
-    };
-    // --- Shared movement logic ---
-    function handleMove(x, y) {
-        var dX = x - sX, dY = y - sY;
-        if (Math.abs(dX) < delta && Math.abs(dY) < delta) {return;
-        } else {
-            if (Math.abs(dX) > Math.abs(dY)) {
-                a -= dX / 4 * pi / 180;
-            } else {
-                b -= dY / 4 * pi / 180;
-            }
-            init3d();
-        }
-        sX = x; sY = y;
-    }
+		if (event.touches.length === 1 && clk === 1) {
+		    handleMove(event.touches[0].pageX, event.touches[0].pageY);
+		} else if (event.touches.length === 2) {
+		    let dist = getDistance(event.touches);
+		    if (prevDist) {
+		        let scale = dist / prevDist;
+		        if (scale > 1.05) { zoomin();init3d();} else if (scale < 0.95) { zoomout();init3d();}
+		    }
+		    prevDist = dist;
+		}
+		event.preventDefault(); // prevent scrolling	
+	};
+	// --- Shared movement logic ---
+	function handleMove(x, y) {
+		var dX = x - sX, dY = y - sY;
+		if (Math.abs(dX) < delta && Math.abs(dY) < delta) {return;
+		} else {
+			if (Math.abs(dX) > Math.abs(dY)) {a -= dX / 4 * pi / 180;} else {b -= dY / 4 * pi / 180;}
+			init3d();
+		}
+		sX = x; sY = y;
+	}
+	// --- Helper: distance between two fingers ---
+	function getDistance(touches) {
+		let dx = touches[0].pageX - touches[1].pageX, dy = touches[0].pageY - touches[1].pageY;
+		return Math.sqrt(dx * dx + dy * dy);
+	}
 }
 
 document.onkeydown = function(e) {
