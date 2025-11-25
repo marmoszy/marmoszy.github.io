@@ -563,7 +563,7 @@ function init_mouse() {
 		    let dist = getDistance(event.touches);
 		    if (prevDist) {
 		        let scale = dist / prevDist;
-		        if (scale > 1.1) { zoomin();init3d();} else if (scale < 0.9) { zoomout();init3d();}
+		        if (scale > 1.04) { zoomin();init3d();} else if (scale < 1/1.04) { zoomout();init3d();}
 		    }
 		    prevDist = dist;
 		}
