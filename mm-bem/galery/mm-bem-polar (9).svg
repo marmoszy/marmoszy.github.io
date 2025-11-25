@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="svg" width="440" height="440" font-family="Times" font-size="14" oncopy="svg_copy(this);">
+<text x="10" y="10" id="title" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
+<text x="280" y="10" id="title2" font-style="italic" style="fill1:#ff6633;stroke:none">f<tspan dy="6" font-size="0.8em">0</tspan><tspan dy="-6" font-style="normal"> = 38 kHz <tspan font-style="italic">c</tspan><tspan dy="6" font-size="0.8em">0</tspan><tspan dy="-6" font-style="normal"> = 1480 m/s</tspan></tspan></text>
+<text x="340" y="432" id="title3" font-style="italic" style="fill1:#ff6633;stroke:none">TS<tspan font-style="normal"> = -39.29 dB</tspan></text>
+<text x="10" y="432" id="title4" font-style="italic" style="fill1:#ff6633;stroke:none">ℒ<tspan dy="6" font-size="0.8em">BS</tspan><tspan dy="-6" font-style="normal"> = 0.0108 m</tspan></text>
+<g id="svg0" transform="translate(20,20)">
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(30 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(60 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(90 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(120 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(150 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(180 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(210 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(240 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(270 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(300 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(330 200 200)" stroke-dasharray="1,1"></line>
+<circle cx="200" cy="200" r="10" stroke="black" fill="none"></circle>	
+<circle cx="200" cy="200" r="57.5" stroke="gray" fill="none" stroke-dasharray="1,1"></circle>	
+<circle cx="200" cy="200" r="105" stroke="gray" fill="none" stroke-dasharray="1,1"></circle>	
+<circle cx="200" cy="200" r="152.5" stroke="gray" fill="none" stroke-dasharray="1,1"></circle>	
+<circle cx="200" cy="200" r="200" stroke="black" fill="none"></circle>
+<text x="205" y="215">-60</text>
+<text x="245" y="215">-50</text>
+<text x="295" y="215">-40</text>
+<text x="342" y="215">-30</text>
+<text x="380" y="215">-20</text>
+<text x="405" y="205">0</text>
+<g transform="rotate(-30,200,200)"><text x="405" y="205">30</text></g>
+<g transform="rotate(-60,200,200)"><text x="405" y="205">60</text></g>
+<text x="195" y="-5">90</text>
+<g transform="rotate(60,200,200)"><text x="-30" y="205">120</text></g>
+<g transform="rotate(30,200,200)"><text x="-30" y="205">150</text></g>
+<text x="-20" y="205">180</text>
+<g transform="rotate(-30,200,200)"><text x="-30" y="205">210</text></g>
+<g transform="rotate(-60,200,200)"><text x="-30" y="205">240</text></g>
+<text x="190" y="415">270</text>
+<g transform="rotate( 60,200,200)"><text x="405" y="205">300</text></g>
+<g transform="rotate( 30,200,200)"><text x="405" y="205">330</text></g>
+
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(0 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(30 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(60 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(90 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(120 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(150 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(180 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(210 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(240 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(270 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(300 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(330 200 200)"></line>
+
+<line x1="257.5" y1="195" x2="257.5" y2="200" stroke="black"></line>
+<line x1="305" y1="195" x2="305" y2="200" stroke="black"></line>
+<line x1="352.5" y1="195" x2="352.5" y2="200" stroke="black"></line>
+<path id="F" stroke="#AA69D3" stroke-width="3" stroke-dasharray="1,0" fill="none" d=""></path><path id="P" stroke="#92ba6c" stroke-width="3" stroke-dasharray="1,0" fill="none" d="M91.65 200.00 L102.90 226.02 L150.33 228.68 L169.30 230.70 L153.43 280.66 L171.74 305.48 L200.00 305.78 L222.49 283.92 L229.98 251.93 L255.41 255.41 L281.28 246.93 L302.92 227.58 L307.98 200.00 L282.08 178.01 L271.47 158.74 L262.84 137.16 L224.70 157.23 L211.58 156.77 L200.00 97.34 L169.35 85.60 L143.68 102.45 L133.01 133.01 L124.87 156.63 L103.72 174.20 L91.65 200.00 Z "></path><circle id="P_TS" fill="none" stroke-width="1" stroke="none" r="4" cx="210" cy="200"><title>TS(0°)=-60.00</title></circle><path id="Q" stroke="#4da6ff" stroke-width="3" stroke-dasharray="4,2" fill="none" d="M112.22 200.00 L113.50 223.18 L121.24 245.47 L116.08 283.92 L148.19 289.74 L177.75 283.03 L200.00 305.78 L227.26 301.74 L245.69 279.14 L252.95 252.95 L255.95 232.30 L261.56 216.50 L284.53 200.00 L268.18 181.73 L291.85 146.97 L299.97 100.03 L265.80 86.04 L221.50 119.76 L200.00 97.34 L178.15 118.44 L173.45 154.01 L189.65 189.65 L161.30 177.66 L132.36 181.88 L112.22 200.00 Z "></path><circle id="Q_TS" fill="none" stroke-width="1" stroke="none" r="4" cx="210" cy="200"><title>TS(0°)=-60.00</title></circle></g>
+</svg>

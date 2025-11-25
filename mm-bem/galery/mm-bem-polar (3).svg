@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" id="svg" width="440" height="440" font-family="Times" font-size="14" oncopy="svg_copy(this);">
+<text x="10" y="10" id="title" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
+<text x="280" y="10" id="title2" font-style="italic" style="fill1:#ff6633;stroke:none">f<tspan dy="6" font-size="0.8em">0</tspan><tspan dy="-6" font-style="normal"> = 360 kHz <tspan font-style="italic">c</tspan><tspan dy="6" font-size="0.8em">0</tspan><tspan dy="-6" font-style="normal"> = 1480 m/s</tspan></tspan></text>
+<text x="340" y="432" id="title3" font-style="italic" style="fill1:#ff6633;stroke:none">TS<tspan font-style="normal"> = -33.90 dB</tspan></text>
+<text x="10" y="432" id="title4" font-style="italic" style="fill1:#ff6633;stroke:none">ℒ<tspan dy="6" font-size="0.8em">BS</tspan><tspan dy="-6" font-style="normal"> = 0.0202 m</tspan></text>
+<g id="svg0" transform="translate(20,20)">
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(30 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(60 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(90 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(120 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(150 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(180 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(210 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(240 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(270 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(300 200 200)" stroke-dasharray="1,1"></line>
+<line x1="210" y1="200" x2="400" y2="200" stroke="gray" transform="rotate(330 200 200)" stroke-dasharray="1,1"></line>
+<circle cx="200" cy="200" r="10" stroke="black" fill="none"></circle>	
+<circle cx="200" cy="200" r="57.5" stroke="gray" fill="none" stroke-dasharray="1,1"></circle>	
+<circle cx="200" cy="200" r="105" stroke="gray" fill="none" stroke-dasharray="1,1"></circle>	
+<circle cx="200" cy="200" r="152.5" stroke="gray" fill="none" stroke-dasharray="1,1"></circle>	
+<circle cx="200" cy="200" r="200" stroke="black" fill="none"></circle>
+<text x="205" y="215">-60</text>
+<text x="245" y="215">-50</text>
+<text x="295" y="215">-40</text>
+<text x="342" y="215">-30</text>
+<text x="380" y="215">-20</text>
+<text x="405" y="205">0</text>
+<g transform="rotate(-30,200,200)"><text x="405" y="205">30</text></g>
+<g transform="rotate(-60,200,200)"><text x="405" y="205">60</text></g>
+<text x="195" y="-5">90</text>
+<g transform="rotate(60,200,200)"><text x="-30" y="205">120</text></g>
+<g transform="rotate(30,200,200)"><text x="-30" y="205">150</text></g>
+<text x="-20" y="205">180</text>
+<g transform="rotate(-30,200,200)"><text x="-30" y="205">210</text></g>
+<g transform="rotate(-60,200,200)"><text x="-30" y="205">240</text></g>
+<text x="190" y="415">270</text>
+<g transform="rotate( 60,200,200)"><text x="405" y="205">300</text></g>
+<g transform="rotate( 30,200,200)"><text x="405" y="205">330</text></g>
+
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(0 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(30 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(60 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(90 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(120 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(150 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(180 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(210 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(240 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(270 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(300 200 200)"></line>
+<line x1="390" y1="200" x2="400" y2="200" stroke="black" transform="rotate(330 200 200)"></line>
+
+<line x1="257.5" y1="195" x2="257.5" y2="200" stroke="black"></line>
+<line x1="305" y1="195" x2="305" y2="200" stroke="black"></line>
+<line x1="352.5" y1="195" x2="352.5" y2="200" stroke="black"></line>
+<path id="F" stroke="#AA69D3" stroke-width="3" stroke-dasharray="1,0" fill="none" d="M325.25 189.04 L310.85 180.45 L308.22 171.00 L303.25 162.42 L297.72 154.43 L292.00 146.88 L282.34 142.35 L269.46 141.72 L291.71 108.29 L265.81 121.57 L251.60 126.31 L226.76 153.66 L252.20 88.05 L242.10 84.33 L234.10 72.75 L222.88 70.23 L213.38 47.02 L200.00 86.75 L189.57 80.80 L181.15 93.07 L159.46 48.72 L163.88 100.77 L142.58 76.86 L128.47 76.10 L110.12 71.64 L98.09 78.55 L113.44 113.44 L73.50 93.85 L60.00 101.97 L56.68 117.25 L73.56 141.04 L63.58 150.35 L94.40 171.70 L70.47 177.16 L63.18 188.03 L80.13 200.00 L70.35 211.34 L59.61 224.75 L49.90 240.22 L77.81 244.47 L93.56 249.64 L82.12 268.06 L65.27 294.34 L76.31 303.79 L84.71 315.29 L96.30 323.58 L122.47 310.72 L156.40 275.52 L173.32 257.22 L169.99 282.46 L169.11 315.29 L176.03 335.96 L188.87 327.18 L200.00 283.99 L213.16 350.45 L227.79 357.59 L243.54 362.48 L261.21 368.16 L276.79 364.69 L287.73 351.95 L293.23 333.15 L296.68 315.22 L299.53 299.53 L300.75 284.54 L299.11 269.40 L291.88 253.05 L283.45 238.91 L305.07 238.24 L322.09 232.71 L331.31 223.15 L334.28 211.75 L333.97 200.00 "></path><path id="P" stroke="#AA69D3" stroke-width="3" stroke-dasharray="1,0" fill="none" d="M325.25 189.04 L310.85 180.45 L308.22 171.00 L303.25 162.42 L297.72 154.43 L292.00 146.88 L282.34 142.35 L269.46 141.72 L291.71 108.29 L265.81 121.57 L251.60 126.31 L226.76 153.66 L252.20 88.05 L242.10 84.33 L234.10 72.75 L222.88 70.23 L213.38 47.02 L200.00 86.75 L189.57 80.80 L181.15 93.07 L159.46 48.72 L163.88 100.77 L142.58 76.86 L128.47 76.10 L110.12 71.64 L98.09 78.55 L113.44 113.44 L73.50 93.85 L60.00 101.97 L56.68 117.25 L73.56 141.04 L63.58 150.35 L94.40 171.70 L70.47 177.16 L63.18 188.03 L80.13 200.00 L70.35 211.34 L59.61 224.75 L49.90 240.22 L77.81 244.47 L93.56 249.64 L82.12 268.06 L65.27 294.34 L76.31 303.79 L84.71 315.29 L96.30 323.58 L122.47 310.72 L156.40 275.52 L173.32 257.22 L169.99 282.46 L169.11 315.29 L176.03 335.96 L188.87 327.18 L200.00 283.99 L213.16 350.45 L227.79 357.59 L243.54 362.48 L261.21 368.16 L276.79 364.69 L287.73 351.95 L293.23 333.15 L296.68 315.22 L299.53 299.53 L300.75 284.54 L299.11 269.40 L291.88 253.05 L283.45 238.91 L305.07 238.24 L322.09 232.71 L331.31 223.15 L334.28 211.75 L333.97 200.00 Z "></path><circle id="P_TS" fill="none" stroke-width="1" stroke="none" r="4" cx="210" cy="200"><title>TS(0°)=-60.00</title></circle><path id="Q" stroke="#4da6ff" stroke-width="3" stroke-dasharray="4,2" fill="none" d="M309.82 180.64 L305.17 171.82 L301.34 163.12 L295.94 155.26 L291.49 147.18 L286.09 139.72 L280.06 132.82 L273.87 126.13 L266.95 120.21 L259.62 114.86 L251.96 110.01 L243.84 105.99 L235.45 102.61 L226.82 99.92 L217.97 98.07 L209.02 96.94 L200.00 96.56 L190.99 97.03 L182.05 98.22 L173.26 100.19 L164.68 102.96 L156.35 106.40 L148.36 110.56 L140.80 115.45 L133.65 120.92 L126.98 126.98 L120.98 133.69 L115.50 140.83 L110.67 148.43 L106.56 156.43 L103.16 164.75 L100.38 173.31 L98.51 182.11 L97.24 191.01 L96.83 200.00 L97.30 208.99 L98.41 217.91 L100.28 226.72 L103.17 235.24 L106.56 243.57 L110.56 251.64 L115.65 259.06 L121.13 266.18 L127.13 272.87 L133.85 278.83 L140.84 284.48 L148.44 289.31 L156.48 293.32 L164.71 296.95 L173.27 299.75 L182.11 301.44 L191.01 302.74 L200.00 303.39 L208.97 302.50 L217.88 301.39 L226.65 299.46 L235.15 296.59 L243.38 293.04 L251.54 289.27 L258.97 284.22 L266.34 279.07 L273.03 273.03 L278.97 266.26 L284.54 259.20 L289.63 251.75 L293.22 243.47 L296.81 235.24 L299.97 226.79 L301.13 217.83 L302.26 208.95 L303.00 200.00 Z "></path><circle id="Q_TS" fill="none" stroke-width="1" stroke="none" r="4" cx="210" cy="200"><title>TS(0°)=-60.00</title></circle></g>
+</svg>
