@@ -69,6 +69,8 @@ input[type='file'],input[type='button'] {font-size: 18px; }
 <div onclick="alert(about);" class="hdr">mm-bem web-demo</div>
 
 <table id="split" cellpadding=0 cellspacing=0 border=0 style="border-collapse:collapse;border:0;border-spacing:0;margin:0 auto">
+
+<!---------------------------  Basic information ------------------------>
 	<tr>
 		<td colspan=2>
 <button class="acc button1">Basic information</button>
@@ -94,8 +96,9 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
 		</td>
 	</tr>
 
+<!---------------------------  Input parameters  ------------------------>
 
-	<tr>
+	<tr><div style="display:inline-block;">		
 		<td colspan=2>
 <button class="acc button1" id="input">Input parameters</button>
 		</td>
@@ -426,7 +429,7 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
 <input type=button value="Save to txt file" onclick='writeFile(document.getElementById("txt").value,"mm-bem.txt");' /> 
 		</td>
 		<td style="vertical-align:top;width:50%">
-<textarea id="txt2" style="width:100%;max-width:240px;height:440;background-color:#A2C8D2;#e6ffff" ondrop="drop2(event);">
+<textarea id="txt2" style="width:100%;max-width:240px;height:440;background-color:#A2C8D2;#e6ffff" ondrop="drop2(event);"" onchange="change2a();">
 </textarea>
 		</td>
 	</tr>
@@ -434,6 +437,213 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
 
 		</td>
 	</tr>
+
+<!--------------------------- Galery ------------------------>
+
+	<tr>
+		<td colspan=2>
+<button class="acc button1">Galery</button>
+		</td>
+	</tr>
+	<tr class="frame" hidden>
+		<td colspan=2>
+			<table>
+				<tr>
+					<td>
+<img src="galery/mm-bem-mesh (1).svg">
+<p style="text-align:center"><i>Fig.1. 
+Low resolution model of sphere with radius r=1.905 cm<br>
+inside wave-length box with a size of 38kHz wavelength.
+</i></p>
+					</td>
+					<td style="padding-top:12px">
+<img src="galery/mm-bem-polar (1).svg">
+<p style="text-align:center"><i>Fig.2. 
+Scattering pattern at 38kHz obtained for low resolution<br>
+model of a soft sphere with radius r=1.905 cm along with exact<br>
+solution (dashed-blue).
+</i></p>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding-top:12px">
+<img src="galery/mm-bem-polar (2).svg">
+<p style="text-align:center"><i>Fig.3. 
+Target strength pattern at 38kHz obtained for low resolution<br>
+model of a soft sphere with radius r=1.905 cm along with exact<br>
+solution (dashed-blue).
+</i></p>
+					</td>
+					<td>
+<img src="galery/mm-bem-mesh (2).svg">
+<p style="text-align:center"><i>Fig.4.
+3D Backscattering length pattern at 38kHz for low resolution<br>
+model of a sphere with radius r=1.905 cm.
+</i></p>						
+					</td>
+				</tr>
+				<tr>
+					<td style="padding-top:12px">
+<img src="galery/mm-bem-polar (3).svg">
+<p style="text-align:center"><i>Fig.5. 
+Target strength frequenecy dependance for low resolution<br>
+model of a soft sphere with radius r=1.905 cm along with exact<br>
+solution (dashed-blue). The angular axis values corespond to <br>
+frequencies in kHz.
+</i></p>
+					</td>
+					<td>
+<img src="galery/mm-bem-mesh (3).svg">
+<p style="text-align:center"><i>Fig.6.
+3D backscattering length pattern at 38kHz for a soft sphere<br> 
+with radius r=1.905 cm (exact solution).
+</i></p>						
+					</td>
+				</tr>
+				<tr>
+					<td style="padding-top:12px">
+<img src="galery/mm-bem-mesh (4).svg">
+<p style="text-align:center"><i>Fig.7. 
+High resolution model of a sphere with radius r=1.905 cm.<br>
+Wave-length box is set for 70 kHz and is fully inside<br>
+the sphere.
+</i></p>
+					</td>
+					<td>
+<img src="galery/mm-bem-polar (4).svg">
+<p style="text-align:center"><i>Fig.8.
+Scattering length pattern at 70kHz for high reolution model<br> 
+of a sphere with radius r=1.905 cm along with exact solution.
+</i></p>						
+					</td>
+				</tr>
+				<tr>
+					<td style="padding-top:12px">
+<img src="galery/mm-bem-polar (5).svg">
+<p style="text-align:center"><i>Fig.9. 
+Scattering length pattern at 120kHz for high reolution model<br> 
+of a sphere with radius r=1.905 cm along with exact solution.
+</i></p>
+					</td>
+					<td>
+<img src="galery/mm-bem-polar (10).svg">
+<p style="text-align:center"><i>Fig.10.
+Target strength frequency dependence for high resolution<br>
+model of the soft sphere with radius r=1.905 cm along with exact<br>
+solution (dashed-blue). The angular axis values corespond to <br>
+frequencies in kHz.
+</i></p>						
+					</td>
+				</tr>
+				<tr>
+					<td style="padding-top:12px">
+<img src="galery/mm-bem-mesh (5).svg">
+<p style="text-align:center"><i>Fig.11. 
+The visualisation of the exact sphere, for which calculations<br>
+are based on theoretical equations.
+</i></p>
+					</td>
+					<td>
+<img src="galery/mm-bem-polar (6).svg">
+<p style="text-align:center"><i>Fig.12.
+Scattering length for of the exact sphere for three <br>
+frequencies: 38 kHz (dashed-blue), 120 kHz (dashed-blue)<br>
+and 200 kHz (red).
+</i></p>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding-top:12px">
+<img src="galery/mm-bem-mesh (6).svg">
+<p style="text-align:center"><i>Fig.13. 
+The model of Yellowfin tuna swimbladder conatining 1500<br>
+triangles. The green dot represents wave direction from<br> 
+dorsal aspect (from up).
+</i></p>
+					</td>
+					<td>
+<img src="galery/mm-bem-polar (7).svg">
+<p style="text-align:center"><i>Fig.14.
+Scattering strength from dorsal aspect (&theta;<sub>0</sub>=270&circ;<br>
+&phi;<sub>0</sub>=0&circ;) of Yellowfin tuna swimbladder model at 38 kHz.
+</i></p>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding-top:12px">
+<img src="galery/mm-bem-mesh (7).svg">
+<p style="text-align:center"><i>Fig.15. 
+The model of Yellowfin tuna swimbladder conatining 1500<br>
+triangles. The green dot represents wave direction from <br>
+lateral aspect (from one side).
+</i></p>
+					</td>
+					<td>
+<img src="galery/mm-bem-polar (8).svg">
+<p style="text-align:center"><i>Fig.16.
+Scattering strength from lateral aspect (&theta;<sub>0</sub>=0&circ;<br>
+&phi;<sub>0</sub>=90&circ;) of Yellowfin tuna swimbladder model at 38 kHz.
+</i></p>
+					</td>
+				</tr>
+				<tr>
+					<td style="padding-top:12px">
+<img src="galery/mm-bem-polar (9).svg">
+<p style="text-align:center"><i>Fig.17. 
+Two target strengths patterns of Yellowfin tuna swimbladder model<br>
+at 38 kHz obtained as 15&circ; scan along &phi;<sub>0</sub>=0<br>
+(dashed-blue) and &phi;<sub>0</sub>=90 (red).
+</i></p>
+					</td>
+					<td>
+<img src="galery/mm-bem-mesh (8).svg">
+<p style="text-align:center"><i>Fig.18.
+3D backscattering length pattern at 38kHz of the Yellowfin<br>
+tuna swimbladder model obtained as 10&circ; scan along both<br>
+direction angles.
+</i></p>						
+					</td>
+				</tr>
+				<tr>
+					<td style="padding-top:12px">
+<img src="galery/mm-bem-mesh (9).svg">
+<p style="text-align:center"><i>Fig.19. 
+The model of Gadus morhua swimbladder from echoSMs github<br>
+repository.<br>
+</i></p>
+					</td>
+					<td>
+<img src="galery/mm-bem-mesh (10).svg">
+<p style="text-align:center"><i>Fig.20.
+3D backscattering length pattern at 38kHz of the Gadus<br>
+morhua swimbladder model obtained as 10&circ; scan along<br>
+both direction angles.
+</i></p>						
+					</td>
+				</tr>
+				<tr>
+					<td style="padding-top:12px">
+<img src="galery/mm-bem-mesh (11).svg">
+<p style="text-align:center"><i>Fig.21. 
+The model of Cod swimbladder from KRM model web-page.<br>
+
+</i></p>
+					</td>
+					<td>
+<img src="galery/mm-bem-mesh (12).svg">
+<p style="text-align:center"><i>Fig.22.
+3D backscattering length pattern at 38kHz of the Cod<br> 
+swimbladder model obtained as 10&circ; scan along both<br>
+direction angles.
+</i></p>						
+					</td>
+				</tr>
+
+			</table>
+		</td>
+	</tr>
+
+<!--------------------------- Configurtion ------------------------>
 	
 	<tr>
 		<td colspan=2>
@@ -487,7 +697,7 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
 			
 <!----------- footer ------------->
 <br>
-<p title="marek.moszynski@pg.edu.pl" style="text-align:center">mm-bem v1.99 (22.11.2025)</p>
+<p title="marek.moszynski@pg.edu.pl" style="text-align:center">mm-bem v2.0 (24.11.2025)</p>
 
 		</td>
 	</tr>
@@ -1622,6 +1832,12 @@ function drop(e) {
 	reader.readAsText(file, "UTF-8");
 }
 
+function change2a(e) {
+	var s = document.getElementById("txt2").value;
+	console.log("change2a");
+	plot("Q",s,"#4da6ff");
+}
+
 function drop2(e) {
 	e.preventDefault();
 	let k = 0;
@@ -1661,6 +1877,7 @@ function plot(id2,s,c,z) {
 	}
 	var ss=s.split('\n');
 	var x=[],y=[],x2=[],ncols=0;
+	console.log(ss.length);
 	for(var i=0;i<ss.length;i++) {
 		s2=ss[i].trim().split(/\s+/);
 		if(s2[0][0]!='#' && s2.length>=2) {
