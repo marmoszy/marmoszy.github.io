@@ -288,6 +288,8 @@ For additional information about mm-bem, please refer to the <a href="mm-bem.pdf
   <option value="sphere_1_905_0_38_1480_js">sphere-1.905-0-38-1480-js.txt</option>
 </optgroup>
 -->
+<optgroup id="files2" label="Opened files">
+</optgroup>
 
 </select>
 
@@ -1331,6 +1333,8 @@ function stl2msh(s) {
 
 files = {};
 function file(s) {return files[s];}
+files2 = {};
+function file2(s) {return files2[s];}
 
 function readFile(e) {  // local file reader
 	let k = 0;
@@ -1368,7 +1372,7 @@ function readFile(e) {  // local file reader
 			}
 			var vname = document.getElementById("obj").value.trim();
 			files[vname] = document.getElementById("msh").value; // save in global variable
-			var el = document.getElementById('files');           // add to files optgroup
+			var el = document.getElementById("files");           // add to files optgroup
 			if(el) el.innerHTML += '<option value="file(\''+vname+'\')">'+vname+'</option>'
 			if(k==N) change(); // start calculations after reading
 		};
@@ -1395,6 +1399,17 @@ function readFile2(e) {  // local file reader
 		reader.onload = function(e) {
 			document.getElementById("txt2").value += e.target.result;
 			k++;
+			var vname = document.getElementById("openfile2").value.trim().split("\\").slice(-1);
+			console.log("readFile2 onload: "+e.target.result.length+" "+vname);
+			files2[vname] = document.getElementById("txt2").value; // save in global variable
+			var el = document.getElementById("files2");           // add to files optgroup
+			if(el) {
+				el.innerHTML += '<option value="file2(\''+vname+'\')">'+vname+'</option>';
+			}
+			var el = document.getElementById("out2");           // select it
+			if(el) {
+				el.value = "file2('"+vname+"')";
+			}
 			if(k==N) change2(); 
 		};
 		if(file.name.endsWith(".txt")) {
