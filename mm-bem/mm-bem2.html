@@ -1131,7 +1131,6 @@ function init_mesh() {
 		if(vx[i][2]<zmin) {zmin=vx[i][2];}
 	}
 	xmax2=xmax-xmin; ymax2=ymax-ymin; zmax2=zmax-zmin;
-	legend_mesh('('+xmax2.toFixed(4)+', '+ymax2.toFixed(4)+', '+zmax2.toFixed(4)+')',"Mesh dimensions");
 	
 	msh_str([[vx,fx]]);
 	s = msh_flush();
@@ -1140,8 +1139,8 @@ function init_mesh() {
 function legend_mesh(s,t) {
 	console.log(s);
 	var el = document.getElementById("legend");
-	if(el && mesh_onoff) {
-		el.innerHTML = s + "<title>"+t+"</title>";
+	if(el) {
+		el.innerHTML = mesh_onoff ? s + "<title>"+t+"</title>": '';
 	}
 }
 
@@ -1159,6 +1158,7 @@ function update_mesh() {
 	var el = svg_createpath(svg, "M", p, mesh_onoff?mshcolor:"none", mesh_onoff?0.5:0, "1,0", 0, 'none');
 	//el.setAttribute('fill','lime');
 	//el.setAttribute('fill-rule','nonzero');
+	legend_mesh('('+xmax2.toFixed(4)+', '+ymax2.toFixed(4)+', '+zmax2.toFixed(4)+')',"Mesh dimensions");
 }
 
 function update_axes() {
