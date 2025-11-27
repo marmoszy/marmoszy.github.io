@@ -324,6 +324,7 @@ Full mm-bem package contains source codes in different programming languages for
    <svg xmlns="http://www.w3.org/2000/svg" id="svg1" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
       <g id="gt" transform="translate(0,20)">
       </g>
+	  <text x="10" y="408" id="legend" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
    </svg>
 </div>
 <input type=button value="Save to svg file" onclick='writeFile(document.getElementById("svg1").outerHTML,"mm-bem-mesh.svg");' /> 
@@ -700,7 +701,7 @@ direction angles.
 			
 <!----------- footer ------------->
 <br>
-<p title="marek.moszynski@pg.edu.pl" style="text-align:center">mm-bem v2.0 (26.11.2025)</p>
+<p title="marek.moszynski@pg.edu.pl" style="text-align:center">mm-bem v2.01 (27.11.2025)</p>
 
 		</td>
 	</tr>
@@ -1095,7 +1096,7 @@ function msh_parse(s) {
 	return [v,e];
 }
 
-var vx=[],fx=[],x0,y0,z0,M=[],r0max;
+var vx=[],fx=[],x0,y0,z0,M=[],r0max,xmax2,ymax2,zmax2;
 function init_mesh() {
 	var s=document.getElementById("msh").value;
 	var ss=s.split('$EndElements\n');
@@ -1118,18 +1119,30 @@ function init_mesh() {
 	//[vx,fx] = ellipsoid(0.01905,0.01,0.01);
 	x0=0.0, y0=0; z0=0; M = R1(); //Ry(-45);
 
-	r0max=0;
+	r0max=0;xmin=xmax=0;ymin=ymax=0;zmin=zmax=0;
 	for(var i=0;i<vx.length;i++) {
 		var r0= Math.sqrt(vx[i][0]**2+vx[i][1]**2+vx[i][2]**2);
-		if(r0>r0max) {
-			r0max=r0;
-		}
+		if(r0>r0max) {r0max=r0;}
+		if(vx[i][0]>xmax) {xmax=vx[i][0];}
+		if(vx[i][1]>ymax) {ymax=vx[i][1];}
+		if(vx[i][2]>zmax) {zmax=vx[i][2];}
+		if(vx[i][0]<xmin) {xmin=vx[i][0];}
+		if(vx[i][1]<ymin) {ymin=vx[i][1];}
+		if(vx[i][2]<zmin) {zmin=vx[i][2];}
 	}
-	console.log('Mesh max: '+r0max.toFixed(6));
+	xmax2=xmax-xmin; ymax2=ymax-ymin; zmax2=zmax-zmin;
+	legend_mesh('('+xmax2.toFixed(4)+', '+ymax2.toFixed(4)+', '+zmax2.toFixed(4)+')');
 	
 	msh_str([[vx,fx]]);
 	s = msh_flush();
 	document.getElementById("msh").value = s;
+}
+function legend_mesh(s) {
+	console.log(s);
+	var el = document.getElementById("legend");
+	if(el && mesh_onoff) {
+		el.innerHTML = s;
+	}
 }
 
 function update_mesh() {
