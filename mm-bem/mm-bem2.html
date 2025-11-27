@@ -1131,17 +1131,17 @@ function init_mesh() {
 		if(vx[i][2]<zmin) {zmin=vx[i][2];}
 	}
 	xmax2=xmax-xmin; ymax2=ymax-ymin; zmax2=zmax-zmin;
-	legend_mesh('('+xmax2.toFixed(4)+', '+ymax2.toFixed(4)+', '+zmax2.toFixed(4)+')');
+	legend_mesh('('+xmax2.toFixed(4)+', '+ymax2.toFixed(4)+', '+zmax2.toFixed(4)+')',"Mesh dimensions");
 	
 	msh_str([[vx,fx]]);
 	s = msh_flush();
 	document.getElementById("msh").value = s;
 }
-function legend_mesh(s) {
+function legend_mesh(s,t) {
 	console.log(s);
 	var el = document.getElementById("legend");
 	if(el && mesh_onoff) {
-		el.innerHTML = s;
+		el.innerHTML = s + "<title>"+t+"</title>";
 	}
 }
 
