@@ -1805,7 +1805,8 @@ function change1() {
 		c0 = parseFloat(document.getElementById("c0").value);
 		ph = parseFloat(document.getElementById("ph").value);
 		if(f0<0) {scan_str='# mm-bem-scan-mode: '+(-f0/1e3)+'kHz scan\n';}
-		else {plot("F",'#');}
+		else {plot("F",'#');} 		// clear frequency plot
+		plot("P","#");			 	// clear calculation plot
 		worker.postMessage(JSON.stringify([lines,th,f0,c0,ph]));
 	} else if(eng=="py_soft_worker") {
 		var lines = document.getElementById("msh").value; //.split('\n');
@@ -1957,6 +1958,9 @@ function plot(id2,s,c,z) {
 			svg_title4("&#8466;<tspan dy='6' font-size='0.8em'>BS</tspan><tspan dy='-6' font-style='normal'> = "+(lbs.toFixed(4))+" m");
 		} else {
 			svg_title("");
+			svg_title2("");
+			svg_title3("");
+			svg_title4("");
 		}
 	}
 }
