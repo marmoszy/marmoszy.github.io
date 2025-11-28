@@ -324,7 +324,7 @@ Full mm-bem package contains source codes in different programming languages for
    <svg xmlns="http://www.w3.org/2000/svg" id="svg1" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
       <g id="gt" transform="translate(0,20)">
       </g>
-	  <text x="10" y="408" id="legend" style="fill1:#ff6633;stroke:none"></text>
+	  <text x="10" y="408" id="legend" onclick="mesh_onoff=(mesh_onoff+1)%3;update();" style="fill1:#ff6633;stroke:none"></text>
    </svg>
 </div>
 <input type=button value="Save to svg file" onclick='writeFile(document.getElementById("svg1").outerHTML,"mm-bem-mesh.svg");' /> 
@@ -702,7 +702,7 @@ direction angles.
 <!----------- footer ------------->
 <br>
 
-<a href="https://www.pg.edu.pl"><img style="height:64px;float:left" title="marek.moszynski@pg.edu.pl" src="Logo_Gdańsk_University_of_Technology.svg"></a>
+<a href="https://www.pg.edu.pl"><img style="height:68px;float:left" title="marek.moszynski@pg.edu.pl" src="Logo_Gdańsk_University_of_Technology.svg"></a>
 <a href="https://www.upv.es"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
@@ -1144,10 +1144,9 @@ function init_mesh() {
 	
 }
 function legend_mesh(s,t) {
-	console.log(s);
 	var el = document.getElementById("legend");
 	if(el) {
-		el.innerHTML = mesh_onoff ? s + "<title>"+t+"</title>": '';
+		el.innerHTML =  s + "<title>"+t+"</title>";
 	}
 }
 
@@ -1833,7 +1832,11 @@ function change1() {
 		if(f0<0) {scan_str='# mm-bem-scan-mode: '+(-f0/1e3)+'kHz scan\n';}
 		else {plot("F",'#');} 		// clear frequency plot
 		plot("P","#");			 	// clear calculation plot
-		worker.postMessage(JSON.stringify([lines,th,f0,c0,ph]));
+		if(fx.length<5500) {
+			worker.postMessage(JSON.stringify([lines,th,f0,c0,ph]));
+		} else {
+			document.getElementById("txt").value="Mesh to large!"
+		}
 	} else if(eng=="py_soft_worker") {
 		var lines = document.getElementById("msh").value; //.split('\n');
 		th = document.getElementById("th").value;
@@ -3363,6 +3366,142 @@ function wasm_soft_worker(lines,th,f0,c0,ph) {
 	return(s);
 }
 
+// ----
+// vx: Array<[x,y,z]>, fx: Array<[i,j,k]>
+// Simplify until fx.length <= targetFaces (or by a ratio).
+
+//const { vx: simplifiedVx, fx: simplifiedFx } = simplifyMesh(vx, fx, {
+//  targetFaces: Math.floor(fx.length * 0.5) // keep ~50% faces
+//});
+
+function simplifyMesh(vx, fx, { targetFaces = Math.floor(fx.length * 0.5) } = {}) {
+  // Work on copies
+  vx = vx.map(v => v.slice());
+  fx = fx.map(f => f.slice());
+
+  // Track removed vertices
+  const alive = new Array(vx.length).fill(true);
+
+  // Build initial edges with costs
+  let edges = buildEdgeMap(fx);
+  recomputeAllEdgeCosts(edges, vx);
+
+  // Repeatedly collapse shortest edges
+  let iterations = 0;
+  while (fx.length > targetFaces && edges.size > 0 && iterations < 1e6) {
+    iterations++;
+
+    // Pick min-cost edge
+    let minKey = null, minCost = Infinity;
+    for (const [key, e] of edges) {
+      if (e.cost < minCost) { minCost = e.cost; minKey = key; }
+    }
+    if (minKey == null) break;
+
+    const e = edges.get(minKey);
+    const v1 = e.v1, v2 = e.v2;
+    if (!alive[v1] || !alive[v2]) { edges.delete(minKey); continue; }
+
+    // Collapse feasibility checks (basic):
+    // - Distinct vertices
+    // - Avoid creating degenerate faces
+    // Optional: manifold checks could be added here.
+    const newPos = midpoint(vx[v1], vx[v2]);
+
+    // Apply collapse: move v1 to midpoint, redirect v2 -> v1 in faces
+    vx[v1] = newPos;
+    alive[v2] = false;
+
+    // Update faces: replace v2 with v1, remove degenerate/invalid
+    fx = fx.reduce((acc, f) => {
+      let [a, b, c] = f;
+
+      if (!alive[a] || !alive[b] || !alive[c]) {
+        // If any vertex already dead, skip; will compact later
+        return acc;
+      }
+
+      // Redirect v2 -> v1
+      if (a === v2) a = v1;
+      if (b === v2) b = v1;
+      if (c === v2) c = v1;
+
+      // Remove degenerate triangles (duplicates or tiny area)
+      if (a === b || b === c || a === c) return acc;
+      if (!validArea(vx[a], vx[b], vx[c])) return acc;
+
+      acc.push([a, b, c]);
+      return acc;
+    }, []);
+
+    // Rebuild local edges around v1; prune edges touching v2
+    // For simplicity, rebuild full map (slower but robust)
+    edges = buildEdgeMap(fx);
+    recomputeAllEdgeCosts(edges, vx);
+  }
+
+  // Compact: remove dead vertices and reindex faces
+  const { vx: vx2, fx: fx2 } = compactMesh(vx, fx, alive);
+
+  return { vx: vx2, fx: fx2 };
+}
+
+// ---------- Helpers ----------
+
+function buildEdgeMap(fx) {
+  const edges = new Map();
+  for (const f of fx) {
+    const tri = [f[0], f[1], f[2]];
+    for (let i = 0; i < 3; i++) {
+      const a = tri[i], b = tri[(i + 1) % 3];
+      const v1 = Math.min(a, b), v2 = Math.max(a, b);
+      const key = v1 + "_" + v2;
+      if (!edges.has(key)) {
+        edges.set(key, { v1, v2, cost: Infinity });
+      }
+    }
+  }
+  return edges;
+}
+
+function recomputeAllEdgeCosts(edges, vx) {
+  for (const e of edges.values()) {
+    e.cost = edgeLength(vx[e.v1], vx[e.v2]);
+  }
+}
+
+function edgeLength(a, b) {
+  const dx = a[0] - b[0], dy = a[1] - b[1], dz = a[2] - b[2];
+  return Math.sqrt(dx * dx + dy * dy + dz * dz);
+}
+
+function midpoint(a, b) {
+  return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2];
+}
+
+function validArea(a, b, c, eps = 1e-12) {
+  // Check triangle area via cross product magnitude
+  const ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+  const ac = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+  const cx = ab[1] * ac[2] - ab[2] * ac[1];
+  const cy = ab[2] * ac[0] - ab[0] * ac[2];
+  const cz = ab[0] * ac[1] - ab[1] * ac[0];
+  const area2 = cx * cx + cy * cy + cz * cz; // squared magnitude
+  return area2 > eps;
+}
+
+function compactMesh(vx, fx, alive) {
+  const oldToNew = new Array(vx.length).fill(-1);
+  const vx2 = [];
+  for (let i = 0; i < vx.length; i++) {
+    if (alive[i]) {
+      oldToNew[i] = vx2.length;
+      vx2.push(vx[i]);
+    }
+  }
+  const fx2 = fx.map(f => [oldToNew[f[0]], oldToNew[f[1]], oldToNew[f[2]]]);
+  return { vx: vx2, fx: fx2 };
+}
 
 // ----
 
