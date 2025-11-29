@@ -87,7 +87,7 @@ This is a web-based demonstration of the mm-bem code, which calculates acoustic 
 The Input parameters section gives user interface for configuring simulations. Users can specify: (1) target mesh (2) plane wave direction angles <small><i>&theta;</i><sub>0</sub></small> and <small><i>&phi;</i><sub>0</sub></small> (3) its frequency <small><i>f</i><sub>0</sub></small> and (4) sound speed <small><i>c</i><sub>0</sub></small> in water (located in Configuration section). The target mesh could be selected from dropdown menu containing cannonical examples and swimbladder models. The mesh is displayed in the Data Visualisation section on the left 3D panel (Ctrl-H for help). The results of BEM calculations are shown in the right panel as 2D polar plot of the scattering pattern. The wave direction angles could be set into scanning modes enabling calculations over a full angular range. When both angles are set into scanning mode, the output represents 3D backscattering length distribution, which is visualized in 3D View, replacing original mesh. The frequency parameter could be also set into scan mode across predefined frequency range (up to 360&nbsp;kHz). In such a case the results are visualised also in the polar plot with angular values representing frequencies in kHz. See Gallery section for examples.
 
 <p style="font-size:20;margin:16;max-width:940;text-align:justify">
-The fish swimbladder models included in the demo are sourced from (1) scientific studies<sup><small><a href="https://www.researchgate.net/publication/384356288_Acoustic_Techniques_for_Tuna_Biomass_Estimation">2</a>,<a href="https://www.mdpi.com/2077-1312/12/11/2014">3</a></small></sup> (2) the <a href="https://ices-tools-dev.github.io/echoSMs/">echoSMs</a> initiative (3) the NOAA Fisheries <a href="https://www.fisheries.noaa.gov/data-tools/krm-model">KRM model</a> webpage. Users may also enter custom target meshes in one of the following formats: <a href="https://gmsh.info/">GMSH</a> msh ASCII 2.0 with triangular elements or <a href="https://en.wikipedia.org/wiki/STL_(file_format)">STL</a> ASCII or in the <a href="https://github.com/ices-tools-dev/echoSMs/tree/main/data_store/resources">echoSMs JSON</a> data structure. 
+The fish swimbladder models included in the demo are sourced from (1) scientific studies<sup><small><a href="https://www.researchgate.net/publication/384356288_Acoustic_Techniques_for_Tuna_Biomass_Estimation">2</a>,<a href="https://www.mdpi.com/2077-1312/12/11/2014">3</a></small></sup> (2) the <a href="https://ices-tools-dev.github.io/echoSMs/">echoSMs</a> initiative (3) the NOAA Fisheries <a href="https://www.fisheries.noaa.gov/data-tools/krm-model">KRM model</a> webpage. Users may also enter custom target meshes in one of the following formats: <a href="https://gmsh.info/">GMSH</a> msh ASCII 2.0 with triangular elements or <a href="https://en.wikipedia.org/wiki/STL_(file_format)">STL</a> or in the <a href="https://github.com/ices-tools-dev/echoSMs/tree/main/data_store/resources">echoSMs JSON</a> data structure. 
 
 <p style="font-size:20;margin:16;max-width:940;text-align:justify">
 Full mm-bem package contains source codes in different programming languages for several cases using also the other BEM algorithms. For more detailed information, please refer to the <a href="mm-bem.pdf">readme</a> and the <a href="https://github.com/marmoszy/mm-bem">github</a> repository.
@@ -166,7 +166,7 @@ Full mm-bem package contains source codes in different programming languages for
 </optgroup>
 </select>
 
-<br><span style="margin-left:32px"></span> or <input accept="model/mesh" id="openfile" title="Load from msh (ascii 2.0), stl (ascii) or echoSMs json" type="file" onchange="readFile(this);" multiple/>
+<br><span style="margin-left:32px"></span> or <input accept="model/mesh" id="openfile" title="Load from msh (ascii 2.0), stl or echoSMs json" type="file" onchange="readFile(this);" multiple/>
 
 <textarea id="obj" style="width:438;height:92" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905,2),[0,0,0]]</textarea>
 
@@ -1376,11 +1376,34 @@ function readFile(e) {  // local file reader
 		}
 		var reader = new FileReader();
 		reader.onload = function(e) {
+			//let result = e.target.result;
+			const buffer = e.target.result;
+			const bytes = new Uint8Array(buffer);
+			
+			let result = "";
+			for (let i = 0; i < bytes.length; i++) {result += String.fromCharCode(bytes[i]);}
+			  
 			k++;
-			if(e.target.result.substring(0,5)=="solid") {        // console.log("STL file");
-				document.getElementById("msh").value += stl2msh(e.target.result);
-			} else if(e.target.result[0]=='{') {                 // console.log("json file");
-				var s = JSON.parse(e.target.result);
+			if(file.name.endsWith(".stl")) {
+				if(result.substring(0,5)=="solid") {  console.log("STL ascii file");
+					document.getElementById("msh").value += stl2msh(result);
+				} else { console.log("STL binary file");
+					var n = bytes[80] + (bytes[81]<<8) + (bytes[82]<<16) + (bytes[83]<<24);
+					// alert("Only ASCII STL are allowed!\n(" + n + " triangles)");
+					var vx=[], fx=[], l=0;
+					for(var i=0; i<n; i++) {
+						f32 = new Float32Array(buffer.slice(84+50*i,84+50*i+48));
+						for(var j=0; j<3; j++) {
+							vx.push([f32[3+3*j], f32[4+3*j], f32[5+3*j]]);
+						}
+						fx.push([l, l+1, l+2]);
+						l += 3;
+					}
+					msh_str([[vx,fx]]);
+					document.getElementById("msh").value += msh_flush();
+				} 
+			} else if(result[0]=='{') {                 // console.log("json file");
+				var s = JSON.parse(result);
 				if (!("specimens" in s)) {alert("Selected json file does not contain specimens");return;}
 				echoSMs.push(s);
 				var vname = document.getElementById("obj").value.trim();
@@ -1396,7 +1419,7 @@ function readFile(e) {  // local file reader
 				alert('' + (m) +' targets loaded!\nYou can select them from echoSMs section of targets above!');
 				return;
 			} else {
-				document.getElementById("msh").value += e.target.result;
+				document.getElementById("msh").value += result;
 			}
 			var vname = document.getElementById("obj").value.trim();
 			files[vname] = document.getElementById("msh").value; // save in global variable
@@ -1406,9 +1429,10 @@ function readFile(e) {  // local file reader
 		};
 		if(file.name.endsWith(".msh")||file.name.endsWith(".stl")||file.name.endsWith(".json")) {
 			document.getElementById("obj").value+=' '+file.name;
-			reader.readAsText(file);
+			//reader.readAsText(file);
+			reader.readAsArrayBuffer(file);
 		} else {
-			alert("Only msh (ascii 2.0) or stl (ascii) files allowed") 
+			alert("Only msh (ascii 2.0) or stl files allowed") 
 		}
 	}
 }
@@ -1929,7 +1953,7 @@ function plot(id2,s,c,z) {
 	}
 	var ss=s.split('\n');
 	var x=[],y=[],x2=[],ncols=0;
-	console.log(ss.length);
+	//console.log(ss.length);
 	for(var i=0;i<ss.length;i++) {
 		s2=ss[i].trim().split(/\s+/);
 		if(s2[0][0]!='#' && s2.length>=2) {
@@ -3378,10 +3402,10 @@ function wasm_soft_worker(lines,th,f0,c0,ph) {
 //  targetFaces: Math.floor(fx.length * 0.5) // keep ~50% faces
 //});
 
-function simplifyMesh(vx, fx, { targetFaces = Math.floor(fx.length * 0.5) } = {}) {
+function simplify(vxfx, { targetFaces = Math.floor(vxfx[1].length * 0.5) } = {}) {
   // Work on copies
-  vx = vx.map(v => v.slice());
-  fx = fx.map(f => f.slice());
+  var vx = vxfx[0].map(v => v.slice());
+  var fx = vxfx[1].map(f => f.slice());
 
   // Track removed vertices
   const alive = new Array(vx.length).fill(true);
@@ -3404,7 +3428,12 @@ function simplifyMesh(vx, fx, { targetFaces = Math.floor(fx.length * 0.5) } = {}
 
     const e = edges.get(minKey);
     const v1 = e.v1, v2 = e.v2;
-    if (!alive[v1] || !alive[v2]) { edges.delete(minKey); continue; }
+    // if (!alive[v1] || !alive[v2]) { edges.delete(minKey); continue; }
+
+	if ((!alive[v1] || !alive[v2]) && !canCollapseEdge(v1, v2, fx)) {
+	  edges.delete(minKey);
+	  continue;
+	}
 
     // Collapse feasibility checks (basic):
     // - Distinct vertices
@@ -3447,11 +3476,9 @@ function simplifyMesh(vx, fx, { targetFaces = Math.floor(fx.length * 0.5) } = {}
   // Compact: remove dead vertices and reindex faces
   const { vx: vx2, fx: fx2 } = compactMesh(vx, fx, alive);
 
-  return { vx: vx2, fx: fx2 };
+  return [vx2,fx2];
 }
-
 // ---------- Helpers ----------
-
 function buildEdgeMap(fx) {
   const edges = new Map();
   for (const f of fx) {
@@ -3467,22 +3494,18 @@ function buildEdgeMap(fx) {
   }
   return edges;
 }
-
 function recomputeAllEdgeCosts(edges, vx) {
   for (const e of edges.values()) {
     e.cost = edgeLength(vx[e.v1], vx[e.v2]);
   }
 }
-
 function edgeLength(a, b) {
   const dx = a[0] - b[0], dy = a[1] - b[1], dz = a[2] - b[2];
   return Math.sqrt(dx * dx + dy * dy + dz * dz);
 }
-
 function midpoint(a, b) {
   return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2];
 }
-
 function validArea(a, b, c, eps = 1e-12) {
   // Check triangle area via cross product magnitude
   const ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
@@ -3493,7 +3516,6 @@ function validArea(a, b, c, eps = 1e-12) {
   const area2 = cx * cx + cy * cy + cz * cz; // squared magnitude
   return area2 > eps;
 }
-
 function compactMesh(vx, fx, alive) {
   const oldToNew = new Array(vx.length).fill(-1);
   const vx2 = [];
@@ -3505,6 +3527,13 @@ function compactMesh(vx, fx, alive) {
   }
   const fx2 = fx.map(f => [oldToNew[f[0]], oldToNew[f[1]], oldToNew[f[2]]]);
   return { vx: vx2, fx: fx2 };
+}
+function canCollapseEdge(v1, v2, fx) {
+  let count = 0;
+  for (const f of fx) {
+    if (f.includes(v1) && f.includes(v2)) count++;
+  }
+  return count === 2; // only collapse if edge is shared by exactly 2 faces
 }
 
 // ----
