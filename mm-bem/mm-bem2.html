@@ -81,7 +81,7 @@ input[type='file'],input[type='button'] {font-size: 18px; }
 This is a web-based demonstration of the mm-bem code, which calculates acoustic scattering patterns from mesh defined targets using Boundary Element Method (BEM)<sup><small><a href="https://www.uaconferences.org/docs/2025_program_papers/2025_05_31_22_55_11_Moszyski_Marek.pdf">1</a></small></sup>. The demo runs entirely within modern web browsers and allows calculating scattering patterns for pressure released (soft) targets modeled by not more than 5000 triangular elements. It uses classical BEM algorithm with P0 elements, requires no third-party libraries and can operate offline on any client machine. It is dedicated to compute target strength <small>TS</small> of swimbladdered fish across multiple frequencies commonly used in fisheries acoustics, provided the wavelength to element size ratio condition is fulfilled. 
 
 <p style="font-size:20;margin:16;max-width:940;text-align:justify">
-The Input parameters section gives user interface for configuring simulations. Users can specify: (1) target mesh (2) plane wave direction angles <small><i>&theta;</i><sub>0</sub></small> and <small><i>&phi;</i><sub>0</sub></small> (3) its frequency <small><i>f</i><sub>0</sub></small> and (4) sound speed <small><i>c</i><sub>0</sub></small> in water (located in Configuration section). The target mesh could be selected from dropdown menu containing cannonical examples and swimbladder models. The mesh is displayed in the Data Visualisation section on the left 3D panel. The results of BEM calculations are shown in the right panel as 2D polar plot of the scattering pattern. The wave direction angles could be set into scanning modes enabling calculations over a full angular range. When both angles are set into scanning mode, the output represents 3D backscattering length distribution, which is visualized in 3D View, replacing original mesh. The frequency parameter could be also set into scan mode across predefined frequency range (up to 360&nbsp;kHz). In such a case the results are visualised also in the polar plot with angular values representing frequencies in kHz.
+The Input parameters section gives user interface for configuring simulations. Users can specify: (1) target mesh (2) plane wave direction angles <small><i>&theta;</i><sub>0</sub></small> and <small><i>&phi;</i><sub>0</sub></small> (3) its frequency <small><i>f</i><sub>0</sub></small> and (4) sound speed <small><i>c</i><sub>0</sub></small> in water (located in Configuration section). The target mesh could be selected from dropdown menu containing cannonical examples and swimbladder models. The mesh is displayed in the Data Visualisation section on the left 3D panel (Ctrl-H for help). The results of BEM calculations are shown in the right panel as 2D polar plot of the scattering pattern. The wave direction angles could be set into scanning modes enabling calculations over a full angular range. When both angles are set into scanning mode, the output represents 3D backscattering length distribution, which is visualized in 3D View, replacing original mesh. The frequency parameter could be also set into scan mode across predefined frequency range (up to 360&nbsp;kHz). In such a case the results are visualised also in the polar plot with angular values representing frequencies in kHz.
 
 <p style="font-size:20;margin:16;max-width:940;text-align:justify">
 The fish swimbladder models included in the demo are sourced from (1) scientific studies<sup><small><a href="https://www.researchgate.net/publication/384356288_Acoustic_Techniques_for_Tuna_Biomass_Estimation">2</a>,<a href="https://www.mdpi.com/2077-1312/12/11/2014">3</a></small></sup> (2) the <a href="https://ices-tools-dev.github.io/echoSMs/">echoSMs</a> initiative (3) the NOAA Fisheries <a href="https://www.fisheries.noaa.gov/data-tools/krm-model">KRM model</a> webpage. Users may also enter custom target meshes in one of the following formats: <a href="https://gmsh.info/">GMSH</a> msh ASCII 2.0 with triangular elements or <a href="https://en.wikipedia.org/wiki/STL_(file_format)">STL</a> ASCII or in the <a href="https://github.com/ices-tools-dev/echoSMs/tree/main/data_store/resources">echoSMs JSON</a> data structure. 
@@ -702,7 +702,7 @@ direction angles.
 <a href="https://www.upv.es"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(28.11.2025)" style="text-align:center">mm-bem v2.03 (2025)</p>
+<p title="(29.11.2025)" style="text-align:center">mm-bem v2.04 (2025)</p>
 
 		</td>
 	</tr>
@@ -824,11 +824,14 @@ document.onkeydown = function(e) {
   if(e.keyCode==72 ) { // ctrl H
 	  if(e.ctrlKey) {e.preventDefault(); alert(about);}
   }
-  if(e.keyCode==48 || e.keyCode==82 ) { // ctrl 0 ctrl R
+  if(e.keyCode==48 || e.keyCode==82 ) { // ctrl 0 
 	  if(e.ctrlKey) {e.preventDefault(); a=0.4; b=-0.2; c=0.0; init3d(); /*zoom=1; xoff=0; yoff=0;*/}
   }
   if(e.keyCode==77) { // ctrl M
 	  if(e.ctrlKey) {e.preventDefault(); mesh_onoff=(mesh_onoff+1)%3;}
+  }
+  if(e.keyCode==82 ) { // ctrl R 
+	  if(e.ctrlKey) {e.preventDefault(); zoom=1; xoff=0; yoff=0;}
   }
   if(e.keyCode==49 ) { // ctrl 1
 	  if(e.ctrlKey) {e.preventDefault(); a_fun();}
@@ -1170,8 +1173,8 @@ function update_mesh() {
 }
 
 function update_axes() {
-  var el = document.getElementById("zoomin"); if(el) {el.title="z="+zoom;}	
-  var el = document.getElementById("zoomout"); if(el) {el.title="z="+zoom;}	
+  var el = document.getElementById("zoomin"); if(el) {el.title="zoom:"+zoom;}	
+  var el = document.getElementById("zoomout"); if(el) {el.title="zoom:"+zoom;}	
   var el = document.getElementById("a_slider"); if(el) {el.title="a="+(a*180/pi).toFixed(1);}	
   var el = document.getElementById("b_slider"); if(el) {el.title="b="+(b*180/pi).toFixed(1);}	
   var el = document.getElementById("c_slider"); if(el) {el.title="c="+(c*180/pi).toFixed(1);}	
@@ -1312,14 +1315,14 @@ function main() {
   init3d();
 }
 
-var about =`mm-bem web-demo MM 2025
+var about =`mm-bem web-demo (2025)
 
 3d view shortcuts:
-ctrl A - Axes on/off (axis numbers: 1-red, 2-green, 3-blue)
+ctrl A - Axes on/off (axes colors: 1-red, 2-green, 3-blue)
 ctrl B - wave Box on/off (size of wavelength)
 ctrl C - scanning Circles on/off (1.5*meshsize)
 ctrl M - Mesh on/off
-ctrl R - default orientation
+ctrl R - view from R=1m
 ctrl 0 - view from default orientation
 ctrl 1 - view from first axis (+/-)
 ctrl 2 - view from second axis (+/-)
