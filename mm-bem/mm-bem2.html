@@ -87,7 +87,7 @@ This is a web-based demonstration of the mm-bem code, which calculates acoustic 
 The Input parameters section gives user interface for configuring simulations. Users can specify: (1) target mesh (2) plane wave direction angles <small><i>&theta;</i><sub>0</sub></small> and <small><i>&phi;</i><sub>0</sub></small> (3) its frequency <small><i>f</i><sub>0</sub></small> and (4) sound speed <small><i>c</i><sub>0</sub></small> in water (located in Configuration section). The target mesh could be selected from dropdown menu containing cannonical examples and swimbladder models. The mesh is displayed in the Data Visualisation section on the left 3D panel (Ctrl-H for help). The results of BEM calculations are shown in the right panel as 2D polar plot of the scattering pattern. The wave direction angles could be set into scanning modes enabling calculations over a full angular range. When both angles are set into scanning mode, the output represents 3D backscattering length distribution, which is visualized in 3D View, replacing original mesh. The frequency parameter could be also set into scan mode across predefined frequency range (up to 360&nbsp;kHz). In such a case the results are visualised also in the polar plot with angular values representing frequencies in kHz. See Gallery section for examples.
 
 <p style="font-size:20;margin:16;max-width:940;text-align:justify">
-The fish swimbladder models included in the demo are sourced from (1) scientific studies<sup><small><a href="https://www.researchgate.net/publication/384356288_Acoustic_Techniques_for_Tuna_Biomass_Estimation">2</a>,<a href="https://www.mdpi.com/2077-1312/12/11/2014">3</a></small></sup> (2) the <a href="https://ices-tools-dev.github.io/echoSMs/">echoSMs</a> initiative (3) the NOAA Fisheries <a href="https://www.fisheries.noaa.gov/data-tools/krm-model">KRM model</a> webpage. Users may also enter custom target meshes in one of the following formats: <a href="https://gmsh.info/">GMSH</a> msh ASCII 2.0 with triangular elements or <a href="https://en.wikipedia.org/wiki/STL_(file_format)">STL</a> or in the <a href="https://github.com/ices-tools-dev/echoSMs/tree/main/data_store/resources">echoSMs JSON</a> data structure. 
+The fish swimbladder models included in the demo are sourced from (1) scientific studies<sup><small><a href="https://www.researchgate.net/publication/384356288_Acoustic_Techniques_for_Tuna_Biomass_Estimation">2</a>,<a href="https://www.mdpi.com/2077-1312/12/11/2014">3</a></small></sup> (2) the <a href="https://ices-tools-dev.github.io/echoSMs/">echoSMs</a> initiative (3) the NOAA Fisheries <a href="https://www.fisheries.noaa.gov/data-tools/krm-model">KRM model</a> webpage. Users may also enter custom target meshes in one of the following formats: <a href="https://gmsh.info/">GMSH</a> MSH 2.0 with triangular elements or <a href="https://en.wikipedia.org/wiki/STL_(file_format)">STL</a> or in the <a href="https://github.com/ices-tools-dev/echoSMs/tree/main/data_store/resources">echoSMs JSON</a> data structure. 
 
 <p style="font-size:20;margin:16;max-width:940;text-align:justify">
 Full mm-bem package contains source codes in different programming languages for several cases using also the other BEM algorithms. For more detailed information, please refer to the <a href="mm-bem.pdf">readme</a> and the <a href="https://github.com/marmoszy/mm-bem">github</a> repository.
@@ -166,7 +166,7 @@ Full mm-bem package contains source codes in different programming languages for
 </optgroup>
 </select>
 
-<br><span style="margin-left:32px"></span> or <input accept=".msh,.stl,.json" id="openfile" title="Load from msh (ascii 2.0), stl or echoSMs json" type="file" onchange="readFile(this);" multiple/>
+<br><span style="margin-left:32px"></span> or <input accept=".msh,.stl,.json" id="openfile" title="Load from msh (2.0), stl or echoSMs json" type="file" onchange="readFile(this);" multiple/>
 
 <textarea id="obj" style="width:438;height:92" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905,2),[0,0,0]]</textarea>
 
@@ -1385,11 +1385,10 @@ function readFile(e) {  // local file reader
 			  
 			k++;
 			if(file.name.endsWith(".stl")) {
-				if(result.substring(0,5)=="solid") {  console.log("STL ascii file");
+				if(result.substring(0,5)=="solid") {  // console.log("STL ascii file");
 					document.getElementById("msh").value += stl2msh(result);
-				} else { console.log("STL binary file");
+				} else {                              // console.log("STL binary file");
 					var n = bytes[80] + (bytes[81]<<8) + (bytes[82]<<16) + (bytes[83]<<24);
-					// alert("Only ASCII STL are allowed!\n(" + n + " triangles)");
 					var vx=[], fx=[], l=0;
 					for(var i=0; i<n; i++) {
 						f32 = new Float32Array(buffer.slice(84+50*i,84+50*i+48));
@@ -1418,8 +1417,36 @@ function readFile(e) {  // local file reader
 				document.getElementById("obj").value = '';
 				alert('' + (m) +' targets loaded!\nYou can select them from echoSMs section of targets above!');
 				return;
-			} else {
-				document.getElementById("msh").value += result;
+			} else { // .msh
+				var ss=result.split('\n');
+				if(parseInt(ss[1].split(' ')[1])!=0) { // console.log("binary msh!");
+					var l=0;
+					for(var i=0;i<bytes.length;i++) {
+						if(bytes[i]==0x0a) {l++;}
+						if(l==6) {break;}
+					}
+					var p = i+1+4;
+					var n = parseInt(ss[5]);
+					var vx=[],fx=[];
+					for(var i=0; i<n; i++) {
+						var f64 = new Float64Array(buffer.slice(p+28*i,p+28*i+24));
+						vx.push([f64[0],f64[1],f64[2]]);
+					}
+					p += n * 28 - 4 + 20 + 1;
+					for(var i=p; i<bytes.length; i++) {
+						if(bytes[i]==0x0a) break;
+					}
+					var m = parseInt(new TextDecoder().decode(bytes.slice(p,p+i+1)));
+					p = i+1;
+					for(i=0; i<m; i++) {
+						var i32 = new Int32Array(buffer.slice(p+36*i,p+36*i+36));
+						fx.push([i32[6]-1,i32[7]-1,i32[8]-1]);
+					}
+					msh_str([[vx,fx]]);
+					document.getElementById("msh").value += msh_flush();
+				} else { 								// ascii msh
+					document.getElementById("msh").value += result;
+				}
 			}
 			var vname = document.getElementById("obj").value.trim();
 			files[vname] = document.getElementById("msh").value; // save in global variable
@@ -1432,7 +1459,7 @@ function readFile(e) {  // local file reader
 			//reader.readAsText(file);
 			reader.readAsArrayBuffer(file);
 		} else {
-			alert("Only msh (ascii 2.0) or stl files allowed") 
+			alert("Only msh (ascii 2.0), stl or json files allowed") 
 		}
 	}
 }
