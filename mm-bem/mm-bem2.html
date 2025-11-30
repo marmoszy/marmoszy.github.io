@@ -1170,6 +1170,8 @@ function update_mesh() {
 		var d = el.getAttribute('d');
 		var out = svg_extractOutlineConvexHull(d);
 		var el2 = svg_createpath(svg, "M2", [out], mesh_onoff?mshcolor:"none", mesh_onoff?0.5:0, "1,0", 0, 'darkblue',mesh_onoff?0.3:0.001);
+	} else {
+		svg_createpath(svg, "M2", [[]], "none", 0, "1,0", 0, 'none');
 	}
 		
   // ---- bounding box in legend
