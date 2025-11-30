@@ -1166,9 +1166,12 @@ function update_mesh() {
 	}
 	
 	var el = svg_createpath(svg, "M", p, mesh_onoff?mshcolor:"none", mesh_onoff?0.5:0, "1,0", 0, 'none');
-	//el.setAttribute('fill','lime');
-	//el.setAttribute('fill-rule','nonzero');
-	
+	if(document.getElementById("obj").value.match("soft_sphere") ) {  // colored mesh hack for exact sphere !!!
+		var d = el.getAttribute('d');
+		var out = svg_extractOutlineConvexHull(d);
+		var el2 = svg_createpath(svg, "M2", [out], mesh_onoff?mshcolor:"none", mesh_onoff?0.5:0, "1,0", 0, 'darkblue',mesh_onoff?0.3:0.001);
+	}
+		
   // ---- bounding box in legend
 	legend_mesh('('+xmax2.toFixed(4)+', '+ymax2.toFixed(4)+', '+zmax2.toFixed(4)+')',"Mesh dimensions");
 
@@ -2190,7 +2193,7 @@ function svg_createline(svg,id,x1,y1,x2,y2,color,w) {
 	el.setAttribute("y2",y2);
 }
 
-function svg_createpath(svg,id,p,color,w,dd,zz,ffcolor) {
+function svg_createpath(svg,id,p,color,w,dd,zz,ffcolor,opacity) {
 	var z = zz||0; 
 	var el=document.getElementById(id);
 	if (!el) {
@@ -2202,6 +2205,7 @@ function svg_createpath(svg,id,p,color,w,dd,zz,ffcolor) {
 	el.setAttribute('stroke-width', w||1);
   	el.setAttribute("stroke-dasharray", dd||"2,2"); 
 	el.setAttribute('fill', ffcolor||"none");
+	el.setAttribute("fill-opacity",opacity||1);
 	s = '';
 	for(var i=0;i<p.length;i++) {
 		for(var j=0;j<p[i].length;j++) {
@@ -2212,6 +2216,40 @@ function svg_createpath(svg,id,p,color,w,dd,zz,ffcolor) {
 	if(s=='Z ') s='';
 	el.setAttribute('d',s);
 	return(el);
+}
+
+/**
+ * Compute convex hull of points using Graham scan.
+ * @param {Array<[number,number]>} points
+ * @returns {Array<[number,number]>} hull vertices in order
+ */
+function convexHull(points) {
+  points = points.slice().sort((a,b)=>a[0]===b[0]?a[1]-b[1]:a[0]-b[0]);   // Sort by x, then y
+  function cross(o,a,b) {return (a[0]-o[0])*(b[1]-o[1]) - (a[1]-o[1])*(b[0]-o[0]);}
+  const low = [], up = [];
+  for (const p of points) {
+    while (low.length>=2 && cross(low[low.length-2], low[low.length-1], p) <= 0) {low.pop();}
+    low.push(p);
+  }
+  for (let i=points.length-1;i>=0;i--) {
+    const p = points[i];
+    while (up.length>=2 && cross(up[up.length-2], up[up.length-1], p) <= 0) {up.pop();}
+    up.push(p);
+  }
+  up.pop(); low.pop();
+  return low.concat(up);
+}
+
+function svg_extractOutlineConvexHull(d) {  // Extract outline from SVG path of triangles.
+  const parts = d.trim().split(/M/).filter(Boolean);
+  const pts = [];
+  for (const p of parts) {
+    const nums = p.match(/-?\d+(\.\d+)?/g).map(Number);
+    pts.push([nums[0], nums[1]]);
+    pts.push([nums[2], nums[3]]);
+    pts.push([nums[4], nums[5]]);
+  }
+  return convexHull(pts);
 }
 
 function svg_copy(e) {
