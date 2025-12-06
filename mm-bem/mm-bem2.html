@@ -1441,8 +1441,10 @@ function echoSMs_fun(s) {
 	console.log("" + m + " specimen loaded from json file.");
 }
 
-var echoSMs_url="https://raw.githubusercontent.com/ices-tools-dev/echoSMs/refs/heads/main/data_store/resources/example_metadata.json";
-loadJSON(echoSMs_url,echoSMs_fun);
+var echoSMs_urls=[
+"https://raw.githubusercontent.com/ices-tools-dev/echoSMs/refs/heads/main/data_store/resources/example_metadata.json"
+]
+for(var i=0;i<echoSMs_urls.length;i++) {loadJSON(echoSMs_urls[i],echoSMs_fun);}
 
 function loadEchoSMs(s) {
 	var s = JSON.parse(s);
