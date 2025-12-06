@@ -141,10 +141,12 @@ Full mm-bem package contains source codes in different programming languages for
 </optgroup>
   <!-- <option value="[specimen(0,0),[0,0,0]]">Gadus_morhua_A_L17.3_body</option> -->
 <optgroup id="echoSMs" label="echoSMs models">
+<!--
   <option value="[specimen(0,0,1,3),[0.07,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_A_L17.3_sb</option>
   <option value="[specimen(0,1,1,3),[0.06,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_B_L15.6_sb</option>
   <option value="[specimen(0,2,1,3),[0.13,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_C_L32.3_sb</option>
   <option value="[specimen(0,3,1,3),[0.15,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_D_L38.0_sb</option>
+-->
 </optgroup>
 <optgroup label="NOAA models">
   <!-- <option value="[krm(0,0,5),[-0.105,0,0]]">sardine_body</option> -->
@@ -706,7 +708,7 @@ along both direction angles.
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(30.11.2025)" style="text-align:center">mm-bem v2.06 (2025)</p>
+<p title="(6.12.2025)" style="text-align:center">mm-bem v2.07 (2025)</p>
 
 		</td>
 	</tr>
@@ -1423,10 +1425,46 @@ function mshb2msh(buffer,bytes,n) {
 	return msh_flush();	
 }
 
+function loadJSON(path,fun) {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {fun(xhr.responseText);} else {console.log("Error",xhr);}
+    }
+  };
+  xhr.open('GET', path, true);
+  xhr.send();
+}
+
+function echoSMs_fun(s) {
+	m = loadEchoSMs(s);
+	console.log("" + m + " specimen loaded from json file.");
+}
+
+var echoSMs_url="https://raw.githubusercontent.com/ices-tools-dev/echoSMs/refs/heads/main/data_store/resources/example_metadata.json";
+loadJSON(echoSMs_url,echoSMs_fun);
+
+function loadEchoSMs(s) {
+	var s = JSON.parse(s);
+	if (!("specimens" in s)) {alert("Selected json file does not contain specimens");return;}
+	echoSMs.push(s);
+	var vname = document.getElementById("obj").value.trim();
+	var el = document.getElementById('echoSMs');     // add to echoSMs optgroup
+	var n = echoSMs.length-1;
+	var m = echoSMs[n].specimens.length;
+	for(var i=0;i<m;i++) {
+		var x = echoSMs[n].specimens[i].shapes[1].x; // shapes[1] - swimbladder 
+		var off = -(x[0]+x[x.length-1])/2;           // x offset to move to center
+		if(el) el.innerHTML += '<option value="[specimen('+(n)+','+(i)+',1,3),['+(off)+',0,0],mul(Ry(180),Rx(90))]">'+echoSMs[1].species+'_'+echoSMs[n].specimens[i].specimen_id+'_'+(echoSMs[n].specimens[i].length)+'_sb</option>'
+	}
+	return(m);
+}
+
 files = {};
 function file(s) {return files[s];}
 files2 = {};
 function file2(s) {return files2[s];}
+
 
 function readFile(e) {  // local file reader
 	let k = 0;
@@ -1438,7 +1476,7 @@ function readFile(e) {  // local file reader
 			document.getElementById("obj").value="";
 			document.getElementById("msh").value="";
 		}
-		var reader = new FileReader();
+		var reader = new reader();
 		reader.onload = function(e) {
 			//let result = e.target.result;
 			const buffer = e.target.result;
@@ -1455,20 +1493,9 @@ function readFile(e) {  // local file reader
 					document.getElementById("msh").value += stlb2msh(buffer,bytes);
 				} 
 			} else if(result[0]=='{') {                 // console.log("json file");
-				var s = JSON.parse(result);
-				if (!("specimens" in s)) {alert("Selected json file does not contain specimens");return;}
-				echoSMs.push(s);
-				var vname = document.getElementById("obj").value.trim();
-				var el = document.getElementById('echoSMs');     // add to echoSMs optgroup
-				var n = echoSMs.length-1;
-				var m = echoSMs[n].specimens.length;
-				for(var i=0;i<m;i++) {
-					var x = echoSMs[n].specimens[i].shapes[1].x; // shapes[1] - swimbladder 
-					var off = -(x[0]+x[x.length-1])/2;           // x offset to move to center
-					if(el) el.innerHTML += '<option value="[specimen('+(n)+','+(i)+',1,3),['+(off)+',0,0],mul(Ry(180),Rx(90))]">'+echoSMs[1].species+'_'+echoSMs[n].specimens[i].specimen_id+'_'+(echoSMs[n].specimens[i].length)+'_sb</option>'
-				}
+				loadEchoSMs(result);
 				document.getElementById("obj").value = '';
-				alert('' + (m) +' targets loaded!\nYou can select them from echoSMs section of targets above!');
+				alert('' + (m) +' targets loaded!\nYou can select them from echoSMs section of targets above!');	
 				return;
 			} else { // .msh
 				var ss=result.split('\n');
