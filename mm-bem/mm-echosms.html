@@ -1,0 +1,111 @@
+<html>
+
+<body>
+<div style="width:540px;margin:0 auto;">
+	<div id="connect">
+	<p>EchoSMs URL: 
+	<p><input id="echoSMs_url" type="text" value="" style="width:100%"/>
+	<p><button onclick="echoSMs_connect();">Connect</button>
+	</div>
+
+	<div id="import" hidden>
+	<p>Select swimbladder models to import:
+	<p><select multiple id="select2" style="width:100%" size="10"><optgroup id="echoSMs_ids"></optgroup></select>
+	<p><button onclick="echoSMs_import();">Import</button>
+	</div>
+
+	<div id="data" hidden>
+	<p><textarea id="ta" rows="10" style="width:100%"></textarea>
+	<p><button onclick="saveJSON();">Save as json</button>
+	<p><img id="img" src="" style="width:100%">
+	</div>
+</div>
+</body>
+
+<script>
+var echoSMs_url = "https://echosms-data-store-app-ogogm.ondigitalocean.app/v2/";
+
+function loadJSON(path,fun) {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {if (xhr.status === 200) {fun(xhr.responseText);} else {console.log("Error",xhr);}}
+  };
+  xhr.open('GET', path, true);
+  xhr.send();
+}
+
+function echoSMs_connect() {
+	var s = document.getElementById("echoSMs_url").value;
+	loadJSON(s+'specimens',echoSMs_process);
+}
+
+function echoSMs_process(ss) {
+	var s2 = JSON.parse(ss);
+	var s = '',n=0;
+	for(var i=0;i<s2.length;i++) {
+		if(s2[i]["anatomical_features"].indexOf("swimbladder") >=0) {
+			s += '<option value="'+s2[i]["id"]+'" >' +(i+1)+". "+s2[i]["id"]+': '+s2[i]["vernacular_name"]+' ('+s2[i]["length"]+')</option>\n';
+			n+=1;
+		}
+	}
+	s = '<option value="none" disabled>'+n+' swimbladdered specimens out of ' + s2.length+'</option>\n' + s;
+	document.getElementById("echoSMs_ids").innerHTML=s;
+	document.getElementById("import").removeAttribute("hidden");
+}
+
+function getSelectedOptionsByGroup(selectId, groupId) {
+  const select = document.getElementById(selectId);
+  const group = select.querySelector(`optgroup#${groupId}`);
+  const selected = [];
+  if (group) {
+    group.querySelectorAll("option:checked").forEach(opt => {
+      selected.push(opt.value); // or opt.text if you want the label
+    });
+  }
+  return selected;
+}
+
+function echoSMs_import() {
+	const ss = getSelectedOptionsByGroup("select2", "echoSMs_ids");
+	var s='';
+	document.getElementById("ta").value = '';
+	for(var i=0;i<ss.length;i++) {
+		s += ''+ss[i]+'\n';
+		loadJSON(document.getElementById("echoSMs_url").value+'specimen/'+ss[i]+'/data',echoSMs_data);
+		document.getElementById("img").src=document.getElementById("echoSMs_url").value+'specimen/'+ss[i]+'/image';
+	}
+	//document.getElementById("ta").value='# '+(s.length!=''?s:"Nothing selected");
+	document.getElementById("data").removeAttribute("hidden");
+}
+
+function echoSMs_data(ss) {
+	document.getElementById("ta").value += ss
+}
+
+function writeFile(data, filename, type) {
+	var file = new Blob([data], {type: type||"plain/text;charset=utf-8"});
+	if (window.navigator.msSaveOrOpenBlob) // IE10+
+		window.navigator.msSaveOrOpenBlob(file, filename);
+	else { // Others
+		var a = document.createElement("a");
+		a.href = URL.createObjectURL(file); 
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		setTimeout(function() {
+			document.body.removeChild(a);
+			window.URL.revokeObjectURL(a.href);  
+		}, 0); 
+	}
+}
+
+function saveJSON() {
+	writeFile(document.getElementById("ta").value,"mm-echosms.json");
+}
+
+document.getElementById("echoSMs_url").value=echoSMs_url;
+
+</script>
+
+
+</html>

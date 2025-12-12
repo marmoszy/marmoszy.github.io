@@ -21,7 +21,7 @@
 
 <style> 
 html,body,textarea,select,optgroup {font-size: 18px;}
-input[type='file'],input[type='button'] {font-size: 18px; }
+input[type='file'],input[type='button'],input[type='text'],input[type='url'] {font-size: 18px; }
 .hdr {width:100%;text-align:center;font-size:32;padding:12px 0 12px 0}
 @media screen and (max-width:1080px){
 	#split td {display:block; width:100%;}
@@ -87,7 +87,7 @@ This is a web-based demonstration of the mm-bem code, which calculates acoustic 
 The Input parameters section gives user interface for configuring simulations. Users can specify: (1) target mesh (2) plane wave direction angles <small><i>&theta;</i><sub>0</sub></small> and <small><i>&phi;</i><sub>0</sub></small> (3) its frequency <small><i>f</i><sub>0</sub></small> and (4) sound speed <small><i>c</i><sub>0</sub></small> in water (located in Configuration section). The target mesh could be selected from dropdown menu containing cannonical examples and swimbladder models. The mesh is displayed in the Data Visualisation section on the left 3D panel (Ctrl-H for help). The results of BEM calculations are shown in the right panel as 2D polar plot of the scattering pattern. The wave direction angles could be set into scanning modes enabling calculations over a full angular range. When both angles are set into scanning mode, the output represents 3D backscattering length distribution, which is visualized in 3D View, replacing original mesh. The frequency parameter could be also set into scan mode across predefined frequency range (up to 360&nbsp;kHz). In such a case the results are visualised also in the polar plot with angular values representing frequencies in kHz. See Gallery section for examples.
 
 <p style="font-size:20;margin:16;max-width:940;text-align:justify">
-The fish swimbladder models included in the demo are sourced from (1) scientific studies<sup><small><a href="https://www.researchgate.net/publication/384356288_Acoustic_Techniques_for_Tuna_Biomass_Estimation">2</a>,<a href="https://www.mdpi.com/2077-1312/12/11/2014">3</a></small></sup> (2) the <a href="https://ices-tools-dev.github.io/echoSMs/">echoSMs</a> initiative (3) the NOAA Fisheries <a href="https://www.fisheries.noaa.gov/data-tools/krm-model">KRM model</a> webpage. Users may also enter custom target meshes in one of the following formats: <a href="https://gmsh.info/">GMSH</a> MSH 2.0 with triangular elements or <a href="https://en.wikipedia.org/wiki/STL_(file_format)">STL</a> or in the <a href="https://github.com/ices-tools-dev/echoSMs/tree/main/data_store/resources">echoSMs JSON</a> data structure. 
+The fish swimbladder models included in the demo are sourced from (1) scientific studies<sup><small><a href="https://www.researchgate.net/publication/384356288_Acoustic_Techniques_for_Tuna_Biomass_Estimation">2</a>,<a href="https://www.mdpi.com/2077-1312/12/11/2014">3</a></small></sup> (2) the <a href="https://ices-tools-dev.github.io/echoSMs/">echoSMs</a> initiative (3) the NOAA Fisheries <a href="https://www.fisheries.noaa.gov/data-tools/krm-model">KRM model</a> webpage. Users may also enter custom target meshes in one of the following formats: <a href="https://gmsh.info/">GMSH</a> MSH 2.0 with triangular elements or <a href="https://en.wikipedia.org/wiki/STL_(file_format)">STL</a> or in the <a href="https://github.com/ices-tools-dev/echoSMs/tree/main/data_store/resources">echoSMs JSON</a> data structure. Additionally, it is possible use fish shape models from echoSMs anatomical data store after importing in Configure section.
 
 <p style="font-size:20;margin:16;max-width:940;text-align:justify">
 Full mm-bem package contains source codes in different programming languages for several cases using also the other BEM algorithms. For more detailed information, please refer to the <a href="mm-bem.pdf">readme</a> and the <a href="https://github.com/marmoszy/mm-bem">github</a> repository.
@@ -141,12 +141,10 @@ Full mm-bem package contains source codes in different programming languages for
 </optgroup>
   <!-- <option value="[specimen(0,0),[0,0,0]]">Gadus_morhua_A_L17.3_body</option> -->
 <optgroup id="echoSMs" label="echoSMs models">
-<!--
   <option value="[specimen(0,0,1,3),[0.07,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_A_L17.3_sb</option>
   <option value="[specimen(0,1,1,3),[0.06,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_B_L15.6_sb</option>
   <option value="[specimen(0,2,1,3),[0.13,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_C_L32.3_sb</option>
   <option value="[specimen(0,3,1,3),[0.15,0,0],mul(Ry(180),Rx(-90))]">Gadus_morhua_D_L38.0_sb</option>
--->
 </optgroup>
 <optgroup label="NOAA models">
   <!-- <option value="[krm(0,0,5),[-0.105,0,0]]">sardine_body</option> -->
@@ -693,6 +691,28 @@ along both direction angles.
   <option value="1520">1520 m/s</option>
 </optgroup>
 </select>
+
+<br><br>
+
+<span id="connect">
+<label for="echoSMs_url">EchoSMs URL:</label>
+<br><input id="echoSMs_url" type="text" value="" style="width:440px;background-color:#e6fff2;"/>
+<br><input type="button" onclick="echoSMs_connect();" value="Connect"/>
+</span>
+
+<span id="import" hidden>
+<br><label for="select2">Select swimbladder KRM models to import:</label>
+<br><select multiple id="select2" style="width:100%;max-width:440px" size="10"><optgroup id="echoSMs_ids"></optgroup></select>
+<br><input type="button" onclick="echoSMs_import();" value="Import"/>
+</span>
+
+<!--
+<span id="data" hidden>
+<textarea id="ta" rows="10" style="width:540px"></textarea>
+<br><input type='button' onclick="saveJSON();" value="Save as json"/>
+</span>
+-->
+
 </p>
 			
 		</td>
@@ -708,7 +728,7 @@ along both direction angles.
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(8.12.2025)" style="text-align:center">mm-bem v2.08 (2025)</p>
+<p title="(12.12.2025)" style="text-align:center">mm-bem v2.09 (2025)</p>
 
 		</td>
 	</tr>
@@ -718,6 +738,69 @@ anlave@doctor.upv.es"></a>
 </div> <!--end of container -->
 </body>
 </html>
+
+<script>
+var echoSMs_url = "https://echosms-data-store-app-ogogm.ondigitalocean.app/v2/";
+
+/*
+function loadJSON(path,fun) {
+  var xhr = new XMLHttpRequest();
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {if (xhr.status === 200) {fun(xhr.responseText);} else {console.log("Error",xhr);}}
+  };
+  xhr.open('GET', path, true);
+  xhr.send();
+}
+*/
+
+function echoSMs_connect() {
+	var s = document.getElementById("echoSMs_url").value;
+	loadJSON(s+'specimens?shape_type=outline',echoSMs_process);
+}
+
+function echoSMs_process(ss) {
+	var s2 = JSON.parse(ss);
+	var s = '',n=0;
+	for(var i=0;i<s2.length;i++) {
+		if(s2[i]["anatomical_features"].indexOf("swimbladder") >=0) {
+			s += '<option value="'+s2[i]["id"]+'" >' +(i+1)+". "+s2[i]["id"]+': '+s2[i]["vernacular_name"]+' ('+s2[i]["length"]+')</option>\n';
+			n+=1;
+		}
+	}
+	s = '<option value="none" disabled>'+n+' swimbladdered specimens out of ' + s2.length+'</option>\n' + s;
+	document.getElementById("echoSMs_ids").innerHTML=s;
+	document.getElementById("import").removeAttribute("hidden");
+}
+
+function getSelectedOptionsByGroup(selectId, groupId) {
+  const select = document.getElementById(selectId);
+  const group = select.querySelector(`optgroup#${groupId}`);
+  const selected = [];
+  if (group) {
+    group.querySelectorAll("option:checked").forEach(opt => {
+      selected.push(opt.value); // or opt.text if you want the label
+    });
+  }
+  return selected;
+}
+
+function echoSMs_import() {
+	const ss = getSelectedOptionsByGroup("select2", "echoSMs_ids");
+	var s='';
+	for(var i=0;i<ss.length;i++) {
+		s += ''+ss[i]+'\n';
+		loadJSON(document.getElementById("echoSMs_url").value+'specimen/'+ss[i]+'/data',echoSMs_fun);
+	}
+}
+
+function saveJSON(s) {
+	writeFile(s,"mm-echosms.json");
+}
+
+document.getElementById("echoSMs_url").value=echoSMs_url;
+
+</script>
+
 
 <script>
 // globals
@@ -1046,6 +1129,42 @@ function linint(data, fitCount) {
     return newData;
 };
 
+function redint(values, factor) {
+  const N = values.length;
+  const newLength = Math.floor(N / factor);
+  const result = [];
+  for (let i = 0; i < newLength; i++) {
+    const pos = i * factor;     // Map new index to original space
+    const idx = Math.floor(pos);
+    const t = pos - idx;
+    if (idx + 1 < N) {      
+      const val = values[idx] * (1 - t) + values[idx + 1] * t; // Linear interpolation between values[idx] and values[idx+1]
+      result.push(val);
+    } else {
+      result.push(values[N - 1]);
+    }
+  }
+  return result;
+}
+
+function resample(values, newLength) {
+  const N = values.length;
+  if (newLength <= 0) return [];
+  const result = [];
+  const scale = (N - 1) / (newLength - 1);
+  for (let i = 0; i < newLength; i++) {
+    const pos = i * scale;
+    const idx = Math.floor(pos);
+    const t = pos - idx;
+    if (idx + 1 < N) {
+      const val = values[idx] * (1 - t) + values[idx + 1] * t; // Linear interpolation between values[idx] and values[idx+1]
+      result.push(val);
+    } else {
+      result.push(values[N - 1]);       // Last element
+    }
+  }
+  return result;
+}
 
 // ---- matrix functions
 
@@ -1429,7 +1548,7 @@ function loadJSON(path,fun) {
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function () {
     if (xhr.readyState === 4) {
-      if (xhr.status === 200) {fun(xhr.responseText);} else {console.log("Error",xhr);}
+      if (xhr.status === 200) {fun(xhr.responseText);} else {console.log("Error: ",xhr);}
     }
   };
   xhr.open('GET', path, true);
@@ -1438,9 +1557,11 @@ function loadJSON(path,fun) {
 
 function echoSMs_fun(s) {
 	m = loadEchoSMs(s);
-	console.log("" + m + " specimen loaded from json file.");
+	//console.log("" + m + " specimen loaded from json file.");
+	alert("" + m + " specimen loaded from json file.");
 }
 
+/*
 var echoSMs_urls=[
 //"https://raw.githubusercontent.com/ices-tools-dev/echoSMs/refs/heads/main/data_store/resources/example_metadata.json"
 
@@ -1451,6 +1572,7 @@ var echoSMs_urls=[
 
 ]
 for(var i=0;i<echoSMs_urls.length;i++) {loadJSON(echoSMs_urls[i],echoSMs_fun);}
+*/
 
 function loadEchoSMs(ss) {
 	var s = JSON.parse(ss);
@@ -1460,7 +1582,6 @@ function loadEchoSMs(ss) {
 			return;
 		} else {
 			var ss2="{\"species\":\"_\",\"specimens\":["+ss+"]}";
-			console.log(ss2);
 			s = JSON.parse(ss2);
 		}
 	}
@@ -1470,11 +1591,27 @@ function loadEchoSMs(ss) {
 	var n = echoSMs.length-1;
 	var m = echoSMs[n].specimens.length;
 	for(var i=0;i<m;i++) {
-		var x = echoSMs[n].specimens[i].shapes[1].x; // shapes[1] - swimbladder 
+		var res = 3;
 		var species = echoSMs[n].species;
-		if(species=="_") species=echoSMs[n].specimens[i].species;
-		var off = -(x[0]+x[x.length-1])/2;           // x offset to move to center
-		if(el) el.innerHTML += '<option value="[specimen('+(n)+','+(i)+',1,3),['+(off)+',0,0],mul(Ry(180),Rx(90))]">'+species+'_'+echoSMs[n].specimens[i].specimen_id+'_'+(echoSMs[n].specimens[i].length)+'_sb</option>'
+		if(species=="_") {
+			species=echoSMs[n].specimens[i].species;
+			res = 1;
+		}
+		var idx = echoSMs[n].specimens[i]["anatomical_features"].indexOf("swimbladder");
+		console.log("swimbladder index: "+idx);
+		if(idx>=0) {
+			var l = echoSMs[n].specimens[i].shapes[idx].x.length;
+			console.log(" size:"+l);
+			if(l>40) {res=40/l;}
+			var x = echoSMs[n].specimens[i].shapes[idx].x; // shapes[1] - swimbladder 
+			var off = -(x[0]+x[x.length-1])/2;           // x offset to move to center
+			if(el) {
+				el.innerHTML += '<option value="[specimen('+(n)+','+(i)+','+(idx)+','+(res).toFixed(1)+'),['+(off).toFixed(3)+',0,0],mul(Ry(180),Rx(90))]">'+species+'_'+echoSMs[n].specimens[i].specimen_id+'_'+(echoSMs[n].specimens[i].length)+'_sb</option>';
+			}
+		} else {
+			alert("No swimbladder description found!")
+			console.log(echoSMs[n].specimens[i]);
+		}
 	}
 	return(m);
 }
@@ -1483,7 +1620,6 @@ files = {};
 function file(s) {return files[s];}
 files2 = {};
 function file2(s) {return files2[s];}
-
 
 function readFile(e) {  // local file reader
 	let k = 0;
@@ -1495,7 +1631,7 @@ function readFile(e) {  // local file reader
 			document.getElementById("obj").value="";
 			document.getElementById("msh").value="";
 		}
-		var reader = new reader();
+		var reader = new FileReader();
 		reader.onload = function(e) {
 			//let result = e.target.result;
 			const buffer = e.target.result;
@@ -1512,7 +1648,7 @@ function readFile(e) {  // local file reader
 					document.getElementById("msh").value += stlb2msh(buffer,bytes);
 				} 
 			} else if(result[0]=='{') {                 // console.log("json file");
-				loadEchoSMs(result);
+				var m = loadEchoSMs(result);
 				document.getElementById("obj").value = '';
 				alert('' + (m) +' targets loaded!\nYou can select them from echoSMs section of targets above!');	
 				return;
@@ -2410,27 +2546,30 @@ function mfrustum(ww = [1,1,1], hh = [1,1,1], xx=[0,0,0], yy=[0,0,0], zz = [3,3,
 	var x = every(xx,nW);
 	var y = every(yy,nW);
 	var z = every(zz,nW);
-for(var j=1;j<w.length;j+=1) {
-    var mode = 0;
-    if(j==1) mode|=1;
-    if(j==w.length-1) mode|=2;
-    for(var i=0; i<N; i++) {
-	for(var k=j-1; k<=j; k+=1) {  // two times
-            var a=0, b = w[k] * Math.sin(2*pi*i/N), c = h[k] * Math.cos(2*pi*i/N);
-    	    vx.push([a+x[k],b+y[k],c+z[k]]);
-	} 
-	//var a = w[j] * Math.sin(2*pi*i/N), b = h[j] * Math.cos(2*pi*i/N);
-    	//vx.push([a+x[j],b+y[j],z[j]]);
-    }
-    vx.push([x[j-1],y[j-1],z[j-1]]); vx.push([x[j],y[j],z[j]]);
-    for(var i=0; i<N; i++) {
-        fx.push([n+2*i,n+2*i+1,n+(2*i+2)%(2*N)]); 
-	fx.push([n+(2*i+2)%(2*N),n+2*i+1,n+(2*i+3)%(2*N)]);
-        if(mode&1) fx.push([n+2*i,n+(2*i+2)%(2*N),n+2*N]); 
-	if(mode&2) fx.push([n+2*i+1,n+2*N+1,n+(2*i+3)%(2*N)]);
-    }
-    n += 2*N + 2;
-}
+	for(var j=0;j<w.length;j+=1) {
+		if(w[j]==0) {w[j]=0.0001;console.log('Warning: w['+j+']==0');}
+		if(h[j]==0) {h[j]=0.0001;console.log('Warning: h['+j+']==0');}
+		if(j==0) continue; 
+	 	var mode = 0;
+		if(j==1) mode|=1;
+		if(j==w.length-1) mode|=2;
+		for(var i=0; i<N; i++) {
+			for(var k=j-1; k<=j; k+=1) {  // two times
+				var a=0, b = w[k] * Math.sin(2*pi*i/N), c = h[k] * Math.cos(2*pi*i/N);
+				vx.push([a+x[k],b+y[k],c+z[k]]);
+			} 
+			//var a = w[j] * Math.sin(2*pi*i/N), b = h[j] * Math.cos(2*pi*i/N);
+			//vx.push([a+x[j],b+y[j],z[j]]);
+		}
+		vx.push([x[j-1],y[j-1],z[j-1]]); vx.push([x[j],y[j],z[j]]);
+		for(var i=0; i<N; i++) {
+			fx.push([n+2*i,n+2*i+1,n+(2*i+2)%(2*N)]); 
+			fx.push([n+(2*i+2)%(2*N),n+2*i+1,n+(2*i+3)%(2*N)]);
+			if(mode&1) fx.push([n+2*i,n+(2*i+2)%(2*N),n+2*N]); 
+			if(mode&2) fx.push([n+2*i+1,n+2*N+1,n+(2*i+3)%(2*N)]);
+	    }
+	    n += 2*N + 2;
+	}
     return [vx,fx];
 }
 
@@ -17567,11 +17706,17 @@ function specimen(k, i, j, mm) {
 	var m = mm||1; 
 	var n = m*echoSMs[k].specimens[i].shapes[j].width.length;
 	var w = echoSMs[k].specimens[i].shapes[j].width;
-	var h = echoSMs[k].specimens[i].shapes[j].height
+	var h = echoSMs[k].specimens[i].shapes[j].height;
 	var x =	echoSMs[k].specimens[i].shapes[j].x;
 	var y =	echoSMs[k].specimens[i].shapes[j].y;
 	var z =	echoSMs[k].specimens[i].shapes[j].z;
-	return mfrustum(linint(w,n),linint(h,n),linint(x,n),linint(y,n),linint(z,n));
+	
+	//if(m>=1) {
+		//return mfrustum(linint(w,n),linint(h,n),linint(x,n),linint(y,n),linint(z,n));
+		//} else {
+		//return mfrustum(redint(w,1/m),redint(h,1/m),redint(x,1/m),redint(y,1/m),redint(z,1/m));
+		//}
+	return mfrustum(resample(w,n),resample(h,n),resample(x,n),resample(y,n),resample(z,n));
 }
 
 function krm(i,j,nn) {
