@@ -1639,6 +1639,8 @@ function file2(s) {return files2[s];}
 function readFile(e) {  // local file reader
 	let k = 0;
 	let N = e.files.length;
+	let obj_old=document.getElementById("obj").value;
+	let msh_old=document.getElementById("msh").value;
 	for(var i=0; i<N; i++) {
 		var file = e.files[i];
 		if (!file) return;
@@ -1664,8 +1666,9 @@ function readFile(e) {  // local file reader
 				} 
 			} else if(result[0]=='{') {                 // console.log("json file");
 				var m = loadEchoSMs(result);
-				document.getElementById("obj").value = '';
-				alert('' + (m) +' targets loaded!\nYou can select them from echoSMs section of targets above!');	
+				document.getElementById("obj").value = obj_old;
+				document.getElementById("msh").value = msh_old;
+				alert('' + (m) +' targets loaded!\nYou can select them from echoSMs section of targets above!');
 				return;
 			} else { // .msh
 				var ss=result.split('\n');
