@@ -25,10 +25,12 @@
 <script>
 var echoSMs_url = "https://echosms-data-store-app-ogogm.ondigitalocean.app/v2/";
 
+var loadJSON_i=0, loadJSON_n=0;
+
 function loadJSON(path,fun) {
   var xhr = new XMLHttpRequest();
   xhr.onreadystatechange = function () {
-    if (xhr.readyState === 4) {if (xhr.status === 200) {fun(xhr.responseText);} else {console.log("Error",xhr);}}
+    if (xhr.readyState === 4) {if(xhr.status === 200) {fun(xhr.responseText);} else {console.log("Error",xhr);}}
   };
   xhr.open('GET', path, true);
   xhr.send();
@@ -69,6 +71,7 @@ function echoSMs_import() {
 	const ss = getSelectedOptionsByGroup("select2", "echoSMs_ids");
 	var s='';
 	document.getElementById("ta").value = '';
+	loadJSON_i=0; loadJSON_n=ss.length;
 	for(var i=0;i<ss.length;i++) {
 		s += ''+ss[i]+'\n';
 		loadJSON(document.getElementById("echoSMs_url").value+'specimen/'+ss[i]+'/data',echoSMs_data);
@@ -79,7 +82,11 @@ function echoSMs_import() {
 }
 
 function echoSMs_data(ss) {
-	document.getElementById("ta").value += ss
+	var el = document.getElementById("ta");
+	if(loadJSON_n>1) {if(loadJSON_i==0) {el.value='{"specimens":['} else {el.value+=','}}
+	el.value += ss
+	loadJSON_i += 1;
+	if(loadJSON_n>1) {if(loadJSON_i==loadJSON_n) {el.value+=']}'}}
 }
 
 function writeFile(data, filename, type) {
