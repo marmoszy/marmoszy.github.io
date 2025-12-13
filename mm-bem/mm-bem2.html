@@ -1588,7 +1588,7 @@ function loadEchoSMs(ss) {
 			alert("Selected json file does not contain specimens nor shapes");
 			return;
 		} else {
-			var ss2="{\"species\":\"_\",\"specimens\":["+ss+"]}";
+			var ss2="{\"specimens\":["+ss+"]}";
 			s = JSON.parse(ss2);
 		}
 	}
@@ -1599,9 +1599,9 @@ function loadEchoSMs(ss) {
 	var m = echoSMs[n].specimens.length;
 	for(var i=0;i<m;i++) {
 		var res = 3;
-		var species = echoSMs[n].species;
-		if(species=="_") {
-			species=echoSMs[n].specimens[i].species;
+		var vname = echoSMs[n].species;
+		if(vname==undefined) {
+			vname = echoSMs[n].specimens[i].vernacular_name;
 			res = 1;
 		}
 		var idx = echoSMs[n].specimens[i]["anatomical_features"].indexOf("swimbladder");
@@ -1613,7 +1613,7 @@ function loadEchoSMs(ss) {
 			var x = echoSMs[n].specimens[i].shapes[idx].x; // shapes[1] - swimbladder 
 			var off = -(x[0]+x[x.length-1])/2;           // x offset to move to center
 			if(el) {
-				el.innerHTML += '<option value="[specimen('+(n)+','+(i)+','+(idx)+','+(res).toFixed(1)+'),['+(off).toFixed(3)+',0,0],mul(Ry(180),Rx(90))]">'+species+'_'+echoSMs[n].specimens[i].specimen_id+'_'+(echoSMs[n].specimens[i].length)+'_sb</option>';
+				el.innerHTML += '<option value="[specimen('+(n)+','+(i)+','+(idx)+','+(res).toFixed(1)+'),['+(off).toFixed(3)+',0,0],mul(Ry(180),Rx(90))]">'+echoSMs[n].specimens[i].id+'_'+vname+'_'+(echoSMs[n].specimens[i].length)+'_sb</option>';
 			}
 		} else {
 			alert("No swimbladder description found!")
