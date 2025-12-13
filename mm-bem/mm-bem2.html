@@ -787,6 +787,7 @@ function getSelectedOptionsByGroup(selectId, groupId) {
 function echoSMs_import() {
 	const ss = getSelectedOptionsByGroup("select2", "echoSMs_ids");
 	var s='';
+	loadJSON_i=0; loadJSON_n=ss.length;
 	for(var i=0;i<ss.length;i++) {
 		s += ''+ss[i]+'\n';
 		loadJSON(document.getElementById("echoSMs_url").value+'specimen/'+ss[i]+'/data',echoSMs_fun);
@@ -1555,10 +1556,16 @@ function loadJSON(path,fun) {
   xhr.send();
 }
 
+var loadJSON_i=0, loadJSON_n=0;
+
 function echoSMs_fun(s) {
 	m = loadEchoSMs(s);
+	loadJSON_i += m;
 	//console.log("" + m + " specimen loaded from json file.");
-	alert("" + m + " specimen loaded from json file.");
+	if(loadJSON_i==loadJSON_n) {
+		alert("" + (loadJSON_n) + " specimen loaded from json file.");
+		loadJSON_i=0;loadJSON_n=0;
+	}
 }
 
 /*
@@ -1601,7 +1608,7 @@ function loadEchoSMs(ss) {
 		console.log("swimbladder index: "+idx);
 		if(idx>=0) {
 			var l = echoSMs[n].specimens[i].shapes[idx].x.length;
-			console.log(" size:"+l);
+			console.log(" data size:"+l);
 			if(l>40) {res=40/l;}
 			var x = echoSMs[n].specimens[i].shapes[idx].x; // shapes[1] - swimbladder 
 			var off = -(x[0]+x[x.length-1])/2;           // x offset to move to center
