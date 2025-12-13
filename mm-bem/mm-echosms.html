@@ -45,12 +45,14 @@ function echoSMs_process(ss) {
 	var s2 = JSON.parse(ss);
 	var s = '',n=0;
 	for(var i=0;i<s2.length;i++) {
-		if(s2[i]["anatomical_features"].indexOf("swimbladder") >=0) {
+		//if(s2[i]["anatomical_features"].indexOf("swimbladder") >=0) 
+		{
 			s += '<option value="'+s2[i]["id"]+'" >' +(i+1)+". "+s2[i]["id"]+': '+s2[i]["vernacular_name"]+' ('+s2[i]["length"]+')</option>\n';
 			n+=1;
 		}
 	}
-	s = '<option value="none" disabled>'+n+' swimbladdered specimens out of ' + s2.length+'</option>\n' + s;
+//	s = '<option value="none" disabled>'+n+' specimens out of ' + s2.length+'</option>\n' + s;
+	s = '<option value="none" disabled>'+n+' specimens'+'</option>\n' + s;
 	document.getElementById("echoSMs_ids").innerHTML=s;
 	document.getElementById("import").removeAttribute("hidden");
 }

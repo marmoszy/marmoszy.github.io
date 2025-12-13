@@ -701,7 +701,7 @@ along both direction angles.
 </span>
 
 <span id="import" hidden>
-<br><label for="select2">Select swimbladder KRM models to import:</label>
+<br><label for="select2">Select swimbladder KRM models and mesh models to import:</label>
 <br><select multiple id="select2" style="width:100%;max-width:440px" size="10"><optgroup id="echoSMs_ids"></optgroup></select>
 <br><input type="button" onclick="echoSMs_import();" value="Import"/>
 </span>
@@ -755,7 +755,8 @@ function loadJSON(path,fun) {
 
 function echoSMs_connect() {
 	var s = document.getElementById("echoSMs_url").value;
-	loadJSON(s+'specimens?shape_type=outline',echoSMs_process);
+	loadJSON(s+'specimens',echoSMs_process);
+	//loadJSON(s+'specimens?shape_type=outline',echoSMs_process);
 }
 
 function echoSMs_process(ss) {
@@ -17711,12 +17712,32 @@ const echoSMs = [
 
 function specimen(k, i, j, mm) {
 	var m = mm||1; 
-	var n = m*echoSMs[k].specimens[i].shapes[j].width.length;
+	var n = m*echoSMs[k].specimens[i].shapes[j].x.length;
 	var w = echoSMs[k].specimens[i].shapes[j].width;
 	var h = echoSMs[k].specimens[i].shapes[j].height;
 	var x =	echoSMs[k].specimens[i].shapes[j].x;
 	var y =	echoSMs[k].specimens[i].shapes[j].y;
 	var z =	echoSMs[k].specimens[i].shapes[j].z;
+
+	if(w==undefined && h==undefined) {
+		const f0=echoSMs[k].specimens[i].shapes[j].facets_0;
+		const f1=echoSMs[k].specimens[i].shapes[j].facets_1;
+		const f2=echoSMs[k].specimens[i].shapes[j].facets_2;
+		if(f0==undefined) {
+			alert("This is not KRM model nor mesh model!") 
+			return;
+		}
+		var xmin=Math.min(...x),xmax=Math.max(...x);
+		var ymin=Math.min(...y),ymax=Math.max(...y);
+		var zmin=Math.min(...z),zmax=Math.max(...z);
+		var xoff=(xmax+xmin)/2;
+		var yoff=(ymax+ymin)/2;
+		var zoff=(zmax+zmin)/2;
+		console.log(''+xoff+' '+yoff+' '+zoff);
+		const vx = x.map((xi, i) => [xi/*-xoff*/, y[i]-yoff, z[i]-zoff]);
+		const fx = f0.map((f0i, i) => [f0i, f1[i], f2[i]]);
+		return [vx,fx];
+	}
 	
 	//if(m>=1) {
 		//return mfrustum(linint(w,n),linint(h,n),linint(x,n),linint(y,n),linint(z,n));
