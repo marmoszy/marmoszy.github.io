@@ -1,7 +1,10 @@
 <html>
-
+<style>
+* {font-size:18px;}
+</style>
+	
 <body>
-<div style="width:540px;margin:0 auto;">
+<div style="width:640px;margin:0 auto;">
 	<div id="connect">
 	<p>EchoSMs URL: 
 	<p><input id="echoSMs_url" type="text" value="" style="width:100%"/>
@@ -17,7 +20,7 @@
 	<div id="data" hidden>
 	<p><textarea id="ta" rows="10" style="width:100%"></textarea>
 	<p><button onclick="saveJSON();">Save as json</button>
-	<p><img id="img" src="" style="width:100%">
+	<p><div id="images"></div>
 	</div>
 </div>
 </body>
@@ -52,7 +55,7 @@ function echoSMs_process(ss) {
 		}
 	}
 //	s = '<option value="none" disabled>'+n+' specimens out of ' + s2.length+'</option>\n' + s;
-	s = '<option value="none" disabled>'+n+' specimens'+'</option>\n' + s;
+	s = '<option value="none" disabled>'+n+' specimens'+':</option>\n' + s;
 	document.getElementById("echoSMs_ids").innerHTML=s;
 	document.getElementById("import").removeAttribute("hidden");
 }
@@ -71,24 +74,28 @@ function getSelectedOptionsByGroup(selectId, groupId) {
 
 function echoSMs_import() {
 	const ss = getSelectedOptionsByGroup("select2", "echoSMs_ids");
-	var s='';
+	var s='',s2='';
 	document.getElementById("ta").value = '';
 	loadJSON_i=0; loadJSON_n=ss.length;
 	for(var i=0;i<ss.length;i++) {
 		s += ''+ss[i]+'\n';
 		loadJSON(document.getElementById("echoSMs_url").value+'specimen/'+ss[i]+'/data',echoSMs_data);
-		document.getElementById("img").src=document.getElementById("echoSMs_url").value+'specimen/'+ss[i]+'/image';
+		s2 += "<img src=\""+document.getElementById("echoSMs_url").value+'specimen/'+ss[i]+'/image'+"\" style=\"width:100%\">";
 	}
+	var el=document.getElementById("images");
+	if(el) el.innerHTML = s2;
 	//document.getElementById("ta").value='# '+(s.length!=''?s:"Nothing selected");
 	document.getElementById("data").removeAttribute("hidden");
 }
 
 function echoSMs_data(ss) {
 	var el = document.getElementById("ta");
-	if(loadJSON_n>1) {if(loadJSON_i==0) {el.value='{"specimens":['} else {el.value+=','}}
+	//if(loadJSON_n>1) 
+	{if(loadJSON_i==0) {el.value='{"specimens":['} else {el.value+=','}}
 	el.value += ss
 	loadJSON_i += 1;
-	if(loadJSON_n>1) {if(loadJSON_i==loadJSON_n) {el.value+=']}'}}
+	//if(loadJSON_n>1) 
+	{if(loadJSON_i==loadJSON_n) {el.value+=']}'}}
 }
 
 function writeFile(data, filename, type) {

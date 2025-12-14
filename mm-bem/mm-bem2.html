@@ -703,7 +703,8 @@ along both direction angles.
 <span id="import" hidden>
 <br><label for="select2">Select swimbladder models to import:</label>
 <br><select multiple id="select2" style="width:100%;max-width:440px" size="10"><optgroup id="echoSMs_ids"></optgroup></select>
-<br><input type="button" onclick="echoSMs_import();" value="Import"/>
+<br><input type="button" onclick="echoSMs_import();" value="Import" title="Import directly to target dropdown"/>
+<input id="echoSMs_save" hidden type="button" onclick="echoSMs_save();" value="Save to json file" title="Save imported models to local file" style="float:right"/>
 </span>
 
 <!--
@@ -728,7 +729,7 @@ along both direction angles.
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(12.12.2025)" style="text-align:center">mm-bem v2.09 (2025)</p>
+<p title="(14.12.2025)" style="text-align:center">mm-bem v2.1 (2025)</p>
 
 		</td>
 	</tr>
@@ -788,11 +789,15 @@ function getSelectedOptionsByGroup(selectId, groupId) {
 function echoSMs_import() {
 	const ss = getSelectedOptionsByGroup("select2", "echoSMs_ids");
 	var s='';
-	loadJSON_i=0; loadJSON_n=ss.length;
+	loadJSON_i=0; loadJSON_n=ss.length; loadJSON_s='';
 	for(var i=0;i<ss.length;i++) {
 		s += ''+ss[i]+'\n';
 		loadJSON(document.getElementById("echoSMs_url").value+'specimen/'+ss[i]+'/data',echoSMs_fun);
 	}
+}
+function echoSMs_save() {
+	saveJSON("{\"specimens\":["+loadJSON_s+"]}");
+	document.getElementById('echoSMs_save').setAttribute("hidden",true);
 }
 
 function saveJSON(s) {
@@ -1557,15 +1562,17 @@ function loadJSON(path,fun) {
   xhr.send();
 }
 
-var loadJSON_i=0, loadJSON_n=0;
+var loadJSON_i=0, loadJSON_n=0, loadJSON_s='';
 
 function echoSMs_fun(s) {
+	loadJSON_s += (loadJSON_s.length>0?',':'') + s;
 	m = loadEchoSMs(s);
 	loadJSON_i += m;
 	//console.log("" + m + " specimen loaded from json file.");
 	if(loadJSON_i==loadJSON_n) {
 		alert("" + (loadJSON_n) + " specimen loaded from json file.");
 		loadJSON_i=0;loadJSON_n=0;
+		if(loadJSON_s.length>0) {document.getElementById("echoSMs_save").removeAttribute("hidden");}
 	}
 }
 
