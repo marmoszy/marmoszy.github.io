@@ -799,14 +799,39 @@ function echoSMs_import() {
 	}
 }
 function echoSMs_image(id) {
+	var id2 = echoSMs_change(document.getElementById("select2"));
+	if(id2.length==0) {id2=id;}
 	var el = document.getElementById("images");
 	if(el) {
-		el.innerHTML = "<img src=\""+document.getElementById("echoSMs_url").value+'specimen/'+id+'/image'+"\" style=\"width:440px\">"
+		if(id2.length>0) {
+			el.innerHTML = "<img title=\""+id2+"\" src=\""+document.getElementById("echoSMs_url").value+'specimen/'+id2+'/image'+"\" style=\"width:440px\">"
+		} else {
+			el.innerHTML='';
+		}
 	}
 }
 function echoSMs_save() {
 	saveJSON("{\"specimens\":["+loadJSON_s+"]}");
 	document.getElementById('echoSMs_save').setAttribute("hidden",true);
+}
+
+let echoSMs_prev = new Set();
+function echoSMs_change(select) {
+	var last='';
+	const cur = new Set(Array.from(select.options).filter(opt => opt.selected).map(opt => opt.value));
+	for (const val of cur) {// Find newly selected option(s)
+    	if (!echoSMs_prev.has(val)) {
+			last = val;
+			// console.log("Last selected:", val);
+		}
+	}
+	for (const val of echoSMs_prev) {// Find newly deselected option(s)
+		if (!cur.has(val)) {
+			//console.log("Deselected:", val);
+		}	
+	}
+	echoSMs_prev = cur;
+	return last;
 }
 
 function saveJSON(s) {
