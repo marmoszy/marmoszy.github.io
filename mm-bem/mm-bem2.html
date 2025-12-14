@@ -23,9 +23,11 @@
 html,body,textarea,select,optgroup {font-size: 18px;}
 input[type='file'],input[type='button'],input[type='text'],input[type='url'] {font-size: 18px; }
 .hdr {width:100%;text-align:center;font-size:32;padding:12px 0 12px 0}
+.w {max-width:940px}
 @media screen and (max-width:1080px){
 	#split td {display:block; width:100%;}
 	#nosplit td {display:inline-block;}
+	.w {max-width:460px}
 }
 :root {
 --col-1: black; /* #A083B9;  #4B6589; #344863; */     
@@ -80,6 +82,7 @@ input[type='file'],input[type='button'],input[type='text'],input[type='url'] {fo
 	<tr class="frame" hidden>
 		<td colspan=2>
 
+<div class="w">
 <p style="font-size:20;margin:16;max-width:940;text-align:justify">
 This is a web-based demonstration of the mm-bem code, which calculates acoustic scattering patterns from mesh defined targets using Boundary Element Method (BEM)<sup><small><a href="https://www.uaconferences.org/docs/2025_program_papers/2025_05_31_22_55_11_Moszyski_Marek.pdf">1</a></small></sup>. The demo runs entirely within modern web browsers and allows calculating scattering patterns for pressure released (soft) targets modeled by not more than 5000 triangular elements. It uses classical BEM algorithm with P0 elements, requires no third-party libraries and can operate offline on any client machine. It is dedicated to compute target strength <small>TS</small> of swimbladdered fish across multiple frequencies commonly used in fisheries acoustics, provided the wavelength to element size ratio condition is fulfilled. 
 
@@ -91,7 +94,7 @@ The fish swimbladder models included in the demo are sourced from (1) scientific
 
 <p style="font-size:20;margin:16;max-width:940;text-align:justify">
 Full mm-bem package contains source codes in different programming languages for several cases using also the other BEM algorithms. For more detailed information, please refer to the <a href="mm-bem.pdf">readme</a> and the <a href="https://github.com/marmoszy/mm-bem">github</a> repository.
-
+</div>
 		</td>
 	</tr>
 
