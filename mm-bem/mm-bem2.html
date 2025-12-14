@@ -695,14 +695,14 @@ along both direction angles.
 <br><br>
 
 <span id="connect">
-<label for="echoSMs_url">EchoSMs URL:</label>
+<label for="echoSMs_url" title="EchoSMs WEB API URL">EchoSMs URL:</label>
 <br><input id="echoSMs_url" type="text" value="" style="width:440px;background-color:#e6fff2;"/>
 <br><input type="button" onclick="echoSMs_connect();" value="Connect"/>
 </span>
 
 <span id="import" hidden>
 <br><label for="select2">Select swimbladder models to import:</label>
-<br><select multiple id="select2" style="width:100%;max-width:440px" size="10"><optgroup id="echoSMs_ids"></optgroup></select>
+<br><select multiple id="select2" style="width:100%;max-width:440px" size="10" onchange="echoSMs_image(this.value);"><optgroup id="echoSMs_ids"></optgroup></select>
 <br><input type="button" onclick="echoSMs_import();" value="Import" title="Import directly to target dropdown"/>
 <input id="echoSMs_save" hidden type="button" onclick="echoSMs_save();" value="Save to json file" title="Save imported models to local file" style="float:right"/>
 </span>
@@ -716,6 +716,9 @@ along both direction angles.
 
 </p>
 			
+		</td>
+		<td>
+			<div id="images" style="margin-top:80px"></div>
 		</td>
 	</tr>
 	
@@ -793,6 +796,12 @@ function echoSMs_import() {
 	for(var i=0;i<ss.length;i++) {
 		s += ''+ss[i]+'\n';
 		loadJSON(document.getElementById("echoSMs_url").value+'specimen/'+ss[i]+'/data',echoSMs_fun);
+	}
+}
+function echoSMs_image(id) {
+	var el = document.getElementById("images");
+	if(el) {
+		el.innerHTML = "<img src=\""+document.getElementById("echoSMs_url").value+'specimen/'+id+'/image'+"\" style=\"width:440px\">"
 	}
 }
 function echoSMs_save() {
