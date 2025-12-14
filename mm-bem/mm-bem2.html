@@ -772,7 +772,7 @@ function echoSMs_process(ss) {
 			n+=1;
 		}
 	}
-	s = '<option value="none" disabled>'+n+' swimbladdered specimens out of ' + s2.length+'</option>\n' + s;
+	s = '<option value="none" disabled>'+n+' swimbladdered specimens out of ' + s2.length+':</option>\n' + s;
 	document.getElementById("echoSMs_ids").innerHTML=s;
 	document.getElementById("import").removeAttribute("hidden");
 }
