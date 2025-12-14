@@ -1,10 +1,16 @@
 <html>
+<title>mm-echosms</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
 <style>
 * {font-size:18px;}
+.w {width:720px}
+@media screen and (max-width:480px) {.w {width:360px}}
 </style>
 	
 <body>
-<div style="width:640px;margin:0 auto;">
+<div class="w" style="margin:0 auto;">
 	<div id="connect">
 	<p>EchoSMs URL: 
 	<p><input id="echoSMs_url" type="text" value="" style="width:100%"/>
@@ -122,6 +128,5 @@ function saveJSON() {
 document.getElementById("echoSMs_url").value=echoSMs_url;
 
 </script>
-
 
 </html>
