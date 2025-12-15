@@ -698,13 +698,13 @@ along both direction angles.
 <br><br>
 
 <span id="connect">
-<label for="echoSMs_url" title="EchoSMs WEB API URL"><a href="https://ices-tools-dev.github.io/echoSMs/datastore_API/">EchoSMs</a> URL<a href="mm-echosms.html" style="text-decoration:none">*</a>:</label>
+<label for="echoSMs_url" title="EchoSMs WEB API URL"><a href="https://ices-tools-dev.github.io/echoSMs/datastore_API/">EchoSMs anatomical data store</a> endpoint URL<a href="mm-echosms.html" style="text-decoration:none" title="All specimens preview">*</a>:</label>
 <br><input id="echoSMs_url" type="text" value="" style="width:440px;background-color:#e6fff2;"/>
 <br><input type="button" onclick="echoSMs_connect();" value="Connect"/>
 </span>
 
 <span id="import" hidden>
-<br><label for="select2">Select swimbladder models to import:</label>
+<br><label for="select2" title="Multiple selection">Select swimbladder models to import:</label>
 <br><select multiple id="select2" style="width:100%;max-width:440px" size="10" onchange="echoSMs_image(this.value);"><optgroup id="echoSMs_ids"></optgroup></select>
 <br><input type="button" onclick="echoSMs_import();" value="Import" title="Import directly to target dropdown"/>
 <input id="echoSMs_save" hidden type="button" onclick="echoSMs_save();" value="Save to json file" title="Save imported models to local file" style="float:right"/>
