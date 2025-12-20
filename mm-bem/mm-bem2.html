@@ -1263,6 +1263,7 @@ function Rx(a, M = R1()) {
 function msh2json(s) {
 	var vxfx = msh_parse(s);
 	var s = '{"dataset_id":"mm-bem2","specimens":[{\n'
+	s += '"id":"mm_bem_'+vxfx[0].length+'x'+vxfx[1].length+'","vernacular_name":"","length":"",\n';
 	s += '"anatomical_types":["swimbladder"],"shape_type":"surface","shapes":[{\n';
 	s += '"anatomical_type":"swimbladder","boundary":"pressure-release",\n'
 	s += '"x":['+vxfx[0].map(row => row[0]).map(v=>-v).join(",")+'],\n';
