@@ -6,7 +6,7 @@
 <script src="cities.js"></script>
 
 <script>
-tle_names=["demo","gnss","gps-ops","glonass","galileo","beidou","tdrss","ss","weather","earthres","geosync","intelsat","iridium","oneweb","starlink","cosmos-2251-debris","planet","science"];
+tle_names=["demo","gnss","gps-ops","glonass","galileo","beidou","tdrss","ss","weather","earthres","geosync","intelsat","iridium","oneweb","starlink","cosmos-2251-debris","planet","science","iceye","piast"];
 for(var i=0;i<tle_names.length;i++) {
 	window[tle_names[i].replaceAll("-","")]=0; // init variables from group names
 	window[tle_names[i].replaceAll("-","")+"_tle"]=''; // init *_tle variables from group names
@@ -1406,6 +1406,16 @@ function demo_tle_update(s) {
 	//console.log(stmp);
 	return(s0);
 }
+var piast_tle=`PIAST-S1
+1 98474C 25276CU  25332.83603354 -.00024797  00000+0 -12401-2 0    04
+2 98474  97.4434  44.8438 0001379 337.8199  97.4819 15.17524552    12
+PIAST-S2
+1 98473C 25276AW  25332.82253817 -.00011055  00000+0 -55091-3 0    03
+2 98473  97.4464  44.8344 0000587 344.8783  16.7471 15.17641958    15
+PIAST-M
+1 98475C 25276AT  25332.82220368 -.00012090  00000+0 -60113-3 0    01
+2 98475  97.4432  44.8341 0000402  59.5603 300.2445 15.17722730    16
+`;
 
 var demo_tle=`EUTELSAT HOTBIRD 13E    
 1 28946U 06007B   25083.89427175 -.00000127  00000+0  00000+0 0  9992
@@ -1538,6 +1548,16 @@ function get_tle(tlename,varname) {
 		window[v] = s; demo_tle_update(s); 	// global variable with "_tle" ending
 	}}); 
 }
+function get_tle2(tlename,varname) {
+	var url = "https://celestrak.org/NORAD/elements/gp.php?NAME="+ tlename + "&FORMAT=tle";
+	let v = (varname||tlename.replaceAll("-",""))+"_tle";
+	fetch(url,{cache:'force-cache'}) // ,headers:{'Cache-Control':'max-age=14400'}})
+	.then(response => {return response.text();})
+	.then(s => { if((!s.match(/Not Found/))&&(!s.match(/Access is denied/))) {
+		window[v] = s; demo_tle_update(s); 	// global variable with "_tle" ending
+	}}); 
+}
+
 function init_tle() {
 	if(celestrack) {
 		get_tle("gnss");
@@ -1557,6 +1577,7 @@ function init_tle() {
 		get_tle("cosmos-2251-debris");	
 		get_tle("planet");	
 		get_tle("science");	
+		get_tle2("iceye");	
 	}
 }
 function ss_change(idx) {
@@ -2298,6 +2319,8 @@ marek.moszynski@pg.edu.pl`;
     <option value="15">Cosmos2251Debris</option>
     <option value="16">Planet</option>
     <option value="17">Space & Earth Science</option>
+    <option value="18">Iceye</option>
+    <option value="19">Piast</option>
   </select>
   <select onchange="ss2_change(parseInt(this.value));" title="Center selected satellite or leave not centered when empty selected" id="ssform2" name="ssform2" style="color:white;background-color:#0080FF;border:none;font-size:13px;">
   </select>
