@@ -123,20 +123,6 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="[sphere(0.005),[-0.01,0,0]],|[sphere(0.005),[0.01,0,0]],|[sphere(0.005),[0,-0.01,0]],|[sphere(0.005),[0,0.01,0]]">Four spheres</option>
   <option value="[sphere(0.005),[-0.01,0,-0.01]],|[sphere(0.005),[0.01,0,-0.01]],|[sphere(0.005),[0,-0.01, -0.01]],|[sphere(0.005),[0, 0.01, -0.01]],|[sphere(0.005),[-0.01,0,0.01]],|[sphere(0.005),[0.01,0,0.01]],|[sphere(0.005), [0,-0.01,0.01]],|[sphere(0.005),[0,0.01,0.01]]">Eight spheres</option>
 </optgroup>
-<optgroup label="Other canonical targets">
-  <option value="[ellipsoid(0.01905,0.01,0.01),[0,0,0]]">Prolate spheroid</option>
-  <option value="[ellipsoid(0.01905,0.005,0.01),[0,0,0]]">Ellipsoid</option>
-  <option value="[ellipsoid(0.01905,0.005,0.01),[0,0,0],Rz(-45)]">Ellipsoid z-axis rotated</option>
-  <option value="[cylinder(0.005,0.005,2*0.01905),[0,0,0]]">Cylinder</option>
-  <option value="[cylinder(0.005,0.005,2*0.01905),[0,0,0],Ry(90)]">Cylinder y-axis rotated</option>
-  <option value="[cylinder(0.005,0.005,2*0.01905),[0,0,0],mul(Ry(30),Rx(60))]">Cylinder doubly rotated</option>
-  <option value="[frustum([0.005,0.006],[0.0075,0.01],2*0.01905),[0,0,0]]">Elliptical frustum</option>
-<!--  <option value="[frustum([0.002,0.005],[0.002,0.0075],0.01905,24,1), [0, 0, -0.01905]],|[frustum([0.005,0.006],[0.0075,0.01],0.01905,24,0), [0, 0, 0]],|
-[frustum([0.006,0.0021],[0.01,0.002],0.01905,24,2), [0, 0, 0.01905]]">Three elliptical frustums</option>
-  <option value="[mfrustum([0.002,0.005,0.005,0.005,0.002],[0.002,0.0075,0.0075,0.0075,0.002],[-2*0.01905,-0.01905,0,0.01905,2*0.01905],[0,0,0,0,0],[0.02,0.01,0.005,0.0025,0]),[0,0,0]]">Multiple frustums</option>
-  <option value="[mfrustum([0.007,0.0115,0.0088,0.007,0.0053,0.0035,0.0008],[0.0018,0.0053,0.008,0.0062,0.0044,0.0026,0.0008],[0.0487,0.0532,0.0621,0.0709,0.0798,0.0887,0.0958],[0,0,0,0,0,0,0],[-0.0026,-0.00175,0.0005,0.0023,0.0049,0.0067,0.00679]), [-0.07, 0, 0]]">Shifted multiple frustum</option>
--->
-</optgroup>
 <optgroup label="Swimmbladder examples">
   <option value="[msh(YFT_752x1500_sb)]">Yellowfin_Tuna_752x1500_sb</option>
   <option value="[msh(YFT_1502x3000_sb)]">Yellowfin_Tuna_1502x3000_sb</option>
@@ -164,6 +150,20 @@ Full mm-bem package contains source codes in different programming languages for
 <!--  <option value="[krm(10,1,15),[-0.145,0,0],Rx(-90)]">StripedBass_628_Lateral_sb</option> -->
   <option value="[krm(11,1,15),[-0.135,0,0],Rx(-90)]">ChannelCatfish_1086_sb</option>
 <!--  <option value="[krm(12,1,15),[-0.135,0,0],Rx(-90)]">ChannelCatfish_1086_Lateral_sb</option> -->
+</optgroup>
+<optgroup label="Other canonical targets">
+  <option value="[ellipsoid(0.01905,0.01,0.01),[0,0,0]]">Prolate spheroid</option>
+  <option value="[ellipsoid(0.01905,0.005,0.01),[0,0,0]]">Ellipsoid</option>
+  <option value="[ellipsoid(0.01905,0.005,0.01),[0,0,0],Rz(-45)]">Ellipsoid z-axis rotated</option>
+  <option value="[cylinder(0.005,0.005,2*0.01905),[0,0,0]]">Cylinder</option>
+  <option value="[cylinder(0.005,0.005,2*0.01905),[0,0,0],Ry(90)]">Cylinder y-axis rotated</option>
+  <option value="[cylinder(0.005,0.005,2*0.01905),[0,0,0],mul(Ry(30),Rx(60))]">Cylinder doubly rotated</option>
+  <option value="[frustum([0.005,0.006],[0.0075,0.01],2*0.01905),[0,0,0]]">Elliptical frustum</option>
+<!--  <option value="[frustum([0.002,0.005],[0.002,0.0075],0.01905,24,1), [0, 0, -0.01905]],|[frustum([0.005,0.006],[0.0075,0.01],0.01905,24,0), [0, 0, 0]],|
+[frustum([0.006,0.0021],[0.01,0.002],0.01905,24,2), [0, 0, 0.01905]]">Three elliptical frustums</option>
+  <option value="[mfrustum([0.002,0.005,0.005,0.005,0.002],[0.002,0.0075,0.0075,0.0075,0.002],[-2*0.01905,-0.01905,0,0.01905,2*0.01905],[0,0,0,0,0],[0.02,0.01,0.005,0.0025,0]),[0,0,0]]">Multiple frustums</option>
+  <option value="[mfrustum([0.007,0.0115,0.0088,0.007,0.0053,0.0035,0.0008],[0.0018,0.0053,0.008,0.0062,0.0044,0.0026,0.0008],[0.0487,0.0532,0.0621,0.0709,0.0798,0.0887,0.0958],[0,0,0,0,0,0,0],[-0.0026,-0.00175,0.0005,0.0023,0.0049,0.0067,0.00679]), [-0.07, 0, 0]]">Shifted multiple frustum</option>
+-->
 </optgroup>
 <optgroup id="files" label="Opened files">
 </optgroup>
@@ -419,6 +419,7 @@ Full mm-bem package contains source codes in different programming languages for
 </textarea>
 <br>
 <input type=button value="Save to msh file" onclick='writeFile(document.getElementById("msh").value,"mm-bem.msh");' /> 
+<input style="float:right" type=button value="Save to json file" onclick='writeFile(msh2json(document.getElementById("msh").value),"mm-bem.json");' /> 
 		</td>
 	</tr>
 </table>
@@ -735,7 +736,7 @@ along both direction angles.
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(17.12.2025)" style="text-align:center">mm-bem v2.11 (2025)</p>
+<p title="(20.12.2025)" style="text-align:center">mm-bem v2.12 (2025)</p>
 
 		</td>
 	</tr>
@@ -1259,6 +1260,21 @@ function Rx(a, M = R1()) {
 }
 
 // --- mesh functions
+function msh2json(s) {
+	var vxfx = msh_parse(s);
+	var s = '{"dataset_id":"mm-bem2","specimens":[{\n'
+	s += '"anatomical_types":["swimbladder"],"shape_type":"surface","shapes":[{\n';
+	s += '"anatomical_type":"swimbladder","boundary":"pressure-release",\n'
+	s += '"x":['+vxfx[0].map(row => row[0]).map(v=>-v).join(",")+'],\n';
+	s += '"y":['+vxfx[0].map(row => row[2]).map(v=>-v).join(",")+'],\n';
+	s += '"z":['+vxfx[0].map(row => row[1]).map(v=>-v).join(",")+'],\n';
+
+	s += '"facets_0":['+vxfx[1].map(row => row[0]).join(",")+'],\n';
+	s += '"facets_1":['+vxfx[1].map(row => row[1]).join(",")+'],\n';
+	s += '"facets_2":['+vxfx[1].map(row => row[2]).join(",")+']\n';
+	s += '}]}]}\n';
+	return(s);
+}
 
 function msh_parse(s) {
 	var lines = s.split('\n');
@@ -1649,7 +1665,11 @@ function loadEchoSMs(ss) {
 			vname = echoSMs[n].specimens[i].vernacular_name;
 			res = 1;
 		}
-		var idx = echoSMs[n].specimens[i]["anatomical_types"].indexOf("swimbladder");
+		var idx = 1;
+		var li = echoSMs[n].specimens[i]["anatomical_types"];
+		if(li!==undefined) {
+			idx=li.indexOf("swimbladder");
+		}
 		console.log("swimbladder index: "+idx);
 		if(idx>=0) {
 			var el2 = echoSMs[n].specimens[i].shapes[idx]; 
@@ -1662,7 +1682,7 @@ function loadEchoSMs(ss) {
 			var l = x.length;
 			console.log(" data size:"+l);
 			if(l>40) {res=40/l;}
-			var off = -(x[0]+x[x.length-1])/2;           // x offset to move to center
+			var off = -(Math.min(...x)+Math.max(...x))/2;           // x offset to move to center
 			if(el) {
 				el.innerHTML += '<option value="[specimen('+(n)+','+(i)+','+(idx)+','+(res).toFixed(1)+'),['+(off).toFixed(3)+',0,0],mul(Ry(180),Rx(90))]">'+echoSMs[n].specimens[i].id+'_'+vname+'_'+(echoSMs[n].specimens[i].length)+'_sb</option>';
 			}
