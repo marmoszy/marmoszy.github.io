@@ -418,8 +418,8 @@ Full mm-bem package contains source codes in different programming languages for
 <textarea id="msh" style="width:480px;height:440px;background-color:#B0D2A2;#e6fff2">
 </textarea>
 <br>
-<input type=button value="Save to msh file" onclick='writeFile(document.getElementById("msh").value,"mm-bem.msh");' /> 
-<input style="float:right" type=button value="Save to json file" onclick='writeFile(msh2json(document.getElementById("msh").value),"mm-bem.json");' /> 
+<input type=button title="Save surface model to GMSH msh v2.0 ASCII file"value="Save to msh file" onclick='writeFile(document.getElementById("msh").value,"mm-bem.msh");' /> 
+<input style="float:right" type=button title="Save surface model to echoSMs json data structure" value="Save to json file" onclick='writeFile(msh2json(document.getElementById("msh").value),"mm-bem.json");' /> 
 		</td>
 	</tr>
 </table>
@@ -708,7 +708,7 @@ along both direction angles.
 <br><label for="select2" title="Multiple selection">Select swimbladder models to import:</label>
 <br><select multiple id="select2" style="width:100%;max-width:440px" size="10" onchange="echoSMs_image(this.value);"><optgroup id="echoSMs_ids"></optgroup></select>
 <br><input type="button" onclick="echoSMs_import();" value="Import" title="Import directly to target dropdown"/>
-<input id="echoSMs_save" hidden type="button" onclick="echoSMs_save();" value="Save to json file" title="Save imported models to local file" style="float:right"/>
+<input id="echoSMs_save" hidden type="button" onclick="echoSMs_save();" value="Save to json file" title="Save imported models to json data structure in local file" style="float:right"/>
 </span>
 
 <!--
