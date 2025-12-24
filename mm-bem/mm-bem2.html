@@ -161,9 +161,9 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="[frustum([0.005,0.006],[0.0075,0.01],2*0.01905),[0,0,0]]">Elliptical frustum</option>
 <!--  <option value="[frustum([0.002,0.005],[0.002,0.0075],0.01905,24,1), [0, 0, -0.01905]],|[frustum([0.005,0.006],[0.0075,0.01],0.01905,24,0), [0, 0, 0]],|
 [frustum([0.006,0.0021],[0.01,0.002],0.01905,24,2), [0, 0, 0.01905]]">Three elliptical frustums</option>
-  <option value="[mfrustum([0.002,0.005,0.005,0.005,0.002],[0.002,0.0075,0.0075,0.0075,0.002],[-2*0.01905,-0.01905,0,0.01905,2*0.01905],[0,0,0,0,0],[0.02,0.01,0.005,0.0025,0]),[0,0,0]]">Multiple frustums</option>
   <option value="[mfrustum([0.007,0.0115,0.0088,0.007,0.0053,0.0035,0.0008],[0.0018,0.0053,0.008,0.0062,0.0044,0.0026,0.0008],[0.0487,0.0532,0.0621,0.0709,0.0798,0.0887,0.0958],[0,0,0,0,0,0,0],[-0.0026,-0.00175,0.0005,0.0023,0.0049,0.0067,0.00679]), [-0.07, 0, 0]]">Shifted multiple frustum</option>
 -->
+  <option value="[mfrustum([0.002,0.005,0.005,0.005,0.002],[0.002,0.0075,0.0075,0.0075,0.002],[-2*0.01905,-0.01905,0,0.01905,2*0.01905],[0,0,0,0,0],[0.02,0.01,0.005,0.0025,0]),[0,0,0]]">Multiple frustums</option>
 </optgroup>
 <optgroup id="files" label="Opened files">
 </optgroup>
@@ -736,7 +736,7 @@ along both direction angles.
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(20.12.2025)" style="text-align:center">mm-bem v2.12 (2025)</p>
+<p title="(23.12.2025)" style="text-align:center">mm-bem v2.13 (2025)</p>
 
 		</td>
 	</tr>
@@ -2622,6 +2622,12 @@ function frustum(rx = [1,1], ry = [1,1], H = 3, N = 24, mode = 3) {
 function every(a,n) {return a.filter((e,i) => (i+n-1)%n === n-1);}
 
 function mfrustum(ww = [1,1,1], hh = [1,1,1], xx=[0,0,0], yy=[0,0,0], zz = [3,3,3], N = 24, W = 1) {
+	console.log("mfrustum");
+	console.log(ww);
+	console.log(hh);
+	console.log(xx);
+	console.log(yy);
+	console.log(zz);
     var vx=[],fx=[];
     var n=0,nW=W||1;
 	var w = every(ww,nW);
@@ -17788,8 +17794,8 @@ const echoSMs = [
 function specimen(k, i, j, mm) {
 	var m = mm||1; 
 	var n = m*echoSMs[k].specimens[i].shapes[j].x.length;
-	var w = echoSMs[k].specimens[i].shapes[j].width;
-	var h = echoSMs[k].specimens[i].shapes[j].height;
+	var w = echoSMs[k].specimens[i].shapes[j].width; 
+	var h = echoSMs[k].specimens[i].shapes[j].height; 
 	var x =	echoSMs[k].specimens[i].shapes[j].x;
 	var y =	echoSMs[k].specimens[i].shapes[j].y;
 	var z =	echoSMs[k].specimens[i].shapes[j].z;
@@ -17819,7 +17825,7 @@ function specimen(k, i, j, mm) {
 		//} else {
 		//return mfrustum(redint(w,1/m),redint(h,1/m),redint(x,1/m),redint(y,1/m),redint(z,1/m));
 		//}
-	return mfrustum(resample(w,n),resample(h,n),resample(x,n),resample(y,n),resample(z,n));
+	return mfrustum(resample(w.map(wi=>wi/2),n),resample(h.map(hi=>hi/2),n),resample(x,n),resample(y,n),resample(z,n));
 }
 
 function krm(i,j,nn) {
