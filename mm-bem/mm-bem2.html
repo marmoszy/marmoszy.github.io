@@ -17835,14 +17835,14 @@ function krm(i,j,nn) {
 			if(noaa[i].w_b[k]==0) noaa[i].w_b[k]=0.00001;
 			if(noaa[i].z_bU[k]==noaa[i].z_bL[k]) noaa[i].z_bU[k]+=0.00001;
 		}
-		return mfrustum(noaa[i].w_b, noaa[i].z_bU.map((a,idx)=>Math.abs(a-noaa[i].z_bL[idx])), 
+		return mfrustum(noaa[i].w_b.map(x=>x/2), noaa[i].z_bU.map((a,idx)=>Math.abs(a-noaa[i].z_bL[idx])/2), 
 			noaa[i].x_b, noaa[i].x_b.map(x=>0), noaa[i].z_bU.map((a,idx)=>(a+noaa[i].z_bL[idx])/2), 24, n );		
 	} else {   /* swimbladder */
 		for(var k=0;k<noaa[i].w_sb.length;k++) {
 			if(noaa[i].w_sb[k]==0) noaa[i].w_sb[k]=0.00001;
 			if(noaa[i].z_sbU[k]==noaa[i].z_sbL[k]) noaa[i].z_sbU[k]+=0.00001;
 		}
-		return mfrustum(noaa[i].w_sb, noaa[i].z_sbU.map((a,idx)=>Math.abs(a-noaa[i].z_sbL[idx])),
+		return mfrustum(noaa[i].w_sb.map(x=>x/2), noaa[i].z_sbU.map((a,idx)=>Math.abs(a-noaa[i].z_sbL[idx])/2),
 			noaa[i].x_sb, noaa[i].x_sb.map(x=>0), noaa[i].z_sbU.map((a,idx)=>(a+noaa[i].z_sbL[idx])/2), 24, n );
 	}
 }
