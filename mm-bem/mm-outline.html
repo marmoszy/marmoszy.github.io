@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>Swimbladder outline with despiking + SVG overlay</title>
+ <title>mm-outline</title>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
 	* {font-size:18px;}
     body { font-family: sans-serif; }
 	td {padding-left:12px;}
     #container { margin-top: 1rem; }
     svg { border: 1px solid #ccc; }
+	@media screen and (max-width:1080px) {
+		#split td {display:block; width:100%;}
+		#nosplit td {display:inline-block;}
+		.w {max-width:460px}
+	}
   </style>
 </head>
 <body>
@@ -20,7 +26,7 @@
 <p>
 <table style="padding:12px">
 <tr>
-<td>Swimbladder length [m]:</td><td><input type="text" id="swimbladder_length" value="0.305" style="width:64px" onchange="change2();"/></td>
+<td>Swimbladder&nbsp;length [m]:</td><td><input type="text" id="swimbladder_length" value="0.305" style="width:64px" onchange="change2();"/></td>
 <td> Number of outline points:</td><td><input type="text" id="number_of_points" value="101" style="width:64px" onchange="change2();"/></td>
 </tr>
 <tr>
