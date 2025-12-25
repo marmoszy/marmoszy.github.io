@@ -20,7 +20,7 @@
 <p>
 <table style="padding:12px">
 <tr>
-<td>Fish length [m]:</td><td><input type="text" id="fish_length" value="0.305" style="width:64px" onchange="change2();"/></td>
+<td>Swimbladder length [m]:</td><td><input type="text" id="swimbladder_length" value="0.305" style="width:64px" onchange="change2();"/></td>
 <td> Number of outline points:</td><td><input type="text" id="number_of_points" value="101" style="width:64px" onchange="change2();"/></td>
 </tr>
 <tr>
@@ -291,7 +291,7 @@ function processImage(img, imgUrl, container_id) {
   log("Lx:"+Math.min(...lower_smooth.map(o=>o[0]))+" "+Math.max(...lower_smooth.map(o=>o[0])));
   log("Ly:"+Math.min(...lower_smooth.map(o=>o[1]))+" "+Math.max(...lower_smooth.map(o=>o[1])));
 
-  var fl = parseFloat(document.getElementById("fish_length").value);
+  var fl = parseFloat(document.getElementById("swimbladder_length").value);
   var m = parseInt(document.getElementById("number_of_points").value);
   var n = upper_smooth.length;
   var xres2 = (fl)/(m-1);
@@ -348,7 +348,7 @@ function processImage(img, imgUrl, container_id) {
 	  if(ta) {
 		  ta.value ='{"dataset_id":"'+fname.split("_")[0]+'",\n"specimens":[{\n';
 		  ta.value+='"id":"'+fname.split("_")[0]+'", "anatomical_types":["swimbladder"], "shape_type":"outline",\n';
-		  ta.value+='"vernacular_name":"Vernacular_Name", "length":"'+document.getElementById("fish_length").value+'", "model_type":"KRM","shapes":[{\n';
+		  ta.value+='"vernacular_name":"Vernacular_Name", "length":"'+document.getElementById("swimbladder_length").value+'", "model_type":"KRM","shapes":[{\n';
 		  ta.value+='"anatomical_type":"swimbladder", "boundary":"pressure_released",\n'
 		  ta.value+='"x":['+outline2["x"].map(o=>o.toFixed(6)).join(',')+'],\n';
 		  ta.value+='"y":['+outline2["y"].map(o=>(-o).toFixed(6)).join(',')+'],\n';
