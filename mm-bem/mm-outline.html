@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Swimbladder outline with despiking + SVG overlay</title>
+  <style>
+	* {font-size:18px;}
+    body { font-family: sans-serif; }
+	td {padding-left:12px;}
+    #container { margin-top: 1rem; }
+    svg { border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+
+<div style="width:960px;margin:0 auto">
+<h1 style="font-size:40px">mm-outline - fish swimbladder detector</h1>
+<p>
+<b>Input parameters:</b>
+<p>
+<table style="padding:12px">
+<tr>
+<td>Fish length [m]:</td><td><input type="text" id="fish_length" value="0.305" style="width:64px" onchange="change2();"/></td>
+<td> Number of outline points:</td><td><input type="text" id="number_of_points" value="101" style="width:64px" onchange="change2();"/></td>
+</tr>
+<tr>
+<td>Despiking window [px]:</td><td><input type="text" id="despiking_window" value="7" style="width:64px" onchange="change2();"/></td>
+<td> Despiking threshold [px]:</td><td><input type="text" id="despiking_threshold" value="3" style="width:64px" onchange="change2();"/></td>
+</tr>
+<tr>
+<td>Gaussian sigma [px]:</td><td><input type="text" id="gaussian_sigma" value="10" style="width:64px" onchange="change2();"/></td>
+<td>Gaussian radius [px]:</td><td><input type="text" id="gaussian_radius" value="20" style="width:64px" onchange="change2();"/></td>
+</tr>
+</table>
+<p>
+<b>Input Files:</b>
+<p>
+<table>
+<tr>
+<td><img id="img1" src="B314_1.png" width="120px" crossorigin="anonymous" onload="processImage(this,this.src,'container1')"></td>
+<td>zh-image file:</td>
+<td><input type="file" id="fileInput1" onchange="change(event,'container1');" accept="image/png,image/jpeg"></td>
+</tr>
+<tr>
+<td><img id="img2" src="B314_2.png" width="120px" crossorigin="anonymous" onload="processImage(this,this.src,'container2')"></td>
+<td>yw-image file:</td> 
+<td><input type="file" id="fileInput2" onchange="change(event,'container2');" accept="image/png,image/jpeg"></td>
+</tr>
+</table>
+<div id="container1" style="width:100%;overflow:auto"></div>
+<div id="container2" style="width:100%;overflow:auto"></div>
+
+<p>
+<b>Output outline:</b>
+<p>
+<textarea id="ta" rows=15 cols=88></textarea><br>
+<input type="button" onclick="writeFile(document.getElementById('ta').value,'mm-outline.json');" value="Save to json file"><br>
+<p>
+<textarea id="ta2" rows=15 cols=88></textarea><br>
+<input type="button" onclick="writeFile(document.getElementById('ta2').value,'mm-outline.txt');" value="Save to txt file"><br>
+<pre id="log"></pre>
+</div>
+
+<script>
+	
+var fname="B314";
+	
+function change(event,container_id) {
+	  var file = event.target.files[0];
+	  fname = file.name;
+	  if (!file) return;
+
+	  const img = new Image();
+	  const url = URL.createObjectURL(file);
+
+	  img.onload = () => {
+		var img12 = document.getElementById(container_id=="container1"?"img1":"img2");
+		img12.src = url;
+	    processImage(img12, url, container_id);
+	    URL.revokeObjectURL(url);
+	  };
+	  img.src = url;
+}
+
+function change2() {
+	var img1 = document.getElementById("img1");
+	var img2 = document.getElementById("img2");
+	processImage(img1, img1.src, "container1");
+	processImage(img2, img2.src, "container2");
+}
+
+function log(msg) {
+  //document.getElementById("log").textContent += msg + "\n";
+  console.log(msg);
+}
+
+// ------------------------------
+// DESPIKING (median-based)
+// ------------------------------
+function despike(points, windowSize = 3, threshold = 3) {
+  const result = points.map(p => [...p]); // deep copy
+  const n = points.length;
+
+  for (let i = 0; i < n; i++) {
+    const window = [];
+
+    for (let k = -windowSize; k <= windowSize; k++) {
+      const j = i + k;
+      if (j >= 0 && j < n) window.push(points[j][1]);
+    }
+
+    const median = window.sort((a,b)=>a-b)[Math.floor(window.length/2)];
+    const y = points[i][1];
+
+    if (Math.abs(y - median) > threshold) {
+      result[i][1] = median;
+    }
+  }
+
+  return result;
+}
+
+// ------------------------------
+// GAUSSIAN SMOOTHING
+// ------------------------------
+function gaussianKernel(sigma, radius) {
+  const kernel = [];
+  const s2 = sigma * sigma;
+  let sum = 0;
+
+  for (let i = -radius; i <= radius; i++) {
+    const value = Math.exp(-(i*i) / (2*s2));
+    kernel.push(value);
+    sum += value;
+  }
+
+  // normalize
+  return kernel.map(v => v / sum);
+}
+
+function gaussianSmooth(points, sigma = 2, radius = 4) {
+  const kernel = gaussianKernel(sigma, radius);
+  const kSize = kernel.length;
+  const half = Math.floor(kSize / 2);
+
+  const result = points.map(p => [...p]); // deep copy
+  const n = points.length;
+
+  for (let i = 0; i < n; i++) {
+    let acc = 0;
+    let wsum = 0;
+
+    for (let k = -half; k <= half; k++) {
+      const j = i + k;
+      if (j >= 0 && j < n) {
+        const w = kernel[k + half];
+        acc += points[j][1] * w;
+        wsum += w;
+      }
+    }
+
+    result[i][1] = acc / wsum;
+  }
+
+  return result;
+}
+
+function interpolateXY(points, m) {
+  const n = points.length;
+  if (n < 2) throw new Error("Need at least two points");
+
+  const result = [];
+  const step = (n - 1) / (m - 1);
+
+  for (let i = 0; i < m; i++) {
+    const t = i * step;
+    const i0 = Math.floor(t);
+    const i1 = Math.min(i0 + 1, n - 1);
+    const frac = t - i0;
+
+    const x = points[i0][0] * (1 - frac) + points[i1][0] * frac;
+    const y = points[i0][1] * (1 - frac) + points[i1][1] * frac;
+
+    result.push([x, y]);
+  }
+
+  return result;
+}
+
+function writeFile(data, filename, type) {
+	var file = new Blob([data], {type: type||"plain/text;charset=utf-8"});
+	if (window.navigator.msSaveOrOpenBlob) // IE10+
+		window.navigator.msSaveOrOpenBlob(file, filename);
+	else { // Others
+		var a = document.createElement("a");
+		a.href = URL.createObjectURL(file); 
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		setTimeout(function() {
+			document.body.removeChild(a);
+			window.URL.revokeObjectURL(a.href);  
+		}, 0); 
+	}
+}
+
+var container1={}, conatiner2={};
+
+// ------------------------------
+// IMAGE PROCESSING + OUTLINE EXTRACTION
+// ------------------------------
+function processImage(img, imgUrl, container_id) {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = img.naturalWidth;
+  canvas.height = img.naturalHeight;
+  ctx.drawImage(img, 0, 0);
+
+  const { width, height } = canvas;
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const data = imageData.data;
+
+  // 1. Simple mask: treat non-black-ish as object
+  const mask = new Uint8Array(width * height);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const i = (y * width + x) * 4;
+      const r = data[i], g = data[i+1], b = data[i+2];
+      const brightness = (r + g + b) / 3;
+      if (brightness > 30) mask[y * width + x] = 1;
+    }
+  }
+
+  // 2. Extract outline
+  const outline = [];
+  const neighbors = [[1,0],[-1,0],[0,1],[0,-1]];
+  for (let y = 1; y < height-1; y++) {
+    for (let x = 1; x < width-1; x++) {
+      if (!mask[y*width + x]) continue;
+      let border = false;
+      for (const [dx,dy] of neighbors) {
+        if (!mask[(y+dy)*width + (x+dx)]) {
+          border = true;
+          break;
+        }
+      }
+      if (border) outline.push([x, y]);
+    }
+  }
+
+  // 3. Group by x → upper/lower outline
+  const byX = new Map();
+  for (const [x, y] of outline) {
+    if (!byX.has(x)) byX.set(x, []);
+    byX.get(x).push(y);
+  }
+
+  const upper = [];
+  const lower = [];
+  const xs = Array.from(byX.keys()).sort((a, b) => a - b);
+
+  for (const x of xs) {
+    const ys = byX.get(x);
+    upper.push([x, Math.min(...ys)]);
+    lower.push([x, Math.max(...ys)]);
+  }
+
+  var despiking_window = parseFloat(document.getElementById("despiking_window").value);
+  var despiking_threshold = parseFloat(document.getElementById("despiking_threshold").value);
+  var gaussian_sigma = parseFloat(document.getElementById("gaussian_sigma").value);
+  var gaussian_radius = parseFloat(document.getElementById("gaussian_radius").value);
+
+  // 1. Despike
+  const upper_despiked = despike(upper, despiking_window, despiking_threshold);
+  const lower_despiked = despike(lower, despiking_window, despiking_threshold);
+
+  // 2. Gaussian smooth
+  const upper_smooth = gaussianSmooth(upper_despiked, gaussian_sigma, gaussian_radius);
+  const lower_smooth = gaussianSmooth(lower_despiked, gaussian_sigma, gaussian_radius);
+
+  const outlineData = {
+    upper_outline: upper_smooth,
+    lower_outline: lower_smooth
+  };
+
+  log("outlineData (despiked):");
+  //log(JSON.stringify(outlineData, null, 2));
+  console.log(outlineData);
+  log("Ux:"+Math.min(...upper_smooth.map(o=>o[0]))+" "+Math.max(...upper_smooth.map(o=>o[0])));
+  log("Uy:"+Math.min(...upper_smooth.map(o=>o[1]))+" "+Math.max(...upper_smooth.map(o=>o[1])));
+  log("Lx:"+Math.min(...lower_smooth.map(o=>o[0]))+" "+Math.max(...lower_smooth.map(o=>o[0])));
+  log("Ly:"+Math.min(...lower_smooth.map(o=>o[1]))+" "+Math.max(...lower_smooth.map(o=>o[1])));
+
+  var fl = parseFloat(document.getElementById("fish_length").value);
+  var m = parseInt(document.getElementById("number_of_points").value);
+  var n = upper_smooth.length;
+  var xres2 = (fl)/(m-1);
+  var yres = (fl)/(n-1);
+  
+  log("m="+m);
+  log("n="+n);
+  log("xres2="+xres2);
+  log("yres="+yres);
+  
+  upper2_smooth = interpolateXY(upper_smooth,m);
+  lower2_smooth = interpolateXY(lower_smooth,m);
+  outlineData["upper2_outline"] = upper2_smooth;
+  outlineData["lower2_outline"] = lower2_smooth;
+  outlineData["xres2_outline"] = xres2;
+  outlineData["yres_outline"] = yres;
+  
+  var y = upper2_smooth.map((o,i)=>(o[1]+lower2_smooth[i][1])/2);
+  var w = upper2_smooth.map((o,i)=>Math.abs(o[1]-lower2_smooth[i][1]));  
+  var mean = [], wh = [];
+  for(var i=0; i<upper2_smooth.length; i++) {
+	  mean.push([upper2_smooth[i][0],y[i]]);
+	  wh.push([upper2_smooth[i][0],w[i]]);
+  }
+  outlineData["mean_outline"] = mean;
+  outlineData["width_outline"] = wh;
+  outlineData["mean"]  = mean.map(x=>x[1]).reduce((a,b)=>a+b)/m;
+
+  window[container_id]=outlineData;
+  
+  if(Object.keys(container1).length>0 && Object.keys(container2).length>0) {
+	  var outline2={};
+	  var ymean = container1["mean"];
+	  var zmean = container2["mean"];
+	  log("ymean: "+ymean);
+	  log("zmean: "+zmean);
+	  outline2["x"]=container1.upper2_outline.map((o,i)=>i*container1.xres2_outline);
+	  outline2["z"]=container1.mean_outline.map(o=>(ymean-o[1])*container1.yres_outline);
+	  outline2["h"]=container1.width_outline.map(o=>o[1]*container1.yres_outline);
+	  outline2["y"]=container2.mean_outline.map(o=>(zmean-o[1])*container2.yres_outline);
+	  outline2["w"]=container2.width_outline.map(o=>o[1]*container2.yres_outline);
+	  window["outline2"]=outline2;
+	  var xmax = Math.max(...outline2["x"]);
+	  var ymax = Math.max(...outline2["y"]);
+	  var hmax = Math.max(...outline2["h"]);
+	  var zmax = Math.max(...outline2["z"]);
+	  var wmax = Math.max(...outline2["w"]);
+	  log("xmax: "+xmax);
+	  log("ymax: "+ymax);
+	  log("hmax: "+hmax);
+	  log("zmax: "+zmax);
+	  log("wmax: "+wmax);
+	  var ta = document.getElementById("ta");
+	  if(ta) {
+		  ta.value ='{"dataset_id":"'+fname.split("_")[0]+'",\n"specimens":[{\n';
+		  ta.value+='"id":"'+fname.split("_")[0]+'", "anatomical_types":["swimbladder"], "shape_type":"outline",\n';
+		  ta.value+='"vernacular_name":"Vernacular_Name", "length":"'+document.getElementById("fish_length").value+'", "model_type":"KRM","shapes":[{\n';
+		  ta.value+='"anatomical_type":"swimbladder", "boundary":"pressure_released",\n'
+		  ta.value+='"x":['+outline2["x"].map(o=>o.toFixed(6)).join(',')+'],\n';
+		  ta.value+='"y":['+outline2["y"].map(o=>(-o).toFixed(6)).join(',')+'],\n';
+		  ta.value+='"z":['+outline2["z"].map(o=>(-o).toFixed(6)).join(',')+'],\n';
+		  ta.value+='"width":['+outline2["w"].map(o=>o.toFixed(6)).join(',')+'],\n';
+		  ta.value+='"height":['+outline2["h"].map(o=>o.toFixed(6)).join(',')+']\n';
+		  ta.value+='}]}]}\n';
+	  }
+	  var s='# xyzwh outline\n';
+	  for(var i=0;i<m;i++) {
+		  s += ''+outline2.x[i].toFixed(6)+' '+outline2.y[i].toFixed(6)+' '+outline2.z[i].toFixed(6)+' '+outline2.w[i].toFixed(6)+' '+outline2.h[i].toFixed(6)+' '+'\n';
+	  }
+	  var ta2 = document.getElementById("ta2");
+	  if(ta2) {
+		  ta2.value=s;
+	  }
+  }
+  
+  drawSVGOverlay(width, height, imgUrl, outlineData, container_id);
+}
+
+// ------------------------------
+// SVG DRAWING
+// ------------------------------
+function drawSVGOverlay(width, height, imgUrl, outlineData, container_id) {
+  const container = document.getElementById(container_id);
+  container.innerHTML = "";
+
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("width", width);
+  svg.setAttribute("height", height);
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+
+  // Background image
+  const imgEl = document.createElementNS(svgNS, "image");
+  imgEl.setAttributeNS("http://www.w3.org/1999/xlink", "href", imgUrl);
+  imgEl.setAttribute("x", "0");
+  imgEl.setAttribute("y", "0");
+  imgEl.setAttribute("width", width);
+  imgEl.setAttribute("height", height);
+  svg.appendChild(imgEl);
+
+  function pointsToString(points) {
+    return points.map(([x,y]) => `${x},${y}`).join(" ");
+  }
+
+  // Upper outline (red)
+  const upperPolyline = document.createElementNS(svgNS, "polyline");
+  upperPolyline.setAttribute("points", pointsToString(outlineData.upper_outline));
+  upperPolyline.setAttribute("fill", "none");
+  upperPolyline.setAttribute("stroke", "red");
+  upperPolyline.setAttribute("stroke-width", "4");
+  svg.appendChild(upperPolyline);
+
+  // Lower outline (blue)
+  const lowerPolyline = document.createElementNS(svgNS, "polyline");
+  lowerPolyline.setAttribute("points", pointsToString(outlineData.lower_outline));
+  lowerPolyline.setAttribute("fill", "none");
+  lowerPolyline.setAttribute("stroke", "blue");
+  lowerPolyline.setAttribute("stroke-width", "4");
+  svg.appendChild(lowerPolyline);
+
+  // Lower outline (green)
+  const meanPolyline = document.createElementNS(svgNS, "polyline");
+  meanPolyline.setAttribute("points", pointsToString(outlineData.mean_outline));
+  meanPolyline.setAttribute("fill", "none");
+  meanPolyline.setAttribute("stroke", "green");
+  meanPolyline.setAttribute("stroke-width", "4");
+  svg.appendChild(meanPolyline);
+
+  container.appendChild(svg);
+}
+</script>
+
+</body>
+</html>
