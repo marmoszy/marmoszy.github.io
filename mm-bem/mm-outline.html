@@ -10,6 +10,7 @@
 	td {padding-left:12px;}
     #container { margin-top: 1rem; }
     svg { border: 1px solid #ccc; }
+	.w {max-width:940px}
 	@media screen and (max-width:1080px) {
 		#split td {display:block; width:100%;}
 		#nosplit td {display:inline-block;}
@@ -24,7 +25,7 @@
 <p>
 <b>Input parameters:</b>
 <p>
-<table style="padding:12px">
+<table class="w" style="padding:12px">
 <tr>
 <td>Swimbladder&nbsp;length [m]:</td><td><input type="text" id="swimbladder_length" value="0.305" style="width:64px" onchange="change2();"/></td>
 <td> Number of outline points:</td><td><input type="text" id="number_of_points" value="101" style="width:64px" onchange="change2();"/></td>
