@@ -116,7 +116,7 @@ function change3(el) { // range handler
 
 function change4(el,id) { // image generator handler
 	var a_b = parseFloat(el.value);
-	drawParametricToImgTag(id,{width:800,height:300,pfun:superellipseParametricRotated(400, 150, 320, a_b*320, 4, id=="img1"?-11:0)});
+	drawParametricToImgTag(id,{width:800,height:400,pfun:superellipseParametricRotated(400, 200, 320, a_b*320, 4, id=="img1"?-11:0)});
 }
 
 function log(msg) {
@@ -452,7 +452,7 @@ function drawSVGOverlay(width, height, imgUrl, outlineData, container_id) {
 }
 
 // generating images by parametric definitions
-
+var gvalue = 0;
 function drawParametricToImgTag(id, {width, height, pfun, t0=0, t1=2*Math.PI, steps=800, stroke="purple", fill="rgba(128, 0, 128, 0.25)" }) {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
@@ -476,6 +476,8 @@ function drawParametricToImgTag(id, {width, height, pfun, t0=0, t1=2*Math.PI, st
   ctx.lineWidth = 2;
   ctx.stroke();
   document.getElementById(id).src = canvas.toDataURL("image/png");
+  fname="outline"+gvalue;
+  gvalue += 1;
 }
 
 // ------------------------------------------------------------
@@ -499,8 +501,8 @@ function superellipseParametricRotated(cx, cy, a, b, n, angleDeg) {
   };
 }
 
-drawParametricToImgTag("img1",{width:800,height:300,pfun:superellipseParametricRotated(400, 150, 320, 40, 4, -11)});
-drawParametricToImgTag("img2",{width:800,height:300,pfun:superellipseParametricRotated(400, 150, 320, 80, 4, 0)});
+drawParametricToImgTag("img1",{width:800,height:400,pfun:superellipseParametricRotated(400, 200, 320, 40, 4, -11)});
+drawParametricToImgTag("img2",{width:800,height:400,pfun:superellipseParametricRotated(400, 200, 320, 80, 4, 0)});
 </script>
 
 </body>
