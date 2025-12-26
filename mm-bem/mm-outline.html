@@ -27,20 +27,28 @@
 <p>
 <table class="w" style="padding:12px">
 <tr>
-<td>Swimbladder&nbsp;length [m]:</td><td><input type="text" id="swimbladder_length" value="0.305" style="width:64px" onchange="change2();"/></td>
-<td> Number of outline points:</td><td><input type="text" id="number_of_points" value="101" style="width:64px" onchange="change2();"/></td>
-</tr>
-<tr>
-<td>Despiking window [px]:</td><td><input type="text" id="despiking_window" value="7" style="width:64px" onchange="change2();"/></td>
-<td> Despiking threshold [px]:</td><td><input type="text" id="despiking_threshold" value="3" style="width:64px" onchange="change2();"/></td>
-</tr>
-<tr>
-<td>Gaussian sigma [px]:</td><td><input type="text" id="gaussian_sigma" value="10" style="width:64px" onchange="change2();"/></td>
-<td>Gaussian radius [px]:</td><td><input type="text" id="gaussian_radius" value="20" style="width:64px" onchange="change2();"/></td>
+<td>Swimbladder&nbsp;length [m]:</td>
+<td><input type="text" id="swimbladder_length" value="0.305" style="width:64px" onchange="change2(this);"/></td>
+<td><input type="range" id="r_swimbladder_length" min="0" max="1" value="0.305" step="0.001" style="width:200px" onchange="change3(this)"/></td>
+</tr><tr>
+<td> Number of outline points:</td><td><input type="text" id="number_of_points" value="101" style="width:64px" onchange="change2(this);"/></td>
+<td><input type="range" id="r_number_of_points" min="3" max="301" value="101" step="1" style="width:200px" onchange="change3(this)"/></td>
+</tr><tr>
+<td>Despiking window [px]:</td><td><input type="text" id="despiking_window" value="7" style="width:64px" onchange="change2(this);"/></td>
+<td><input type="range" id="r_despiking_window" min="1" max="20" value="7" step="1" style="width:200px" onchange="change3(this)"/></td>
+</tr><tr>
+<td> Despiking threshold [px]:</td><td><input type="text" id="despiking_threshold" value="3" style="width:64px" onchange="change2(this);"/></td>
+<td><input type="range" id="r_despiking_threshold" min="1" max="20" value="3" step="1" style="width:200px" onchange="change3(this)"/></td>
+</tr><tr>
+<td>Gaussian sigma [px]:</td><td><input type="text" id="gaussian_sigma" value="10" style="width:64px" onchange="change2(this);"/></td>
+<td><input type="range" id="r_gaussian_sigma" min="1" max="100" value="10" step="1" style="width:200px" onchange="change3(this)"/></td>
+</tr><tr>
+<td>Gaussian radius [px]:</td><td><input type="text" id="gaussian_radius" value="20" style="width:64px" onchange="change2(this);"/></td>
+<td><input type="range" id="r_gaussian_radius" min="1" max="100" value="20" step="1" style="width:200px" onchange="change3(this)"/></td>
 </tr>
 </table>
 <p>
-<b>Input Files:</b>
+<b>Input files:</b>
 <p>
 <table>
 <tr>
@@ -89,11 +97,18 @@ function change(event,container_id) {
 	  img.src = url;
 }
 
-function change2() {
+function change2(el) { // input params handler
+	document.getElementById("r_"+el.id).value = el.value;
 	var img1 = document.getElementById("img1");
 	var img2 = document.getElementById("img2");
 	processImage(img1, img1.src, "container1");
 	processImage(img2, img2.src, "container2");
+}
+
+function change3(el) { // range handler
+	var el2 = document.getElementById(el.id.substring(2));
+	el2.value = el.value;
+	change2(el2);
 }
 
 function log(msg) {
