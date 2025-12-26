@@ -481,10 +481,10 @@ function drawParametricToImgTag(id, {width, height, pfun, t0=0, t1=2*Math.PI, st
 }
 
 // ------------------------------------------------------------
-// ROTATED SUPERELLIPSE (Lamé curve)
-//   x0 = a * sign(cos t) * |cos t|^(2/n) - base parametric form
+// Rotated superellipse (Lamé curve)
+//   x0 = a * sign(cos t) * |cos t|^(2/n) -- base parametric form
 //   y0 = b * sign(sin t) * |sin t|^(2/n)
-//   x = cx + x0*cosθ - y0*sinθ - rotation by angle θ
+//   x = cx + x0*cosθ - y0*sinθ -- rotation by angle θ
 //   y = cy + x0*sinθ + y0*cosθ
 // ------------------------------------------------------------
 function superellipseParametricRotated(cx, cy, a, b, n, angleDeg) {
@@ -501,8 +501,9 @@ function superellipseParametricRotated(cx, cy, a, b, n, angleDeg) {
   };
 }
 
-drawParametricToImgTag("img1",{width:800,height:400,pfun:superellipseParametricRotated(400, 200, 320, 40, 4, -11)});
-drawParametricToImgTag("img2",{width:800,height:400,pfun:superellipseParametricRotated(400, 200, 320, 80, 4, 0)});
+//drawParametricToImgTag("img1",{width:800,height:400,pfun:superellipseParametricRotated(400, 200, 320, 40, 4, -11)});
+//drawParametricToImgTag("img2",{width:800,height:400,pfun:superellipseParametricRotated(400, 200, 320, 80, 4, 0)});
+
 </script>
 
 </body>
