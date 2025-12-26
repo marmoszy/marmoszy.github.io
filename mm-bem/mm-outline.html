@@ -27,7 +27,15 @@
 <p>
 <table class="w" style="padding:12px">
 <tr>
-<td>Swimbladder&nbsp;length [m]:</td>
+<td>Side image file:</td>
+<td><img id="img1" src="B314_1.png" width="120px" crossorigin="anonymous" onload="processImage(this,this.src,'container1')"></td><td><input type="file" id="fileInput1" onchange="change(event,'container1');" accept="image/png,image/jpeg"></td>
+</tr>
+<tr>
+<td>Up image file:</td> 
+<td><img id="img2" src="B314_2.png" width="120px" crossorigin="anonymous" onload="processImage(this,this.src,'container2')"></td>
+<td><input type="file" id="fileInput2" onchange="change(event,'container2');" accept="image/png,image/jpeg"></td>
+</tr><tr>
+<td>Swimbladder length [m]:</td>
 <td><input type="text" id="swimbladder_length" value="0.305" style="width:64px" onchange="change2(this);"/></td>
 <td><input type="range" id="r_swimbladder_length" min="0" max="1" value="0.305" step="0.001" style="width:200px" onchange="change3(this)"/></td>
 </tr><tr>
@@ -45,21 +53,6 @@
 </tr><tr>
 <td>Gaussian radius [px]:</td><td><input type="text" id="gaussian_radius" value="20" style="width:64px" onchange="change2(this);"/></td>
 <td><input type="range" id="r_gaussian_radius" min="1" max="100" value="20" step="1" style="width:200px" onchange="change3(this)"/></td>
-</tr>
-</table>
-<p>
-<b>Input files:</b>
-<p>
-<table>
-<tr>
-<td><img id="img1" src="B314_1.png" width="120px" crossorigin="anonymous" onload="processImage(this,this.src,'container1')"></td>
-<td>zh-image file:</td>
-<td><input type="file" id="fileInput1" onchange="change(event,'container1');" accept="image/png,image/jpeg"></td>
-</tr>
-<tr>
-<td><img id="img2" src="B314_2.png" width="120px" crossorigin="anonymous" onload="processImage(this,this.src,'container2')"></td>
-<td>yw-image file:</td> 
-<td><input type="file" id="fileInput2" onchange="change(event,'container2');" accept="image/png,image/jpeg"></td>
 </tr>
 </table>
 <div id="container1" style="width:100%;overflow:auto"></div>
