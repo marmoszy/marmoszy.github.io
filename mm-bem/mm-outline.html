@@ -21,24 +21,34 @@
 <body>
 
 <div style="width:960px;margin:0 auto">
-<h1 style="font-size:40px">mm-outline - fish swimbladder detector</h1>
+<h1 style="font-size:40px">Fish swimbladder outline generator</h1>
 <p>
 <b>Input parameters:</b>
 <p>
 <table class="w" style="padding:12px">
 <tr>
-<td>Side image file:</td>
-<td><img id="img1" src="B314_1.png" width="120px" crossorigin="anonymous" onload="processImage(this,this.src,'container1')"></td><td><input type="file" id="fileInput1" onchange="change(event,'container1');" accept="image/png,image/jpeg"></td>
+<td>Side image:</td>
+<td><img id="img1" src="B314_1.png" width="120px" crossorigin="anonymous" onload="processImage(this,this.src,'container1')"></td>
+<td><input type="file" id="fileInput1" onchange="change(event,'container1');" accept="image/png,image/jpeg"><br>or
+<input type="button" value="Generate:" onclick="change4(document.getElementById('a_b_1'),'img1');"> for a/b = <input type="text" id="a_b_1" value="0.125" style="width:64px" onchange="change4(this,'img1');"/></td>
 </tr>
 <tr>
-<td>Up image file:</td> 
+<td>Up image:</td> 
 <td><img id="img2" src="B314_2.png" width="120px" crossorigin="anonymous" onload="processImage(this,this.src,'container2')"></td>
-<td><input type="file" id="fileInput2" onchange="change(event,'container2');" accept="image/png,image/jpeg"></td>
+<td><input type="file" id="fileInput2" onchange="change(event,'container2');" accept="image/png,image/jpeg"><br>or
+<input type="button" value="Generate:" onclick="change4(document.getElementById('a_b_2'),'img2');"> for a/b = <input type="text" id="a_b_2" value="0.3" style="width:64px" onchange="change4(this,'img2');"/></td>
 </tr><tr>
 <td>Swimbladder length [m]:</td>
 <td><input type="text" id="swimbladder_length" value="0.305" style="width:64px" onchange="change2(this);"/></td>
 <td><input type="range" id="r_swimbladder_length" min="0" max="1" value="0.305" step="0.001" style="width:200px" onchange="change3(this)"/></td>
-</tr><tr>
+</tr>
+</table>
+
+<p>
+<b>Algorithm parameters:</b>
+<p>
+<table class="w" style="padding:12px">
+<tr>
 <td> Number of outline points:</td><td><input type="text" id="number_of_points" value="101" style="width:64px" onchange="change2(this);"/></td>
 <td><input type="range" id="r_number_of_points" min="3" max="301" value="101" step="1" style="width:200px" onchange="change3(this)"/></td>
 </tr><tr>
@@ -102,6 +112,11 @@ function change3(el) { // range handler
 	var el2 = document.getElementById(el.id.substring(2));
 	el2.value = el.value;
 	change2(el2);
+}
+
+function change4(el,id) { // image generator handler
+	var a_b = parseFloat(el.value);
+	drawParametricToImgTag(id,{width:800,height:300,pfun:superellipseParametricRotated(400, 150, 320, a_b*320, 4, id=="img1"?-11:0)});
 }
 
 function log(msg) {
@@ -221,9 +236,8 @@ function writeFile(data, filename, type) {
 
 var container1={}, conatiner2={};
 
-// ------------------------------
-// IMAGE PROCESSING + OUTLINE EXTRACTION
-// ------------------------------
+// Image processing with outline extraction
+
 function processImage(img, imgUrl, container_id) {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
@@ -242,7 +256,7 @@ function processImage(img, imgUrl, container_id) {
       const i = (y * width + x) * 4;
       const r = data[i], g = data[i+1], b = data[i+2];
       const brightness = (r + g + b) / 3;
-      if (brightness > 30) mask[y * width + x] = 1;
+      if (brightness > 30 && brightness < 250) mask[y * width + x] = 1;
     }
   }
 
@@ -385,9 +399,8 @@ function processImage(img, imgUrl, container_id) {
   drawSVGOverlay(width, height, imgUrl, outlineData, container_id);
 }
 
-// ------------------------------
-// SVG DRAWING
-// ------------------------------
+// svg drawing
+
 function drawSVGOverlay(width, height, imgUrl, outlineData, container_id) {
   const container = document.getElementById(container_id);
   container.innerHTML = "";
@@ -437,6 +450,57 @@ function drawSVGOverlay(width, height, imgUrl, outlineData, container_id) {
 
   container.appendChild(svg);
 }
+
+// generating images by parametric definitions
+
+function drawParametricToImgTag(id, {width, height, pfun, t0=0, t1=2*Math.PI, steps=800, stroke="purple", fill="rgba(128, 0, 128, 0.25)" }) {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = width;
+  canvas.height = height;
+  ctx.fillStyle = "rgba(0, 0, 0, 0)"; //"black";
+  ctx.fillRect(0, 0, width, height);
+  ctx.beginPath();
+  for (let i = 0; i <= steps; i++) {
+    const t = t0 + (t1 - t0) * (i / steps);
+    const [x, y] = pfun(t);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  if (fill) {
+    ctx.fillStyle = fill;
+    ctx.fill();
+  }
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  document.getElementById(id).src = canvas.toDataURL("image/png");
+}
+
+// ------------------------------------------------------------
+// ROTATED SUPERELLIPSE (Lamé curve)
+//   x0 = a * sign(cos t) * |cos t|^(2/n) - base parametric form
+//   y0 = b * sign(sin t) * |sin t|^(2/n)
+//   x = cx + x0*cosθ - y0*sinθ - rotation by angle θ
+//   y = cy + x0*sinθ + y0*cosθ
+// ------------------------------------------------------------
+function superellipseParametricRotated(cx, cy, a, b, n, angleDeg) {
+  const theta = angleDeg * Math.PI / 180;
+  const cosT = Math.cos(theta), sinT = Math.sin(theta);
+  return t => {
+    const ct = Math.cos(t);
+    const st = Math.sin(t);
+    const x0 = a * Math.sign(ct) * Math.pow(Math.abs(ct), 2 / n);
+    const y0 = b * Math.sign(st) * Math.pow(Math.abs(st), 2 / n);
+    const x = cx + x0 * cosT - y0 * sinT;
+    const y = cy + x0 * sinT + y0 * cosT;
+    return [x, y];
+  };
+}
+
+drawParametricToImgTag("img1",{width:800,height:300,pfun:superellipseParametricRotated(400, 150, 320, 40, 4, -11)});
+drawParametricToImgTag("img2",{width:800,height:300,pfun:superellipseParametricRotated(400, 150, 320, 80, 4, 0)});
 </script>
 
 </body>
