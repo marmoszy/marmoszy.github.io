@@ -862,6 +862,7 @@ var bkg = bkg1; //"#000077"; // "#ffdd88"; "darkblue"; //
 
 var axcolors = ["red", "green", "blue"];
 var mshcolor = "#0b22ae";
+var mshcolor2 = "rgba(128,128,128,0.5)";
 var axes_onoff = 1, box_onoff = 1, circle_onoff = 1; mesh_onoff = 2;
 
 //var wh = Math.max(window.innerHeight-150,400);
@@ -1375,7 +1376,7 @@ function update_mesh2(th, ph) {
 	const pvxfx = projectMesh(vx, fx, (th+0)*Math.PI/180, (ph+0)*Math.PI/180);
 	var el = svg_createpath(svg0,"N",pvxfx.pfx.map(r=>r.map(([x, y])=>[1000*x+W/2, 1000*y+H/2]))
 		//,"rgba(128,128,128,0.5)");
-		, mesh_onoff?"rgba(128,128,128,0.5)":"none", mesh_onoff?0.5:0, "1,0", 0, 'none');
+		, mesh_onoff?mshcolor2:"none", mesh_onoff?0.5:0, "1,0", 0, 'none');
 }
 
 // projection functions
