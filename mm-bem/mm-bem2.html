@@ -1360,6 +1360,11 @@ function update_mesh() {
 
   // ---- mesh box
     draw_box("svg1","M1",xmin,xmax,ymin,ymax,zmin,zmax,(mesh_onoff&2)?'darkblue':'none');
+	
+  // ---- mesh projection
+	var th = parseFloat(document.getElementById("th").value);
+	var ph = parseFloat(document.getElementById("ph").value);
+	update_mesh2(th,ph);
 }
 
 function update_mesh2(th, ph) {
@@ -1368,7 +1373,9 @@ function update_mesh2(th, ph) {
 	const H = svg.getAttribute("height")-40;
 	const svg0 = document.getElementById("svg0");
 	const pvxfx = projectMesh(vx, fx, (th+0)*Math.PI/180, (ph+0)*Math.PI/180);
-	var el = svg_createpath(svg0,"N",pvxfx.pfx.map(r=>r.map(([x, y])=>[1000*x+W/2, 1000*y+H/2])),"rgba(128,128,128,0.5)");
+	var el = svg_createpath(svg0,"N",pvxfx.pfx.map(r=>r.map(([x, y])=>[1000*x+W/2, 1000*y+H/2]))
+		//,"rgba(128,128,128,0.5)");
+		, mesh_onoff?"rgba(128,128,128,0.5)":"none", mesh_onoff?0.5:0, "1,0", 0, 'none');
 }
 
 // projection functions
