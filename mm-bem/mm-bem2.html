@@ -736,7 +736,7 @@ along both direction angles.
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(25.12.2025)" style="text-align:center">mm-bem v2.14 (2025)</p>
+<p title="(28.12.2025)" style="text-align:center">mm-bem v2.15 (2025)</p>
 
 		</td>
 	</tr>
@@ -1326,8 +1326,7 @@ function init_mesh() {
 
 	msh_str([[vx,fx]]);
 	s = msh_flush();
-	document.getElementById("msh").value = s;
-	
+	document.getElementById("msh").value = s;	
 }
 function legend_mesh(s,t) {
 	var el = document.getElementById("legend");
@@ -1361,8 +1360,66 @@ function update_mesh() {
 
   // ---- mesh box
     draw_box("svg1","M1",xmin,xmax,ymin,ymax,zmin,zmax,(mesh_onoff&2)?'darkblue':'none');
-
 }
+
+function update_mesh2(th, ph) {
+	var svg = document.getElementById("svg");
+	const W = svg.getAttribute("width")-40;
+	const H = svg.getAttribute("height")-40;
+	const svg0 = document.getElementById("svg0");
+	const pvxfx = projectMesh(vx, fx, (th+0)*Math.PI/180, (ph+0)*Math.PI/180);
+	var el = svg_createpath(svg0,"N",pvxfx.pfx.map(r=>r.map(([x, y])=>[1000*x+W/2, 1000*y+H/2])),"rgba(128,128,128,0.5)");
+}
+
+// projection functions
+
+function sphericalToCartesian(theta, phi) { // normalized direction vector
+  //return [Math.sin(theta)*Math.cos(phi), Math.sin(theta)*Math.sin(phi), Math.cos(theta)]; 
+  return rot(Ry(phi*180/Math.PI), 1*Math.cos(theta+Math.PI), 1*Math.sin(theta+Math.PI), 0);
+}
+function getPlaneBasis(dir) {           
+  var a = Math.abs(dir[1]) < 0.9 ? [0,1,0] : [0,1,0]; // pick an arbitrary vector not parallel 
+  var u = normalize(cross(dir, a));
+  return [u, normalize(cross(dir, u))]; // two perpendicular unit vectors 
+}
+function getBasisWithUpY(theta, phi) {
+  var d = sphericalToCartesian(theta, phi);
+  var up = [0, 1, 0];
+  // project up onto plane perpendicular to d
+  var v = normalize([up[0]-dot(up,d)*d[0], up[1]-dot(up,d)*d[1], up[2]-dot(up,d)*d[2]]);
+  var u = normalize(cross(d,v));
+  return [u, v, d];
+}
+function applyRoll(u, v, roll) { // Apply roll rotation around dir axis
+  var cosR = Math.cos(roll), sinR = Math.sin(roll);
+  var uPrime = [u[0]*cosR + v[0]*sinR,u[1]*cosR + v[1]*sinR,u[2]*cosR + v[2]*sinR];
+  var vPrime = [-u[0]*sinR + v[0]*cosR,-u[1]*sinR + v[1]*cosR,-u[2]*sinR + v[2]*cosR];
+  return [uPrime, vPrime];
+}
+function cross(a, b) {
+  return [a[1]*b[2] - a[2]*b[1], a[2]*b[0] - a[0]*b[2], a[0]*b[1] - a[1]*b[0]];
+}
+function normalize(v) {
+  const len = Math.hypot(...v);
+  return v.map(x => x/len);
+}
+function projectVertex(p, u, v) {
+  return [dot(p, u), dot(p, v)];  // 2D coordinates x, y on the plane
+}
+function dot(a, b) {
+  return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
+}
+function projectMesh(vx, fx, theta0, phi0) {
+  var dir = sphericalToCartesian(theta0, phi0);
+  var [u, v] = getPlaneBasis(dir);
+  //var [u, v, d] = getBasisWithUpY(theta, phi);
+  var [u1, v1] = applyRoll(u, v, phi0);
+  var pvx = vx.map(p => projectVertex(p, u1, v1));
+  var pfx = fx.map(f => f.map(idx => pvx[idx]));
+  return { pvx, pfx };
+}
+
+// update functions
 
 function update_axes() {
   var el = document.getElementById("zoomin"); if(el) {el.title="zoom:"+zoom;}	
@@ -1417,8 +1474,7 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
 
   var p1 = [];
   for(var i=0;i<360;i++) {
-	p1.push(V(P(rot(Ry(ph),r*Math.cos(i*pi/180)
-		,r*Math.sin(i*pi/180), 0))));
+	  p1.push(V(P(rot(Ry(ph),r*Math.cos(i*pi/180),r*Math.sin(i*pi/180), 0))));
   }
   svg_createpath(svg,"C1",[p1],circle_onoff?'green':'none',1,"1,2");
 
@@ -1432,10 +1488,8 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
   var p2=[];
   for(var i=0;i<360;i+=15) {
 	var p=[]
-	p.push(V(P(rot(Ry(ph),r*Math.cos(i*pi/180)
-		, r*Math.sin(i*pi/180), 0))));
-  	p.push(V(P(rot(Ry(ph),0.97*r*Math.cos(i*pi/180)
-		, 0.97*r*Math.sin(i*pi/180), 0))));
+	p.push(V(P(rot(Ry(ph),r*Math.cos(i*pi/180), r*Math.sin(i*pi/180), 0))));
+  	p.push(V(P(rot(Ry(ph),0.97*r*Math.cos(i*pi/180), 0.97*r*Math.sin(i*pi/180), 0))));
 	p2.push(p);
   }
   svg_createpath(svg,"C2",p2,circle_onoff?'green':'none',1,"1,1");
@@ -2068,6 +2122,9 @@ function change1() {
 // 3d update()
 	init_mesh()
 	init3d();
+	th = parseFloat(document.getElementById("th").value);
+	ph = parseFloat(document.getElementById("ph").value);
+	update_mesh2(th,ph);
 	if(document.getElementById("obj").value.startsWith("lbs:")) {
 		return;
 	}
@@ -2157,6 +2214,7 @@ function change1() {
 					var f00 = parseFloat(v[3]);
 					var lbs = parseFloat(v[5]);
 					var TS = 20*Math.log10(lbs);   // console.log(th_lbs+' '+TS);
+					update_mesh2(th0,ph0);
 					if(f0<0) { // scan mode
 						scan_str += ''+f00/1e3+' '+(th0)+' '+(ph0)+' '+lbs.toFixed(6)+'\n';
 						plot("F",scan_str,"#AA69D3",1);  // 1 - no closing 'Z'
