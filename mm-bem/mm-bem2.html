@@ -331,6 +331,7 @@ Full mm-bem package contains source codes in different programming languages for
    </svg>
 </div>
 <input type=button value="Save to svg file" onclick='writeFile(document.getElementById("svg1").outerHTML,"mm-bem-mesh.svg");' /> 
+<input type=button value="Save to png file" style="float:right" onclick='downloadSvgAsPng(document.getElementById("svg1"),"mm-bem-mesh.png",2);' /> 
 	
 		</td>
 		<td>
@@ -398,6 +399,7 @@ Full mm-bem package contains source codes in different programming languages for
 </svg>
 </div>
 <input type=button value="Save to svg file" onclick='writeFile(document.getElementById("svg").outerHTML,"mm-bem-polar.svg");' /> 
+<input type=button value="Save to png file" style="float:right" onclick='downloadSvgAsPng(document.getElementById("svg"),"mm-bem-polar.png",2);' /> 
 
 		</td>
 	</tr>
@@ -1378,15 +1380,13 @@ function update_mesh2(th, ph) {
 	const svg0 = document.getElementById("svg0");
 	const pvxfx = projectMesh(vx, fx, (th+0)*Math.PI/180, (ph+0)*Math.PI/180);
 	var el = svg_createpath(svg0,"N",pvxfx.pfx.map(r=>r.map(([x, y])=>[1000*x+W/2, 1000*y+H/2]))
-		//,"rgba(128,128,128,0.5)");
 		, mesh_onoff?mshcolor2:"none", mesh_onoff?0.5:0, "1,0", 0, 'none');
 }
 
-// projection functions
+// ----- projection functions
 
 function sphericalToCartesian(theta, phi) { // normalized direction vector
   //return [Math.sin(theta)*Math.cos(phi), Math.sin(theta)*Math.sin(phi), Math.cos(theta)];
-  console.log("sphericalToCartesian: "+(phi*180/Math.PI)); 
   return rot(Ry(phi*180/Math.PI), 1*Math.cos(theta+Math.PI), 1*Math.sin(theta+Math.PI), 0);
 }
 function getPlaneBasis(dir) {           
@@ -1431,7 +1431,7 @@ function projectMesh(vx, fx, theta0, phi0) {
   return { pvx, pfx };
 }
 
-// update functions
+// ---- update functions
 
 function update_axes() {
   var el = document.getElementById("zoomin"); if(el) {el.title="zoom:"+zoom;}	
@@ -2605,6 +2605,66 @@ function svg_copy(e) {
 		document.execCommand('copy');
 	}
 }
+/*
+function toBase64(txt) { // TextEncoder: Always UTF8
+    const uint8Array = new TextEncoder().encode(txt);
+    let binary = '';
+    for (let i = 0; i < uint8Array.length; ++i)
+        binary += String.fromCharCode(uint8Array[i]);
+    return btoa(binary);
+}
+function svg2png(svgString,fname,w,h) {
+	let canvas = document.createElement("canvas");
+	canvas.width = w||480;	
+	canvas.height = h||480;
+	let img = new Image();
+	img.onload = function () {
+	  let ctx = canvas.getContext("2d");
+	  ctx.drawImage(img, 0, 0);
+	};
+	img.src = "data:image/svg+xml;base64," + toBase64(svgString); //btoa(svgString);
+	let pngUrl = canvas.toDataURL("image/png");
+	let imgElement = document.createElement("img");
+	imgElement.src = pngUrl;
+	document.body.appendChild(imgElement);
+	let downloadLink = document.createElement("a");
+	downloadLink.href = pngUrl;
+	downloadLink.download = fname||"image.png";
+	downloadLink.click();
+}
+*/
+function downloadSvgAsPng(svgElement, filename = "image.png", scale = 1) {
+    const svgData = new XMLSerializer().serializeToString(svgElement);
+    const svgBlob = new Blob([svgData],{type:"image/svg+xml;charset=utf-8"});
+    const url = URL.createObjectURL(svgBlob);
+    const img = new Image();
+    img.onload = function () {
+      const width = svgElement.viewBox.baseVal.width || svgElement.width.baseVal.value;
+      const height = svgElement.viewBox.baseVal.height || svgElement.height.baseVal.value;
+      const canvas = document.createElement("canvas");
+      canvas.width = width * scale;
+      canvas.height = height * scale;
+      const ctx = canvas.getContext("2d");
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(function (blob) {
+        const a = document.createElement("a");
+        a.download = filename;
+        a.href = URL.createObjectURL(blob);
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+      }, "image/png");
+    };
+    img.onerror = function (e) {
+      console.error("Error loading SVG as image", e);
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  }
 
 // ---- matrix functions
 
