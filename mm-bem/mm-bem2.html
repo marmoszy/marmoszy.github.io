@@ -441,6 +441,8 @@ Full mm-bem package contains source codes in different programming languages for
 		<td style="vertical-align:top;width:50%">
 <textarea id="txt2" style="width:100%;max-width:240px;height:440;background-color:#A2C8D2;#e6ffff" ondrop="drop2(event);"" onchange="change2a();">
 </textarea>
+<br>
+<input type=button value="Save to txt file" onclick='writeFile(document.getElementById("txt2").value,"mm-bem2.txt");' /> 
 		</td>
 	</tr>
 </table>
@@ -2627,6 +2629,7 @@ function svg2png(svgString,fname,w,h) {
 	let imgElement = document.createElement("img");
 	imgElement.src = pngUrl;
 	document.body.appendChild(imgElement);
+
 	let downloadLink = document.createElement("a");
 	downloadLink.href = pngUrl;
 	downloadLink.download = fname||"image.png";
