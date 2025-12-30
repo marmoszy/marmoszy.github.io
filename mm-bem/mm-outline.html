@@ -453,7 +453,7 @@ function drawSVGOverlay(width, height, imgUrl, outlineData, container_id) {
 
 // generating images by parametric definitions
 var gvalue = 0;
-function drawParametricToImgTag(id, {width, height, pfun, t0=0, t1=2*Math.PI, steps=800, stroke="gray", fill="rgba(128, 128, 128, 0.25)" }) {
+function drawParametricToImgTag(id, {width, height, pfun, t0=0, t1=2*Math.PI, steps=800, stroke="gray", fill="rgba(11, 34, 174, 0.25)" }) {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   canvas.width = width;
