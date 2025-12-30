@@ -1389,7 +1389,7 @@ function update_mesh2(th, ph) {
 
 function sphericalToCartesian(theta, phi) { // normalized direction vector
   //return [Math.sin(theta)*Math.cos(phi), Math.sin(theta)*Math.sin(phi), Math.cos(theta)];
-  return rot(Ry(phi*180/Math.PI), 1*Math.cos(theta+Math.PI), 1*Math.sin(theta+Math.PI), 0);
+  return rot(Ry(phi*180/Math.PI), 1*Math.cos(theta), 1*Math.sin(theta), 0);
 }
 function getPlaneBasis(dir) {           
   var a = Math.abs(dir[1]) < 0.9 ? [0,1,0] : [0,1,0]; // pick an arbitrary vector not parallel 
