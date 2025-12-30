@@ -1381,7 +1381,7 @@ function update_mesh2(th, ph) {
 	const H = svg.getAttribute("height")-40;
 	const svg0 = document.getElementById("svg0");
 	const pvxfx = projectMesh(vx, fx, (th+0)*Math.PI/180, (ph+0)*Math.PI/180);
-	var el = svg_createpath(svg0,"N",pvxfx.pfx.map(r=>r.map(([x, y])=>[1000*x+W/2, 1000*y+H/2]))
+	var el = svg_createpath(svg0,"N",pvxfx.pfx.map(r=>r.map(([x, y])=>[1200*x+W/2, 1200*y+H/2]))
 		, mesh_onoff?mshcolor2:"none", mesh_onoff?0.5:0, "1,0", 0, 'none');
 }
 

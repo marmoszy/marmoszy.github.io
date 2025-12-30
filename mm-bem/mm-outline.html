@@ -36,7 +36,7 @@
 <td>Up image:</td> 
 <td><img id="img2" src="B314_2.png" width="120px" crossorigin="anonymous" onload="processImage(this,this.src,'container2')"></td>
 <td><input type="file" id="fileInput2" onchange="change(event,'container2');" accept="image/png,image/jpeg"><br>or
-<input type="button" value="Generate:" onclick="change4(document.getElementById('a_b_2'),'img2');"> for a/b = <input type="text" id="a_b_2" value="0.3" style="width:64px" onchange="change4(this,'img2');"/></td>
+<input type="button" value="Generate" onclick="change4(document.getElementById('a_b_2'),'img2');"> for a/b = <input type="text" id="a_b_2" value="0.3" style="width:64px" onchange="change4(this,'img2');"/></td>
 </tr><tr>
 <td>Swimbladder length [m]:</td>
 <td><input type="text" id="swimbladder_length" value="0.305" style="width:64px" onchange="change2(this);"/></td>
@@ -453,7 +453,7 @@ function drawSVGOverlay(width, height, imgUrl, outlineData, container_id) {
 
 // generating images by parametric definitions
 var gvalue = 0;
-function drawParametricToImgTag(id, {width, height, pfun, t0=0, t1=2*Math.PI, steps=800, stroke="purple", fill="rgba(128, 0, 128, 0.25)" }) {
+function drawParametricToImgTag(id, {width, height, pfun, t0=0, t1=2*Math.PI, steps=800, stroke="gray", fill="rgba(128, 128, 128, 0.25)" }) {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   canvas.width = width;
