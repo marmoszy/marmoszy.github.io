@@ -75,7 +75,7 @@
 <input type="button" onclick="writeFile(document.getElementById('ta').value,'mm-outline.json');" value="Save to json file"><br>
 <p>
 <textarea id="ta2" rows=15 cols=88></textarea><br>
-<input type="button" onclick="writeFile(document.getElementById('ta2').value,'mm-outline.txt');" value="Save to txt file"><br>
+<input type="button" onclick="writeFile(document.getElementById('ta2').value,'mm-outline.tsv');" value="Save to tsv file"><br>
 <pre id="log"></pre>
 </div>
 
@@ -386,9 +386,9 @@ function processImage(img, imgUrl, container_id) {
 		  ta.value+='"height":['+outline2["h"].map(o=>o.toFixed(6)).join(',')+']\n';
 		  ta.value+='}]}]}\n';
 	  }
-	  var s='# xyzwh outline\n';
+	  var s='# xyzwh outline\n# x\ty\tz\tw\th\n';
 	  for(var i=0;i<m;i++) {
-		  s += ''+outline2.x[i].toFixed(6)+' '+outline2.y[i].toFixed(6)+' '+outline2.z[i].toFixed(6)+' '+outline2.w[i].toFixed(6)+' '+outline2.h[i].toFixed(6)+' '+'\n';
+		  s += ''+outline2.x[i].toFixed(6)+'\t'+outline2.y[i].toFixed(6)+'\t'+outline2.z[i].toFixed(6)+'\t'+outline2.w[i].toFixed(6)+'\t'+outline2.h[i].toFixed(6)+' '+'\n';
 	  }
 	  var ta2 = document.getElementById("ta2");
 	  if(ta2) {

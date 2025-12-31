@@ -169,7 +169,7 @@ Full mm-bem package contains source codes in different programming languages for
 </optgroup>
 </select>
 
-<br><span style="margin-left:32px"></span> or <input accept=".msh,.stl,.json" id="openfile" title="Load from msh (2.0), stl or echoSMs json" type="file" onchange="readFile(this);" multiple/>
+<br><span style="margin-left:32px"></span> or <input accept=".msh,.stl,.json,.tsv" id="openfile" title="Load from msh (2.0), stl or echoSMs json" type="file" onchange="readFile(this);" multiple/>
 
 <textarea id="obj" style="width:438;height:92" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905,2),[0,0,0]]</textarea>
 
@@ -740,7 +740,7 @@ along both direction angles.
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(30.12.2025)" style="text-align:center">mm-bem v2.17 (2025)</p>
+<p title="(31.12.2025)" style="text-align:center">mm-bem v2.18 (2025)</p>
 
 		</td>
 	</tr>
@@ -1772,6 +1772,26 @@ function loadEchoSMs(ss) {
 	return(m);
 }
 
+function outline2msh(s,nn) {
+	const lines = s.trim().split("\n").filter(line => line.trim() !== "" && !line.trim().startsWith("#"));
+	const rows = lines.map(line => line.trim().split(/[\s,;]+/).map(Number));
+	const numCols = rows[0].length;
+	const columns = Array.from({length: numCols}, (_, j) =>rows.map(row => row[j]));
+	console.log("Column vectors:", columns);
+	var x =	columns[0];
+	var z =	columns[1];
+	var y =	columns[2];
+	var h = columns[3]; 
+	var w = columns[4];
+	var xoff = (Math.min(...x)+Math.max(...x))/2;
+	x = x.map(xi=>xoff-xi); 
+	//var vxfx = mfrustum(w.map(wi=>wi/2),h.map(hi=>hi/2),x,y,z);
+	var n = nn||x.length;
+	var vxfx = mfrustum(resample(w.map(wi=>wi/2),n),resample(h.map(hi=>hi/2),n),resample(x,n),resample(y,n),resample(z,n));
+	msh_str([vxfx]);
+	return msh_flush();	
+}
+
 files = {};
 function file(s) {return files[s];}
 files2 = {};
@@ -1811,6 +1831,8 @@ function readFile(e) {  // local file reader
 				document.getElementById("msh").value = msh_old;
 				alert('' + (m) +' targets loaded!\nYou can select them from echoSMs section of targets above!');
 				return;
+			} else if(result[0]=='#') {                 // console.log("tsv file");
+				document.getElementById("msh").value += outline2msh(result); // assume 5 column xyzwh file with comment line
 			} else { // .msh
 				var ss=result.split('\n');
 				if(parseInt(ss[1].split(' ')[1])!=0) { // console.log("binary msh!");
@@ -1825,7 +1847,7 @@ function readFile(e) {  // local file reader
 			if(el) el.innerHTML += '<option value="file(\''+vname+'\')">'+vname+'</option>'
 			if(k==N) change(); // start calculations after reading
 		};
-		if(file.name.endsWith(".msh")||file.name.endsWith(".stl")||file.name.endsWith(".json")) {
+		if(file.name.endsWith(".msh")||file.name.endsWith(".stl")||file.name.endsWith(".json")||file.name.endsWith(".tsv")) {
 			document.getElementById("obj").value+=' '+file.name;
 			//reader.readAsText(file);
 			reader.readAsArrayBuffer(file);
@@ -2072,7 +2094,7 @@ function change1() {
 		O = eval('['+obj+']');
 		O.forEach(o => msh_str(o));
 		document.getElementById("msh").value=msh_flush();
-	} else if(obj.endsWith(".msh")||obj.endsWith(".stl")) {
+	} else if(obj.endsWith(".msh")||obj.endsWith(".stl")||obj.endsWith(".tsv")) {
 		// document.getElementById("msh").value='[already inplace]'; 
 	} else if(obj.startsWith("lbs:") ) {
 		document.getElementById("msh").value=prevs0[obj]; 
