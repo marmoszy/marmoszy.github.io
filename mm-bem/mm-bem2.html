@@ -1844,7 +1844,7 @@ function readFile(e) {  // local file reader
 			files[vname] = document.getElementById("msh").value; // save in global variable
 			var el = document.getElementById("files");           // add to files optgroup
 			if(el) {
-				el.innerHTML += '<option id='+vname+' value="[msh(file(\''+vname+'\')),[0,0,0]]">'+vname+'</option>';
+				el.innerHTML += '<option id="'+vname+'" value="[msh(file(\''+vname+'\')),[0,0,0]]">'+vname+'</option>';
 				var el2 = document.getElementById(vname);
 				if(el2) el2.selected = true;
 			}
