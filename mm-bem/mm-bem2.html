@@ -1777,7 +1777,6 @@ function outline2msh(s,nn) {
 	const rows = lines.map(line => line.trim().split(/[\s,;]+/).map(Number));
 	const numCols = rows[0].length;
 	const columns = Array.from({length: numCols}, (_, j) =>rows.map(row => row[j]));
-	console.log("Column vectors:", columns);
 	var x =	columns[0];
 	var z =	columns[1];
 	var y =	columns[2];
@@ -1844,7 +1843,11 @@ function readFile(e) {  // local file reader
 			var vname = document.getElementById("obj").value.trim();
 			files[vname] = document.getElementById("msh").value; // save in global variable
 			var el = document.getElementById("files");           // add to files optgroup
-			if(el) el.innerHTML += '<option value="file(\''+vname+'\')">'+vname+'</option>'
+			if(el) {
+				el.innerHTML += '<option id='+vname+' value="[msh(file(\''+vname+'\')),[0,0,0]]">'+vname+'</option>';
+				var el2 = document.getElementById(vname);
+				if(el2) el2.selected = true;
+			}
 			if(k==N) change(); // start calculations after reading
 		};
 		if(file.name.endsWith(".msh")||file.name.endsWith(".stl")||file.name.endsWith(".json")||file.name.endsWith(".tsv")) {
@@ -2788,12 +2791,6 @@ function frustum(rx = [1,1], ry = [1,1], H = 3, N = 24, mode = 3) {
 function every(a,n) {return a.filter((e,i) => (i+n-1)%n === n-1);}
 
 function mfrustum(ww = [1,1,1], hh = [1,1,1], xx=[0,0,0], yy=[0,0,0], zz = [3,3,3], N = 24, W = 1) {
-	console.log("mfrustum");
-	console.log(ww);
-	console.log(hh);
-	console.log(xx);
-	console.log(yy);
-	console.log(zz);
     var vx=[],fx=[];
     var n=0,nW=W||1;
 	var w = every(ww,nW);
