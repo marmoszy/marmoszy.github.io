@@ -1933,7 +1933,8 @@ function psave(pname) {
 	var el = document.getElementById("prevcalc");
 	if(el) {
 		prevs[pname] = document.getElementById("txt").value;
-		el.innerHTML =  '<option value="prevs[\''+pname+'\']" title="'+pname+'">'+pname.slice(0,40)+'' + '</option>' + el.innerHTML;
+//		el.innerHTML =  '<option value="prevs[\''+pname+'\']" title="'+pname+'">'+pname.slice(0,40)+'' + '</option>' + el.innerHTML;
+		el.innerHTML =  '<option value="'+prevs[pname]+'" title="'+pname+'">'+pname.slice(0,40)+'' + '</option>' + el.innerHTML;
 		var a = el.innerHTML.match(/<option\b[^>]*>[\s\S]*?<\/option>/gi)
 		a = [...new Set(a)];
 		el.innerHTML = a.join("");
@@ -2308,7 +2309,7 @@ function change1() {
 function change2() {
 	var out2 = document.getElementById("out2").value;
 	if(out2!="none") {
-		var s = eval(out2);
+		var s = out2; //eval(out2);
 		document.getElementById("txt2").value=s;
 		plot("Q",s,"#4da6ff");
 	//} else if(txt2.length>1) {
