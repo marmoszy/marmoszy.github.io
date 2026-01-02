@@ -13,9 +13,13 @@
 <div class="hdr">mm-dicom</div>
 <div style="width:960px;margin:0 auto">
   <p>
-  <button id="loadUrlBtn" title="Load tar.gz DICOM file" onclick='loadFromURL(document.getElementById("urlInput").value.trim());'>Load from URL</button>
+<!--  <button id="loadUrlBtn" title="Load tar.gz DICOM file" onclick='loadFromURL(document.getElementById("urlInput").value.trim());'>Load from URL</button>
   <input type="text" id="urlInput" value='https://wir.eti.pg.gda.pl/dicom/DD2210.tar.gz'> or 
-  <input type="file" id="dicomFiles" title="Select tar.gz or multiple DICOM files" multiple onchange="loadFiles(event);"/>  
+-->
+  <input type="file" id="dicomFiles" title="Select tar.gz or multiple DICOM files" multiple onchange="loadFiles(event);"/> 
+
+or  download example DICOM file: <a href="https://wir.eti.pg.gda.pl/dicom/DD2210.tar.gz">DD2210.tar.gz</a> (546.4 MB).
+ 
   <p>
   <span id="p"></span>
   <p>
@@ -69,13 +73,24 @@ function isDicom(buffer) {
 async function loadDicomTarGz(file) {
     const gz = await file.arrayBuffer();
     const tar = await gunzip(gz);
-    const entries = untar(tar);
-    return entries.filter(e => isDicom(e.arrayBuffer));
+    return untar(tar).filter(e => isDicom(e.arrayBuffer));
 }
 async function loadDicomTarGzFromURL(url) {
-    const gzBuffer = await fetchArrayBuffer(url);
-    const tarBuffer = await gunzip(gzBuffer);
-    return untar(tarBuffer).filter(e => isDicom(e.arrayBuffer));
+    const gz = await fetchArrayBuffer(url);
+    const tar = await gunzip(gz);
+    return untar(tar).filter(e => isDicom(e.arrayBuffer));
+}
+async function streamFromURL(url) {
+    showLoading();
+    slices=[];
+    streamUntarGz(url, file => {
+        console.log(file.name);
+        if(isDicom(file.arrayBuffer)) {
+            slices.push(parseDicom(file.arrayBuffer));
+            if(slices.length==1) update(0);
+	    console.log(slices.length);
+	}
+    });
 }
 async function fetchArrayBuffer(url) {
     const response = await fetch(url);
@@ -236,18 +251,84 @@ async function loadFiles(event) {
     slices = sortSlices(slices);
     update();
 }
-function update() {
+function update(n) {
+    idx = n||0;
     const slider = document.getElementById("sliceSlider");
     slider.max = slices.length - 1;
     slider.style.display = "block";
     slider.addEventListener("input", () => {showSlice(parseInt(slider.value));});
-    showSlice(0);
+    showSlice(idx);
     document.getElementById("imgdiv").removeAttribute("hidden");
 }
 function showLoading() {
     document.getElementById("p").innerHTML="Loading ...";
     document.getElementById("imgdiv").setAttribute("hidden","hidden");
 }
+
+async function streamUntarGz(url, onFile) {
+  const response = await fetch(url);
+  const gunzip = response.body.pipeThrough(new DecompressionStream("gzip"));
+  const reader = gunzip.getReader();
+  let buffer = new Uint8Array(0);
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    // Append new chunk to buffer
+    const tmp = new Uint8Array(buffer.length + value.length);
+    tmp.set(buffer);
+    tmp.set(value, buffer.length);
+    buffer = tmp;
+    buffer = processTarBuffer(buffer, onFile); // Process as many TAR entries as possible
+  }
+  update(slices.length-1);
+}
+
+function processTarBuffer(buffer, onFile) {
+  let offset = 0;
+  while (true) {
+    // Need full 512‑byte header
+    if (buffer.length - offset < 512) break;
+    const header = buffer.slice(offset, offset + 512);
+    // Detect end-of-archive: header is all zeros
+    let allZero = true;
+    for (let i = 0; i < 512; i++) {
+      if (header[i] !== 0) { allZero = false; break; }
+    }
+    if (allZero) {
+      // Consume the zero block and stop
+      offset += 512;
+      break;
+    }
+    // Read filename (100 bytes)
+    const name = new TextDecoder().decode(header.slice(0, 100)).replace(/\0.*$/, "");
+    if (!name) {
+      // No filename → end of archive
+      offset += 512;
+      break;
+    }
+    // Read size (12 bytes octal)
+    let sizeRaw = new TextDecoder().decode(header.slice(124, 136));
+    sizeRaw = sizeRaw.replace(/\0/g, "").trim();
+    const size = parseInt(sizeRaw, 8);
+    if (Number.isNaN(size)) {
+      // Incomplete header or PAX/USTAR weirdness → wait for more data
+      break;
+    }
+    const fileStart = offset + 512;
+    const fileEnd = fileStart + size;
+    // Wait for full file data
+    if (buffer.length < fileEnd) break;
+    // Emit file
+    const fileBytes = buffer.slice(fileStart, fileEnd);
+    onFile({ name, size, arrayBuffer: fileBytes.buffer });
+    // Move to next 512‑byte boundary
+    const blocks = Math.ceil(size / 512);
+    offset = fileStart + blocks * 512;
+  }
+  // Return leftover bytes (unprocessed tail)
+  return buffer.slice(offset);
+}
+
 
 </script>
 
