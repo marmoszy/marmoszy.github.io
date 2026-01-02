@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>DICOM Viewer with Slider</title>
+</head>
+<style>
+ * {font-size:18px;}
+ .hdr {width:100%;text-align:center;font-size:32px;padding:12px 0 12px 0}
+</style>
+<body>
+
+<div class="hdr">mm-dicom</div>
+<div style="width:960px;margin:0 auto">
+  <p>
+  <button id="loadUrlBtn" title="Load tar.gz DICOM file" onclick='loadFromURL(document.getElementById("urlInput").value.trim());'>Load from URL</button>
+  <input type="text" id="urlInput" value='https://wir.eti.pg.gda.pl/dicom/DD2210.tar.gz'> or 
+  <input type="file" id="dicomFiles" title="Select tar.gz or multiple DICOM files" multiple onchange="loadFiles(event);"/>  
+  <p>
+  <span id="p"></span>
+  <p>
+  <input type="range" id="sliceSlider" min="0" max="0" value="0" style="width:960px; display:none;">
+  <div id="imgdiv" hidden>
+    <canvas id="dicomCanvas"></canvas>
+    <br>
+    <button onclick='saveCanvasAsPNG(document.getElementById("dicomCanvas"),"mm-dicom.png");' id="savePng">Save as png</button>
+  </div>
+
+</div>
+
+<script>
+async function gunzip(arrayBuffer) {
+    const ds = new DecompressionStream("gzip");
+    const decompressed = new Response(
+        new Response(arrayBuffer).body.pipeThrough(ds)
+    );
+    return await decompressed.arrayBuffer();
+}
+function untar(arrayBuffer) {
+    const bytes = new Uint8Array(arrayBuffer);
+    const files = [];
+    let offset = 0;
+    while (offset < bytes.length) {
+        const name = readString(bytes, offset, 100);
+        if (!name) break;
+        const sizeOctal = readString(bytes, offset + 124, 12).trim();
+        const size = parseInt(sizeOctal, 8);
+        const fileStart = offset + 512;
+        const fileEnd = fileStart + size;
+        const fileBytes = bytes.slice(fileStart, fileEnd);
+        files.push({name, arrayBuffer:fileBytes.buffer});
+        const blocks = Math.ceil(size / 512);
+        offset = fileStart + blocks * 512;
+    }
+    return files;
+}
+function readString(bytes, start, length) {
+    let out = "";
+    for (let i = start; i < start + length; i++) {
+        if (bytes[i] === 0) break;
+        out += String.fromCharCode(bytes[i]);
+    }
+    return out;
+}
+function isDicom(buffer) {
+    const b = new Uint8Array(buffer);
+    return b.length>132 && b[128]===0x44 && b[129]===0x49 && b[130]===0x43 && b[131]===0x4D;
+}
+async function loadDicomTarGz(file) {
+    const gz = await file.arrayBuffer();
+    const tar = await gunzip(gz);
+    const entries = untar(tar);
+    return entries.filter(e => isDicom(e.arrayBuffer));
+}
+async function loadDicomTarGzFromURL(url) {
+    const gzBuffer = await fetchArrayBuffer(url);
+    const tarBuffer = await gunzip(gzBuffer);
+    return untar(tarBuffer).filter(e => isDicom(e.arrayBuffer));
+}
+async function fetchArrayBuffer(url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error("Failed to fetch: " + response.status);
+    }
+    return await response.arrayBuffer();
+}
+function saveCanvasAsPNG(canvas, filename) {
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+}
+
+function parseDicom(buffer) {
+        const view = new DataView(buffer);
+        // Detect Explicit VR
+        let isExplicitVR = true;
+        if (String.fromCharCode(view.getUint8(128),view.getUint8(129),
+		view.getUint8(130),view.getUint8(131)) !== "DICM") {
+            isExplicitVR = false;
+        }
+        function readTag(offset) {
+            const group = view.getUint16(offset, true).toString(16).padStart(4, "0");
+            const element = view.getUint16(offset + 2, true).toString(16).padStart(4, "0");
+            return "x" + group + element;
+        }
+        function readExplicitVR(offset) {
+            return String.fromCharCode(view.getUint8(offset),view.getUint8(offset + 1));
+        }
+        function readElement(offset) {
+            const tag = readTag(offset);
+            if (isExplicitVR) {
+                const vr = readExplicitVR(offset + 4);
+                if (["OB","OW","OF","SQ","UT","UN"].includes(vr)) {
+                    const length = view.getUint32(offset + 8, true);
+                    return {tag,vr,length,
+                        valueOffset: offset + 12, nextOffset: offset + 12 + length};
+                }
+                const length = view.getUint16(offset + 6, true);
+                return {tag,vr,length,
+                    valueOffset: offset + 8, nextOffset: offset + 8 + length};
+            } else {
+                const length = view.getUint32(offset + 4, true);
+                return {tag,vr: null,length,
+                    valueOffset: offset + 8, nextOffset: offset + 8 + length};
+            }
+        }
+        function readViewString(offset, length) {
+            let s = "";
+            for (let i = 0; i < length; i++) {
+                s += String.fromCharCode(view.getUint8(offset + i));
+            }
+            return s.trim();
+        }
+        let offset = isExplicitVR ? 132 : 0;
+        let rows, cols, bitsAllocated, pixelRepresentation;
+        let imagePosition = null;
+        let pixelDataOffset = null;
+        let pixelDataLength = null;
+    	let instanceNumber,imageOrientation = null,sliceLocation,sopInstanceUID;
+        while (offset < buffer.byteLength) {
+            const el = readElement(offset);
+            if (el.tag === "x00280010") rows = view.getUint16(el.valueOffset, true);
+            if (el.tag === "x00280011") cols = view.getUint16(el.valueOffset, true);
+            if (el.tag === "x00280100") bitsAllocated = view.getUint16(el.valueOffset, true);
+            if (el.tag === "x00280103") pixelRepresentation = view.getUint16(el.valueOffset, true);
+            if (el.tag === "x00200032") imagePosition = readViewString(el.valueOffset, el.length);
+            if (el.tag === "x00200013") instanceNumber = view.getUint16(el.valueOffset, true);
+            if (el.tag === "x00200037") imageOrientation = readViewString(el.valueOffset, el.length);
+            if (el.tag === "x00201041") sliceLocation = view.getFloat32(el.valueOffset, true);
+            if (el.tag === "x00080018") sopInstanceUID = readViewString(el.valueOffset, el.length);
+            if (el.tag === "x7fe00010") {
+                pixelDataOffset = el.valueOffset; pixelDataLength = el.length;
+                break;
+            }
+            offset = el.nextOffset;
+        }
+        const pixelBytes = new Uint8Array(buffer, pixelDataOffset, pixelDataLength);
+        return {rows,cols,bitsAllocated,pixelRepresentation,imagePosition,
+	    instanceNumber,imageOrientation,sliceLocation,sopInstanceUID,pixelBytes};
+}
+
+function showSlice(index) {
+        const slider = document.getElementById("sliceSlider");
+        slider.value = index;
+        const canvas = document.getElementById("dicomCanvas");
+        const slice = slices[index];
+        var { rows, cols, bitsAllocated, pixelRepresentation,imagePosition, instanceNumber,imageOrientation,sliceLocation,sopInstanceUID, pixelBytes } = slice;
+        canvas.width = cols;
+        canvas.height = rows;
+        const ctx = canvas.getContext("2d");
+        const imageData = ctx.createImageData(cols, rows);
+        if (bitsAllocated === 8) {
+            for (let i = 0; i < pixelBytes.length; i++) {
+                const v = pixelBytes[i];
+                imageData.data[i * 4 + 0] = v;
+                imageData.data[i * 4 + 1] = v;
+                imageData.data[i * 4 + 2] = v;
+                imageData.data[i * 4 + 3] = 255;
+            }
+        } else if (bitsAllocated === 16) {
+            const dv = new DataView(pixelBytes.buffer, pixelBytes.byteOffset, pixelBytes.byteLength);
+            let min = Infinity, max = -Infinity;
+            for (let i = 0; i < pixelBytes.length/2; i++) {
+                let val = pixelRepresentation === 1
+                    ? dv.getInt16(i * 2, true)
+                    : dv.getUint16(i * 2, true);
+                if (val < min) min = val;
+                if (val > max) max = val;
+            }
+            for (let i = 0; i < pixelBytes.length / 2; i++) {
+                let val = pixelRepresentation === 1
+                    ? dv.getInt16(i * 2, true)
+                    : dv.getUint16(i * 2, true);
+                const norm = Math.floor(((val - min) / (max - min)) * 255);
+                imageData.data[i * 4 + 0] = norm;
+                imageData.data[i * 4 + 1] = norm;
+                imageData.data[i * 4 + 2] = norm;
+                imageData.data[i * 4 + 3] = 255;
+            }
+        }
+        ctx.putImageData(imageData, 0, 0);
+
+	if(imagePosition == null) imagePosition="0\\\\";
+	if(imageOrientation == null) imageOrientation="0";
+	const sliceName = `${index}/${slices.length}: no=${instanceNumber} xyz=${imagePosition.replaceAll("\\"," ")} o=${imageOrientation.split("\\").map(x=>parseFloat(x))}`;
+	var el = document.getElementById("p");
+	if(el) el.innerHTML = sliceName;
+}
+
+var slices = [];
+function sortSlices(slices) {
+    slices.sort((a, b) => {
+        const zA = parseFloat(a.imagePosition?.split("\\")[2] || 0);
+        const zB = parseFloat(b.imagePosition?.split("\\")[2] || 0);
+        return zA - zB;     // Sort slices by z‑coordinate
+    });
+    return(slices);
+}
+async function loadFromURL(url) {
+    showLoading();
+    const files = await loadDicomTarGzFromURL(url);
+    slices = sortSlices(files.map(f => parseDicom(f.arrayBuffer)));
+    update();
+}
+async function loadFiles(event) {
+    showLoading();
+    const isTarGz = event.target.files[0].name.endsWith("gz");
+    var files = isTarGz ? await loadDicomTarGz(event.target.files[0]):[...event.target.files];
+    if (files.length === 0) return;
+    slices = [];
+    for (const file of files) {
+        var buffer = isTarGz ? file.arrayBuffer : await file.arrayBuffer();
+	slices.push(parseDicom(buffer)); 
+    }
+    slices = sortSlices(slices);
+    update();
+}
+function update() {
+    const slider = document.getElementById("sliceSlider");
+    slider.max = slices.length - 1;
+    slider.style.display = "block";
+    slider.addEventListener("input", () => {showSlice(parseInt(slider.value));});
+    showSlice(0);
+    document.getElementById("imgdiv").removeAttribute("hidden");
+}
+function showLoading() {
+    document.getElementById("p").innerHTML="Loading ...";
+    document.getElementById("imgdiv").setAttribute("hidden","hidden");
+}
+
+</script>
+
+</body>
+</html>
