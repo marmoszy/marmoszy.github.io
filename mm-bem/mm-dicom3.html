@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>DICOM Viewer with Slider</title>
+</head>
+<style>
+ * {font-size:18px;}
+ .hdr {width:100%;text-align:center;font-size:32px;padding:12px 0 12px 0}
+</style>
+<body>
+
+<div class="hdr">mm-dicom</div>
+
+<div style="width:960px;margin:0 auto">
+  <p>
+Minimalistic DICOM viewer. As an example you can download (and then open): <a href="https://wir.eti.pg.gda.pl/dicom/DD2210.tar.gz">DD2210.tar.gz</a> (546.4 MB), which represents Atlantic Bluefin Tuna CT scans<a href="https://www.mdpi.com/2077-1312/12/11/2014" style="text-decoration:none">*</a>.
+
+  <p>
+<!--  <button id="loadUrlBtn" title="Load tar.gz DICOM file" onclick='loadFromURL(document.getElementById("urlInput").value.trim());'>Load from URL</button>
+  <input type="text" id="urlInput" value='https://wir.eti.pg.gda.pl/dicom/DD2210.tar.gz'/> or 
+-->
+  <input type="file" id="dicomFiles" title="Select tar.gz or multiple DICOM files" multiple onchange="loadFiles(event);"/> 
+
+  <p>
+  <span id="p"></span>
+
+  <p>
+  <div id="imgdiv" hidden>
+  Series:  
+<select id="series" onchange="showSeries(this.value);">
+<option id="o0" value="0">1</option>
+<option id="o1" value="1">2</option>
+<option id="o2" value="2">3</option>
+<option id="o3" value="3">4</option>
+<option id="o4" value="4" selected>5</option>
+<option id="o5" value="5">6</option>
+<option id="o6" value="6">7</option>
+</select>
+&nbsp;  
+wc: <input type="range" id="wc" min="0" max="100" step="10" value="40" style="width:100px" oninput="dispatchInput();"/>
+wl: <input type="range" id="wl" min="0" max="1000" step="100" value="400" style="width:100px" oninput="dispatchInput();"/>
+<br>
+<span id="p2"></span>
+<br>
+    <input type="range" id="sliceSlider" min="0" max="0" value="0" style="width:960px;"/>
+    <canvas id="dicomCanvas"></canvas>
+    <br>
+    <button onclick='saveCanvasAsPNG(document.getElementById("dicomCanvas"),"mm-dicom.png");' id="savePng">Save as png</button>
+    <br>
+
+    <input type="range" id="slider2" min="0" max="100" value="0" style="width:960px;"/>
+    <canvas id="canvas2" title="Coronal reconstruction"></canvas>
+    <br>
+    <button onclick='saveCanvasAsPNG(document.getElementById("canvas2"),"mm-dicom.png");' id="savePng2">Save as png</button>
+    <br>
+
+    <input type="range" id="slider3" min="0" max="100" value="0" style="width:960px;"/>
+    <canvas id="canvas3" title="Sagittal reconstruction"></canvas>
+    <br>
+    <button onclick='saveCanvasAsPNG(document.getElementById("canvas3"),"mm-dicom.png");' id="savePng3">Save as png</button>
+
+  </div>
+
+</div>
+
+<script>
+function dispatchInput() {
+  var ev = new Event('input');
+  document.getElementById('sliceSlider').dispatchEvent(ev);
+  document.getElementById('slider2').dispatchEvent(ev);
+  document.getElementById('slider3').dispatchEvent(ev);
+}
+async function gunzip(arrayBuffer) {
+    const ds = new DecompressionStream("gzip");
+    const decompressed = new Response(
+        new Response(arrayBuffer).body.pipeThrough(ds)
+    );
+    return await decompressed.arrayBuffer();
+}
+function untar(arrayBuffer) {
+    const bytes = new Uint8Array(arrayBuffer);
+    const files = [];
+    let offset = 0;
+    while (offset < bytes.length) {
+        const name = readString(bytes, offset, 100);
+        if (!name) break;
+        const sizeOctal = readString(bytes, offset + 124, 12).trim();
+        const size = parseInt(sizeOctal, 8);
+        const fileStart = offset + 512;
+        const fileEnd = fileStart + size;
+        const fileBytes = bytes.slice(fileStart, fileEnd);
+        files.push({name, arrayBuffer:fileBytes.buffer});
+        const blocks = Math.ceil(size / 512);
+        offset = fileStart + blocks * 512;
+    }
+    return files;
+}
+function readString(bytes, start, length) {
+    let out = "";
+    for (let i = start; i < start + length; i++) {
+        if (bytes[i] === 0) break;
+        out += String.fromCharCode(bytes[i]);
+    }
+    return out;
+}
+function isDicom(buffer) {
+    const b = new Uint8Array(buffer);
+    return b.length>132 && b[128]===0x44 && b[129]===0x49 && b[130]===0x43 && b[131]===0x4D;
+}
+async function loadDicomTarGz(file) {
+    const gz = await file.arrayBuffer();
+    const tar = await gunzip(gz);
+    return untar(tar).filter(e => isDicom(e.arrayBuffer));
+}
+async function loadDicomTarGzFromURL(url) {
+    const gz = await fetchArrayBuffer(url);
+    const tar = await gunzip(gz);
+    return untar(tar).filter(e => isDicom(e.arrayBuffer));
+}
+async function streamFromURL(url) {
+    showLoading();
+    slices=[];
+    streamUntarGz(url, file => {
+        console.log(file.name);
+        if(isDicom(file.arrayBuffer)) {
+            slices.push(parseDicom(file.arrayBuffer));
+            if(slices.length==1) update(0);
+	    console.log(slices.length);
+	}
+    });
+    hideLoading();
+}
+async function fetchArrayBuffer(url) {
+    const response = await fetch(url);
+    if (!response.ok) {
+        throw new Error("Failed to fetch: " + response.status);
+    }
+    return await response.arrayBuffer();
+}
+function saveCanvasAsPNG(canvas, filename) {
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+}
+
+function parseDicom(buffer) {
+        const view = new DataView(buffer);
+        // Detect Explicit VR
+        let isExplicitVR = true;
+        if (String.fromCharCode(view.getUint8(128),view.getUint8(129),
+		view.getUint8(130),view.getUint8(131)) !== "DICM") {
+            isExplicitVR = false;
+        }
+        function readTag(offset) {
+            const group = view.getUint16(offset, true).toString(16).padStart(4, "0");
+            const element = view.getUint16(offset + 2, true).toString(16).padStart(4, "0");
+            return "x" + group + element;
+        }
+        function readExplicitVR(offset) {
+            return String.fromCharCode(view.getUint8(offset),view.getUint8(offset + 1));
+        }
+        function readElement(offset) {
+            const tag = readTag(offset);
+            if (isExplicitVR) {
+                const vr = readExplicitVR(offset + 4);
+                if (["OB","OW","OF","SQ","UT","UN"].includes(vr)) {
+                    const length = view.getUint32(offset + 8, true);
+                    return {tag,vr,length,
+                        valueOffset: offset + 12, nextOffset: offset + 12 + length};
+                }
+                const length = view.getUint16(offset + 6, true);
+                return {tag,vr,length,
+                    valueOffset: offset + 8, nextOffset: offset + 8 + length};
+            } else {
+                const length = view.getUint32(offset + 4, true);
+                return {tag,vr: null,length,
+                    valueOffset: offset + 8, nextOffset: offset + 8 + length};
+            }
+        }
+        function readViewString(offset, length) {
+            let s = "";
+            for (let i = 0; i < length; i++) {
+                s += String.fromCharCode(view.getUint8(offset + i));
+            }
+            return s.trim();
+        }
+        let offset = isExplicitVR ? 132 : 0;
+        let rows, cols, bitsAllocated, pixelRepresentation;
+        let imagePosition = null;
+        let pixelDataOffset = null;
+        let pixelDataLength = null;
+    	let instanceNumber,imageOrientation = null,sliceLocation,sopInstanceUID;
+	let uid, no, name, pixelSpacing,sliceSpacing,rescaleSlope,rescaleIntercept;
+        while (offset < buffer.byteLength) {
+            const el = readElement(offset);
+	    //console.log(el.tag+" "+el.length);
+            if (el.tag === "x00280010") rows = view.getUint16(el.valueOffset, true);
+            if (el.tag === "x00280011") cols = view.getUint16(el.valueOffset, true);
+            if (el.tag === "x00280100") bitsAllocated = view.getUint16(el.valueOffset, true);
+            if (el.tag === "x00280103") pixelRepresentation = view.getUint16(el.valueOffset, true);
+            if (el.tag === "x00200032") imagePosition = readViewString(el.valueOffset, el.length);
+            if (el.tag === "x00200013") instanceNumber = view.getUint16(el.valueOffset, true);
+            if (el.tag === "x00200037") imageOrientation = readViewString(el.valueOffset, el.length);
+            if (el.tag === "x00201041") sliceLocation = view.getFloat32(el.valueOffset, true);
+            if (el.tag === "x00080018") sopInstanceUID = readViewString(el.valueOffset, el.length);
+            if (el.tag === "x00280030") pixelSpacing = readViewString(el.valueOffset, el.length);
+            if (el.tag === "x00281053") rescaleSlope = readViewString(el.valueOffset, el.length);
+            if (el.tag === "x00281052") rescaleIntercept = readViewString(el.valueOffset, el.length);
+            if (el.tag === "x00180050") sliceSpacing = readViewString(el.valueOffset, el.length);
+            if (el.tag === "x0020000e") uid = readViewString(el.valueOffset, el.length);
+            if (el.tag === "x00200011") no = readViewString(el.valueOffset, el.length);
+            if (el.tag === "x0008103e") name = readViewString(el.valueOffset, el.length);
+            if (el.tag === "x7fe00010") {
+                pixelDataOffset = el.valueOffset; pixelDataLength = el.length;
+                break;
+            }
+            offset = el.nextOffset;
+        }
+        const pixelBytes = new Uint8Array(buffer, pixelDataOffset, pixelDataLength);
+        return {rows,cols,bitsAllocated,pixelRepresentation,imagePosition,
+	    instanceNumber,imageOrientation,sliceLocation,sopInstanceUID,
+	    uid,no,name,pixelSpacing,sliceSpacing,rescaleSlope,rescaleIntercept,
+	    pixelBytes};
+}
+
+function showSlice6(slices, idx, canvasid, sliderid, windowCenter = 40, windowWidth = 400) {
+  var canvas = document.getElementById(canvasid);
+  var slider = document.getElementById(sliderid);
+  const { pixels, width, height } = slices[idx];
+  slider.value = idx;
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");6
+  const img = ctx.createImageData(width, height);
+  const out = img.data;
+  const wc = windowCenter;
+  const ww = windowWidth;
+  const low = wc - ww / 2;
+  const high = wc + ww / 2;
+  for (let i = 0; i < pixels.length; i++) {
+    let v = pixels[i];
+    if (v<=low) v=0; else if (v>=high) v=255; else v=((v-low)/ww)*255; // Window/level
+    const idx = i * 4;
+    out[idx] = v;
+    out[idx + 1] = v;
+    out[idx + 2] = v;
+    out[idx + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+
+  if(slices[idx].orientation=="axial") {
+/*
+	if(imagePosition == null) imagePosition="0\\\\";
+	if(imageOrientation == null) imageOrientation="0";
+	const info = `${no}. ${name}: ${index}/${slices.length}: no=${instanceNumber} xyz=${imagePosition.replaceAll("\\"," ")} o=${imageOrientation.split("\\").map(x=>parseFloat(x))} s=${pixelSpacing.replaceAll("\\"," ")} ${sliceSpacing}`;
+*/
+	var name = "";
+	var el2 = document.getElementById("series"); 
+	if(el2) {
+		console.log("series:",el2.value);
+		var el3 = document.getElementById("o"+el2.value)
+		if(el3) {
+			console.log("option:",el3.id);
+			name = el3.getAttribute("name");
+		}
+	}
+	var sl = axial[slices[idx].index]; 
+	var info = ` ${name}: ${idx}/${slices.length} ${sl.fname}`;
+	info += ` no=${sl.instanceNumber} xyz=${sl.imagePosition.replaceAll("\\"," ")} o=${sl.imageOrientation.split("\\").map(x=>parseFloat(x))} s=${sl.pixelSpacing.replaceAll("\\"," ")} ${sl.sliceSpacing}`;
+	var el = document.getElementById("p2");
+	if(el) el.innerHTML = info;
+  }
+  if(slices[idx].orientation=="coronal"||slices[idx].orientation=="sagittal") {
+    const rotated = rotateRight(canvas);
+    canvas.width = rotated.width;
+    canvas.height = rotated.height;
+    canvas.getContext("2d").drawImage(rotated, 0, 0);
+  }
+}
+
+function showSlice(slices,index) {
+        const slider = document.getElementById("sliceSlider");
+        slider.value = index;
+        const canvas = document.getElementById("dicomCanvas");
+        const slice = slices[index];
+        var { rows, cols, bitsAllocated, pixelRepresentation,imagePosition,
+		instanceNumber,imageOrientation,sliceLocation,sopInstanceUID, 
+		uid,no,name,pixelSpacing,sliceSpacing, 
+		pixelBytes } = slice;
+        canvas.width = cols;
+        canvas.height = rows;
+        const ctx = canvas.getContext("2d");
+        const imageData = ctx.createImageData(cols, rows);
+        if (bitsAllocated === 8) {
+            for (let i = 0; i < pixelBytes.length; i++) {
+                const v = pixelBytes[i];
+                imageData.data[i * 4 + 0] = v;
+                imageData.data[i * 4 + 1] = v;
+                imageData.data[i * 4 + 2] = v;
+                imageData.data[i * 4 + 3] = 255;
+            }
+        } else if (bitsAllocated === 16) {
+            const dv = new DataView(pixelBytes.buffer, pixelBytes.byteOffset, pixelBytes.byteLength);
+            let min = Infinity, max = -Infinity;
+            for (let i = 0; i < pixelBytes.length/2; i++) {
+                let val = pixelRepresentation === 1
+                    ? dv.getInt16(i * 2, true)
+                    : dv.getUint16(i * 2, true);
+                if (val < min) min = val;
+                if (val > max) max = val;
+            }
+            for (let i = 0; i < pixelBytes.length / 2; i++) {
+                let val = pixelRepresentation === 1
+                    ? dv.getInt16(i * 2, true)
+                    : dv.getUint16(i * 2, true);
+                const norm = Math.floor(((val - min) / (max - min)) * 255);
+                imageData.data[i * 4 + 0] = norm;
+                imageData.data[i * 4 + 1] = norm;
+                imageData.data[i * 4 + 2] = norm;
+                imageData.data[i * 4 + 3] = 255;
+            }
+        }
+        ctx.putImageData(imageData, 0, 0);
+
+	if(imagePosition == null) imagePosition="0\\\\";
+	if(imageOrientation == null) imageOrientation="0";
+	const sliceName = `${no}. ${name}: ${index}/${slices.length}: no=${instanceNumber} xyz=${imagePosition.replaceAll("\\"," ")} o=${imageOrientation.split("\\").map(x=>parseFloat(x))} s=${pixelSpacing.replaceAll("\\"," ")} ${sliceSpacing}`;
+	var el = document.getElementById("p");
+	if(el) el.innerHTML = sliceName;
+}
+
+var axial=[], axial2=[];
+
+function sortSlices(slices) {
+    slices.sort((a, b) => {
+	const s1 = a.no.localeCompare(b.no);
+	if(s1!=0) return s1;
+        const zA = parseFloat(a.imagePosition?.split("\\")[2] || 0);
+        const zB = parseFloat(b.imagePosition?.split("\\")[2] || 0);
+        const s2 = zA - zB;     // Sort slices by z‑coordinate
+	if(s2!=0) return s2;
+        const yA = parseFloat(a.imagePosition?.split("\\")[1] || 0);
+        const yB = parseFloat(b.imagePosition?.split("\\")[1] || 0);
+        return yA - yB;     // Sort slices by z‑coordinate
+    });
+    return(slices);
+}
+
+function buildVolume(slices) {
+  const depth = slices.length;
+  const rows = slices[0].rows;
+  const cols = slices[0].cols;
+  const a = slices[0].rescaleSlope;
+  const b = slices[0].rescaleIntercept;
+  const volume = new Array(depth);   // volume[z][y][x] = voxel value
+  for (let z = 0; z < depth; z++) {
+    const slice = slices[z];
+    const dv = new DataView(slice.pixelBytes.buffer,slice.pixelBytes.byteOffset,slice.pixelBytes.byteLength);
+    const slice2D = new Array(rows);
+    for (let y = 0; y < rows; y++) {
+      const row = new Int16Array(cols);
+      for (let x = 0; x < cols; x++) {
+        const idx = (y * cols + x) * 2;
+        const val = slice.pixelRepresentation==1?dv.getInt16(idx,true):dv.getUint16(idx,true);
+        row[x] = val; //*a+b;
+      }
+      slice2D[y] = row;
+    }
+    volume[z] = slice2D;
+  }
+  return { volume, rows, cols, depth };
+}
+
+function makeAllAxialSlices(volumeObj) {
+  const { volume, rows, cols, depth } = volumeObj;
+  const slices = [];
+  for (let z = 0; z < depth; z++) {
+    const pixels = new Int16Array(rows * cols);
+    for (let y = 0; y < rows; y++) {
+      for (let x = 0; x < cols; x++) {
+        pixels[y * cols + x] = volume[z][y][x];
+      }
+    }
+    slices.push({pixels, width:cols, height:rows, index:z, orientation:"axial"});
+  }
+  return slices;
+}
+function makeAllCoronalSlices(volumeObj) {
+  const { volume, rows, cols, depth } = volumeObj;
+  const slices = [];
+  for (let yIndex = 0; yIndex < rows; yIndex++) {
+    const pixels = new Int16Array(depth * cols);
+    for (let z = 0; z < depth; z++) {
+      for (let x = 0; x < cols; x++) {
+        pixels[z * cols + x] = volume[z][yIndex][x];
+      }
+    }
+    slices.push({pixels, width:cols, height:depth, index:yIndex, orientation: "coronal"});
+  }
+  return slices;
+}
+function makeAllSagittalSlices(volumeObj) {
+  const { volume, rows, cols, depth } = volumeObj;
+  const slices = [];
+  for (let xIndex = 0; xIndex < cols; xIndex++) {
+    const pixels = new Int16Array(depth * rows);
+    for (let z = 0; z < depth; z++) {
+      for (let y = 0; y < rows; y++) {
+        pixels[z * rows + y] = volume[z][y][xIndex];
+      }
+    }
+    slices.push({pixels, width:rows, height:depth, index:xIndex, orientation:"sagittal"});
+  }
+  return slices;
+}
+
+var seriesMap = [];
+
+function groupSlicesIntoSeries(datasets) {
+  const seriesMap = {};
+  for (const ds of datasets) {
+    const name = ds.name || "UNKNOWN";
+    if (!seriesMap[name]) {
+      seriesMap[name] = [];
+    }
+    seriesMap[name].push(ds);
+  }
+  return seriesMap;
+}
+function sortSeriesMap(seriesMap) {
+  for (const id in seriesMap) {
+    seriesMap[id].sort((a, b) => {
+      const z1 = a.ImagePosition?.[2] ?? a.InstanceNumber ?? 0;
+      const z2 = b.ImagePosition?.[2] ?? b.InstanceNumber ?? 0;
+      return z1 - z2;
+    });
+  }
+  return seriesMap;
+}
+
+async function loadFromURL(url) {
+    showLoading();
+    const files = await loadDicomTarGzFromURL(url);
+    axial = sortSlices(files.map(f => parseDicom(f.arrayBuffer)));
+    seriesMap = groupSlicesIntoSeries(axial);
+    update();
+    hideLoading();
+}
+
+var coronal=[], sagittal=[];
+
+async function loadFiles(event) {
+    showLoading();
+    const isTarGz = event.target.files[0].name.endsWith("gz");
+    var files = isTarGz ? await loadDicomTarGz(event.target.files[0]):[...event.target.files];
+    if (files.length === 0) return;
+// axial
+    var axial0 = [];
+    for (const file of files) {
+        var buffer = isTarGz ? file.arrayBuffer : await file.arrayBuffer();
+	var slice = parseDicom(buffer);
+	slice.fname = file.name;
+	axial0.push(slice); 
+    }
+    axial0 = sortSlices(axial0);
+    seriesMap = sortSeriesMap(groupSlicesIntoSeries(axial0));
+    var idx = document.getElementById("series").value;
+    showSeries(idx);
+}
+function showSeries(n) {
+    if(seriesMap.length==0) return;
+    var keyName = Object.keys(seriesMap)[parseInt(n)]; 
+    axial = seriesMap[keyName];
+    if(!axial) {hideLoading(); alert("no slices found"); return;}
+    volume = buildVolume(axial);
+    console.log(keyName,axial.length,volume.rows,volume.cols,volume.depth);
+    const el = document.getElementById("o"+n);
+    if(el) {
+	el.setAttribute("name",keyName);
+    }
+// axial
+    axial2 = makeAllAxialSlices(volume);
+    const slider = document.getElementById("sliceSlider");
+    slider.max = volume.depth;
+    slider.addEventListener("input", () => {showSlice6(axial2,parseInt(slider.value),"dicomCanvas","sliceSlider",document.getElementById("wc").value,document.getElementById("wl").value);});
+    showSlice6(axial2,Math.floor(volume.depth/2),"dicomCanvas","sliceSlider");
+
+// coronal
+    coronal = makeAllCoronalSlices(volume);
+    const slider2 = document.getElementById("slider2");
+    slider2.max = volume.rows;
+    slider2.addEventListener("input", () => {showSlice6(coronal,parseInt(slider2.value),"canvas2","slider2",document.getElementById("wc").value,document.getElementById("wl").value);});
+    showSlice6(coronal,Math.floor(volume.rows/2),"canvas2","slider2");
+
+// sagittal
+    sagittal = makeAllSagittalSlices(volume);
+    const slider3 = document.getElementById("slider3");
+    slider3.max = volume.cols;
+    slider3.addEventListener("input", () => {showSlice6(sagittal,parseInt(slider3.value),"canvas3","slider3",document.getElementById("wc").value,document.getElementById("wl").value);});
+    showSlice6(sagittal,Math.floor(volume.cols/2),"canvas3","slider3");
+
+    document.getElementById("imgdiv").removeAttribute("hidden");
+    //update();
+    hideLoading();
+}
+function update(n) {
+    idx = n||0;
+    const slider = document.getElementById("sliceSlider");
+    slider.max = axial.length - 1;
+    slider.style.display = "block";
+    slider.addEventListener("input", () => {showSlice(axial,parseInt(slider.value));});
+    showSlice(axial,idx);
+    document.getElementById("imgdiv").removeAttribute("hidden");
+}
+function showLoading() {
+    document.getElementById("p").innerHTML="Loading ...";
+    document.getElementById("p").removeAttribute("hidden");
+    document.getElementById("imgdiv").setAttribute("hidden","hidden");
+}
+function hideLoading() {
+    document.getElementById("p").innerHTML="";
+    document.getElementById("p").setAttribute("hidden","hidden");
+}
+
+async function streamUntarGz(url, onFile) {
+  const response = await fetch(url);
+  const gunzip = response.body.pipeThrough(new DecompressionStream("gzip"));
+  const reader = gunzip.getReader();
+  let buffer = new Uint8Array(0);
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;    
+    const tmp = new Uint8Array(buffer.length + value.length); // Append new chunk to buffer
+    tmp.set(buffer);
+    tmp.set(value, buffer.length);
+    buffer = tmp;
+    buffer = processTarBuffer(buffer, onFile); // Process as many TAR entries as possible
+  }
+  update(slices.length-1);
+}
+
+function processTarBuffer(buffer, onFile) {
+  let offset = 0;
+  while (true) {    
+    if (buffer.length - offset < 512) break; // Need full 512‑byte header
+    const header = buffer.slice(offset, offset + 512);    
+    let allZero = true;     // Detect end-of-archive: header is all zeros
+    for (let i = 0; i < 512; i++) {if (header[i] !== 0) { allZero = false; break; }}
+    if (allZero) {offset += 512; break;}  // Consume the zero block and stop  
+    const name = new TextDecoder().decode(header.slice(0, 100)).replace(/\0.*$/, "");
+    if (!name) {offset += 512; break;}    // Filename (100 bytes) no filename - end of archive 
+    let sizeRaw = new TextDecoder().decode(header.slice(124, 136));
+    sizeRaw = sizeRaw.replace(/\0/g, "").trim();  // Read size (12 bytes octal)
+    const size = parseInt(sizeRaw, 8);
+    if (Number.isNaN(size)) {break;} // Incomplete header or PAX/USTAR weirdness: wait for more 
+    const fileStart = offset + 512;
+    const fileEnd = fileStart + size;
+    if (buffer.length < fileEnd) break;   // Wait for full file data    
+    const fileBytes = buffer.slice(fileStart, fileEnd);    // Emit file
+    onFile({ name, size, arrayBuffer: fileBytes.buffer });    
+    const blocks = Math.ceil(size / 512); // Move to next 512‑byte boundary
+    offset = fileStart + blocks * 512;
+  }
+  return buffer.slice(offset); // Return leftover bytes (unprocessed tail)
+}
+
+function rotateRight(srcCanvas) {
+  const dstCanvas = document.createElement("canvas");
+  const ctx = dstCanvas.getContext("2d");
+  dstCanvas.width = srcCanvas.height;   // swap width/height
+  dstCanvas.height = srcCanvas.width;
+  ctx.translate(dstCanvas.width, 0);    // move origin to the right edge, then rotate
+  ctx.rotate(Math.PI/2);
+  ctx.drawImage(srcCanvas, 0, 0);       // draw original image
+  return dstCanvas;
+}
+function rotateLeft(srcCanvas) {
+  const dstCanvas = document.createElement("canvas");
+  const ctx = dstCanvas.getContext("2d");
+  dstCanvas.width = srcCanvas.height;   // swap width/height
+  dstCanvas.height = srcCanvas.width;
+  ctx.translate(0, dstCanvas.height);   // move origin to bottom, then rotate
+  ctx.rotate(-Math.PI / 2);
+  ctx.drawImage(srcCanvas, 0, 0);
+  return dstCanvas;
+}
+
+</script>
+
+</body>
+</html>
