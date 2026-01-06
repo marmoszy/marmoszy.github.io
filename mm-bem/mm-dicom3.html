@@ -28,7 +28,8 @@ Minimalistic DICOM viewer. As an example you can download (and then open): <a hr
   <p>
   <div id="imgdiv" hidden>
   Series:  
-<select id="series" onchange="showSeries(this.value);">
+<select id="series" onchange="showLoading();setTimeout(()=>{showSeries(this.value);},0);">
+<!--
 <option id="o0" value="0">1</option>
 <option id="o1" value="1">2</option>
 <option id="o2" value="2">3</option>
@@ -36,6 +37,7 @@ Minimalistic DICOM viewer. As an example you can download (and then open): <a hr
 <option id="o4" value="4" selected>5</option>
 <option id="o5" value="5">6</option>
 <option id="o6" value="6">7</option>
+-->
 </select>
 &nbsp;  
 wc: <input type="range" id="wc" min="0" max="100" step="10" value="40" style="width:100px" oninput="dispatchInput();"/>
@@ -254,7 +256,7 @@ function showSlice6(slices, idx, canvasid, sliderid, windowCenter = 40, windowWi
 /*
 	if(imagePosition == null) imagePosition="0\\\\";
 	if(imageOrientation == null) imageOrientation="0";
-	const info = `${no}. ${name}: ${index}/${slices.length}: no=${instanceNumber} xyz=${imagePosition.replaceAll("\\"," ")} o=${imageOrientation.split("\\").map(x=>parseFloat(x))} s=${pixelSpacing.replaceAll("\\"," ")} ${sliceSpacing}`;
+	const info = `${no}. ${name}: ${index}/${slices.length}: no=${instanceNumber} xyz=${imagePosition?.replaceAll("\\"," ")} o=${imageOrientation?.split("\\").map(x=>parseFloat(x))} s=${pixelSpacing?.replaceAll("\\"," ")} ${sliceSpacing}`;
 */
 	var name = "";
 	var el2 = document.getElementById("series"); 
@@ -268,7 +270,7 @@ function showSlice6(slices, idx, canvasid, sliderid, windowCenter = 40, windowWi
 	}
 	var sl = axial[slices[idx].index]; 
 	var info = ` ${name}: ${idx}/${slices.length} ${sl.fname}`;
-	info += ` no=${sl.instanceNumber} xyz=${sl.imagePosition.replaceAll("\\"," ")} o=${sl.imageOrientation.split("\\").map(x=>parseFloat(x))} s=${sl.pixelSpacing.replaceAll("\\"," ")} ${sl.sliceSpacing}`;
+	info += ` no=${sl.instanceNumber} xyz=${sl.imagePosition?.replaceAll("\\"," ")} o=${sl.imageOrientation?.split("\\").map(x=>parseFloat(x))} s=${sl.pixelSpacing?.replaceAll("\\"," ")} ${sl.sliceSpacing}`;
 	var el = document.getElementById("p2");
 	if(el) el.innerHTML = info;
   }
@@ -466,8 +468,16 @@ async function loadFiles(event) {
     }
     axial0 = sortSlices(axial0);
     seriesMap = sortSeriesMap(groupSlicesIntoSeries(axial0));
-    var idx = document.getElementById("series").value;
-    showSeries(idx);
+    var s='';
+    for(var i=0;i<Object.keys(seriesMap).length;i++) {
+       s+= '<option id="o'+i+'" value="'+i+'">'+(i+1)+'</option>';
+    }
+    var el=document.getElementById("series");
+    if(el) {
+	el.innerHTML = s;
+    }
+    el.value=0;
+    showSeries(el.value);
 }
 function showSeries(n) {
     if(seriesMap.length==0) return;
