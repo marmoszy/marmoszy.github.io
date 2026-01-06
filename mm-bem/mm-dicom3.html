@@ -40,8 +40,8 @@ Minimalistic DICOM viewer. As an example you can download (and then open): <a hr
 -->
 </select>
 &nbsp;  
-wc: <input type="range" id="wc" min="0" max="100" step="10" value="40" style="width:100px" oninput="dispatchInput();"/>
-wl: <input type="range" id="wl" min="0" max="1000" step="100" value="400" style="width:100px" oninput="dispatchInput();"/>
+Image corrections: wc=<input type="range" id="wc" min="0" max="100" step="10" value="40" style="width:100px" oninput="dispatchInput();"/>
+&nbsp;wl=<input type="range" id="wl" min="0" max="1000" step="100" value="400" style="width:100px" oninput="dispatchInput();"/>
 <br>
 <span id="p2"></span>
 <br>
@@ -70,6 +70,11 @@ wl: <input type="range" id="wl" min="0" max="1000" step="100" value="400" style=
 function dispatchInput() {
   var ev = new Event('input');
   document.getElementById('sliceSlider').dispatchEvent(ev);
+  document.getElementById('slider2').dispatchEvent(ev);
+  document.getElementById('slider3').dispatchEvent(ev);
+}
+function dispatchInput2() {
+  var ev = new Event('input');
   document.getElementById('slider2').dispatchEvent(ev);
   document.getElementById('slider3').dispatchEvent(ev);
 }
@@ -273,12 +278,26 @@ function showSlice6(slices, idx, canvasid, sliderid, windowCenter = 40, windowWi
 	info += ` no=${sl.instanceNumber} xyz=${sl.imagePosition?.replaceAll("\\"," ")} o=${sl.imageOrientation?.split("\\").map(x=>parseFloat(x))} s=${sl.pixelSpacing?.replaceAll("\\"," ")} ${sl.sliceSpacing}`;
 	var el = document.getElementById("p2");
 	if(el) el.innerHTML = info;
+	dispatchInput2();
   }
   if(slices[idx].orientation=="coronal"||slices[idx].orientation=="sagittal") {
     const rotated = rotateRight(canvas);
     canvas.width = rotated.width;
     canvas.height = rotated.height;
-    canvas.getContext("2d").drawImage(rotated, 0, 0);
+    const ctx = canvas.getContext("2d"); // draw rotated
+    var x1 = parseInt(document.getElementById("sliceSlider")?.value);
+ctx.save(); 
+ctx.scale(-1, 1); // przesuwamy obraz, aby był widoczny po odwróceniu 
+ctx.drawImage(rotated, -canvas.width, 0); // przywracamy stan 
+ctx.restore();
+    //ctx.drawImage(rotated, 0, 0);
+    ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";      // line color
+    ctx.lineWidth = 4;            // thickness
+    // ctx.lineCap = "round";     // "butt", "round", or "square"
+    ctx.beginPath();              // start a new path
+    ctx.moveTo(x1, 0);            // starting point (x1, y1)
+    ctx.lineTo(x1, canvas.height);// ending point (x2, y2)
+    ctx.stroke();                 // draw the line
   }
 }
 
