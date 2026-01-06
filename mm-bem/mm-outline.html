@@ -27,20 +27,35 @@
 <p>
 <table class="w" style="padding:12px">
 <tr>
-<td>Side image:</td>
-<td><img id="img1" src="B314_1.png" width="120px" crossorigin="anonymous" onload="processImage(this,this.src,'container1')"></td>
-<td><input type="file" id="fileInput1" onchange="change(event,'container1');" accept="image/png,image/jpeg"><br>or
-<input type="button" value="Generate:" onclick="change4(document.getElementById('a_b_1'),'img1');"> for a/b = <input type="text" id="a_b_1" value="0.125" style="width:64px" onchange="change4(this,'img1');"/></td>
+<td>Swimbladder length [m]:</td>
+<td>l = <input type="text" id="swimbladder_length" value="0.305" style="width:64px" onchange="change2(this);"/></td>
+<td><input type="range" id="r_swimbladder_length" min="0" max="1" value="0.305" step="0.001" style="width:200px" onchange="change3(this)"/></td>
 </tr>
 <tr>
-<td>Up image:</td> 
+<td>Side-view image:<br>(pixel aspect ratio <input type="text" id="wh1" value="1.0" style="width:40px;display:inline-block" onchange="change2a('1');"/>)</td>
+<td><img id="img1" src="B314_1.png" width="120px" crossorigin="anonymous" onload="processImage(this,this.src,'container1')"></td>
+<td><input type="file" id="fileInput1" onchange="change(event,'container1');" accept="image/png,image/jpeg"><br>or
+<input type="button" value="Generate:" onclick="change4(document.getElementById('a_b_1'),'img1',document.getElementById('hl'),document.getElementById('tilt'));"> 
+for: h/l = <input type="text" id="a_b_1" value="0.125" style="width:64px" onchange="change4(this,'img1',document.getElementById('hl'),document.getElementById('tilt'));"/>
+<span title="tilt angle">&theta;=</span>
+<input type="text" id="tilt" value="-11" style="width:48px" onchange="change4(document.getElementById('a_b_1'),'img1',document.getElementById('hl'),this);" title="tilt angle"/>
+<span title="shape factor">n=</span>
+<input type="text" id="hl" value="4" style="width:48px" onchange="change4(document.getElementById('a_b_1'),'img1',this,document.getElementById('tilt'));" title="shape factor"/>
+<input type="range" id="r_hl" min="2" max="5" value="4" step="0.1" style="width:100px" onchange="change3(this)"/>
+</td>
+</tr>
+<tr>
+<td>Up-view image:<br>(pixel aspect ratio <input type="text" id="wh2" value="1.0" style="width:40px" onchange="change2a('2');"/>)</td> 
 <td><img id="img2" src="B314_2.png" width="120px" crossorigin="anonymous" onload="processImage(this,this.src,'container2')"></td>
 <td><input type="file" id="fileInput2" onchange="change(event,'container2');" accept="image/png,image/jpeg"><br>or
-<input type="button" value="Generate" onclick="change4(document.getElementById('a_b_2'),'img2');"> for a/b = <input type="text" id="a_b_2" value="0.3" style="width:64px" onchange="change4(this,'img2');"/></td>
-</tr><tr>
-<td>Swimbladder length [m]:</td>
-<td><input type="text" id="swimbladder_length" value="0.305" style="width:64px" onchange="change2(this);"/></td>
-<td><input type="range" id="r_swimbladder_length" min="0" max="1" value="0.305" step="0.001" style="width:200px" onchange="change3(this)"/></td>
+<input type="button" value="Generate" onclick="change4(document.getElementById('a_b_2'),'img2',document.getElementById('wl'),document.getElementById('yaw'));"> 
+for: w/l = <input type="text" id="a_b_2" value="0.3" style="width:64px" onchange="change4(this,'img2',document.getElementById('wl'));"/>
+<span title="yaw angle">&phi;=</span>
+<input type="text" id="yaw" value="0" style="width:48px" onchange="change4(document.getElementById('a_b_2'),'img2',document.getElementById('wl'),this);" title="yaw angle"/>
+<span title="shape factor">n=</span>
+<input type="text" id="wl" value="4" style="width:48px" onchange="change4(document.getElementById('a_b_2'),'img2',this,document.getElementById('yaw'));" title="shape factor"/>
+<input type="range" id="r_wl" min="2" max="5" value="4" step="0.1" style="width:100px" onchange="change3(this)"/>
+</td>
 </tr>
 </table>
 
@@ -107,6 +122,10 @@ function change2(el) { // input params handler
 	processImage(img1, img1.src, "container1");
 	processImage(img2, img2.src, "container2");
 }
+function change2a(idx) { // w/h ratio handler
+	var img = document.getElementById("img"+idx);
+	processImage(img, img.src, "container"+idx);
+}
 
 function change3(el) { // range handler
 	var el2 = document.getElementById(el.id.substring(2));
@@ -114,9 +133,11 @@ function change3(el) { // range handler
 	change2(el2);
 }
 
-function change4(el,id) { // image generator handler
+function change4(el,id,el2,el3) { // image generator handler
 	var a_b = parseFloat(el.value);
-	drawParametricToImgTag(id,{width:800,height:400,pfun:superellipseParametricRotated(400, 200, 320, a_b*320, 4, id=="img1"?-11:0)});
+	var n = parseFloat(el2?el2.value:4);
+	var a = parseFloat(el3?el3.value:-11);
+	drawParametricToImgTag(id,{width:800,height:400,pfun:superellipseParametricRotated(400, 200, 320, a_b*320, n, a)});
 }
 
 function log(msg) {
@@ -238,7 +259,7 @@ var container1={}, conatiner2={};
 
 // Image processing with outline extraction
 
-function processImage(img, imgUrl, container_id) {
+function processImage(img, imgUrl, container_id, image_resolution_ratio=1) {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
   canvas.width = img.naturalWidth;
@@ -352,6 +373,8 @@ function processImage(img, imgUrl, container_id) {
   window[container_id]=outlineData;
   
   if(Object.keys(container1).length>0 && Object.keys(container2).length>0) {
+	  var wh1 = parseFloat(document.getElementById("wh1").value);
+	  var wh2 = parseFloat(document.getElementById("wh2").value);
 	  var outline2={};
 	  var ymean = container1["mean"];
 	  var zmean = container2["mean"];
@@ -359,9 +382,9 @@ function processImage(img, imgUrl, container_id) {
 	  log("zmean: "+zmean);
 	  outline2["x"]=container1.upper2_outline.map((o,i)=>i*container1.xres2_outline);
 	  outline2["z"]=container1.mean_outline.map(o=>(ymean-o[1])*container1.yres_outline);
-	  outline2["h"]=container1.width_outline.map(o=>o[1]*container1.yres_outline);
+	  outline2["h"]=container1.width_outline.map(o=>o[1]*container1.yres_outline*wh1);
 	  outline2["y"]=container2.mean_outline.map(o=>(zmean-o[1])*container2.yres_outline);
-	  outline2["w"]=container2.width_outline.map(o=>o[1]*container2.yres_outline);
+	  outline2["w"]=container2.width_outline.map(o=>o[1]*container2.yres_outline*wh2);
 	  window["outline2"]=outline2;
 	  var xmax = Math.max(...outline2["x"]);
 	  var ymax = Math.max(...outline2["y"]);
