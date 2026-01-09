@@ -46,27 +46,40 @@ Image corrections: wc=<input type="range" id="wc" min="0" max="100" step="10" va
 <span id="p2"></span>
 <br>
     <input type="range" id="sliceSlider" min="0" max="0" value="0" style="width:960px;"/>
-    <canvas id="dicomCanvas"></canvas>
+    <canvas id="dicomCanvas" onmousemove="mousemove(event,'dicomCanvas','sliceSlider','infoxy1')"></canvas>
     <br>
     <button onclick='saveCanvasAsPNG(document.getElementById("dicomCanvas"),"mm-dicom.png");' id="savePng">Save as png</button>
+	&nbsp;<span id="infoxy1"></span>
     <br>
 
     <input type="range" id="slider2" min="0" max="100" value="0" style="width:960px;"/>
-    <canvas id="canvas2" title="Coronal reconstruction"></canvas>
+    <canvas id="canvas2"  onmousemove="mousemove(event,'canvas2','slider2','infoxy2')" title="Coronal reconstruction"></canvas>
     <br>
     <button onclick='saveCanvasAsPNG(document.getElementById("canvas2"),"mm-dicom.png");' id="savePng2">Save as png</button>
+	&nbsp;<span id="infoxy2"></span>
     <br>
 
     <input type="range" id="slider3" min="0" max="100" value="0" style="width:960px;"/>
-    <canvas id="canvas3" title="Sagittal reconstruction"></canvas>
+    <canvas id="canvas3" onmousemove="mousemove(event,'canvas3','slider3','infoxy3')" title="Sagittal reconstruction"></canvas>
     <br>
     <button onclick='saveCanvasAsPNG(document.getElementById("canvas3"),"mm-dicom.png");' id="savePng3">Save as png</button>
+	&nbsp;<span id="infoxy3"></span>
 
   </div>
 
 </div>
 
 <script>
+
+function mousemove(event,canvas_id,slider_id,info_id) {
+  const rect = document.getElementById(canvas_id).getBoundingClientRect();
+  const x = parseInt(event.clientX - rect.left);
+  const y = parseInt(event.clientY - rect.top);
+  const z = parseInt(document.getElementById(slider_id).value);
+  var n = parseInt(info_id[info_id.length-1]);
+  const el = document.getElementById(info_id).innerHTML = ' ('+x+","+y+"): "+(n==1?vv[z][y][x]:n==2?vv[x][z][y]:vv[x][y][z]);
+}
+
 function dispatchInput() {
   var ev = new Event('input');
   document.getElementById('sliceSlider').dispatchEvent(ev);
@@ -239,7 +252,7 @@ function showSlice6(slices, idx, canvasid, sliderid, windowCenter = 40, windowWi
   slider.value = idx;
   canvas.width = width;
   canvas.height = height;
-  const ctx = canvas.getContext("2d");6
+  const ctx = canvas.getContext("2d");
   const img = ctx.createImageData(width, height);
   const out = img.data;
   const wc = windowCenter;
@@ -375,7 +388,7 @@ function buildVolume(slices) {
   const cols = slices[0].cols;
   const a = slices[0].rescaleSlope;
   const b = slices[0].rescaleIntercept;
-  const volume = new Array(depth);   // volume[z][y][x] = voxel value
+  volume = new Array(depth);   // volume[z][y][x] = voxel value
   for (let z = 0; z < depth; z++) {
     const slice = slices[z];
     const dv = new DataView(slice.pixelBytes.buffer,slice.pixelBytes.byteOffset,slice.pixelBytes.byteLength);
@@ -470,7 +483,7 @@ async function loadFromURL(url) {
     hideLoading();
 }
 
-var coronal=[], sagittal=[];
+var vv = [], coronal=[], sagittal=[];
 
 async function loadFiles(event) {
     showLoading();
@@ -498,12 +511,14 @@ async function loadFiles(event) {
     el.value=0;
     showSeries(el.value);
 }
+
 function showSeries(n) {
     if(seriesMap.length==0) return;
     var keyName = Object.keys(seriesMap)[parseInt(n)]; 
     axial = seriesMap[keyName];
     if(!axial) {hideLoading(); alert("no slices found"); return;}
-    volume = buildVolume(axial);
+    var volume = buildVolume(axial);
+	vv = volume.volume;
     console.log(keyName,axial.length,volume.rows,volume.cols,volume.depth);
     const el = document.getElementById("o"+n);
     if(el) {
