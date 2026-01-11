@@ -66,6 +66,7 @@ Image corrections: wc=<input type="range" id="wc" min="0" max="100" step="10" va
     <div style="position:relative;display:inline-block">
     	<canvas id="canvas2"  onmousemove="mousemove(event,'canvas2','slider2','infoxy2')" title="Coronal reconstruction"></canvas>
     	<div id="vline2" style="position:absolute;left:0;top:0;bottom:0;width:3px;background:rgba(255,0,0,0.5);pointer-events:auto;cursor:ew-resize" onmousedown="dragging='v2';"></div>
+    	<div id="hline2" style="position:absolute;left:0px;top:0;right:0;bottom:0;height:3px;background:rgba(255,0,0,0.5);pointer-events:auto;cursor:ns-resize" onmousedown="dragging='h2';"></div>
    </div>
 
     <br>
@@ -78,6 +79,7 @@ Image corrections: wc=<input type="range" id="wc" min="0" max="100" step="10" va
     <div style="position:relative;display:inline-block">
     	<canvas id="canvas3" onmousemove="mousemove(event,'canvas3','slider3','infoxy3')" title="Sagittal reconstruction"></canvas>
     	<div id="vline3" style="position:absolute;left:0;top:0;bottom:0;width:3px;background:rgba(255,0,0,0.5);pointer-events:auto;cursor:ew-resize" onmousedown="dragging='v3';"></div>
+    	<div id="hline3" style="position:absolute;left:0px;top:0;right:0;bottom:0;height:3px;background:rgba(255,0,0,0.5);pointer-events:auto;cursor:ns-resize" onmousedown="dragging='h3';"></div>
    </div>
 
     <br>
@@ -181,6 +183,15 @@ function mousemove(event,canvas_id,slider_id,info_id) {
     slider.value = x;
     slider.dispatchEvent(new Event('input'));
   }
+  if (dragging === "h2") {
+    canvas = document.getElementById("canvas2");
+    rect = canvas.getBoundingClientRect();
+    let y = Math.max(0, Math.min(event.clientY-rect.top, canvas.height));
+    document.getElementById("hline2").style.top = `${y}px`;
+    var slider=document.getElementById("slider3");
+    slider.value = y;
+    slider.dispatchEvent(new Event('input'));
+  }
   if (dragging === "v2") {
     canvas = document.getElementById("canvas2");
     rect = canvas.getBoundingClientRect();
@@ -188,6 +199,15 @@ function mousemove(event,canvas_id,slider_id,info_id) {
     document.getElementById("vline2").style.left = `${x}px`;
     var slider=document.getElementById("sliceSlider");
     slider.value = x;
+    slider.dispatchEvent(new Event('input'));
+  }
+  if (dragging === "h3") {
+    canvas = document.getElementById("canvas3");
+    rect = canvas.getBoundingClientRect();
+    let y = Math.max(0, Math.min(event.clientY-rect.top, canvas.height));
+    document.getElementById("hline3").style.top = `${y}px`;
+    var slider=document.getElementById("slider2");
+    slider.value = y;
     slider.dispatchEvent(new Event('input'));
   }
   if (dragging === "v3") {
@@ -395,8 +415,14 @@ function showSlice6(slices, idx, canvasid, sliderid, windowCenter = 40, windowWi
 	document.getElementById("vline2").style.left=`${idx}px`;
 	document.getElementById("vline3").style.left=`${idx}px`;
   }
-  if(sliderid=='slider2') {document.getElementById("hline1").style.top=`${idx}px`;}
-  if(sliderid=='slider3') {document.getElementById("vline1").style.left=`${idx}px`;}
+  if(sliderid=='slider2') {
+	document.getElementById("hline1").style.top=`${idx}px`;
+	document.getElementById("hline3").style.top=`${idx}px`;
+    }
+  if(sliderid=='slider3') {
+	document.getElementById("vline1").style.left=`${idx}px`;
+	document.getElementById("hline2").style.top=`${idx}px`;
+  }
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
@@ -534,8 +560,9 @@ function buildVolume(slices) {
   const depth = slices.length;
   const rows = slices[0].rows;
   const cols = slices[0].cols;
-  const a = slices[0].rescaleSlope;
-  const b = slices[0].rescaleIntercept;
+  const a = parseFloat(slices[0].rescaleSlope);
+  const b = parseFloat(slices[0].rescaleIntercept);
+  console.log("buildVolume: ",a," ",b);
   volume = new Array(depth);   // volume[z][y][x] = voxel value
   for (let z = 0; z < depth; z++) {
     const slice = slices[z];
@@ -546,7 +573,7 @@ function buildVolume(slices) {
       for (let x = 0; x < cols; x++) {
         const idx = (y * cols + x) * 2;
         const val = slice.pixelRepresentation==1?dv.getInt16(idx,true):dv.getUint16(idx,true);
-        row[x] = val; //*a+b;
+        row[x] = Number.isNaN(a)? val : a*val+b;
       }
       slice2D[y] = row;
     }
