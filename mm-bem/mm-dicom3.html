@@ -42,8 +42,8 @@ Minimalistic DICOM viewer. As an example you can download (and then open): <a hr
 &nbsp;
 <input type="button" value="Save as json" onclick="saveJsonGz();" />
 &nbsp;  
-Image corrections: wc=<input type="range" id="wc" min="0" max="100" step="10" value="40" style="width:100px" oninput="dispatchInput();"/>
-&nbsp;wl=<input type="range" id="wl" min="0" max="1000" step="100" value="400" style="width:100px" oninput="dispatchInput();"/>
+WL:<input type="range" id="wc" min="0" max="100" step="10" value="40" style="width:100px" oninput="dispatchInput();"/>
+&nbsp;WW=<input type="range" id="ww" min="0" max="1000" step="100" value="400" style="width:100px" oninput="dispatchInput();"/>
 <br>
 <span id="p2"></span>
 <br>
@@ -52,7 +52,7 @@ Image corrections: wc=<input type="range" id="wc" min="0" max="100" step="10" va
     <div style="position:relative;display:inline-block">
     	<canvas id="dicomCanvas" onmousemove="mousemove(event,'dicomCanvas','sliceSlider','infoxy1')" width="512" height="512"></canvas>
     	<div id="vline1" style="position:absolute;left:0;top:0;bottom:0;width:3px;background:rgba(255,0,0,0.5);pointer-events:auto;cursor:ew-resize" onmousedown="dragging='v';"></div>
-    	<div id="hline1" style="position:absolute;left:0px;top:0;right:0;bottom:0;height:3px;background:rgba(255,0,0,0.5);pointer-events:auto;cursor:ns-resize" onmousedown="dragging='h';"></div>
+    	<div id="hline1" style="position:absolute;left:0px;top:0;right:0;bottom:0;height:3px;background:rgba(0,0,255,0.5);pointer-events:auto;cursor:ns-resize" onmousedown="dragging='h';"></div>
    </div>
 
     <br>
@@ -65,7 +65,7 @@ Image corrections: wc=<input type="range" id="wc" min="0" max="100" step="10" va
 
     <div style="position:relative;display:inline-block">
     	<canvas id="canvas2"  onmousemove="mousemove(event,'canvas2','slider2','infoxy2')" title="Coronal reconstruction"></canvas>
-    	<div id="vline2" style="position:absolute;left:0;top:0;bottom:0;width:3px;background:rgba(255,0,0,0.5);pointer-events:auto;cursor:ew-resize" onmousedown="dragging='v2';"></div>
+    	<div id="vline2" style="position:absolute;left:0;top:0;bottom:0;width:3px;background:rgba(0,128,0,0.5);pointer-events:auto;cursor:ew-resize" onmousedown="dragging='v2';"></div>
     	<div id="hline2" style="position:absolute;left:0px;top:0;right:0;bottom:0;height:3px;background:rgba(255,0,0,0.5);pointer-events:auto;cursor:ns-resize" onmousedown="dragging='h2';"></div>
    </div>
 
@@ -78,8 +78,8 @@ Image corrections: wc=<input type="range" id="wc" min="0" max="100" step="10" va
 
     <div style="position:relative;display:inline-block">
     	<canvas id="canvas3" onmousemove="mousemove(event,'canvas3','slider3','infoxy3')" title="Sagittal reconstruction"></canvas>
-    	<div id="vline3" style="position:absolute;left:0;top:0;bottom:0;width:3px;background:rgba(255,0,0,0.5);pointer-events:auto;cursor:ew-resize" onmousedown="dragging='v3';"></div>
-    	<div id="hline3" style="position:absolute;left:0px;top:0;right:0;bottom:0;height:3px;background:rgba(255,0,0,0.5);pointer-events:auto;cursor:ns-resize" onmousedown="dragging='h3';"></div>
+    	<div id="vline3" style="position:absolute;left:0;top:0;bottom:0;width:3px;background:rgba(0,128,0,0.5);pointer-events:auto;cursor:ew-resize" onmousedown="dragging='v3';"></div>
+    	<div id="hline3" style="position:absolute;left:0px;top:0;right:0;bottom:0;height:3px;background:rgba(0,0,255,0.5);pointer-events:auto;cursor:ns-resize" onmousedown="dragging='h3';"></div>
    </div>
 
     <br>
@@ -93,6 +93,40 @@ Image corrections: wc=<input type="range" id="wc" min="0" max="100" step="10" va
 <script src="https://unpkg.com/fflate@0.8.2"></script>
 
 <script>
+function toArrayBuffer(u8) {
+  return u8.buffer.slice(u8.byteOffset, u8.byteOffset + u8.byteLength);
+}
+
+async function loadDicomZip0(file) {
+  const buf = new Uint8Array(await file.arrayBuffer());
+  const files = fflate.unzipSync(buf);
+  return Object.values(files).filter(e => isDicom(e.arrayBuffer));
+}
+
+async function loadDicomZip(file) {
+  const buf = new Uint8Array(await file.arrayBuffer());
+  return new Promise((resolve, reject) => {
+    fflate.unzip(buf, (err, files) => {
+      if (err) {
+        console.error("fflate unzip error:", err);
+        return reject(err);
+      }
+      const dicoms = [];
+      for (const [name, data] of Object.entries(files)) {
+        try {
+          if (isDicom(data)) {
+            dicoms.push({ name, data });
+          }
+        } catch (e) {
+          console.error("Error in isDicom for", name, e);
+        }
+      }
+      console.log("Total DICOM files:", dicoms.length);
+      resolve(dicoms);
+    });
+  });
+}
+
 var dragging = null;
 document.addEventListener("mouseup", () => dragging = null);
 
@@ -663,12 +697,14 @@ var vv = [], coronal=[], sagittal=[];
 async function loadFiles(event) {
     showLoading();
     const isTarGz = event.target.files[0].name.endsWith("gz");
-    var files = isTarGz ? await loadDicomTarGz(event.target.files[0]):[...event.target.files];
+    const isZip = event.target.files[0].name.endsWith("zip");
+    var files = isTarGz ? await loadDicomTarGz(event.target.files[0]):
+isZip? await loadDicomZip(event.target.files[0]) :[...event.target.files];
     if (files.length === 0) return;
 // axial
     var axial0 = [];
     for (const file of files) {
-        var buffer = isTarGz ? file.arrayBuffer : await file.arrayBuffer();
+        var buffer = isTarGz ? file.arrayBuffer : isZip ? toArrayBuffer(file.data) : await file.arrayBuffer();
 	var slice = parseDicom(buffer);
 	slice.fname = file.name;
 	axial0.push(slice); 
@@ -703,21 +739,21 @@ function showSeries(n) {
     axial2 = makeAllAxialSlices(volume);
     const slider = document.getElementById("sliceSlider");
     slider.max = volume.depth;
-    slider.addEventListener("input", () => {showSlice6(axial2,parseInt(slider.value),"dicomCanvas","sliceSlider",document.getElementById("wc").value,document.getElementById("wl").value);});
+    slider.addEventListener("input", () => {showSlice6(axial2,parseInt(slider.value),"dicomCanvas","sliceSlider",document.getElementById("wc").value,document.getElementById("ww").value);});
     showSlice6(axial2,Math.floor(volume.depth/2),"dicomCanvas","sliceSlider");
 
 // coronal
     coronal = makeAllCoronalSlices(volume);
     const slider2 = document.getElementById("slider2");
     slider2.max = volume.rows;
-    slider2.addEventListener("input", () => {showSlice6(coronal,parseInt(slider2.value),"canvas2","slider2",document.getElementById("wc").value,document.getElementById("wl").value);});
+    slider2.addEventListener("input", () => {showSlice6(coronal,parseInt(slider2.value),"canvas2","slider2",document.getElementById("wc").value,document.getElementById("ww").value);});
     showSlice6(coronal,Math.floor(volume.rows/2),"canvas2","slider2");
 
 // sagittal
     sagittal = makeAllSagittalSlices(volume);
     const slider3 = document.getElementById("slider3");
     slider3.max = volume.cols;
-    slider3.addEventListener("input", () => {showSlice6(sagittal,parseInt(slider3.value),"canvas3","slider3",document.getElementById("wc").value,document.getElementById("wl").value);});
+    slider3.addEventListener("input", () => {showSlice6(sagittal,parseInt(slider3.value),"canvas3","slider3",document.getElementById("wc").value,document.getElementById("ww").value);});
     showSlice6(sagittal,Math.floor(volume.cols/2),"canvas3","slider3");
 
     document.getElementById("imgdiv").removeAttribute("hidden");
