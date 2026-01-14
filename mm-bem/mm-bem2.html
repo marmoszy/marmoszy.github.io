@@ -1879,13 +1879,15 @@ function readFile2(e) {  // local file reader
 			var el = document.getElementById("files2");            // add to files optgroup
 			if(el) {
 				if(!(vname in files2)) {
-					el.innerHTML += '<option value="file2(\''+vname+'\')">'+vname+'</option>';
+//					el.innerHTML += '<option value="file2(\''+vname+'\')">'+vname+'</option>';
+					el.innerHTML += '<option id="'+vname+'"  value="'+document.getElementById("txt2").value+'">'+vname+'</option>';
 				}
 			}
 			files2[vname] = document.getElementById("txt2").value; // save in global variable
+			document.getElementById(vname).selected=true;
 			var el = document.getElementById("out2");              // select it
 			if(el) {
-				el.value = "file2('"+vname+"')";
+				//el.value = "file2('"+vname+"')";
 			}
 			if(k==N) change2(); 
 		};
@@ -2057,7 +2059,7 @@ postMessage('[Soft sphere exact solution: ...]');
 	for(var f00 = fmin; f00 <= fmax; f00 += fstep) {
 		for(var ph0 = phmin; ph0 <= phmax; ph0 += phstep) {
 			for(var th0 = thmin; th0 <= thmax; th0 += thstep) {
-				var obj2 = obj.replace(')',','+f00+')');
+				var obj2 = obj.replace(')',','+f00+','+c0+','+th0+','+ph0+')');
 				var s = eval(obj2);
 				postMessage(JSON.stringify(s));  // type 1 - scattering length
 				var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
