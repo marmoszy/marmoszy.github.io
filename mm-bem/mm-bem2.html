@@ -746,7 +746,7 @@ along both direction angles.
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(15.1.2026)" style="text-align:center">mm-bem v2.20 (2025-2026)</p>
+<p title="(16.1.2026)" style="text-align:center">mm-bem v2.20 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -3884,18 +3884,14 @@ function G(x, pts, k) {
     }
     return out;
 }
-
-        // source points
 	let offset = c0/f0/25;
-        x2 = e.map((f, i) => {
+        x2 = e.map((f, i) => {         // source points
             let nrm = normal([v[f[0]], v[f[1]], v[f[2]]]);
             return [x[i][0]-offset*nrm[0],x[i][1]-offset*nrm[1],x[i][2]-offset*nrm[2]];
         });
-
         // assemble A
         //const k = 2*Math.PI*f0/c0;
-        let A = x2.map(p => G(p, x, k));
-	console.log(A);
+        S = x2.map(p => G(p, x, k));
 /*
 		for (let i = 0; i < m; i++) {
 		  S[i] = new Array(m);
@@ -3906,7 +3902,6 @@ function G(x, pts, k) {
 		  }
 		}
 */
-	S = A;
 }
 
 	//postMessage("[... Gauss Javascript Solver]");
@@ -3943,16 +3938,14 @@ function G(x, pts, k) {
 if(method==1) {
 				f = x.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));
 } else {
-        let b = x2.map(p => {
+        f = x2.map(p => {
             let phase = dot(p, d);
-//            return math.multiply(-1, math.exp(math.multiply(math.complex(0,1), k*phase)));
             return new Complex(-Math.cos(k*phase),-Math.sin(k*phase));
+//            return math.multiply(-1, math.exp(math.multiply(math.complex(0,1), k*phase)));
         });
-	console.log(b);
 /*
 				f = x.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));
 */
-	f = b;
 }
 				var phi = gaussian1Wasm(f);
 
@@ -3961,17 +3954,15 @@ if(method==1) {
 				// Far field solution
 				const r1 = Array.from({length: 360/l}, (_, i) => mul(Ry(ph0),
 				  [[Math.cos(l*i*pi/180)],[Math.sin(l*i*pi/180)],[0]]) );
-				var psc;
+				var psc=[];
 if(method==1) {
 				const Sff = r1.map(v => x.map(xj =>
 				  new Complex(Math.cos(-k * dot(xj,v))/(4*pi), Math.sin(-k * dot(xj,v))/(4*pi) )));
 				psc = multiplyMatrixVector(Sff, phi);
 } else {
 
-        var val=[];
-	for (let deg=0; deg<360; deg++) {
-            let a = deg*Math.PI/180;
-            let r = r1[deg]; // [Math.cos(a), Math.sin(a), 0];
+        for (let i=0; i<r1.length; i++) {
+            let r = r1[i]; // [Math.cos(a), Math.sin(a), 0];
             let sumv = new Complex(0,0);
             for (let j=0; j<phi.length; j++) {
                 let phase = dot(x[j], r);
@@ -3981,15 +3972,14 @@ if(method==1) {
 
                 sumv = sumv.add(term);
             }
-            val.push(sumv);
+            psc.push(sumv);
         }
-	console.log(val);
+	//console.log(psc);
 /*
 				const Sff = r1.map(v => x.map(xj =>
 				  new Complex(Math.cos(-k * dot(xj,v))/(4*pi), Math.sin(-k * dot(xj,v))/(4*pi) )));
 				psc = multiplyMatrixVector(Sff, phi);
 */
-	psc = val;
 }
 				var idx = (th0/l+180/l)%(360/l);
 				var lbs = psc[idx].abs();
