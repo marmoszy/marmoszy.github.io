@@ -2330,6 +2330,7 @@ function change2() {
 	} else {
 		document.getElementById("txt2").value="";
 		plot("Q","#"); // clear curve2
+		plot("R","#"); // clear curve3
 		plot("F","#"); // clear curve4
 	}
 }
@@ -2390,16 +2391,20 @@ function plot(id2,s,c,z) {
 		c0=parseFloat(document.getElementById("c0").value);				
 	}
 	var ss=s.split('\n');
-	var x=[],y=[],x2=[],ncols=0;
+	var x=[],y=[],x2=[],y2=[],ncols=0,mblocks=0;
 	//console.log(ss.length);
 	for(var i=0;i<ss.length;i++) {
 		s2=ss[i].trim().split(/\s+/);
+                if(s2[0].length==0) mblocks += 1;
 		if(s2[0][0]!='#' && s2.length>=2) {
 			if(ncols==0) ncols=s2.length;
 			var xval=parseFloat(s2[m==1?1:0]);  
 			x.push(xval>=1000?xval/1000:xval); // column 1: degrees
 			if(s2[ncols-1].match(/^[a-zA-Z]+/)) ncols-=1; // gp generated table
-			y.push(parseFloat(s2[ncols-1])); // last column: absolute values
+			if(mblocks==0) 
+				y.push(parseFloat(s2[ncols-1])); // last column: absolute values
+			else 
+				y2.push(parseFloat(s2[ncols-1]));
 			if(ncols>2) x2.push(parseFloat(s2[1]));
 		} else {
 			var v = ss[i].match(/# (\d+)x(\d+)/); // detection of scanning data
@@ -2421,6 +2426,9 @@ function plot(id2,s,c,z) {
 	svg0 = document.getElementById("svg0");
 //	svg_polar(svg0,x,y,W,H,id2||"P",c||(ncols==2?((fmin!=fmax)?"#AA69D3":"#ff6633"):"#92ba6c"),z);  
 	svg_polar(svg0,x,y,W,H,id2||"P",c||((ncols==2)?"#ff6633":(ncols==3)?"#92ba6c":"#AA69D3"),z);  
+
+	if(mblocks>0 && y2.length>0) svg_polar(svg0,x,y2,W,H,"R","#008800",z);
+	else  svg_polar(svg0,[],[],W,H,"R","#008800",z);
 	
 	if(id2!="F") { // not for frequency psuedo-polar plot 
 		th = th || parseFloat(document.getElementById("th").value);
@@ -2445,7 +2453,7 @@ function plot(id2,s,c,z) {
 			update();
 		}
 	}
-	if(id2!="F" && id2!="Q") { // do not change titles when drawing frequency TS in polar plot
+	if(id2!="F" && id2!="Q" && id2!="R") { // do not change titles when drawing frequency TS in polar plot
 		if(ncols==2) {
 			svg_title("&theta;<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+th+"&deg; <tspan font-style='italic'>&phi;</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+ph+"&deg;</tspan>");
 			svg_title2("f<tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+(f0/1000)+" kHz <tspan font-style='italic'>c</tspan><tspan dy='6' font-size='0.8em'>0</tspan><tspan dy='-6' font-style='normal'> = "+c0+" m/s</tspan>");
@@ -2540,7 +2548,7 @@ function svg_polar(svg,x,y,W,H,id,c,z) {
 			svg_createpoint(svg,id,[p[0][0],p[0][1]],c||"red"
 				,"TS("+x[0]+ "&deg;)="+t.toFixed(2),4,c||"red");
 	} else {
-		svg_createpath(svg,id,[p],c||"red",z==1?3:3,(id=="Q")?"4,2":"1,0",z);
+		svg_createpath(svg,id,[p],c||"red",z==1?3:3,(id=="Q"||id=="R")?"4,2":"1,0",z);
 	}
 }
 
