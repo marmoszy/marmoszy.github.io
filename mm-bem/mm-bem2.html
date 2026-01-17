@@ -2255,11 +2255,11 @@ function change1() {
 			if(s.startsWith('[') && s.endsWith(']')) {
 				document.getElementById("txt").value += s.slice(1,-1)+'\n';
 			} else {
-				var m=parseInt(document.getElementById("method").value);
+				var m = parseInt(document.getElementById("method").value);
 				var t = Date.now()/1000 - start;
 				s = '# mm-'+(m==1?'bem':'mfs')+'-wasm: '+ t.toFixed(3) + 's ' + JSON.parse(s);
 				document.getElementById("txt").value = s;
-				plot();
+				plot(undefined,undefined,m!=1?'#C8102E':undefined); // FFCD00
 				// extract ph0,th0,f0,c0,lbs
 				var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
 				if(v) {
@@ -2294,12 +2294,12 @@ function change1() {
 		f0 = parseFloat(document.getElementById("f0").value);
 		c0 = parseFloat(document.getElementById("c0").value);
 		ph = parseFloat(document.getElementById("ph").value);
-		if(f0<0) {scan_str='# mm-bem-scan-mode: '+(-f0/1e3)+'kHz scan\n';}
+		const m = parseInt(document.getElementById("method").value);
+		if(f0<0) {scan_str='# mm-'+(m==1?'bem':'mfs')+'-scan-mode: '+(-f0/1e3)+'kHz scan\n';}
 		else {plot("F",'#');} 		// clear frequency plot
 		plot("P","#");			 	// clear calculation plot
 		if(fx.length<5500) {
-			const method = parseInt(document.getElementById("method").value);
-			worker.postMessage(JSON.stringify([lines,th,f0,c0,ph,method]));
+			worker.postMessage(JSON.stringify([lines,th,f0,c0,ph,m]));
 		} else {
 			document.getElementById("txt").value="The mesh too large for BEM inside the browser!"
 		}
