@@ -329,6 +329,7 @@ Full mm-bem package contains source codes in different programming languages for
       <g id="gt" transform="translate(0,20)">
       </g>
 	  <text x="10" y="408" id="legend" onclick="mesh_onoff=(mesh_onoff+1)%3;update();" style="fill1:#ff6633;stroke:none"></text>
+	  <text x="380" y="408" id="legend2" onclick="mesh_onoff=(mesh_onoff+1)%3;update();" style="fill1:#ff6633;stroke:none"></text>	  
    </svg>
 </div>
 <input type=button value="Save to svg file" onclick='writeFile(document.getElementById("svg1").outerHTML,"mm-bem-mesh.svg");' /> 
@@ -754,7 +755,7 @@ along both direction angles.
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(22.1.2026)" style="text-align:center">mm-bem v2.22 (2025-2026)</p>
+<p title="(26.1.2026)" style="text-align:center">mm-bem v2.23 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -1350,10 +1351,16 @@ function init_mesh() {
 	s = msh_flush();
 	document.getElementById("msh").value = s;	
 }
-function legend_mesh(s,t) {
+function legend_mesh(s,t,s2,t2) {
+	s2 = s2||'';
+	t2 = t2||'';
 	var el = document.getElementById("legend");
 	if(el) {
 		el.innerHTML =  s + "<title>"+t+"</title>";
+	}
+	var el = document.getElementById("legend2");
+	if(el) {
+		el.innerHTML =  s2 + "<title>"+t2+"</title>";
 	}
 }
 
@@ -1378,7 +1385,8 @@ function update_mesh() {
 	}
 		
   // ---- bounding box in legend
-	legend_mesh('('+xmax2.toFixed(4)+', '+ymax2.toFixed(4)+', '+zmax2.toFixed(4)+')',"Mesh dimensions");
+	legend_mesh('('+xmax2.toFixed(4)+', '+ymax2.toFixed(4)+', '+zmax2.toFixed(4)+')',"Mesh dimensions",
+		"["+vx.length+"x"+fx.length+"]","Mesh size");
 
   // ---- mesh box
     draw_box("svg1","M1",xmin,xmax,ymin,ymax,zmin,zmax,(mesh_onoff&2)?'darkblue':'none');
