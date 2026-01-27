@@ -332,8 +332,8 @@ Full mm-bem package contains source codes in different programming languages for
 	  <text x="360" y="408" id="legend2" onclick="mesh_onoff=(mesh_onoff+1)%3;update();" style="fill1:#ff6633;stroke:none"></text>	  
    </svg>
 </div>
-<input type=button value="Save to svg file" onclick='writeFile(document.getElementById("svg1").outerHTML,"mm-bem-mesh.svg");' /> 
-<input type=button value="Save to png file" style="float:right" onclick='downloadSvgAsPng(document.getElementById("svg1"),"mm-bem-mesh.png",2);' /> 
+<input type=button value="Save to svg" onclick='writeFile(document.getElementById("svg1").outerHTML,"mm-bem-mesh.svg");' /> 
+<input type=button value="Save to png" style="float:right" onclick='downloadSvgAsPng(document.getElementById("svg1"),"mm-bem-mesh.png",2);' /> 
 	
 		</td>
 		<td>
@@ -400,8 +400,8 @@ Full mm-bem package contains source codes in different programming languages for
 </g>
 </svg>
 </div>
-<input type=button value="Save to svg file" onclick='writeFile(document.getElementById("svg").outerHTML,"mm-bem-polar.svg");' /> 
-<input type=button value="Save to png file" style="float:right" onclick='downloadSvgAsPng(document.getElementById("svg"),"mm-bem-polar.png",2);' /> 
+<input type=button value="Save to svg" onclick='writeFile(document.getElementById("svg").outerHTML,"mm-bem-polar.svg");' /> 
+<input type=button value="Save to png" style="float:right" onclick='downloadSvgAsPng(document.getElementById("svg"),"mm-bem-polar.png",2);' /> 
 
 		</td>
 	</tr>
@@ -422,8 +422,8 @@ Full mm-bem package contains source codes in different programming languages for
 <textarea id="msh" style="width:480px;height:440px;background-color:#B0D2A2;#e6fff2">
 </textarea>
 <br>
-<input type=button title="Save surface model to GMSH msh v2.0 ASCII file"value="Save to msh file" onclick='writeFile(document.getElementById("msh").value,"mm-bem.msh");' /> 
-<input style="float:right" type=button title="Save surface model to echoSMs json data structure" value="Save to json file" onclick='writeFile(msh2json(document.getElementById("msh").value),"mm-bem.json");' /> 
+<input type=button title="Save surface model to GMSH msh v2.2 ASCII file"value="Save to msh" onclick='writeFile(document.getElementById("msh").value,"mm-bem.msh");' /> 
+<input style="float:right" type=button title="Save surface model to echoSMs json data structure" value="Save to json" onclick='writeFile(msh2json(document.getElementById("msh").value),"mm-bem.json");' /> 
 		</td>
 	</tr>
 </table>
@@ -438,13 +438,13 @@ Full mm-bem package contains source codes in different programming languages for
 <textarea id="txt" style="width:100%;max-width:240px;height:440;background-color:#D2ACA2;#ffe6e6" ondrop="drop(event);" onchange="plot();" onpaste="setTimeout(plot,0);">
 </textarea>
 <br>
-<input type=button value="Save to txt file" onclick='writeFile(document.getElementById("txt").value,"mm-bem.txt");' /> 
+<input type=button value="Save to txt" onclick='writeFile(document.getElementById("txt").value,"mm-bem.txt");' /> 
 		</td>
 		<td style="vertical-align:top;width:50%">
 <textarea id="txt2" style="width:100%;max-width:240px;height:440;background-color:#A2C8D2;#e6ffff" ondrop="drop2(event);"" onchange="change2a();">
 </textarea>
 <br>
-<input type=button value="Save to txt file" onclick='writeFile(document.getElementById("txt2").value,"mm-bem2.txt");' /> 
+<input type=button value="Save to txt" onclick='writeFile(document.getElementById("txt2").value,"mm-bem2.txt");' /> 
 		</td>
 	</tr>
 </table>
@@ -727,7 +727,7 @@ along both direction angles.
 <br><label for="select2" title="Multiple selection">Select swimbladder models to import:</label>
 <br><select multiple id="select2" style="width:100%;max-width:440px" size="10" onchange="echoSMs_image(this.value);"><optgroup id="echoSMs_ids"></optgroup></select>
 <br><input type="button" onclick="echoSMs_import();" value="Import" title="Import directly to target dropdown"/>
-<input id="echoSMs_save" hidden type="button" onclick="echoSMs_save();" value="Save to json file" title="Save imported models to json data structure in local file" style="float:right"/>
+<input id="echoSMs_save" hidden type="button" onclick="echoSMs_save();" value="Save to json" title="Save imported models to json data structure in local file" style="float:right"/>
 </span>
 
 <!--
@@ -755,7 +755,7 @@ along both direction angles.
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(26.1.2026)" style="text-align:center">mm-bem v2.23 (2025-2026)</p>
+<p title="(27.1.2026)" style="text-align:center">mm-bem v2.24 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -1317,7 +1317,7 @@ function init_mesh() {
 	var ss=s.split('$EndElements\n');
 	vx=[];fx=[];
 	for(var i=0;i<ss.length;i++) {
-		if(ss[i].length>0) {
+		if(ss[i].length>0 && ss[i].startsWith("$MeshFormat") ) {
 			var vi=[],fi=[];
 			[vi,fi] = msh_parse(ss[i]);
 			var N = vx.length;
@@ -1922,8 +1922,8 @@ function readFile2(e) {  // local file reader
 	}
 }
 
-function writeFile(data, filename, type) {
-	var file = new Blob([data], {type: type||"plain/text;charset=utf-8"});
+function writeFile(data, filename) {
+	var file = new Blob([data], {type: "plain/text;charset=utf-8"});
 	if (window.navigator.msSaveOrOpenBlob) // IE10+
 		window.navigator.msSaveOrOpenBlob(file, filename);
 	else { // Others
@@ -2266,6 +2266,7 @@ function change1() {
 		var s = wasm_soft_worker_header + wasm_soft_worker.toString();
 		let blob = new Blob([s], { type: "application/javascript" });
 		worker = new Worker(URL.createObjectURL(blob));
+		let nStep = 0;
 		worker.onmessage = function(event) {
 			var s = event.data;
 			if(s.startsWith('[') && s.endsWith(']')) {
@@ -2274,7 +2275,12 @@ function change1() {
 				var m = parseInt(document.getElementById("method").value);
 				var sol = parseInt(document.getElementById("solver")?.value);
 				var t = Date.now()/1000 - start;
-				s = '# mm-'+(m==1?'bem':'mfs')+'-'+(sol==1?'gauss':'blockedLU')+': '+ t.toFixed(3) + 's ' + JSON.parse(s);
+				s = JSON.parse(s);
+				var s0 = s.match(/^(?!#\d+\s).*$/gm);
+				var s1 = s.match(/^#\d+\s.*$/gm);
+				s = '# mm-'+(m==1?'bem':'mfs')+'-'+(sol==1?'gauss':'blockedLU')+': '+ t.toFixed(3) + 's ' + s0.join('\n');
+				document.getElementById("msh").value += elem_data(s1,t,nStep);
+				nStep += 1;
 				document.getElementById("txt").value = s;
 				plot(undefined,undefined,m!=1?'#C8102E':undefined); // FFCD00
 				// extract ph0,th0,f0,c0,lbs
@@ -2335,6 +2341,45 @@ function change1() {
 		document.getElementById("txt").value="";
 		plot();
 	}
+}
+
+function p0ToP1(vx, fx, vn) {
+  const Nv = vx.length, Nt = fx.length;
+  const num = new Array(Nv).fill(0), den = new Array(Nv).fill(0);
+  for (let k = 0; k < Nt; k++) {
+    const [i, j, l] = fx[k];   // triangle vertex indices (0‑based)
+    const val = vn[k];
+    const xi = vx[i], xj = vx[j], xl = vx[l];
+    // Compute triangle area
+    const ax = xj[0] - xi[0], ay = xj[1] - xi[1], az = xj[2] - xi[2];
+    const bx = xl[0] - xi[0], by = xl[1] - xi[1], bz = xl[2] - xi[2];
+    const cx = ay * bz - az * by;
+    const cy = az * bx - ax * bz;
+    const cz = ax * by - ay * bx;
+    const area = 0.5 * Math.sqrt(cx * cx + cy * cy + cz * cz);
+    num[i] += area * val;     // Accumulate area-weighted contributions
+    num[j] += area * val;
+    num[l] += area * val;
+    den[i] += area;
+    den[j] += area;
+    den[l] += area;
+  }
+  return num.map((s, idx) => (den[idx] > 0 ? s / den[idx] : 0));
+}
+
+function elem_data(s2,t,n,name) {
+	name = name || "|v_n|";
+	var s = '';
+	if(s2 && s2.length>0) { // write removing 
+		// s += '$ElementData\n1\n'+name+'\n1\n'+t.toFixed(3)+'\n3\n'+n+'\n1\n'
+		// s += s2.length+'\n'+s2.map(s=>s.slice(1)).join('\n')+'\n$EndElementData\n';
+		var vn = s2.map(s=>s.slice(1).split(' ')[1]);
+		vn1 = p0ToP1(vx, fx, vn);
+		s += '$NodeData\n1\n'+name+'\n1\n'+t.toFixed(3)+'\n3\n'+n+'\n1\n'
+		s += vn1.length+'\n'+vn1.map((v,i)=>''+(i+1)+' '+v.toFixed(6)).join('\n')+'\n$EndNodeData\n';
+
+	}
+	return s;
 }
 
 function change2() {
@@ -4144,6 +4189,9 @@ if(method==1) {
 				var s = '# th0='+th0+' ph0='+ph0+' f0='+f0+' c0='+c0+' lbs='+lbs.toFixed(6)+'\n';
 				for(let i=0; i<psc.length; i++) {
 					s += l*i + ' ' + psc[i].abs().toFixed(6) + '\n';
+				}
+				for(var i=0;i<phi.length;i++) {
+					s += '#' + (i+1) + ' ' + (phi[i].abs()).toFixed(6)+'\n';
 				}
 				postMessage(JSON.stringify(s));
 				LBS.push([(th0+180)%360,ph0,lbs]);
