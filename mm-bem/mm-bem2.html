@@ -435,13 +435,13 @@ Full mm-bem package contains source codes in different programming languages for
 <table id="nosplit" style="width:100%;padding:0;vertical-align:top;border-spacing:0" cellspacing=0 cellpadding=0 border=0>
 	<tr>
 		<td style="text-align:top;width:50%">
-<textarea id="txt" style="width:100%;max-width:240px;height:440;background-color:#D2ACA2;#ffe6e6" ondrop="drop(event);" onchange="plot();" onpaste="setTimeout(plot,0);">
+<textarea id="txt" style="width:100%;max-width:240px;height:440;background-color:#D2ACA2;#ffe6e6;"  ondrop="drop(event);" onchange="plot();" onpaste="setTimeout(plot,0);">
 </textarea>
 <br>
 <input type=button value="Save to txt" onclick='writeFile(document.getElementById("txt").value,"mm-bem.txt");' /> 
 		</td>
 		<td style="vertical-align:top;width:50%">
-<textarea id="txt2" style="width:100%;max-width:240px;height:440;background-color:#A2C8D2;#e6ffff" ondrop="drop2(event);"" onchange="change2a();">
+<textarea id="txt2" style="width:100%;max-width:240px;height:440;background-color:#A2C8D2;#e6ffff;" ondrop="drop2(event);"" onchange="change2a();">
 </textarea>
 <br>
 <input type=button value="Save to txt" onclick='writeFile(document.getElementById("txt2").value,"mm-bem2.txt");' /> 
@@ -755,7 +755,7 @@ along both direction angles.
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(27.1.2026)" style="text-align:center">mm-bem v2.24 (2025-2026)</p>
+<p title="(28.1.2026)" style="text-align:center">mm-bem v2.25 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -2282,6 +2282,11 @@ function change1() {
 				document.getElementById("msh").value += elem_data(s1,t,nStep);
 				nStep += 1;
 				document.getElementById("txt").value = s;
+				var el=document.getElementById("txt2");
+				if(el.value.length==0 || el.value.startsWith("# re(p_i)")) {
+					//document.getElementById("txt2").value = "# re(p_i) im(p_i) re(v_n) im(v_n)\n"+
+					//	s1.map(s=>s.slice(1)).join('\n');
+				}
 				plot(undefined,undefined,m!=1?'#C8102E':undefined); // FFCD00
 				// extract ph0,th0,f0,c0,lbs
 				var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
@@ -2343,7 +2348,7 @@ function change1() {
 	}
 }
 
-function p0ToP1(vx, fx, vn) {
+function p0ToP1_area(vx, fx, vn) { //_area
   const Nv = vx.length, Nt = fx.length;
   const num = new Array(Nv).fill(0), den = new Array(Nv).fill(0);
   for (let k = 0; k < Nt; k++) {
@@ -2360,20 +2365,132 @@ function p0ToP1(vx, fx, vn) {
   return num.map((s, idx) => (den[idx]>0 ? s/den[idx] : 0));
 }
 
-function elem_data(s2,t,n,mode=1) { // mode==0:ElementData, mode==1:NodeData
+function p0ToP1(vx, fx, vn) { // _barycentric
+  const Nv = vx.length, Nt = fx.length;
+  const num = new Array(Nv).fill(0), den = new Array(Nv).fill(0);
+  for (let k = 0; k < Nt; k++) {
+    const [i, j, l] = fx[k];
+    const val = vn[k], xi = vx[i], xj = vx[j], xl = vx[l];
+    const v0 = [xj[0]-xi[0], xj[1]-xi[1], xj[2]-xi[2]]; // edge vectors
+    const v1 = [xl[0]-xi[0], xl[1]-xi[1], xl[2]-xi[2]];
+    const v2 = [xl[0]-xj[0], xl[1]-xj[1], xl[2]-xj[2]];
+    // lengths
+    const a = Math.hypot(v2[0], v2[1], v2[2]); // opposite i
+    const b = Math.hypot(v1[0], v1[1], v1[2]); // opposite j
+    const c = Math.hypot(v0[0], v0[1], v0[2]); // opposite l
+    // angles via law of cosines
+    const angle_i = Math.acos((b*b + c*c - a*a) / (2*b*c));
+    const angle_j = Math.acos((a*a + c*c - b*b) / (2*a*c));
+    const angle_l = Math.acos((a*a + b*b - c*c) / (2*a*b));
+    num[i] += angle_i * val;  den[i] += angle_i;
+    num[j] += angle_j * val;  den[j] += angle_j;
+    num[l] += angle_l * val;  den[l] += angle_l;
+  }
+  return num.map((s, idx) => den[idx] > 0 ? s / den[idx] : 0);
+}
+
+function p0ToP1_leastSquares(vx, fx, vn) { // _leastSquares
+  const Nv = vx.length, Nt = fx.length;
+  // build triangle centers and node -> incident triangles
+  const centers = new Array(Nt);
+  const star = Array.from({ length: Nv }, () => []);
+  for (let k = 0; k < Nt; k++) {
+    const [i, j, l] = fx[k];
+    const xi = vx[i], xj = vx[j], xl = vx[l];
+    centers[k] = [
+      (xi[0] + xj[0] + xl[0]) / 3,
+      (xi[1] + xj[1] + xl[1]) / 3,
+      (xi[2] + xj[2] + xl[2]) / 3,
+    ];
+    star[i].push(k);
+    star[j].push(k);
+    star[l].push(k);
+  }
+  const out = new Array(Nv).fill(0);
+  for (let p = 0; p < Nv; p++) {
+    const tris = star[p];
+    if (tris.length === 0) continue;
+    const xp = vx[p];
+    // We solve (A^T A) u = A^T b, u = [a, gx, gy, gz]
+    let ATA = [0,0,0,0,  0,0,0,0,  0,0,0,0,  0,0,0,0]; // 4x4 row-major
+    let ATb = [0,0,0,0];
+    for (const k of tris) {
+      const ck = centers[k];
+      const dx = ck[0] - xp[0],dy = ck[1] - xp[1],dz = ck[2] - xp[2];
+      const v = vn[k];
+      const row = [1, dx, dy, dz];
+      // ATA += row^T * row
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          ATA[4*r + c] += row[r] * row[c];
+        }
+        ATb[r] += row[r] * v;
+      }
+    }
+    // solve 4x4 system ATA * u = ATb (small, do direct solve)
+    const u = solve4x4(ATA, ATb); // implement a tiny 4x4 solver
+	if (u === null) {
+	  let s = 0;
+	  for (const k of star[p]) s += vn[k];
+	  out[p] = s / star[p].length;
+	} else {
+      out[p] = u ? u[0] : 0;       // a = value at node
+	}
+  }
+  return out;
+}
+function solve4x4(A, b) {
+  // A is 16 numbers in row-major order
+  // b is length-4
+  const M = [
+    [A[0], A[1], A[2], A[3], b[0]],
+    [A[4], A[5], A[6], A[7], b[1]],
+    [A[8], A[9], A[10], A[11], b[2]],
+    [A[12], A[13], A[14], A[15], b[3]]
+  ];
+  // Forward elimination with partial pivoting
+  for (let k = 0; k < 4; k++) {
+    // pivot row
+    let piv = k;
+    for (let i = k+1; i < 4; i++)
+      if (Math.abs(M[i][k]) > Math.abs(M[piv][k])) piv = i;
+    // swap if needed
+    if (piv !== k) {
+      const tmp = M[k]; M[k] = M[piv]; M[piv] = tmp;
+    }
+    const diag = M[k][k];
+    if (Math.abs(diag) < 1e-14) return null; // singular
+    // eliminate below
+    for (let i = k+1; i < 4; i++) {
+      const f = M[i][k] / diag;
+      for (let j = k; j < 5; j++) M[i][j] -= f * M[k][j];
+    }
+  }
+  // Back substitution
+  const x = [0,0,0,0];
+  for (let i = 3; i >= 0; i--) {
+    if(Math.abs(M[i][i])<1e-14) return null;
+    let s = M[i][4];
+    for (let j = i+1; j < 4; j++) s -= M[i][j] * x[j];
+    x[i] = s / M[i][i];
+  }
+  return x;
+}
+
+function elem_data(s2,t,n,mode=1) { // s2: data_string t:time, n:n_seq, mode==0:ElementData, mode==1:NodeData
 	var vname = ['"Re(p_i)"','"Im(p_i)"','"Re(v_n)"','"Im(v_n)"'];
 	var s = '';
 	if(s2 && s2.length>0) { // write removing 
-		    for(var j=0;j<vname.length;j++) {
-		if(mode==0) {
-			s += '$ElementData\n1\n'+vname[j]+'\n1\n'+t.toFixed(3)+'\n3\n'+n+'\n1\n'
-			s += s2.length+'\n'+s2.map(s=>s.slice(1).split(' ')[j+1]).join('\n')+'\n$EndElementData\n';
-		} else {
-			var vn2 = s2.map(s=>s.slice(1).split(' ')[j+1]);
-			vn = p0ToP1(vx, fx, vn2);
-			s += '$NodeData\n1\n'+vname[j]+'\n1\n'+t.toFixed(3)+'\n3\n'+n+'\n1\n'
-			s += vn.length+'\n'+vn.map((v,i)=>''+(i+1)+' '+v.toFixed(6)).join('\n')+'\n$EndNodeData\n';
-                   }
+		for(var j=0;j<vname.length;j++) {
+			if(mode==0) {
+				s += '$ElementData\n1\n'+vname[j]+'\n1\n'+t.toFixed(3)+'\n3\n'+n+'\n1\n'
+				s += s2.length+'\n'+s2.map(s=>s.slice(1).split(' ')[j+1]).join('\n')+'\n$EndElementData\n';
+			} else {
+				var vn2 = s2.map(s=>s.slice(1).split(' ')[j+1]);
+				vn = p0ToP1(vx, fx, vn2);
+				s += '$NodeData\n1\n'+vname[j]+'\n1\n'+t.toFixed(3)+'\n3\n'+n+'\n1\n'
+				s += vn.length+'\n'+vn.map((v,i)=>''+(i+1)+' '+v.toFixed(6)).join('\n')+'\n$EndNodeData\n';
+			}
 		}
 	}
 	return s;
