@@ -1,0 +1,351 @@
+<!DOCTYPE HTML>
+<html>
+
+<!--<script src="gaussb_gmresj.js"></script>-->
+
+<head>
+
+<!-- piezoAxFem using wasm code + mathjs MM 29.1.2026 -->
+
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.3/math.min.js" integrity="sha512-fesVfb4J/V6Ip/PU3P7lTBbajgdv0zx8NTt8DWjBDs1Wmx01fNRMYKr5rraztWFVhycbM5WzRMaDi5Je/8AyQg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+ 
+</head>
+
+<body>
+<center>	
+<h2 style="color:darkblue">
+  Axisymmetric FEM analysis of a circular piezoelectric disk
+</h2> 
+
+<svg id="svg" xmlns="http://www.w3.org/2000/svg" 
+  width="960" height="400" font-family="Times" font-size=14>
+	<g transform="translate(0,60)">
+		<rect id="r0" width=380 height=280 style="fill:none;stroke:lightgray;stroke-width:1" />
+		<rect x=0 y=0 width=380 height=280 style="fill:AliceBlue;stroke:none;opacity:0.75" />
+	</g>
+	<g transform="translate(380,60)">
+		<rect id="r1" width=380 height=280 style="fill:none;stroke:lightgray;stroke-width:1" />
+		<rect x=0 y=0 width=380 height=280 style="fill:AliceBlue;stroke:none;opacity:0.75" />
+		<g id="svg1" >
+		</g>
+	</g>
+</svg>
+
+<style>
+	input,pre,p {font-size:14pt}
+</style>
+	<p>
+	f = <input id="f" type=number value=126 min="40" max="200" onchange="update()" /> kHz&nbsp;&nbsp;&nbsp;&nbsp;  
+	M = <input id="M" type=number value=8 min="1" max="99" onchange="update()" />&nbsp;&nbsp;&nbsp;&nbsp; 
+	N = <input id="N" type=number value=6 min="1" max="99" onchange="update()"/>&nbsp;&nbsp;&nbsp;&nbsp;
+	</p>
+<p >
+	<pre id="p">
+	</pre>
+</p>
+</center>
+
+<script type="text/javascript">
+
+var gauss_soa_wasm="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";
+
+var R = 0.019, T = 0.0141;                 // piezo disc half diameter and thickness
+var M = 8, N = 6;                          // mesh grid size (M x N)
+var ff = [126e3];                          // analysis frequency 
+var C = 1000e3;                            // display coeff (used in svg_mesh)
+var svg = document.getElementById("svg1"); // svg container id
+
+function update() {
+	while (svg.firstChild) {svg.removeChild(svg.firstChild);}
+	ff = [parseFloat(document.getElementById('f').value)*1e3];
+	M = parseInt(document.getElementById('M').value);
+	N = parseInt(document.getElementById('N').value);
+	res = piezoAxFem(R, T, M, N, ff);
+	svg_mesh(res.nodes, res.elems, res.uu, C);
+	document.getElementById("p").innerHTML = res.s + document.getElementById("p").innerHTML;
+}
+
+/* svg drawing functions */	
+function svg_createpoint(svg,id,x,y,color,r,color2,title) { // building svg circle with coords in a string s
+	var el=document.getElementById(id);
+	if (!el) {
+		el = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+		el.setAttribute('id',id);
+		svg.appendChild(el);
+	}
+	el.setAttribute('fill',color);
+	el.setAttribute('stroke-width',1);
+	el.setAttribute('stroke',color2||'none');
+	el.setAttribute("r",r||6);
+	el.setAttribute("cx",x);
+	el.setAttribute("cy",y);
+	el.innerHTML = "<title>"+(title || '')+"</title>";
+}
+function svg_createline(svg,id,x1,y1,x2,y2,color,w) { // building svg rect with coords in a string s for histogram bar
+	var el=document.getElementById(id);
+	if (!el) {
+		el = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+		el.setAttribute('id',id);
+		svg.appendChild(el);
+	}
+	el.setAttribute('stroke',color);
+	el.setAttribute('stroke-width',w||1);
+	el.setAttribute("x1",x1);
+	el.setAttribute("y1",y1);
+	el.setAttribute("x2",x2);
+	el.setAttribute("y2",y2);
+}
+
+function svg_point(id,x,y,c) {
+	var w=document.getElementById("r1").getAttribute("width");
+	var h=document.getElementById("r1").getAttribute("height");
+	svg_createpoint(svg,id,x/R*w,(1-y/T)*h,c||"red",4.5);		
+}
+function svg_line(id,x1,y1,x2,y2,c) {
+	var w=document.getElementById("r1").getAttribute("width");
+	var h=document.getElementById("r1").getAttribute("height");
+	svg_createline(svg,id,x1/R*w,(1-y1/T)*h,x2/R*w,(1-y2/T)*h,c||"red");		
+}
+function svg_mesh(nodes,elems,uu,C) {   /* drawing mesh with displacement */
+	for (var i=0;i<nodes.length;i++) {
+		svg_point("P"+i,nodes[i][0],nodes[i][1],"blue");
+	}
+	for (var i=0;i<elems.length;i++) {
+		var m=elems[i].length;
+		for (var j=0;j<m;j++) {
+			svg_line("L"+i+"_"+j,nodes[elems[i][j]][0],nodes[elems[i][j]][1],
+				nodes[elems[i][(j+1)%m]][0],nodes[elems[i][(j+1)%m]][1],"blue");
+		}
+	}
+	var nodes2=[];
+	for (var i=0;i<nodes.length;i++) {
+		nodes2.push([nodes[i][0]+C*uu._data[3*i+0].re,nodes[i][1]+C*uu._data[3*i+1].re]);
+	}
+	for (var i=0;i<nodes2.length;i++) {
+		svg_point("Q"+i,nodes2[i][0],nodes2[i][1],"red");
+	}
+	for (var i=0;i<elems.length;i++) {
+		var m=elems[i].length;
+		for(var j=0;j<m;j++) {
+			svg_line("K"+i+"_"+j,nodes2[elems[i][j]][0],nodes2[elems[i][j]][1],
+				nodes2[elems[i][(j+1)%m]][0],nodes2[elems[i][(j+1)%m]][1],"red");
+		}
+	}
+}
+var mat2str=function(D) {  // matrix to string 
+	var s='';
+	for (var i=0;i<D.length;i++) {
+		for(var j=0;j<D[i].length;j++) {
+			s += (D[i][j]).toString()+'\t';
+		} s += '\n';
+	} s += '\n';
+	return s;
+}
+// piezoAxFem - 2D axisymmetric FEM calculations for piezoelectric circular disc
+//  returns: nodes-mesh points, elems-triangles, uu-displacements, yy-admittance 
+//  using mathjs objects and functions: 
+//  complex, conj, matrix(._data,.index,.resize,.subset,.range), add, transpose, inv, multiply, dot 
+function piezoAxFem(R,T,M,N,ff) {         // R,T -dimenssion, M,N-grid size, ff-freqencies tab
+	var s = " (" + M + " x " + N + ") ";  // info string
+	var rho = 7800;                       // piezo PZT255 coefficients including loss
+	var c11 = 122.9070e9; c11 = math.complex(c11,c11/58.6); 
+	var c12 =  76.6089e9; c12 = math.complex(c12,c12/58.6);
+	var c13 =  71.178e9;  c13 = math.complex(c13,c13/80);  
+	var c33 =  97.056e9;  c33 = math.complex(c33,c33/145);
+	var c44 =  23.500e9;  c44 = math.complex(c44,c44/120);
+	var e31 =  -7.8417,   e33 = 13.5583,    e15 = 12.2440;   
+	var epsS11 = 8.234e-9;  epsS11 = math.complex(-epsS11,epsS11/50);
+	var epsS33 = 7.580e-9;  epsS33 = math.complex(-epsS33,epsS33/50);
+	var D  = 
+		[[c11, c12, c13, 0  ,  0  , e31], 
+		[c12, c11, c13, 0  ,  0  , e31],
+		[c13, c13, c33, 0  ,  0  , e33],
+		[0  , 0  , 0  , c44, e15,   0 ],
+		[0  , 0  , 0  , e15,epsS11, 0 ],
+		[e31, e31, e33, 0  ,  0  ,epsS33]]
+	nodes=[];  // creating nodes
+	for (var j=0;j<N+1;j++) {
+		for(var i=0;i<M+1;i++) {
+			nodes.push([i/M*R,j/N*T]); 
+		}
+	}
+	elems=[];  // creating triangular elements with nodes' indices
+	for (var j=0;j<N;j++) {
+		for(var i=0;i<M;i++) {
+			var n=i+j*(M+1);
+			elems.push([n,n+1,n+2+M]); 
+			elems.push([n,n+2+M,n+1+M]);
+		}
+	} 
+	var gpoints = [[1/3,1/3,1/2]];  // one point Gauss integration and weight/2!
+	var shape = function(x,y) { return([[1-x-y,x,y],[[-1,1,0],[-1,0,1]]]);}
+	//s += 'D:\n' + mat2str(D);
+	//s += 'nodes:\n' + mat2str(nodes);
+	//s += 'elems:\n' + mat2str(elems);
+	//s += 'gpoints:\n' + mat2str(gpoints);
+	//s += shape(gpoints[0][0],gpoints[0][1]) + '\n';
+	var n=nodes.length;
+	var KK = math.matrix().resize([3*n,3*n]);
+	var MM = math.matrix().resize([3*n,3*n]);
+	for (var ei=0; ei<elems.length; ei++) {
+		var e = elems[ei];
+		var m = e.length;
+		var xy=[]; for(var ni=0;ni<m;ni++) {xy.push(nodes[e[ni]]); } 
+		var K = math.matrix().resize([3*m,3*m]);
+		var M = math.matrix().resize([3*m,3*m]);
+		var B = math.matrix().resize([6,3*m]);
+		var H = math.matrix().resize([2,3*m]);
+		for(var gi=0;gi<gpoints.length;gi++) {
+			var x=gpoints[gi][0], y=gpoints[gi][1], gw=gpoints[gi][2];
+			var N=shape(x,y)[0], dN=shape(x,y)[1];			  
+			var r = math.dot(math.transpose(xy)[0],N);
+			var J = math.multiply(math.transpose(xy),math.transpose(dN));
+			var dN = math.multiply(math.transpose(math.inv(J)),dN);
+			var detJ = math.det(J);		  
+
+			B = math.subset(B,math.index(0,math.range(0,3*m,3)),dN[0]);
+			B = math.subset(B,math.index(1,math.range(0,3*m,3)),math.divide(N,r));
+			B = math.subset(B,math.index(2,math.range(1,3*m,3)),dN[1]);
+			B = math.subset(B,math.index(3,math.range(0,3*m,3)),dN[1]);
+			B = math.subset(B,math.index(3,math.range(1,3*m,3)),dN[0]);
+			B = math.subset(B,math.index(4,math.range(2,3*m,3)),dN[0]);
+			B = math.subset(B,math.index(5,math.range(2,3*m,3)),dN[1]);
+			H = math.subset(H,math.index(0,math.range(0,3*m,3)),N);
+			H = math.subset(H,math.index(1,math.range(1,3*m,3)),N);
+			K = math.multiply(math.multiply(math.multiply(math.transpose(B),D),B),r*gw*detJ); 
+			M = math.multiply(math.multiply(math.transpose(H),H),rho*r*gw*detJ); 
+			for (var i=0;i<m;i++) {   // assembling stiffness and mass matrices
+				for (var j=0;j<m;j++) {
+					for (var ii=0;ii<3;ii++) {
+						for (var jj=0;jj<3;jj++) {
+							KK._data[3*e[i]+ii][3*e[j]+jj] = math.add(KK._data[3*e[i]+ii][3*e[j]+jj],K._data[3*i+ii][3*j+jj]);
+							MM._data[3*e[i]+ii][3*e[j]+jj] = math.add(MM._data[3*e[i]+ii][3*e[j]+jj],M._data[3*i+ii][3*j+jj]);
+						}
+					}
+				}
+			}
+			//s += "x: "+ math.transpose(xy)[0] + '\n';
+			//s += 'N:' + N0 + '\n';
+			//s += 'dN:' + dN  +'\n';
+			//s += "r: " + r + '\n';
+			//s += 'J: ' + J + '\n';
+			//s += "dN: "+ dN +  '\n';
+			//s += 'detJ: ' + detJ + '\n';
+			//s += "B: " + B + '\n';
+			//s += "H: " + H + '\n';
+			//s += "K: " + K + '\n';
+			//s += "M: " + M + '\n';
+			//s += "KK: " + KK + '\n';
+			//s += "MM: " + MM + '\n';			
+			//s += '---------' + '\n';		  
+		}	
+	} //s += '\n';	
+	yy = [];
+	for (var fi=0;fi<ff.length;fi++) { // solving A x = b for all frequencies
+		var f = ff[fi];
+		var AA = math.matrix().resize([3*n,3*n]);   // AA -matrix
+		var w = 2*math.PI*f;
+		for (var i=0;i<3*n;i++) {
+			for (var j=0;j<3*n;j++) {
+				AA._data[i][j] = math.add(math.multiply(-w*w,MM._data[i][j]),KK._data[i][j]);
+			}
+		}
+	    var bb = math.matrix().resize([3*n]);       // bb - vector
+		var i00 = [], i0V = [], i1V = [];
+		for (var i=0;i<n;i++) {    // setting boundary conditions (1e30 - terrible giant value)
+			var no=nodes[i];
+			if (no[0]==0) {        //  ur(0)=0
+				AA._data[3*i+0][3*i+0] = 1e30;
+				bb._data[3*i+0]        = 0e30;
+				i00.push(i);
+			}
+			if (no[1]==0) {        //  phi(0)=1V
+				AA._data[3*i+2][3*i+2] = 1e30;
+				bb._data[3*i+2]        = 1e30;
+				i1V.push(i);
+			}
+			if (no[1]==T) {        // phi(T)=0V
+				AA._data[3*i+2][3*i+2] = 1e30;
+				bb._data[3*i+2]        = 0e30;
+				i0V.push(i);
+			}
+		}	
+		//var lup = math.lup(AA);		
+		//var uu = math.lusolve(lup,bb);
+
+		var start = Date.now()/1000;
+		//var uu = math.multiply(math.inv(AA),bb);  // solution: uu-displacement
+		var uu = gauss4mathjs(AA,bb);
+		console.log("time:"+((Date.now()/1000)-start));
+
+		var y = math.complex(0,0);
+		for (var i=0;i<3*n;i++) {
+			for (var j=0;j<i1V.length;j++) {
+				y = math.add(y,math.multiply(math.conj(KK._data[i][3*j+2]),uu._data[i]));
+			}
+		}
+		y = math.multiply(math.complex(0,-2*math.PI*w),y);
+		yy.push(y);	                              // solutions: yy-admittance
+		//s += "AA: " + AA + '\n';
+		//s += "bb: " + bb + '\n';
+		//s += "lup.p: " + lup.p + '\n';
+		//s += "uu: " + uu + '\n';
+		//s += "yy: " + yy + '\n';
+		s = "\n f=" + f + " y=" + y + " " + s;
+	}
+	return ({"nodes":nodes, "elems":elems, "uu":uu, "yy":yy, "s":s }); 
+}
+
+var run_gauss0,run_gauss1,heap;
+
+function load() {
+	const memory = new WebAssembly.Memory({ initial: 512*16 }); // 512MiB = 512*16*64 KiB
+	fetch('data:application/wasm;base64,'+gauss_soa_wasm)
+	.then(response => response.arrayBuffer())
+	.then(bytes => WebAssembly.instantiate(bytes,{env:{memory}}))
+	.then(function(result) {
+		console.log(result.instance.exports);
+		heap = new Float64Array(memory.buffer);
+		run_gauss0 = result.instance.exports.run_gauss0;
+        	run_gauss1 = result.instance.exports.run_gauss1;
+		update();
+	});
+}
+function gauss4mathjs(AA, bb) { // interfacing with math.js
+	const n = AA._size[0];
+	const A = 0;
+	const b = n*n*2;
+	var k = A;
+	const nn = n*n;
+ 	for(var i=0; i<n; i++) {for(var j=0; j<n; j++) {
+		var c = math.complex(AA._data[i][j]);
+		heap[k] = math.re(c); 
+		heap[k+nn] = math.im(c); 
+		k += 1;
+	}}	
+	var k = b;
+	for(var i=0; i<n; i++) {
+		var c = bb._data[i];
+		heap[k] = math.re(c);
+		heap[k+n] = math.im(c); 
+		k += 1;
+	}
+	run_gauss0(n, A*8, (A+nn)*8);
+	run_gauss1(n, A*8, (A+nn)*8, b*8, (b+n)*8);
+	var k = b;
+	var x = math.matrix().resize([n]);
+	for(var i=0; i<n; i++) {
+		x._data[i] = math.complex(heap[k],heap[k+n]); 
+		k += 1;
+	}
+	return(x);
+}
+
+
+load();
+
+
+</script>
+
+</body>
+</html>
