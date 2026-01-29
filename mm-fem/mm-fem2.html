@@ -18,12 +18,12 @@
 </h2> 
 
 <svg id="svg" xmlns="http://www.w3.org/2000/svg" 
-  width="960" height="400" font-family="Times" font-size=14>
-	<g transform="translate(0,60)">
+  width="960" height="440" font-family="Times" font-size=14>
+	<g transform="translate(0,80)">
 		<rect id="r0" width=380 height=280 style="fill:none;stroke:lightgray;stroke-width:1" />
 		<rect x=0 y=0 width=380 height=280 style="fill:AliceBlue;stroke:none;opacity:0.75" />
 	</g>
-	<g transform="translate(380,60)">
+	<g transform="translate(380,80)">
 		<rect id="r1" width=380 height=280 style="fill:none;stroke:lightgray;stroke-width:1" />
 		<rect x=0 y=0 width=380 height=280 style="fill:AliceBlue;stroke:none;opacity:0.75" />
 		<g id="svg1" >
@@ -34,10 +34,12 @@
 <style>
 	input,pre,p {font-size:14pt}
 </style>
-	<p>
+	<p style="margin-left:48px;text-align:left;">
+	R = <span id="R"></span> cm&nbsp;&nbsp;&nbsp;&nbsp;
+	T = <span id="T"></span> cm&nbsp;&nbsp;&nbsp;&nbsp;
 	f = <input id="f" type=number value=126 min="40" max="200" onchange="update()" /> kHz&nbsp;&nbsp;&nbsp;&nbsp;  
-	M = <input id="M" type=number value=8 min="1" max="99" onchange="update()" />&nbsp;&nbsp;&nbsp;&nbsp; 
-	N = <input id="N" type=number value=6 min="1" max="99" onchange="update()"/>&nbsp;&nbsp;&nbsp;&nbsp;
+	M = <input id="M" type=number value=19 min="1" max="99" onchange="update()" />&nbsp;&nbsp;&nbsp;&nbsp; 
+	N = <input id="N" type=number value=14 min="1" max="99" onchange="update()"/>&nbsp;&nbsp;&nbsp;&nbsp;
 	</p>
 <p style="">
 	<pre id="p" style="margin-left:32px;text-align:left;">
@@ -57,6 +59,8 @@ var svg = document.getElementById("svg1"); // svg container id
 
 function update() {
 	while (svg.firstChild) {svg.removeChild(svg.firstChild);}
+	document.getElementById("R").innerHTML= ""+100*R;
+	document.getElementById("T").innerHTML= ""+100*T;
 	ff = [parseFloat(document.getElementById('f').value)*1e3];
 	M = parseInt(document.getElementById('M').value);
 	N = parseInt(document.getElementById('N').value);
@@ -146,7 +150,7 @@ var mat2str=function(D) {  // matrix to string
 //  using mathjs objects and functions: 
 //  complex, conj, matrix(._data,.index,.resize,.subset,.range), add, transpose, inv, multiply, dot 
 function piezoAxFem(R,T,M,N,ff) {         // R,T -dimenssion, M,N-grid size, ff-freqencies tab
-	var s = " (" + M + " x " + N + ") ";  // info string
+	var s = " [" + M + " x " + N + "] ";  // info string
 	var rho = 7800;                       // piezo PZT255 coefficients including loss
 	var c11 = 122.9070e9; c11 = math.complex(c11,c11/58.6); 
 	var c12 =  76.6089e9; c12 = math.complex(c12,c12/58.6);
@@ -276,7 +280,8 @@ function piezoAxFem(R,T,M,N,ff) {         // R,T -dimenssion, M,N-grid size, ff-
 		var start = Date.now()/1000;
 		//var uu = math.multiply(math.inv(AA),bb);  // solution: uu-displacement
 		var uu = gauss4mathjs(AA,bb);
-		console.log("time:"+((Date.now()/1000)-start));
+		var end = Date.now()/1000;
+		console.log("time:"+(end-start));
 
 		var y = math.complex(0,0);
 		for (var i=0;i<3*n;i++) {
@@ -291,7 +296,7 @@ function piezoAxFem(R,T,M,N,ff) {         // R,T -dimenssion, M,N-grid size, ff-
 		//s += "lup.p: " + lup.p + '\n';
 		//s += "uu: " + uu + '\n';
 		//s += "yy: " + yy + '\n';
-		s = "\n f=" + f + " y=" + y + " " + s;
+		s = "\n f = " + f + " " + s + " y = " + math.re(y).toFixed(6) + " + " + math.im(y).toFixed(6) + "i " + "(t = " + (end-start).toFixed(3) +" s)";
 	}
 	return ({"nodes":nodes, "elems":elems, "uu":uu, "yy":yy, "s":s }); 
 }
