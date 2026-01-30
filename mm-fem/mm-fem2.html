@@ -1,4 +1,3 @@
-<!DOCTYPE HTML>
 <html>
 
 <!--<script src="gaussb_gmresj.js"></script>-->
@@ -51,10 +50,11 @@
 
 var gauss_soa_wasm="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";
 
+
 var R = 0.019, T = 0.0141;                 // piezo disc half diameter and thickness
 var M = 8, N = 6;                          // mesh grid size (M x N)
 var ff = [126e3];                          // analysis frequency 
-var C = 1000e3;                            // display coeff (used in svg_mesh)
+var coeff = 0.5e6;                         // display coeff (used in svg_mesh)
 var svg = document.getElementById("svg1"); // svg container id
 
 function update() {
@@ -65,7 +65,7 @@ function update() {
 	M = parseInt(document.getElementById('M').value);
 	N = parseInt(document.getElementById('N').value);
 	res = piezoAxFem(R, T, M, N, ff);
-	svg_mesh(res.nodes, res.elems, res.uu, C);
+	svg_mesh(res.nodes, res.elems, res.uu, coeff);
 	document.getElementById("p").innerHTML = res.s + document.getElementById("p").innerHTML;
 }
 
@@ -160,8 +160,8 @@ function piezoAxFem(R,T,M,N,ff) {         // R,T -dimenssion, M,N-grid size, ff-
 	var e31 =  -7.8417,   e33 = 13.5583,    e15 = 12.2440;   
 	var epsS11 = 8.234e-9;  epsS11 = math.complex(-epsS11,epsS11/50);
 	var epsS33 = 7.580e-9;  epsS33 = math.complex(-epsS33,epsS33/50);
-	var D  = 
-		[[c11, c12, c13, 0  ,  0  , e31], 
+	var C  = 
+		[[c11, c12, c13,0  ,  0  , e31], 
 		[c12, c11, c13, 0  ,  0  , e31],
 		[c13, c13, c33, 0  ,  0  , e33],
 		[0  , 0  , 0  , c44, e15,   0 ],
@@ -183,7 +183,7 @@ function piezoAxFem(R,T,M,N,ff) {         // R,T -dimenssion, M,N-grid size, ff-
 	} 
 	var gpoints = [[1/3,1/3,1/2]];  // one point Gauss integration and weight/2!
 	var shape = function(x,y) { return([[1-x-y,x,y],[[-1,1,0],[-1,0,1]]]);}
-	//s += 'D:\n' + mat2str(D);
+	//s += 'C:\n' + mat2str(C);
 	//s += 'nodes:\n' + mat2str(nodes);
 	//s += 'elems:\n' + mat2str(elems);
 	//s += 'gpoints:\n' + mat2str(gpoints);
@@ -199,7 +199,7 @@ function piezoAxFem(R,T,M,N,ff) {         // R,T -dimenssion, M,N-grid size, ff-
 		var M = math.matrix().resize([3*m,3*m]);
 		var B = math.matrix().resize([6,3*m]);
 		var H = math.matrix().resize([2,3*m]);
-		for(var gi=0;gi<gpoints.length;gi++) {
+		for(var gi=0; gi<gpoints.length; gi++) {
 			var x=gpoints[gi][0], y=gpoints[gi][1], gw=gpoints[gi][2];
 			var N=shape(x,y)[0], dN=shape(x,y)[1];			  
 			var r = math.dot(math.transpose(xy)[0],N);
@@ -216,7 +216,7 @@ function piezoAxFem(R,T,M,N,ff) {         // R,T -dimenssion, M,N-grid size, ff-
 			B = math.subset(B,math.index(5,math.range(2,3*m,3)),dN[1]);
 			H = math.subset(H,math.index(0,math.range(0,3*m,3)),N);
 			H = math.subset(H,math.index(1,math.range(1,3*m,3)),N);
-			K = math.multiply(math.multiply(math.multiply(math.transpose(B),D),B),r*gw*detJ); 
+			K = math.multiply(math.multiply(math.multiply(math.transpose(B),C),B),r*gw*detJ); 
 			M = math.multiply(math.multiply(math.transpose(H),H),rho*r*gw*detJ); 
 			for (var i=0;i<m;i++) {   // assembling stiffness and mass matrices
 				for (var j=0;j<m;j++) {
