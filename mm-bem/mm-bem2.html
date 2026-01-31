@@ -3946,7 +3946,9 @@ function multiplyMatrixVector(matrix, vector) {
 }
 
 function multiplyMatrixVector2(matrix, vector) {
-  const m = matrix.length, n = matrix[0].length;
+  const m = matrix.length;
+  const n = vector.length;
+  var start = Date.now()/1000;
   console.log(m+'x'+n);
   const A = 0;
   const b = A + m*n*2;
@@ -3963,8 +3965,9 @@ function multiplyMatrixVector2(matrix, vector) {
       heap[k] = vector[i].re; heap[k+n] = vector[i].im;
       k += 1;
   }
-
+  console.log('t1='+((Date.now()/1000)-start));
   mv_c_mul(m,n, A*8,(A+m*n)*8, b*8,(b+n)*8, c*8,(c+m)*8);
+  console.log('t2='+((Date.now()/1000)-start));
 
   var result = [];
   var k = c;
@@ -3972,6 +3975,8 @@ function multiplyMatrixVector2(matrix, vector) {
       result.push(new Complex(heap[k],heap[k+m]));
       k += 1;
   }
+  console.log('t3='+((Date.now()/1000)-start));
+
   return result;
 }
 
@@ -4312,7 +4317,7 @@ if(solver==1) {
 if(method==1) {
 				const Sff = r1.map(v => x.map(xj =>
 					new Complex(Math.cos(-k * dot(xj,v))/(4*pi), Math.sin(-k * dot(xj,v))/(4*pi) )));
-				psc = multiplyMatrixVector2(Sff, phi);
+				psc = multiplyMatrixVector(Sff, phi);
 } else {
 				for (let i=0; i<r1.length; i++) {
 					let r = r1[i]; // [Math.cos(a), Math.sin(a), 0];
@@ -4344,17 +4349,35 @@ if(method==1) {
 /* MM 31.1.2026 
 				// Near field calculations
 				if(thmin==thmax && phmin==phmax) { // no scan mode
+					var start = Date.now()/1000;
 					//postMessage("[ near field solution]");
-					var psc1 =[], NN = 200; RR = 2*c0/f0;
+					var psc1 =[], NN = 100; RR = 2*c0/f0;
 					const grid1 = Array.from({length: NN*NN}, (_,k) => { const i = Math.floor(k / NN); j = k % NN;
 						return mul(Ry(ph0), [[-RR + 2*RR * i/(NN-1)],[-RR + 2*RR * j/(NN-1)],[0]]);});
 					//console.log(grid1);
-					const Sff1 = grid1.map(v => x.map(xj =>
-						new Complex(Math.cos(-k * dot(xj,v))/(4*pi), Math.sin(-k * dot(xj,v))/(4*pi) )));
-					psc1 = multiplyMatrixVector2(Sff1, phi);
+					console.log('t01='+((Date.now()/1000)-start));
+					var mm = grid1.length, nn = x.length, cc = 1/(4*pi);
+					var Sff1 = new Array(mm); // write directly??
+					for(var i=0; i<mm; i++) {
+						Sff1[i] = new Array(nn);
+						var vv = grid1[i];
+						for(var j=0; j<nn; j++) {
+							//var kd = - k * dot(x[j],vv);
+							var kd = - k * (x[j][0]*vv[0]+
+								x[j][1]*vv[1]+x[j][2]*vv[2]);
+							Sff1[i][j] = new Complex(
+								Math.cos(kd)*cc,
+								Math.sin(kd)*cc );
+							//heap[i*nn+j]=Math.cos(kd)*cc;	
+							//heap[i*nn+j+mm*nn]=Math.sin(kd)*cc;	
+						}
+					}
+					console.log('t02='+((Date.now()/1000)-start));
+					psc1 = multiplyMatrixVector2(Sff1,phi);
 					for(let k=0; k<psc1.length; k++) { var i = Math.floor(k/NN), j= k%NN;
 						s += (j==0?'## ':'') + psc1[k].abs().toFixed(6) + (j==(NN-1)?'\n':' ');
 					}
+					console.log('t03='+((Date.now()/1000)-start));
 				}
 				postMessage(JSON.stringify(s));
 */
