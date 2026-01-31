@@ -2301,8 +2301,10 @@ function change1() {
 				if(el.value.length==0 || el.value.startsWith("# re(p_i)") || el.value.startsWith("# abs(p_sc)")) {
 					//document.getElementById("txt2").value = "# re(p_i) im(p_i) re(v_n) im(v_n)\n"+
 					//	s1.map(s=>s.slice(1)).join('\n');
-					document.getElementById("txt2").value = "# abs(p_sc)\n"+
-					s2.map(s=>s.slice(3)).join('\n'); // skip "## "
+					if(s2) {
+						document.getElementById("txt2").value = "# abs(p_sc)\n"+
+						s2.map(s=>s.slice(3)).join('\n'); // skip "## "
+					}
 				}
 				plot(undefined,undefined,m!=1?'#C8102E':undefined); // FFCD00
 				// extract ph0,th0,f0,c0,lbs
