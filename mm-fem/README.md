@@ -13,5 +13,7 @@ The minimalistic FEM code in html+wasm, python+numpy and freefem for the calcula
 
 
 ![](mm-fem-edp_126_19_14.png)
+
 **Fig.3. Freefem generated vibrations.**
+
 
