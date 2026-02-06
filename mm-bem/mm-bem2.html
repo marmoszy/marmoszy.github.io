@@ -763,7 +763,7 @@ function select3() {select();}
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(5.2.2026)" style="text-align:center">mm-bem v2.27 (2025-2026)</p>
+<p title="(6.2.2026)" style="text-align:center">mm-bem v2.28 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -896,7 +896,11 @@ var img_onoff = 0;
 //var wh = Math.max(window.innerHeight-150,400);
 var wh = document.getElementById("svg1").getAttribute("width")-0;
 
-function imgclick(el) {img_onoff ^= 1; el.style.opacity=img_onoff?196:0;update();} 
+function imgclick(el) {
+	if(el.getAttribute("href")) {
+		img_onoff ^= 1; el.style.opacity=img_onoff?196:0;update();
+	}
+} 
 function zoomin()  {zoom*=2; xoff-=wh/4*zoom; yoff-=wh/4*zoom;}
 function zoomout() {if(zoom>1/8) {xoff+=wh/4*zoom; yoff+=wh/4*zoom; zoom/=2; }}
 
@@ -1417,7 +1421,7 @@ function update_mesh2(th, ph) {
 	var nn = img_onoff?2.5:1;
 	var el = svg_createpath(svg0,"N",pvxfx.pfx.map(r=>r.map(([x, y])=>
 		[nn*1200*x+W/2, nn*1200*y+H/2]))
-		, img_onoff?'white':mesh_onoff?mshcolor2:"none", img_onoff?0.5:mesh_onoff?0.5:0, "1,0", 0, 'none');
+		, img_onoff?'white':mesh_onoff?mshcolor2:"none", img_onoff?2:mesh_onoff?0.5:0, "1,0", 0, 'none');
 	if(el) el.setAttribute("fill-rule","evenodd");
 }
 
@@ -1429,7 +1433,7 @@ function sphericalToCartesian(theta, phi) { // normalized direction vector
 }
 function getPlaneBasis(dir) {           
   //var a = Math.abs(dir[1]) < 0.9 ? [0,1,0] : [0,1,0]; // pick an arbitrary vector not parallel 
-  var a = [0,1,0]; // pick an arbitrary vector not parallel 
+  var a = img_onoff?[0,1,0]:[0,1,0]; // from UpY 
   var u = normalize(cross(a, dir));
   return [u, normalize(cross(dir, u))]; // two perpendicular unit vectors 
 }
@@ -1460,9 +1464,38 @@ function projectVertex(p, u, v) {
 function dot(a, b) {
   return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
 }
+function getSideDirection(dir) {
+  let up = Math.abs(dir[1]) < 0.99 ? [0,1,0] : [1,0,0];
+  let side = cross(dir, up);
+  return normalize(side);
+}
+function getSideDirectionRolled(dir, phi) {
+  const up = Math.abs(dir[1]) < 0.99 ? [0,1,0] : [1,0,0];   // choose a stable up vector
+  let side = normalize(cross(dir, up));   // base side direction
+  side = rotateAroundAxis(side, dir, phi);   // roll around dir by phi
+  return side;
+}
+function rotateAroundAxis(v, axis, angle) {
+  // Ensure axis is normalized
+  const ax = axis[0], ay = axis[1], az = axis[2];
+  const len = Math.hypot(ax, ay, az);
+  const ux = ax / len, uy = ay / len, uz = az / len;
+  const x = v[0], y = v[1], z = v[2];
+  const c = Math.cos(angle);
+  const s = Math.sin(angle);
+  // Rodrigues rotation formula: v_rot = v*c + (axis × v)*s + axis*(axis·v)*(1-c) 
+  const cx = uy*z - uz*y, cy = uz*x - ux*z, cz = ux*y - uy*x; // axis × v
+  const dot = ux*x + uy*y + uz*z; // axis · v
+  return [ x*c + cx*s + ux*dot*(1-c),y*c + cy*s + uy*dot*(1-c),z*c + cz*s + uz*dot*(1-c)];
+}
+
 function projectMesh(vx, fx, theta0, phi0) {
   var dir = sphericalToCartesian(theta0, phi0);
+  if (img_onoff) {
+		dir=getSideDirectionRolled(dir, phi0);
+  }
   var [u, v] = getPlaneBasis(dir);
+  console.log("ProjectMesh:",theta0,phi0,dir,u,v);
   //var [u, v, d] = getBasisWithUpY(theta, phi);
   //[u, v] = applyRoll(u, v, phi0);
   var pvx = vx.map(p => projectVertex(p, u, v));
@@ -1472,7 +1505,7 @@ function projectMesh(vx, fx, theta0, phi0) {
 
 // ---- raster image functions
 
-var colormap = [
+var colormap = [ // Matlab colormap
  53,42,135
 ,54,48,147
 ,54,55,160
@@ -1538,7 +1571,15 @@ var colormap = [
 ,246,243,19
 ,249,251,14	
 ];
-function createImage1(data, W, H) { // data must be normalized to [0..1] 
+function cmapMatlab() {
+ return function(v) {
+  var n=6.4;
+  v = 3*Math.floor(n*Math.floor(64/n*v-1e-30));
+  return [colormap[v],colormap[v+1],colormap[v+2]];
+ };
+}
+
+function createRectImage(data, W, H) { // data must be normalized to [0..1] 
 	const canvas = document.createElement("canvas");
 	canvas.width = W;
 	canvas.height = H;
@@ -1600,13 +1641,7 @@ function cmapRainbow() {
   return [Math.round(r * 255),Math.round(g * 255),Math.round(b * 255)];
  };
 }
-function cmapMatlab() {
- return function(v) {
-  var n=6.4;
-  v = 3*Math.floor(n*Math.floor(64/n*v-1e-30));
-  return [colormap[v],colormap[v+1],colormap[v+2]];
- };
-}
+
 // ------------------------------------------------------------
 // Bilinear interpolation in polar grid
 // ------------------------------------------------------------
@@ -1627,7 +1662,7 @@ function samplePolar(r, theta, f, maxR) { // r in [0..maxR]
   // Bilinear interpolation
   return ((f00*(1-dr)*(1-dt) + f10*(dr)*(1-dt) + f01*(1-dr)*(dt) + f11*(dr)*(dt)));
 }
-function createImage2(data0, r1, r2, W=400, H=400, alfa=196) {
+function createPolarImage(data0, r1, r2, W=400, H=400, alfa=196) {
 	//const r1 = 0.002;   // inner radius in world units
 	//const r2 = 0.06;   // outer radius in world units
 	//const alfa = 128;	
@@ -1704,12 +1739,12 @@ function update_near_field(s) {
 	const W = svg.getAttribute("width")-40;
 	const H = svg.getAttribute("height")-40;
 	const data = s.trim().split(/\r?\n/).map(l => l.trim().split(/\s+/).map(Number));
-	var createImage = (data.length==data[0].length) ? createImage1 : createImage2;
-	const pngData = createImage(normalizeMtx(data),0.004,0.06); // 15 circles
+	const pngData = createPolarImage(normalizeMtx(data),0.004,0.06); // real r1,r2
 	if(pngData) {
 		var el = document.getElementById("svgimg");
 		if(el) {
 			el.setAttribute("href", pngData);
+			if(!img_onoff) el.style.opacity=0;
 		}
 	}
 }
@@ -2602,6 +2637,7 @@ function change1() {
 		plot("P","#");			 	// clear calculation plot
 		var el = document.getElementById("svgimg");
 		if(el) {el.setAttribute("href","")} // clear image
+		if(img_onoff) {img_onoff=0; update();}
 		var el = document.getElementById("txt2");
 		if(el && el.value.startsWith("# abs(p_sc)")) {el.value="";}
 		if(fx.length<5500) {
@@ -4554,11 +4590,11 @@ if(method==1) {
 				for(let i=0; i<psc.length; i++) {
 					s += l*i + ' ' + psc[i].abs().toFixed(6) + '\n';
 				}
-/* MM 31.1.2026
+// MM 31.1.2026
 				postMessage(JSON.stringify(s));
 				// Near field calculations
 				if(thmin==thmax && phmin==phmax) { // no scan mode
-					postMessage("[ near field solution]");
+					//postMessage("[ near field solution]");
 					var psc1 =[];
 					//var NN = 400, NR=NN, NT=NN, RR = 1; //0.5*c0/f0;
 					//var grid1 = Array.from({length: NN*NN}, (_,k) => { // rect grid: NN x NN
@@ -4580,7 +4616,7 @@ if(method==1) {
 						s += '\n';
 					}
 				}
-*/
+//
 				for(var i=0;i<phi.length;i++) { // surface incident pressure and normal velosity 
 					s += '#' + (i+1) + 
 						 ' ' + (f[i].re).toFixed(6) + 
