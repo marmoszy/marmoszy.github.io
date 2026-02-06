@@ -1427,15 +1427,38 @@ function update_mesh2(th, ph) {
 
 // ----- projection functions
 
-function sphericalToCartesian(theta, phi) { // normalized direction vector
+function sphericalToCartesian0(theta, phi) { // normalized direction vector
   //return [Math.sin(theta)*Math.cos(phi), Math.sin(theta)*Math.sin(phi), Math.cos(theta)];
   return rot(Ry(phi*180/Math.PI), 1*Math.cos(theta), 1*Math.sin(theta), 0);
 }
-function getPlaneBasis(dir) {           
+function sphericalToCartesian(theta, phi) {
+  return [-Math.cos(theta) * Math.cos(phi), -Math.sin(theta),Math.cos(theta) * Math.sin(phi)];
+}
+
+function getPlaneBasis2(dir) {           
+  var a = Math.abs(dir[1]) < 0.99 ? [0,1,0] : [0,1,0]; // pick an arbitrary vector not parallel 
+  //var a = img_onoff?[0,1,0]:[0,1,0]; // from UpY 
+  var u = normalize(cross(a, dir)); // right vector
+  var v = normalize(cross(dir, u)); // up vector
+  const c = cross(u, v); // ensure right-handed basis
+  if (dot(c, dir) < 0) { v = [-v[0], -v[1], -v[2]]; }
+  return [u, v]; // two perpendicular unit vectors 
+}
+function getPlaneBasis0(dir) {           
   //var a = Math.abs(dir[1]) < 0.9 ? [0,1,0] : [0,1,0]; // pick an arbitrary vector not parallel 
   var a = img_onoff?[0,1,0]:[0,1,0]; // from UpY 
   var u = normalize(cross(a, dir));
   return [u, normalize(cross(dir, u))]; // two perpendicular unit vectors 
+}
+function getPlaneBasis(dir) {
+  const up = [0, 1, 0];
+  let u = cross(dir, up); // side direction (right)
+  if (norm(u) < 1e-6) {
+    u = cross(dir, [1,0,0]); // dir is parallel to up → choose different up
+  }
+  u = normalize(u);
+  let v = normalize(cross(u, dir)); // vertical direction in projection plane
+  return [u, v];
 }
 function getBasisWithUpY(theta, phi) {
   var d = sphericalToCartesian(theta, phi);
@@ -1471,7 +1494,7 @@ function getSideDirection(dir) {
 }
 function getSideDirectionRolled(dir, phi) {
   const up = Math.abs(dir[1]) < 0.99 ? [0,1,0] : [1,0,0];   // choose a stable up vector
-  let side = normalize(cross(dir, up));   // base side direction
+  let side = normalize(cross(dir,up));   // base side direction
   side = rotateAroundAxis(side, dir, phi);   // roll around dir by phi
   return side;
 }
@@ -1489,7 +1512,7 @@ function rotateAroundAxis(v, axis, angle) {
   return [ x*c + cx*s + ux*dot*(1-c),y*c + cy*s + uy*dot*(1-c),z*c + cz*s + uz*dot*(1-c)];
 }
 
-function projectMesh(vx, fx, theta0, phi0) {
+function projectMesh0(vx, fx, theta0, phi0) {
   var dir = sphericalToCartesian(theta0, phi0);
   if (img_onoff) {
 		dir=getSideDirectionRolled(dir, phi0);
@@ -1500,6 +1523,31 @@ function projectMesh(vx, fx, theta0, phi0) {
   //[u, v] = applyRoll(u, v, phi0);
   var pvx = vx.map(p => projectVertex(p, u, v));
   var pfx = fx.map(f => f.map(idx => pvx[idx]));
+  return { pvx, pfx };
+}
+
+function projectMesh(vx, fx, theta, phi) {
+  return (img_onoff) ? projectMeshSide(vx, fx, theta, phi) : projectMeshUp(vx, fx, theta, phi)
+}
+function projectMeshUp(vx, fx, theta, phi) {
+  const dir = sphericalToCartesian(theta, phi);
+  const [u, v] = getPlaneBasis(dir);
+  //console.log("projectMeshUp:",dir,u,v);
+  const pvx = vx.map(p => projectVertex(p, u, v));
+  const pfx = fx.map(f => f.map(i => pvx[i]));
+  return { pvx, pfx };
+}
+function projectMeshSide(vx, fx, theta, phi) {
+  const dir = sphericalToCartesian(theta, phi);
+  const up  = [0, 1, 0];
+  let sideDir = cross(dir, up); // side direction = perpendicular to (dir, up)
+  sideDir = normalize(sideDir);
+  var [u, v] = getPlaneBasis(sideDir);
+  u = [-u[0], -u[1], -u[2]];
+  v = [-v[0], -v[1], -v[2]];
+  //console.log("projectMeshSize:",dir,sideDir,u,v);
+  const pvx = vx.map(p => projectVertex(p, u, v));
+  const pfx = fx.map(f => f.map(i => pvx[i]));
   return { pvx, pfx };
 }
 
@@ -4600,7 +4648,7 @@ if(method==1) {
 					//var grid1 = Array.from({length: NN*NN}, (_,k) => { // rect grid: NN x NN
 					//	const i = Math.floor(k / NN); j = k % NN;
 					//	return mul(Ry(ph0),[[-RR+2*RR*i/(NN-1)],[-RR+2*RR*j/(NN-1)],[0]]);});
-					var nn = 3;
+					var nn = 5; // every 5 deg
 					var NR = 15, NT = 360, RR = Array.from({length:NR},(_,i)=>0.004*(i+1));
 
 					for(var j=0;j<NR;j++) { // polar grid: NR x 360/n
