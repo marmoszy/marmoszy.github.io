@@ -326,7 +326,7 @@ Full mm-bem package contains source codes in different programming languages for
 		onclick="zoomin();update();" title="zoomin" id="zoomin"><b>&plus;</b></button>
    <br>     
    <svg xmlns="http://www.w3.org/2000/svg" id="svg1" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
-      <g id="gt" transform="translate(0,20)">
+      <g id="gt" transform="translate(0,20)" >
       </g>
 	  <text x="10" y="408" id="legend" onclick="mesh_onoff=(mesh_onoff+1)%3;update();" style="fill1:#ff6633;stroke:none"></text>
 	  <text x="360" y="408" id="legend2" onclick="mesh_onoff=(mesh_onoff+1)%3;update();" style="fill1:#ff6633;stroke:none"></text>	  
@@ -763,7 +763,7 @@ function select3() {select();}
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(6.2.2026)" style="text-align:center">mm-bem v2.28 (2025-2026)</p>
+<p title="(7.2.2026)" style="text-align:center">mm-bem v2.29 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -876,7 +876,7 @@ document.getElementById("echoSMs_url").value=echoSMs_url;
 
 <script>
 // globals
-var pi=Math.PI;
+var pi = Math.PI;
 var a = 0.4, b = -0.2, c = 0.0;     // y - up (3D view angles)
 // var a = 1.3, b = 0.7, c = -1.4;  // z - up (3D view angles)
 
@@ -904,68 +904,70 @@ function imgclick(el) {
 function zoomin()  {zoom*=2; xoff-=wh/4*zoom; yoff-=wh/4*zoom;}
 function zoomout() {if(zoom>1/8) {xoff+=wh/4*zoom; yoff+=wh/4*zoom; zoom/=2; }}
 
-function init_mouse0() {
-	let delta=8, sX, sY, clk=0;
-	var el=document.getElementById("svg1");
-	el.onmousedown = function (event) {sX = event.pageX; sY = event.pageY;  clk=1;}
-	el.onmouseup = function (event) {clk=0;}
-	el.onmousemove = function (event) {
-		if(clk==0) return;
-		var dX = event.pageX-sX, dY = event.pageY-sY;
-		if (Math.abs(dX) < delta && Math.abs(dY) < delta) {
-			return;
-		} else {
-			if(Math.abs(dX)>Math.abs(dY)) {
-				a -= dX/4*pi/180;
-			} else {
-				b -= dY/4*pi/180;
-			}
-			init3d();
-		}
-		sX = event.pageX; sY = event.pageY;
-	}
-}
-
 function init_mouse() {
-    let delta = 8, sX, sY, clk = 0;
+    let delta = 8, sX, sY, clk = 0, moved = 0;
     var el = document.getElementById("svg1");
     // --- Mouse events ---
-    el.onmousedown = function (event) {sX = event.pageX; sY = event.pageY; clk = 1;};
-    el.onmouseup = function () { clk = 0; };
-    el.onmousemove = function (event) {if (clk == 0) return;handleMove(event.pageX, event.pageY);};
+    el.onmousedown = function (event) {sX = event.pageX; sY = event.pageY; clk = 1; moved=0;};
+    el.onmouseup = function (event) { clk = 0; if(!moved){handleClick(event.pageX,event.pageY);} };
+    el.onmousemove = function (event) {if(clk==0)return; moved=1;handleMove(event.pageX, event.pageY);};
 	// --- Touch events ---
     let prevDist = null; // for pinch zoom
     el.ontouchstart = function (event) {
-        if (event.touches.length === 1) {sX = event.touches[0].pageX;sY = event.touches[0].pageY;clk = 1;}
-		else if (event.touches.length === 2) { prevDist = getDistance(event.touches); clk = 0;}
+        if (event.touches.length === 1) {
+		sX = event.touches[0].pageX; sY = event.touches[0].pageY; clk = 1;
+	} else if (event.touches.length === 2) { 
+		prevDist = getDistance(event.touches); clk = 0;
+	}
     };
     el.ontouchend = function () { clk = 0; prevDist = null;};
     el.ontouchmove = function (event) {
 		if (event.touches.length === 1 && clk === 1) {
-		    handleMove(event.touches[0].pageX, event.touches[0].pageY);
+			handleMove(event.touches[0].pageX, event.touches[0].pageY);
 		} else if (event.touches.length === 2) {
-		    let dist = getDistance(event.touches);
-		    if (prevDist) {
-		        let scale = dist / prevDist;
-		        if (scale > 1.06) { zoomin();init3d();} else if (scale < 1/1.06) { zoomout();init3d();}
-		    }
-		    prevDist = dist;
+			let dist = getDistance(event.touches);
+			if (prevDist) {
+		        	let scale = dist / prevDist;
+		        	if (scale > 1.06) { zoomin();init3d();} 
+				else if (scale < 1/1.06) { zoomout();init3d();}
+		    	}
+		    	prevDist = dist;
 		}
 		event.preventDefault(); // prevent scrolling	
 	};
 	// --- Shared movement logic ---
 	function handleMove(x, y) {
 		var dX = x - sX, dY = y - sY;
-		if (Math.abs(dX) < delta && Math.abs(dY) < delta) {return;
-		} else {
-			if (Math.abs(dX) > Math.abs(dY)) {a -= dX / 4 * pi / 180;} else {b -= dY / 4 * pi / 180;}
+		if (Math.abs(dX) > delta || Math.abs(dY) > delta) {
+			if (Math.abs(dX) > Math.abs(dY)) {
+				a -= dX / 4 * pi / 180;
+			} else {
+				b -= dY / 4 * pi / 180;
+			}
 			init3d();
+			sX = x; sY = y;
 		}
-		sX = x; sY = y;
+	}
+	function handleClick(x, y) {
+		var theta = parseFloat(document.getElementById("th").value)*pi/180;
+		var phi = parseFloat(document.getElementById("ph").value)*pi/180;
+	        let nx = -Math.sin(theta) * Math.sin(phi);
+		let ny =  Math.cos(theta) * Math.sin(phi);
+		let nz = -Math.sin(theta) * Math.cos(phi);
+		var a1 =  Math.atan2(nx, nz);                     // yaw
+                var b1 =  Math.atan2(ny, Math.sqrt(nx*nx+nz*nz)); // pitch 
+                var c1 =  0;                                      // roll
+		if(a==a1 && b==b1 && c==c1) {
+			a = 0.4; b = -0.2; c = 0.0;     // default (3D view angles)
+		} else {
+			a = a1; b = b1; c = c1;
+		}
+		init3d();
 	}
 	// --- Helper: distance between two fingers ---
 	function getDistance(touches) {
-		let dx = touches[0].pageX - touches[1].pageX, dy = touches[0].pageY - touches[1].pageY;
+		let dx = touches[0].pageX - touches[1].pageX; 
+		let dy = touches[0].pageY - touches[1].pageY;
 		return Math.sqrt(dx * dx + dy * dy);
 	}
 }
@@ -1427,11 +1429,11 @@ function update_mesh2(th, ph) {
 
 // ----- projection functions
 
-function sphericalToCartesian0(theta, phi) { // normalized direction vector
+function sphericalToCartesian(theta, phi) { // normalized direction vector
   //return [Math.sin(theta)*Math.cos(phi), Math.sin(theta)*Math.sin(phi), Math.cos(theta)];
-  return rot(Ry(phi*180/Math.PI), 1*Math.cos(theta), 1*Math.sin(theta), 0);
+  return rot(Ry(phi*180/Math.PI), 1*Math.cos(theta+pi), 1*Math.sin(theta+pi), 0);
 }
-function sphericalToCartesian(theta, phi) {
+function sphericalToCartesian1(theta, phi) {
   return [-Math.cos(theta) * Math.cos(phi), -Math.sin(theta),Math.cos(theta) * Math.sin(phi)];
 }
 
@@ -1449,16 +1451,6 @@ function getPlaneBasis0(dir) {
   var a = img_onoff?[0,1,0]:[0,1,0]; // from UpY 
   var u = normalize(cross(a, dir));
   return [u, normalize(cross(dir, u))]; // two perpendicular unit vectors 
-}
-function getPlaneBasis(dir) {
-  const up = [0, 1, 0];
-  let u = cross(dir, up); // side direction (right)
-  if (norm(u) < 1e-6) {
-    u = cross(dir, [1,0,0]); // dir is parallel to up → choose different up
-  }
-  u = normalize(u);
-  let v = normalize(cross(u, dir)); // vertical direction in projection plane
-  return [u, v];
 }
 function getBasisWithUpY(theta, phi) {
   var d = sphericalToCartesian(theta, phi);
@@ -1528,6 +1520,16 @@ function projectMesh0(vx, fx, theta0, phi0) {
 
 function projectMesh(vx, fx, theta, phi) {
   return (img_onoff) ? projectMeshSide(vx, fx, theta, phi) : projectMeshUp(vx, fx, theta, phi)
+}
+function getPlaneBasis(dir) {
+  const up = [0, 1, 0];
+  let u = cross(dir, up); // side direction (right)
+  if (norm(u) < 1e-6) {
+    //u = cross(dir, [1,0,0]); // dir is parallel to up → choose different up
+  }
+  u = normalize(u);
+  let v = normalize(cross(u, dir)); // vertical direction in projection plane
+  return [u, v];
 }
 function projectMeshUp(vx, fx, theta, phi) {
   const dir = sphericalToCartesian(theta, phi);
@@ -1622,7 +1624,7 @@ var colormap = [ // Matlab colormap
 function cmapMatlab() {
  return function(v) {
   var n=6.4;
-  v = 3*Math.floor(n*Math.floor(64/n*v-1e-30));
+  v = 3*Math.floor(n*Math.floor(64/n*(v>0.9999?0.9999:v<0?0:v)));
   return [colormap[v],colormap[v+1],colormap[v+2]];
  };
 }
@@ -1640,54 +1642,6 @@ function createRectImage(data, W, H) { // data must be normalized to [0..1]
 	  }
 	}
 	return canvas.toDataURL("image/png");
-}
-function cmapGray(v) {
- return function(v) {
-  const r = v * 255,g = v * 255,b = v * 255;
-  return [r|0, g|0, b|0];
- };
-}
-function cmapInferno() {
- return function(v) { // Inferno-like 
-  const r = 30 + 220*v, g = 12 + 60*v*v, b = 50 + 200*(v**3);
-  return [r|0, g|0, b|0];
- };
-}
-function makeTwoColorMap(c1, c2) {
-  return function(v) {
-    const r = c1[0]+v*(c2[0]-c1[0]), g = c1[1]+v*(c2[1]-c1[1]), b = c1[2]+v*(c2[2]-c1[2]);
-    return [r|0, g|0, b|0];
-  };
-}
-function makeThreeColorMap(c1, c2, c3) {
-  return function(v) {
-    if (v <= 0.5) { // interpolate from c1 → c2
-      const t = v * 2;  // 0..1
-      const r = c1[0]+t*(c2[0]-c1[0]), g = c1[1]+t*(c2[1]-c1[1]), b = c1[2]+t*(c2[2]-c1[2]);
-      return [r|0, g|0, b|0];
-    } else { // interpolate from c2 → c3
-      const t = (v - 0.5) * 2;  // 0..1
-      const r = c2[0]+t*(c3[0]-c2[0]), g = c2[1]+t*(c3[1]-c2[1]), b = c2[2]+t*(c3[2]-c2[2]);
-      return [r|0, g|0, b|0];
-    }
-  };
-}
-function cmapRainbow() {
- return function(v) {
-  v *=255;
-  v = Math.max(0, Math.min(255, v));    // clamp index
-  const h = (v / 255) * 360;  // map 0..255 → 0..360 degrees hue
-  const c = 1;                // convert HSV(h,1,1) → RGB
-  const x = 1 - Math.abs((h / 60) % 2 - 1);
-  let r = 0, g = 0, b = 0;
-  if (h < 60)      { r = c; g = x; b = 0; }
-  else if (h < 120){ r = x; g = c; b = 0; }
-  else if (h < 180){ r = 0; g = c; b = x; }
-  else if (h < 240){ r = 0; g = x; b = c; }
-  else if (h < 300){ r = x; g = 0; b = c; }
-  else             { r = c; g = 0; b = x; }
-  return [Math.round(r * 255),Math.round(g * 255),Math.round(b * 255)];
- };
 }
 
 // ------------------------------------------------------------
@@ -1722,15 +1676,6 @@ function createPolarImage(data0, r1, r2, W=400, H=400, alfa=196) {
 	const img = ctx.createImageData(W, H);
 	const data = img.data;
 	const edge = 1.0 / scale; // optional: 1‑pixel antialiasing band
-	//var cmap = makeTwoColorMap([0, 0, 255], [255, 0, 0]); // blue → red // 
-	//var cmap = cmapInferno();
-	//var cmap = cmapGray();
-	//var cmap = cmapRainbow();	
-	//var cmap = makeThreeColorMap([0, 0, 128],[0, 128, 0],[128, 128, 0]);  // neg -> 0 -> pos
-	//var cmap = makeThreeColorMap([0, 0, 255],[255, 255, 255],[255, 0, 0]);  // neg -> 0 -> pos
-	//var cmap = makeThreeColorMap([53, 42, 135],[19, 182, 172],[253, 231, 37]); // deep blue greenish,yellow (parula)
-	//var cmap = makeThreeColorMap([53, 42, 135],[46, 183, 164],[249, 251, 14]); // (parula)
-	//var cmap = makeThreeColorMap( [255,128,0], [0,0,255], [255,0,0]); // orange blue red 
 	var cmap = cmapMatlab();
 	var cx = W / 2, cy = H / 2;
 	var mi=Infinity, ma=-Infinity;
@@ -1781,13 +1726,16 @@ function normalizeMtx(arr) {
   const range = max-min || 1; // avoid division by zero
   return arr.map(row => row.map(v=>((v-min)/range)/**2-1*/)); // Normalize to [0, 1]
 }
+function logNormalizeMtx(arr) {
+  return arr.map(row => row.map(v=>(20*Math.log10(v)+20)/30)); // logNormalize
+}
 
 function update_near_field(s) {
 	var svg = document.getElementById("svg");
 	const W = svg.getAttribute("width")-40;
 	const H = svg.getAttribute("height")-40;
 	const data = s.trim().split(/\r?\n/).map(l => l.trim().split(/\s+/).map(Number));
-	const pngData = createPolarImage(normalizeMtx(data),0.004,0.06); // real r1,r2
+	const pngData = createPolarImage(logNormalizeMtx(data),0.004,0.06); // real r1,r2
 	if(pngData) {
 		var el = document.getElementById("svgimg");
 		if(el) {
@@ -4512,7 +4460,7 @@ if(method==1) {
 		  S[i] = new Array(m);
 		  for (let j = 0; j < m; j++) {
 		    const r = dist(x[i],x[j]);
-		    S[i][j] = (r!==0) ? new Complex(Math.cos(k*r)/(r*4*pi),Math.sin(k*r)/(r*4*pi))
+		    S[i][j] = (r!==0)?new Complex(Math.cos(k*r)/(4*pi*r),Math.sin(k*r)/(4*pi*r))
 		                      : new Complex(0, k/(4*pi) ) ;
 		  }
 		}
@@ -4576,7 +4524,7 @@ if(solver==1) {
 		for(var ph0=phmin;ph0<=phmax;ph0+=phstep) {
 		   for(var th0=thmin;th0<=thmax;th0+=thstep) {
 		      // Incident field
-		      d = mul(Ry(ph0),[[Math.cos(th0*pi/180)],[Math.sin(th0*pi/180)],[0]]);	
+		      d = mul(Ry(ph0),[[Math.cos(th0*pi/180+pi)],[Math.sin(th0*pi/180+pi)],[0]]);	
 		      var f;
 			if(method==1) {
 				function dot(a,b) {return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];}
@@ -4610,7 +4558,7 @@ if(solver==1) {
 		      // Far field solution
 			  const a1 = 1;
 		      const r1 = Array.from({length: 360/l},
-				  (_, i)=>mul(Ry(ph0),[[a1*Math.cos(l*i*pi/180)],[a1*Math.sin(l*i*pi/180)],[0]]));
+				  (_, i)=>mul(Ry(ph0),[[a1*Math.cos(l*i*pi/180+pi)],[a1*Math.sin(l*i*pi/180+pi)],[0]]));
 		      var psc=[];
 if(method==1) {
 				const Sff = r1.map(v => x.map(xj =>
@@ -4653,7 +4601,7 @@ if(method==1) {
 
 					for(var j=0;j<NR;j++) { // polar grid: NR x 360/n
 						var grid1 = Array.from({length: NT/nn}, (_, i)=>mul(Ry(ph0),
-						  [[RR[j]*Math.cos(l*i*nn*pi/180)],[RR[j]*Math.sin(l*i*nn*pi/180)],[0]]));
+						  [[RR[j]*Math.cos(l*i*nn*pi/180+pi)],[RR[j]*Math.sin(l*i*nn*pi/180+pi)],[0]]));
 						const Sff1 = grid1.map(v => x.map(xj => {const r=dist(xj,v);
 							return new Complex(Math.cos(k*r)/(4*pi*r),Math.sin(k*r)/(4*pi*r))}));
 						psc1 = multiplyMatrixVector(Sff1, phi);
