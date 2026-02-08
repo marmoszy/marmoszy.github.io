@@ -763,7 +763,7 @@ function select3() {select();}
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(7.2.2026)" style="text-align:center">mm-bem v2.29 (2025-2026)</p>
+<p title="(8.2.2026)" style="text-align:center">mm-bem v2.30 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -1668,7 +1668,7 @@ function createPolarImage(data0, r1, r2, W=400, H=400, alfa=196) {
 	//const r1 = 0.002;   // inner radius in world units
 	//const r2 = 0.06;   // outer radius in world units
 	//const alfa = 128;	
-	console.log(data0.length,'x',data0[0].length);	
+	//console.log(data0.length,'x',data0[0].length);	
 	var scale = W/2/r2; // 800;//250;     // pixels per unit radius
 	const canvas = document.createElement("canvas");
 	canvas.width = W; canvas.height = H;
@@ -1714,7 +1714,7 @@ function createPolarImage(data0, r1, r2, W=400, H=400, alfa=196) {
 		if(v<mi)mi=v; if(v>ma)ma=v;
 	  }
 	}
-	console.log("mi/ma:",mi,ma);
+	//console.log("mi/ma:",mi,ma);
 	ctx.putImageData(img, 0, 0);
 	return canvas.toDataURL("image/png");	
 }
@@ -1734,7 +1734,8 @@ function update_near_field(s) {
 	var svg = document.getElementById("svg");
 	const W = svg.getAttribute("width")-40;
 	const H = svg.getAttribute("height")-40;
-	const data = s.trim().split(/\r?\n/).map(l => l.trim().split(/\s+/).map(Number));
+	const data = s.trim().split(/\r?\n/).filter(l => !l.trim().startsWith('#'))
+			.map(l => l.trim().split(/\s+/).map(Number));
 	const pngData = createPolarImage(logNormalizeMtx(data),0.004,0.06); // real r1,r2
 	if(pngData) {
 		var el = document.getElementById("svgimg");
@@ -1814,15 +1815,17 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
 
   var p1 = [];
   for(var i=0;i<360;i++) {
-	  p1.push(V(P(rot(Ry(ph),r*Math.cos(i*pi/180),r*Math.sin(i*pi/180), 0))));
+	  p1.push(V(P(rot(Ry(ph),r*Math.cos(i*pi/180+pi),r*Math.sin(i*pi/180+pi), 0))));
   }
   svg_createpath(svg,"C1",[p1],circle_onoff?'green':'none',1,"1,2");
+  svg_createpath(svg,"C1th",[p1.slice(0,th)],circle_onoff?'green':'none',1,"1,0",1);
 
   var p1 = [];
   for(var i=0;i<360;i++) {
-	p1.push(V(P([r*Math.cos(i*pi/180), 0, r*Math.sin(i*pi/180)])));
+	p1.push(V(P([r*Math.cos(i*pi/180+pi), 0, -r*Math.sin(i*pi/180+pi)])));
   }
   svg_createpath(svg,"C1h",[p1],circle_onoff?'green':'none',1,"1,2");
+  svg_createpath(svg,"C1ph",[p1.slice(0,ph)],circle_onoff?'green':'none',1,"1,0",1);
 
 // --- circle ticks 
   var p2=[];
@@ -1901,9 +1904,11 @@ function main() {
   init3d();
 }
 
-var about =`mm-bem web-demo (2025)
+var about =`mm-bem web-demo (2025-2026)
 
-3d view shortcuts:
+Shortcuts:
+click on 2D - include near field onoff (far only by default)
+click on 3D - view of scattering plane
 ctrl A - Axes on/off (axes colors: 1-red, 2-green, 3-blue)
 ctrl B - wave length Box on/off (size of wavelength)
 ctrl C - scanning Circles on/off (1.5*meshsize)
@@ -4104,7 +4109,7 @@ onmessage = function(e) {
 	.then(bytes => WebAssembly.instantiate(bytes,{env:{memory}}))
 	.then(function(result) {
 
-	console.log(result.instance.exports);
+	//console.log(result.instance.exports);
 
 	heap = new Float64Array(memory.buffer);
 	//gauss = result.instance.exports.gauss;
@@ -4422,7 +4427,7 @@ function dist(x,y) {return Math.sqrt((x[0]-y[0])**2+(x[1]-y[1])**2+(x[2]-y[2])**
 
 function wasm_soft_worker(lines,th,f0,c0,ph,rr,method,solver) {
 
-	console.log("wasm_soft_worker: "+th+" "+ph+" "+rr+" "+method+" "+solver);
+	//console.log("wasm_soft_worker: "+th+" "+ph+" "+rr+" "+method+" "+solver);
 	//test();
 	
 	var fmin,fmax,fstep;
@@ -4598,7 +4603,11 @@ if(method==1) {
 					//	return mul(Ry(ph0),[[-RR+2*RR*i/(NN-1)],[-RR+2*RR*j/(NN-1)],[0]]);});
 					var nn = 5; // every 5 deg
 					var NR = 15, NT = 360, RR = Array.from({length:NR},(_,i)=>0.004*(i+1));
-
+					console.log(''+NR+'x'+(NT/nn));
+					s += '## # '+NR+'x'+(NT/nn)+'\n## # ';
+					for(var j=0; j<NR; j++) {
+						s += '' + RR[j].toFixed(3) + ((j==NR-1)?'\n':' ');
+					}
 					for(var j=0;j<NR;j++) { // polar grid: NR x 360/n
 						var grid1 = Array.from({length: NT/nn}, (_, i)=>mul(Ry(ph0),
 						  [[RR[j]*Math.cos(l*i*nn*pi/180+pi)],[RR[j]*Math.sin(l*i*nn*pi/180+pi)],[0]]));
