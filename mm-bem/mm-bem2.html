@@ -1860,7 +1860,7 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
   var p3 = rot(Ry(ph), r*Math.cos((th+180)*pi/180), r*Math.sin((th+180)*pi/180), 0);
   var t3 = '\u03b8='+th + " " + "\u03a6=" + ph;
   svg_createpoint(svg,"th_xy",V(P(p3)),
-	circle_onoff?(rr<0?"blue":point_source?"red":"green"):"none",t3);
+	circle_onoff?(rr<0?"blue":point_source?"green":"red"):"none",t3);
 }
 
 function init_sliders() { // sliders
@@ -2799,7 +2799,7 @@ function solve4x4(A, b) {
 }
 
 function elem_data(s2,t,n,mode=1) { // s2: data_string t:time, n:n_seq, mode==0:ElementData, mode==1:NodeData
-	var vname = ['"Re(p_i)"','"Im(p_i)"','"Re(v_n)"','"Im(v_n)"'];
+	var vname = ['"Re(p_i) [Pa]"','"Im(p_i) [Pa]"','"Re(q) [N]"','"Im(q) [N]"'];
 	var s = '';
 	if(s2 && s2.length>0) { // write removing 
 		for(var j=0;j<vname.length;j++) {
@@ -4446,7 +4446,7 @@ function buildRHS_soft_piston(targetNodes, k, f, d, R, r, u, rho0, Ntheta) {
   var omega = 2*pi*f;
   R = R || 1; //  default to 1m
   r = (typeof r === "number") ? [0, r] : r;
-  var u0 = 1e-10;  // R*r/(2*rho0*c0**2*besselJ1(kr);  
+  var u0 = 5e-11;  // R*r/(2*rho0*c0**2*besselJ1(kr);  
   u = u || new Array(r.length).fill(0).map(()=>new Complex(u0,0));
   rho0 = rho0||1e3;
   Ntheta = Ntheta||36;
@@ -4454,10 +4454,10 @@ function buildRHS_soft_piston(targetNodes, k, f, d, R, r, u, rho0, Ntheta) {
   console.log(k,omega,d,R,r,u,rho0,Ntheta);
   const rhs = new Array(nNodes).fill(0).map(() => new Complex(0,0)); // 0+0j);
   // 1) direction from target center to aperture center (theta+pi, phi+pi)
-  //const th = theta + pi, ph = phi   + pi;
-  const nx = d[0]; //Math.sin(ph)*Math.cos(th);
-  const ny = d[1]; //Math.sin(ph)*Math.sin(th);
-  const nz = d[2]; //Math.cos(ph);
+  //const th = theta + pi, ph = phi + pi;
+  const nx = -d[0]; //Math.sin(ph)*Math.cos(th);
+  const ny = -d[1]; //Math.sin(ph)*Math.sin(th);
+  const nz = -d[2]; //Math.cos(ph);
   // 2) aperture center
   const Cx = R*nx, Cy = R*ny, Cz = R*nz;
   console.log("Circular piston:",Cx,Cy,Cz);
@@ -4620,17 +4620,18 @@ if(solver==1) {
 			if(method==1) {
 				function dot(a,b) {return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];}
 				if(rr!=NaN && rr!=0) {
-				    if(rr>0) {
-					function sub(a,b) {return [a[0]-b[0], a[1]-b[1], a[2]-b[2]];}
-					function norm(v) {return Math.sqrt(dot(v, v));}
-					function G(x,y,k) {const r = norm(sub(x,y)); 
-						return new Complex(-Math.cos(k*r)/(4*pi*r),-Math.sin(k*r)/(4*pi*r));}
-					const xs = [rr*c0/f0*d[0], rr*c0/f0*d[1], rr*c0/f0*d[2]]; 
-					f = x.map(x => G(x,xs,k));
-					//f = x.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));
+					rr *= c0/f0; // in wave-length
+					if(rr>0) {
+						function sub(a,b) {return [a[0]-b[0], a[1]-b[1], a[2]-b[2]];}
+						function norm(v) {return Math.sqrt(dot(v, v));}
+						function G(x,y,k) {const r = norm(sub(x,y)); 
+							return new Complex(-Math.cos(k*r)/(4*pi*r),-Math.sin(k*r)/(4*pi*r));}
+						const xs = [rr*d[0], rr*d[1], rr*d[2]]; 
+						f = x.map(x => G(x,xs,k));
+						//f = x.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));
 				    } else { // circular piston
-					rr = -rr;
-					f = buildRHS_soft_piston(x, k, f0, d, rr, 0.019);
+						rr = Math.abs(rr);
+						f = buildRHS_soft_piston(x, k, f0, d, rr, 0.019);
 				    }
 				} else {
 					f = x.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));					
