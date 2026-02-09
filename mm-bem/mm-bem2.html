@@ -676,11 +676,13 @@ along both direction angles.
   <option value="2">MFS</option>
 </select>
 &nbsp;&nbsp;
+<span hidden>
 <label for="solver" style="margin-left:32px">Solver: </label> 
 <select id="solver" onchange="select()" style="background-color:#ffe6e6">
   <option value="1">Gauss</option>
   <option value="2" selected>Blocked LU</option>
 </select>
+</span>
 <br><br>
 <label for="engine">Calculations rule: </label> 
 <select id="engine" onchange="select()" style="background-color:#ffe6e6">
@@ -722,7 +724,11 @@ along both direction angles.
 function select3() {select();}
 </script>
 <label for="rr">Source distance (0-plane wave): <i>r<sub>0</sub></i> =</label> 
-<input type="number" id="rr" title="0 - plane wave" onchange="select3()" value="0" style="width:48px"/> &lambda;
+<input type="number" id="rr" title=
+"r=0 - plane wave
+r>0 - point source
+r<0 - circular piston"
+onchange="select3()" value="0" style="width:48px"/> &lambda;
 <br><br>
 
 <span id="connect">
@@ -763,7 +769,7 @@ function select3() {select();}
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(8.2.2026)" style="text-align:center">mm-bem v2.30 (2025-2026)</p>
+<p title="(9.2.2026)" style="text-align:center">mm-bem v2.31 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -1734,8 +1740,8 @@ function update_near_field(s) {
 	var svg = document.getElementById("svg");
 	const W = svg.getAttribute("width")-40;
 	const H = svg.getAttribute("height")-40;
-	const data = s.trim().split(/\r?\n/).filter(l => !l.trim().startsWith('#'))
-			.map(l => l.trim().split(/\s+/).map(Number));
+	const data = s.trim().split(/\r?\n/).map(l => l.replace(/#.*/, ''))
+			.filter(l => l).map(l => l.trim().split(/\s+/).map(Number));
 	const pngData = createPolarImage(logNormalizeMtx(data),0.004,0.06); // real r1,r2
 	if(pngData) {
 		var el = document.getElementById("svgimg");
@@ -1808,7 +1814,7 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
   var point_source = false;
   if(rr!=0 && rr!=NaN) {
 	  point_source = true;
-	  r = rr * c0/f0;
+	  r = Math.abs(rr) * c0/f0;
   }
 
 // --- two circles for showing wave direction
@@ -1853,7 +1859,8 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
 
   var p3 = rot(Ry(ph), r*Math.cos((th+180)*pi/180), r*Math.sin((th+180)*pi/180), 0);
   var t3 = '\u03b8='+th + " " + "\u03a6=" + ph;
-  svg_createpoint(svg,"th_xy",V(P(p3)),circle_onoff?(point_source?"red":"green"):"none",t3);
+  svg_createpoint(svg,"th_xy",V(P(p3)),
+	circle_onoff?(rr<0?"blue":point_source?"red":"green"):"none",t3);
 }
 
 function init_sliders() { // sliders
@@ -4423,6 +4430,85 @@ function test() {
 	console.log(x);
 }
 function dist(x,y) {return Math.sqrt((x[0]-y[0])**2+(x[1]-y[1])**2+(x[2]-y[2])**2);}
+
+// ----- circular piston as wave source
+// targetNodes:  [ [x,y,z], ... ]  (scatterer surface nodes)
+// k:            wavenumber
+// f:            frequency
+// d(theta,phi): wave direction
+// R:            distance from target center to aperture center
+// r:            [r0,...,r_{m-1}]  FEM radii (0..a)
+// u:            [u0,...,u_{m-1}]  complex displacements at r[k]
+// rho0:         density
+// Ntheta:       number of angular samples per ring
+
+function buildRHS_soft_piston(targetNodes, k, f, d, R, r, u, rho0, Ntheta) {
+  var omega = 2*pi*f;
+  R = R || 1; //  default to 1m
+  r = (typeof r === "number") ? [0, r] : r;
+  var u0 = 1e-10;  // R*r/(2*rho0*c0**2*besselJ1(kr);  
+  u = u || new Array(r.length).fill(0).map(()=>new Complex(u0,0));
+  rho0 = rho0||1e3;
+  Ntheta = Ntheta||36;
+  const nNodes = targetNodes.length;
+  console.log(k,omega,d,R,r,u,rho0,Ntheta);
+  const rhs = new Array(nNodes).fill(0).map(() => new Complex(0,0)); // 0+0j);
+  // 1) direction from target center to aperture center (theta+pi, phi+pi)
+  //const th = theta + pi, ph = phi   + pi;
+  const nx = d[0]; //Math.sin(ph)*Math.cos(th);
+  const ny = d[1]; //Math.sin(ph)*Math.sin(th);
+  const nz = d[2]; //Math.cos(ph);
+  // 2) aperture center
+  const Cx = R*nx, Cy = R*ny, Cz = R*nz;
+  console.log("Circular piston:",Cx,Cy,Cz);
+  // 3) build local basis e1, e2 in aperture plane
+  let ax = 0, ay = 0, az = 1;
+  if (Math.abs(nx*ax + ny*ay + nz*az) > 0.9) { ax = 0; ay = 1; az = 0; }
+  // e1 = normalize(a × n)
+  let e1x = ay*nz-az*ny, e1y = az*nx-ax*nz, e1z = ax*ny-ay*nx;
+  let Le1 = Math.hypot(e1x,e1y,e1z); e1x/=Le1; e1y/=Le1; e1z/=Le1;
+  // e2 = n × e1
+  const e2x = ny*e1z-nz*e1y, e2y = nz*e1x - nx*e1z, e2z = nx*e1y - ny*e1x;
+  // 4) loop over target nodes
+  for (let j = 0; j < nNodes; ++j) {
+    const [xj, yj, zj] = targetNodes[j];
+    let p_inc_j = new Complex(0,0); // 0+0j;
+    // 5) loop over rings
+    for (let kRing = 0; kRing < r.length - 1; ++kRing) {
+      const r1 = r[kRing];
+      const r2 = r[kRing+1];
+      const rbar = 0.5*(r1 + r2);
+      const dS   = pi*(r2*r2 - r1*r1);
+      // const u_k  = u_at_rbar(r1, r2, u[kRing], u[kRing+1]);  // Complex mean
+      const u_k  = new Complex((u[kRing].re+u[kRing+1].re)/2,(u[kRing].im+u[kRing+1].im)/2 ); 
+      let Gavg = new Complex(0,0); // 0+0j; // average Green's function over angles
+      for (let n = 0; n < Ntheta; ++n) {
+        const ang  = 2*pi*n/Ntheta;
+        const cosA = Math.cos(ang);
+        const sinA = Math.sin(ang);
+        const X = Cx + rbar*(cosA*e1x + sinA*e2x);   // ring point in 3D
+        const Y = Cy + rbar*(cosA*e1y + sinA*e2y);
+        const Z = Cz + rbar*(cosA*e1z + sinA*e2z);
+        const dx = xj - X, dy = yj - Y, dz = zj - Z;
+        const Rjn = Math.hypot(dx, dy, dz);
+        const phase = k*Rjn;
+	//const G = Math.exp(1j*phase) / (4*Math.PI*Rjn); // complex Green's function
+        const G = new Complex(Math.cos(phase)/(4*pi*Rjn),Math.sin(phase)/(4*pi*Rjn)); 
+        //Gavg += G; // Complex add
+        Gavg = Gavg.add(G); // Complex add
+      }
+      //Gavg /= Ntheta; // Complex div
+      Gavg = Gavg.div(new Complex(Ntheta,0)); // Complex div
+      // p_inc_j += u_k * Gavg * dS; // complex mul and add
+      p_inc_j = p_inc_j.add( u_k.mul(Gavg).mul(new Complex(dS,0)) ); // complex mul and add
+    }
+    //p_inc_j *= -rho0*omega*omega;     // Complex mul by Rayleigh factor: -ρ0 ω²
+    p_inc_j = p_inc_j.mul(new Complex(0,-rho0*omega*omega)); // Complex mul by Rayleigh factor
+    rhs[j] = new Complex(-p_inc_j.re,-p_inc_j.im);   // RHS in soft case is -p_inc
+  }
+  return rhs;
+}
+
 `;
 
 function wasm_soft_worker(lines,th,f0,c0,ph,rr,method,solver) {
@@ -4534,6 +4620,7 @@ if(solver==1) {
 			if(method==1) {
 				function dot(a,b) {return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];}
 				if(rr!=NaN && rr!=0) {
+				    if(rr>0) {
 					function sub(a,b) {return [a[0]-b[0], a[1]-b[1], a[2]-b[2]];}
 					function norm(v) {return Math.sqrt(dot(v, v));}
 					function G(x,y,k) {const r = norm(sub(x,y)); 
@@ -4541,6 +4628,10 @@ if(solver==1) {
 					const xs = [rr*c0/f0*d[0], rr*c0/f0*d[1], rr*c0/f0*d[2]]; 
 					f = x.map(x => G(x,xs,k));
 					//f = x.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));
+				    } else { // circular piston
+					rr = -rr;
+					f = buildRHS_soft_piston(x, k, f0, d, rr, 0.019);
+				    }
 				} else {
 					f = x.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));					
 				}
@@ -4604,10 +4695,16 @@ if(method==1) {
 					var nn = 5; // every 5 deg
 					var NR = 15, NT = 360, RR = Array.from({length:NR},(_,i)=>0.004*(i+1));
 					console.log(''+NR+'x'+(NT/nn));
-					s += '## # '+NR+'x'+(NT/nn)+'\n## # ';
+					s += '## # '+NR+'x'+(NT/nn)+'\n'
+					s += '## # ';
 					for(var j=0; j<NR; j++) {
-						s += '' + RR[j].toFixed(3) + ((j==NR-1)?'\n':' ');
+						s += ''+RR[j].toFixed(3)+' ';
 					}
+					s += '\n## # ';
+					for(var j=0; j<NT; j+=nn) {
+						s += ''+(j)+' ';
+					}
+					s += '\n';
 					for(var j=0;j<NR;j++) { // polar grid: NR x 360/n
 						var grid1 = Array.from({length: NT/nn}, (_, i)=>mul(Ry(ph0),
 						  [[RR[j]*Math.cos(l*i*nn*pi/180+pi)],[RR[j]*Math.sin(l*i*nn*pi/180+pi)],[0]]));
