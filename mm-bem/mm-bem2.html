@@ -1867,7 +1867,7 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
   var t3 = '\u03b8='+th + " " + "\u03a6=" + ph;
   if(point_source) {
 	  svg_createpoint(svg,"th_xy",V(P(p3)),
-	  	circle_onoff?(rr<0?"blue":point_source?"green":"red"):"none",t3);
+	  	circle_onoff?(rr<0?"blue":point_source?"black":"red"):"none",t3);
   } else {
 	  var el=svg_createpath(svg,"th_xy_d",pp3,"black",1.5,"1,0",1);	// wave length arrow
 	  el.setAttribute("marker-end","url(#arrowhead)");
