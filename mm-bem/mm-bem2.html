@@ -122,6 +122,7 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="[sphere(0.005),[-0.01,0,0]],|[sphere(0.005),[0.01,0,0]]">Two spheres</option>
   <option value="[sphere(0.005),[-0.01,0,0]],|[sphere(0.005),[0.01,0,0]],|[sphere(0.005),[0,-0.01,0]],|[sphere(0.005),[0,0.01,0]]">Four spheres</option>
   <option value="[sphere(0.005),[-0.01,0,-0.01]],|[sphere(0.005),[0.01,0,-0.01]],|[sphere(0.005),[0,-0.01, -0.01]],|[sphere(0.005),[0, 0.01, -0.01]],|[sphere(0.005),[-0.01,0,0.01]],|[sphere(0.005),[0.01,0,0.01]],|[sphere(0.005), [0,-0.01,0.01]],|[sphere(0.005),[0,0.01,0.01]]">Eight spheres</option>
+  <option value="[spheres(0.005,2,[3,3,3],[0.01,0.01,0.01])]">Multiple spheres</option>
 </optgroup>
 <optgroup label="Swimmbladder examples">
   <option value="[msh(YFT_752x1500_sb)]">Yellowfin_Tuna_752x1500_sb</option>
@@ -345,7 +346,9 @@ Full mm-bem package contains source codes in different programming languages for
 <!------------ svg plot2D -------------->
 <div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#fafcff;white;#F5EDEA;#eee">
 <svg xmlns="http://www.w3.org/2000/svg" id="svg" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
-<image id="svgimg" x="20" y="20" width="400" height="400" onclick="imgclick(this);" style="pointer-events:all"/>
+<image id="svgimg" x="20" y="20" width="400" height="400" onclick="imgclick(this);" style="pointer-events:all">
+	<title>click to switch far field/near field</title>
+</image>
 <text x="10" y="10" id="title" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
 <text x="280" y="10" id="title2" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
 <text x="340" y="432" id="title3" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
@@ -3384,6 +3387,29 @@ function mfrustum(ww = [1,1,1], hh = [1,1,1], xx=[0,0,0], yy=[0,0,0], zz = [3,3,
     return [vx,fx];
 }
 
+function msh_join(vx1,fx1,vx2,fx2) {
+	var m = vx1.length; 
+	for(var i=0; i<fx2.length; i++) {
+		fx2[i] = [fx2[i][0]+m, fx2[i][1]+m, fx2[i][2]+m];
+	}
+	return [[...vx1, ...vx2],[...fx1, ...fx2]];	
+}
+
+function spheres(R = 0.01, N = 2, mmm = [3,3,3], sep = [0.01, 0.01, 0.01]) {
+	var vx1=[],fx1=[];
+	for(var m = -(mmm[2]-1)/2; m<=(mmm[2]-1)/2; m++) {	
+		for(var l = -(mmm[1]-1)/2; l<=(mmm[1]-1)/2; l++) {
+			for(var k = -(mmm[0]-1)/2; k<=(mmm[0]-1)/2; k++) {
+				var [vx2,fx2] = sphere(R,N);
+				for(var i=0; i<vx2.length; i++) {
+					vx2[i][0]+=2*k*R+k*sep[0]; vx2[i][1]+=2*l*R+l*sep[1]; vx2[i][2]+=2*m*R+m*sep[2];
+				}
+				[vx1,fx1] = msh_join(vx1,fx1,vx2,fx2);
+			}
+		}
+    }
+	return [vx1,fx1];
+}
 
 function sphere(R = 1, N = 2) {
     let vx = [[0,0,R],[0,0,-R],[-R,0,0],[0,-R,0],[R,0,0],[0,R,0]];
@@ -3395,31 +3421,16 @@ function sphere(R = 1, N = 2) {
         let ntold = nt;
         for (let i = 0; i < ntold; i++) {
             let [i1,i2,i3] = fx[i];
-            let a = norm([
-                (vx[i1][0] + vx[i2][0])/2,
-                (vx[i1][1] + vx[i2][1])/2,
-                (vx[i1][2] + vx[i2][2])/2
-            ]);
-            let b = norm([
-                (vx[i2][0] + vx[i3][0])/2,
-                (vx[i2][1] + vx[i3][1])/2,
-                (vx[i2][2] + vx[i3][2])/2
-            ]);
-            let c = norm([
-                (vx[i3][0] + vx[i1][0])/2,
-                (vx[i3][1] + vx[i1][1])/2,
-                (vx[i3][2] + vx[i1][2])/2
-            ]);
-
+            let a = norm([(vx[i1][0] + vx[i2][0])/2,(vx[i1][1] + vx[i2][1])/2,(vx[i1][2] + vx[i2][2])/2]);
+            let b = norm([(vx[i2][0] + vx[i3][0])/2,(vx[i2][1] + vx[i3][1])/2,(vx[i2][2] + vx[i3][2])/2]);
+            let c = norm([(vx[i3][0] + vx[i1][0])/2,(vx[i3][1] + vx[i1][1])/2,(vx[i3][2] + vx[i1][2])/2]);
             vx.push([R*a[0], R*a[1], R*a[2]]);
             vx.push([R*b[0], R*b[1], R*b[2]]);
             vx.push([R*c[0], R*c[1], R*c[2]]);
-
             fx.push([i1, nv, nv+2]);
             fx.push([nv, i2, nv+1]);
             fx.push([nv+1, i3, nv+2]);
             fx[i] = [nv, nv+1, nv+2];
-
             nv += 3;
             nt += 3;
         }
