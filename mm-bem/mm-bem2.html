@@ -773,7 +773,7 @@ onchange="select3()" value="0" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(9.2.2026)" style="text-align:center">mm-bem v2.31 (2025-2026)</p>
+<p title="(10.2.2026)" style="text-align:center">mm-bem v2.32 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -1815,9 +1815,10 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
   var r = (r0max * 1.5)||(c0/f0/2 * 5); //Math.sqrt(2);
   
   var rr = parseFloat(document.getElementById("r0")?.value);
-  var point_source = false;
+  var point_source = false, aperture=false;
   if(rr!=0 && rr!=NaN) {
-	  point_source = true;
+	  point_source = (rr>0);
+	  aperture = (rr<0);
 	  r = Math.abs(rr) * c0/f0;
   }
 
@@ -1865,15 +1866,43 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
   var p3b = rot(Ry(ph), (r+l/2)*Math.cos((th+180)*pi/180), (r+l/2)*Math.sin((th+180)*pi/180), 0);
   var pp3=[[V(P(p3b)),V(P(p3))]];	
   var t3 = '\u03b8='+th + " " + "\u03a6=" + ph;
-  if(point_source) {
-	  svg_createpoint(svg,"th_xy",V(P(p3)),
-	  	circle_onoff?(rr<0?"blue":point_source?"black":"red"):"none",t3);
-  } else {
-	  var el=svg_createpath(svg,"th_xy_d",pp3,"black",1.5,"1,0",1);	// wave length arrow
+  var el;
+  if(point_source) { // point source
+	  el=svg_createpoint(svg,"th_xy",V(P(p3)),circle_onoff?(rr<0?"gray":point_source?"black":"red"):"none",t3);
+  	  el=svg_createpath(svg,"th_xy_a",[[]],"none",1,"1,0",0,"none",0.25);	// aperture
+	  el=svg_createpath(svg,"th_xy_d",[[]],"black",1.5,"1,0",1);	        // arrow
+  } else if(aperture) { // aperture
+	  ap = circle3D(p3,rot(Ry(ph),Math.cos((th+180)*pi/180),Math.sin((th+180)*pi/180),0),l/2);
+	  for(i=0;i<ap.length;i++) ap[i] = V(P(ap[i]));
+	  el=svg_createpath(svg,"th_xy_a",[ap],"gray",1,"1,0",0,"gray",0.25);	// aperture
+  	  el=svg_createpoint(svg,"th_xy",[[]],"none");	                        // clear point
+	  el=svg_createpath(svg,"th_xy_d",[[]],"black",1.5,"1,0",1);	        // clear arrow
+  } else {  // plane wave
+	  el=svg_createpath(svg,"th_xy_d",pp3,"black",1.5,"1,0",1);	            // arrow
 	  el.setAttribute("marker-end","url(#arrowhead)");
   	  el.innerHTML = "<title>"+t3+"</title>";
+  	  el=svg_createpath(svg,"th_xy_a",[[]],"none",1,"1,0",0,"none",0.25);	// clear aperture
+  	  el=svg_createpoint(svg,"th_xy",[[]],"none");	                        // clear point
     }
 }
+
+function circle3D(center, normal, radius, segments = 64) {
+  const nLen = Math.hypot(normal[0], normal[1], normal[2]);   // Normalize the normal vector
+  const n = {x: normal[0] / nLen, y: normal[1] / nLen, z: normal[2] / nLen};
+  let a = Math.abs(n.x) < 0.9 ? {x: 1, y: 0, z: 0} : {x: 0, y: 1, z: 0}; // Pick a vector not parallel to n
+  let u = {x: a.y * n.z - a.z * n.y, y: a.z * n.x - a.x * n.z,z: a.x * n.y - a.y * n.x}; // u = normalize(a × n)
+  const uLen = Math.hypot(u.x, u.y, u.z); u = { x: u.x / uLen, y: u.y / uLen, z: u.z / uLen };
+  const v = {x: n.y * u.z - n.z * u.y, y: n.z * u.x - n.x * u.z, z: n.x * u.y - n.y * u.x};   // v = n × u
+  const pts = [];   // Generate points
+  for (let i = 0; i < segments; i++) {
+    const theta = (2 * Math.PI * i) / segments;
+    pts.push([center[0] + radius * (Math.cos(theta) * u.x + Math.sin(theta) * v.x),
+			center[1] + radius * (Math.cos(theta) * u.y + Math.sin(theta) * v.y),
+			center[2] + radius * (Math.cos(theta) * u.z + Math.sin(theta) * v.z)] );
+  }
+  return pts;
+}
+
 
 function init_sliders() { // sliders
   document.getElementById("a_slider").value = Math.round(a*180/pi);
@@ -3076,8 +3105,8 @@ function svg_createpoint(svg, id, xy, color, title, r, color2) {
 	el.setAttribute('stroke-width',1);
 	el.setAttribute('stroke',color2||'none');
 	el.setAttribute("r",r||4);
-	el.setAttribute("cx",xy[0]);
-	el.setAttribute("cy",xy[1]);
+	el.setAttribute("cx",xy&&xy.length>1?xy[0]:-99);
+	el.setAttribute("cy",xy&&xy.length>1?xy[1]:-99);
 	el.innerHTML = "<title>"+(title || '')+"</title>";
 }
 
