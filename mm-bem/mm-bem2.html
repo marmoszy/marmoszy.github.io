@@ -906,6 +906,8 @@ var mshcolor2 = "rgba(11,34,174,0.25)";
 var axes_onoff = 1, box_onoff = 1, circle_onoff = 1; mesh_onoff = 2; grid_onoff = 1;
 var img_onoff = 0, img_was_on = 0; 
 
+var nf_r0 = 0.004, nf_m = 15, nf_n = 5;  // near field params
+
 //var wh = Math.max(window.innerHeight-150,400);
 var wh = document.getElementById("svg1").getAttribute("width")-0;
 
@@ -1246,8 +1248,9 @@ function soft_sphere(aa, ff0, cc0, th00, ph00) { // using document parameters, f
 	s = '# mm-bem soft_sphere('+(a)+')\n# th0='+(th0)+' ph0='+(ph0)+' f0='+(f0)+' c0='+(c0)+' lbs='+(lbs.toFixed(6))+'\n'+ s;
 	//return s;
 	
-	var nn = 3; // every 3 deg
-	var NR = 15, NT = 360, RR = Array.from({length:NR},(_,i)=>0.004*(i+1)); // the same code as in calculation worker
+	var nn = nf_n; // every 5 deg
+	var NR = nf_m, NT = 360, r0 = nf_r0;
+		RR = Array.from({length:NR},(_,i)=>r0*(i+1)); // the same code as in calculation worker
 	for(var j=0;j<=RR.length;j++) {
 		s += '## ';
 		for(var i=0;i<=NT;i+=nn) {
@@ -1486,7 +1489,7 @@ function update_mesh2(th, ph) {
 	const H = svg.getAttribute("height")-40;
 	const svg0 = document.getElementById("svg0");
 	const pvxfx = projectMesh(vx, fx, (th+0)*Math.PI/180, (ph+0)*Math.PI/180);	
-	var nn = img_onoff?2.5:1;
+	var nn = img_onoff?2.5*(0.06/nf_r0/nf_m):1; 
 	var el = svg_createpath(svg0,"N",pvxfx.pfx.map(r=>r.map(([x, y])=>
 		[nn*1200*x+W/2, nn*1200*y+H/2]))
 		, img_onoff?'white':mesh_onoff?mshcolor2:"none", img_onoff?2:mesh_onoff?0.5:0, "1,0", 0, 'none');
@@ -1802,7 +1805,7 @@ function update_near_field(s) {
 	const H = svg.getAttribute("height")-40;
 	const data = s.trim().split(/\r?\n/).map(l => l.replace(/#.*/, ''))
 			.filter(l => l).map(l => l.trim().split(/\s+/).map(Number));
-	const pngData = createPolarImage(logNormalizeMtx(data),0.004,0.06); // real r1,r2
+	const pngData = createPolarImage(logNormalizeMtx(data), nf_r0, nf_r0*nf_m); // real r1,r2
 	if(pngData) {
 		var el = document.getElementById("svgimg");
 		if(el) {
@@ -2890,6 +2893,7 @@ function change1() {
 		c0 = parseFloat(document.getElementById("c0").value);
 		ph = parseFloat(document.getElementById("ph").value);
 		rr = parseFloat(document.getElementById("r0")?.value) || 0; // point source distance
+		var rest = {nf_r0:nf_r0, nf_m:nf_m, nf_n:nf_n};
 		const m = parseInt(document.getElementById("method").value);
 		const solver = parseInt(document.getElementById("solver")?.value);
 		if(f0<0) {scan_str='# mm-'+(m==1?'bem':'mfs')+'-scan-mode: '+(-f0/1e3)+'kHz scan\n';}
@@ -2901,7 +2905,7 @@ function change1() {
 		var el = document.getElementById("txt2");
 		if(el && el.value.startsWith("# abs(p_sc)")) {el.value="";}
 		if(fx.length<5500) {
-			worker.postMessage(JSON.stringify([lines,th,f0,c0,ph,rr,m,solver]));
+			worker.postMessage(JSON.stringify([lines,th,f0,c0,ph,rr,m,solver,rest]));
 		} else {
 			document.getElementById("txt").value="The mesh too large for BEM inside the browser!"
 		}
@@ -4396,8 +4400,8 @@ onmessage = function(e) {
 	blocked_lu_soa = result.instance.exports.blocked_lu_soa;
 	blocked_lu_solve_soa = result.instance.exports.blocked_lu_solve_soa;
 
-	[lines,th,f0,c0,ph,rr,method,solver] = JSON.parse(e.data);
-	var s = wasm_soft_worker(lines,th,f0,c0,ph,rr,method,solver);
+	[lines,th,f0,c0,ph,rr,method,solver,rest] = JSON.parse(e.data);
+	var s = wasm_soft_worker(lines,th,f0,c0,ph,rr,method,solver,rest);
 	// postMessage(JSON.stringify(s));
 	});
 }
@@ -4771,7 +4775,7 @@ function buildRHS_soft_piston(targetNodes, k, f, d, R, r, u, rho0, Ntheta) {
 
 `;
 
-function wasm_soft_worker(lines,th,f0,c0,ph,rr,method,solver) {
+function wasm_soft_worker(lines,th,f0,c0,ph,rr,method,solver,rest) {
 
 	//console.log("wasm_soft_worker: "+th+" "+ph+" "+rr+" "+method+" "+solver);
 	//test();
@@ -4876,8 +4880,7 @@ if(solver==1) {
 		   for(var th0=thmin;th0<=thmax;th0+=thstep) {
 		      // Incident field
 		      d = mul(Ry(ph0),[[Math.cos(th0*pi/180+pi)],[Math.sin(th0*pi/180+pi)],[0]]);
-			  console.log("d:",d)	
-		      var f;
+			  var f;
 			if(method==1) {
 				function dot(a,b) {return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];}
 				if(rr!=NaN && rr!=0) {
@@ -4946,17 +4949,20 @@ if(method==1) {
 				}
 // MM 31.1.2026
 				postMessage(JSON.stringify(s));
-				// Near field calculations
-				if(thmin==thmax && phmin==phmax) { // no scan mode
+				if(thmin==thmax && phmin==phmax) { // when no in scan mode
+// Near field calculations
 					//postMessage("[ near field solution]");
 					var psc1 =[];
 					//var NN = 400, NR=NN, NT=NN, RR = 1; //0.5*c0/f0;
 					//var grid1 = Array.from({length: NN*NN}, (_,k) => { // rect grid: NN x NN
 					//	const i = Math.floor(k / NN); j = k % NN;
 					//	return mul(Ry(ph0),[[-RR+2*RR*i/(NN-1)],[-RR+2*RR*j/(NN-1)],[0]]);});
-					var nn = 5; // every 5 deg
-					var NR = 15, NT = 360, RR = Array.from({length:NR},(_,i)=>0.004*(i+1));
-					//console.log(''+NR+'x'+(NT/nn));
+					var nn = rest?.nf_n || 5, // every 5 deg
+						NR = rest?.nf_m || 15,
+						NT = 360, 
+						r0 = rest?.nf_r0 || 0.004,
+						RR = Array.from({length:NR},(_,i)=>r0*(i+1));
+					console.log(''+NR+'x'+(NT/nn)+ ' r0='+r0+'   ',rest);
 					s += '## # '+NR+'x'+(NT/nn)+'\n'
 					s += '## # ';
 					for(var j=0; j<NR; j++) {
@@ -4979,8 +4985,8 @@ if(method==1) {
 						}
 						s += '\n';
 					}
-//
-					for(var i=0;i<phi.length;i++) { // surface incident pressure and normal velosity 
+// surface incident pressure and normal velocity 
+					for(var i=0;i<phi.length;i++) { 
 						s += '#' + (i+1) + 
 							 ' ' + (f[i].re).toFixed(6) + 
 							 ' ' + (f[i].im).toFixed(6) + 
@@ -5180,6 +5186,10 @@ url_params();
 document.getElementById("th").value = parseFloat(th);
 document.getElementById("ph").value = parseFloat(ph);
 document.getElementById("rule").value = engine;
+
+nf_r0 = parseFloat(nf_r0);
+nf_m = parseFloat(nf_m);
+nf_n = parseFloat(nf_n);
 
 var ss = window.location.search.substring(1).split('&')
 for(var i = 0; i < ss.length; i++) {
