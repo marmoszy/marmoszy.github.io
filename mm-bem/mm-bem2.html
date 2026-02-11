@@ -4979,14 +4979,14 @@ if(method==1) {
 						}
 						s += '\n';
 					}
-				}
 //
-				for(var i=0;i<phi.length;i++) { // surface incident pressure and normal velosity 
-					s += '#' + (i+1) + 
-						 ' ' + (f[i].re).toFixed(6) + 
-						 ' ' + (f[i].im).toFixed(6) + 
-						 ' ' + (phi[i].re).toFixed(6)+
-						 ' ' + (phi[i].im).toFixed(6)+'\n';
+					for(var i=0;i<phi.length;i++) { // surface incident pressure and normal velosity 
+						s += '#' + (i+1) + 
+							 ' ' + (f[i].re).toFixed(6) + 
+							 ' ' + (f[i].im).toFixed(6) + 
+							 ' ' + (phi[i].re).toFixed(6)+
+							 ' ' + (phi[i].im).toFixed(6)+'\n';
+					}
 				}
 				postMessage(JSON.stringify(s));
 				LBS.push([(th0+180)%360,ph0,lbs]);
