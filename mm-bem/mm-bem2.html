@@ -1132,6 +1132,8 @@ function draw_box(svg,id,xmin,xmax,ymin,ymax,zmin,zmax,color,w) {
 
 const cmath = { // Complex math functions 
   cplx: (re, im) => ({ re, im }),
+  add: (a, b) => ({re: a.re + b.re, im: a.im + b.im}),
+  sub: (a, b) => ({re: a.re - b.re, im: a.im - b.im}),
   abs: (c) => Math.sqrt(c.re * c.re + c.im * c.im),
   mul: (a, b) => ({re: a.re * b.re - a.im * b.im,im: a.re * b.im + a.im * b.re}),
   div: (a, b) => {const denom = b.re * b.re + b.im * b.im;
@@ -1190,6 +1192,43 @@ function exact_ss(ka, th, a) {
   }
   return cmath.mul(cmath.cplx(a / ka, 0), sum);
 }
+function exact_ss2a(k, a, r, th) { // k–wavenumber, a–sphere radius, r–observation radius (r>=a), th–polar angle (theta)
+  const ka = k * a, kr = k * r;
+  const M = Math.floor(ka) + 5;   // choose truncation based on max(ka, kr)
+  const j_ka = j_series(M, ka), y_ka = y_series(M, ka);
+  const j_kr = j_series(M, kr), y_kr = y_series(M, kr);
+  const P    = LP_series(M, Math.cos(th));
+  let sum = cmath.cplx(0, 0);
+  for (let m = 0; m <= M; m++) {
+    const twoMp1 = 2 * m + 1;
+    const h_ka = cmath.cplx(j_ka[m], y_ka[m]); // h_m(ka) = j_m(ka) + i y_m(ka)
+    const h_kr = cmath.cplx(j_kr[m], y_kr[m]); // h_m(kr) = j_m(kr) + i y_m(kr)
+    const coeff = cmath.div(cmath.cplx(j_ka[m],0),h_ka); // coeff = j_m(ka) / h_m(ka)
+    const jkr = cmath.cplx(j_kr[m], 0);        // term_m = (2m+1) * [ j_m(kr) - coeff * h_m(kr) ] * P_m(cos th)
+    const scatteredPart = cmath.mul(coeff, h_kr);
+    const bracket = cmath.sub(jkr, scatteredPart);
+    const term = cmath.mul(cmath.cplx(twoMp1 * P[m], 0),bracket);
+    sum = cmath.add(sum, term);
+  }
+  return sum; // sum is the total field p(r, th) (up to your incident-field normalization)
+}
+function exact_ss2(k, a, r, th) {
+  const ka = k * a, kr = k * r;
+  const M = Math.floor(ka) + 5; // truncation based on ka only
+  const j_ka = j_series(M, ka), y_ka = y_series(M, ka);
+  const j_kr = j_series(M, kr), y_kr = y_series(M, kr);
+  const P    = LP_series(M, Math.cos(th));
+  let sum = cmath.cplx(0, 0);
+  for (let m = 0; m <= M; m++) {
+    const twoMp1 = 2 * m + 1;    
+    const h_ka = cmath.cplx(j_ka[m], y_ka[m]); // h_m(ka) and h_m(kr)
+    const h_kr = cmath.cplx(j_kr[m], y_kr[m]);    
+    const coeff = cmath.div(cmath.cplx(j_ka[m], 0), h_ka); // coeff = j_m(ka) / h_m(ka)   
+    const term = cmath.mul(cmath.cplx(-twoMp1 * P[m], 0),cmath.mul(coeff, h_kr)); // scattered term=-(2m+1)*coeff*h_m(kr)*P_m
+    sum = cmath.add(sum, term);
+  }
+  return sum;   // p_scat(r, θ)
+}
 
 function soft_sphere(aa, ff0, cc0, th00, ph00) { // using document parameters, for 360 angles, returning two-column string
 	var a = aa||0.01905; 
@@ -1203,7 +1242,21 @@ function soft_sphere(aa, ff0, cc0, th00, ph00) { // using document parameters, f
 		s += ''+i+'\t'+r.toFixed(6)+'\n';
 		if(i==((th0+180)%360)) lbs=r;
 	}
-	return('# mm-bem soft_sphere('+(a)+')\n# th0='+(th0)+' ph0='+(ph0)+' f0='+(f0)+' c0='+(c0)+' lbs='+(lbs.toFixed(6))+'\n'+s);
+	// return('# mm-bem soft_sphere('+(a)+')\n# th0='+(th0)+' ph0='+(ph0)+' f0='+(f0)+' c0='+(c0)+' lbs='+(lbs.toFixed(6))+'\n'+s);
+	s = '# mm-bem soft_sphere('+(a)+')\n# th0='+(th0)+' ph0='+(ph0)+' f0='+(f0)+' c0='+(c0)+' lbs='+(lbs.toFixed(6))+'\n'+ s;
+	//return s;
+	
+	var nn = 3; // every 3 deg
+	var NR = 15, NT = 360, RR = Array.from({length:NR},(_,i)=>0.004*(i+1)); // the same code as in calculation worker
+	for(var j=0;j<=RR.length;j++) {
+		s += '## ';
+		for(var i=0;i<=NT;i+=nn) {
+			var r = cmath.abs(exact_ss2(2*Math.PI*f0/c0,a,RR[j],(i-th0)*Math.PI/180))
+			s += ''+r.toFixed(6)+' ';
+		}
+		s += '\n';
+	}
+	return s;
 }
 
 // ---- vector function
@@ -2386,6 +2439,8 @@ onmessage = function(e) {
 }
 const cmath = { // Complex math functions 
   cplx: (re, im) => ({ re, im }),
+  add: (a, b) => ({re: a.re + b.re, im: a.im + b.im}),
+  sub: (a, b) => ({re: a.re - b.re, im: a.im - b.im}),
   abs: (c) => Math.sqrt(c.re * c.re + c.im * c.im),
   mul: (a, b) => ({re: a.re * b.re - a.im * b.im,im: a.re * b.im + a.im * b.re}),
   div: (a, b) => {const denom = b.re * b.re + b.im * b.im;
@@ -2408,7 +2463,7 @@ function y_series(N, x) { // ----- Iterative spherical Neumann y(n, x)
   return y;
 }
 // ----- soft sphere scattering function (exact solution)
-function ss(ka, th, a) {
+function exact_ss(ka, th, a) {
   const M = Math.floor(ka) + 5;
   const j = j_series(M, ka), y = y_series(M, ka), P = LP_series(M, Math.cos(th));
   let sum = cmath.cplx(0, 0);
@@ -2418,6 +2473,81 @@ function ss(ka, th, a) {
   }
   return cmath.mul(cmath.cplx(a / ka, 0), sum);
 }
+function exact_ss2a(k, a, r, th) { // k–wavenumber, a–sphere radius, r–observation radius (r>=a), th–polar angle (theta)
+  const ka = k * a, kr = k * r;
+  const M = Math.floor(ka) + 5;   // choose truncation based on max(ka, kr)
+  const j_ka = j_series(M, ka), y_ka = y_series(M, ka);
+  const j_kr = j_series(M, kr), y_kr = y_series(M, kr);
+  const P    = LP_series(M, Math.cos(th));
+  let sum = cmath.cplx(0, 0);
+  for (let m = 0; m <= M; m++) {
+    const twoMp1 = 2 * m + 1;
+    const h_ka = cmath.cplx(j_ka[m], y_ka[m]);            // h_m(ka) = j_m(ka) + i y_m(ka)
+    const h_kr = cmath.cplx(j_kr[m], y_kr[m]);            // h_m(kr) = j_m(kr) + i y_m(kr)
+    const coeff = cmath.div(cmath.cplx(j_ka[m], 0),h_ka); // coeff = j_m(ka) / h_m(ka)
+    const jkr = cmath.cplx(j_kr[m], 0);                   // term_m = (2m+1) * [ j_m(kr) - coeff * h_m(kr) ] * P_m(cos th)
+    const scatteredPart = cmath.mul(coeff, h_kr);
+    const bracket = cmath.sub(jkr, scatteredPart);
+    const term = cmath.mul(cmath.cplx(twoMp1 * P[m], 0),bracket);
+    sum = cmath.add(sum, term);
+  }
+  return sum;                                 // sum is the total field p(r, th) (up to your incident-field normalization)
+}
+function exact_ss2b(k, a, r, th) {
+  const ka = k * a, kr = k * r;
+  const M = Math.floor(ka) + 5; // truncation based on ka only
+  const j_ka = j_series(M, ka), y_ka = y_series(M, ka);
+  const j_kr = j_series(M, kr), y_kr = y_series(M, kr);
+  const P    = LP_series(M, Math.cos(th));
+  let sum = cmath.cplx(0, 0);
+  for (let m = 0; m <= M; m++) {
+    const twoMp1 = 2 * m + 1;    
+    const h_ka = cmath.cplx(j_ka[m], y_ka[m]); // h_m(ka) and h_m(kr)
+    const h_kr = cmath.cplx(j_kr[m], y_kr[m]);    
+    const coeff = cmath.div(cmath.cplx(j_ka[m], 0), h_ka); // coeff = j_m(ka) / h_m(ka)   
+    const term = cmath.mul(cmath.cplx(-twoMp1 * P[m], 0),cmath.mul(coeff, h_kr));  // scattered term=-(2m+1)*coeff*h_m(kr)*P_m
+    sum = cmath.add(sum, term);
+  }
+  return sum;   // p_scat(r, θ)
+}
+function ipow(n) { // i^n helper
+  const m = n % 4;
+  if (m === 0) return cmath.cplx(1, 0);
+  if (m === 1) return cmath.cplx(0, 1);
+  if (m === 2) return cmath.cplx(-1, 0);
+  return cmath.cplx(0, -1); // m === 3
+}
+// Scattered pressure from soft sphere, plane-wave incidence along +z
+// k – wavenumber, a – sphere radius, r – observation radius (r >= a), th – polar angle
+function exact_ss2(k, a, r, th) {
+  const ka = k * a, kr = k * r;
+  const M = Math.floor(ka) + 5; // truncation based on size parameter ka
+  const j_ka = j_series(M, ka), y_ka = y_series(M, ka);
+  const j_kr = j_series(M, kr), y_kr = y_series(M, kr);
+  const P    = LP_series(M, Math.cos(th));
+  let sum = cmath.cplx(0, 0);
+  for (let n = 0; n <= M; n++) {
+    const twoNp1 = 2 * n + 1;
+    const h_ka = cmath.cplx(j_ka[n], y_ka[n]); // h_n(ka)
+    const h_kr = cmath.cplx(j_kr[n], y_kr[n]); // h_n(kr)
+    const ratio = cmath.div(cmath.cplx(j_ka[n], 0), h_ka); // j_n(ka) / h_n(ka)    
+    const i_n = ipow(n);                       // i^n
+    let coeff = cmath.mul(i_n, ratio);         // coeff_n = -(2n+1) * i^n * (j_n(ka)/h_n(ka)) * P_n(cos th)
+    coeff = cmath.mul(coeff, cmath.cplx(-twoNp1 * P[n], 0));
+    const term = cmath.mul(coeff, h_kr);         // term_n = coeff_n * h_n(kr)
+    sum = cmath.add(sum, term);
+  }
+  return sum; // p_scat(r, th) for plane wave incidence
+}
+function p_inc_plane(k, r, th) {  // Incident plane wave: p_inc = exp(i k r cos θ) 
+	return cmath.exp(cmath.cplx(0, k * r * Math.cos(th))); 
+}
+function exact_ss2t(k, a, r, th) { // TOTAL FIELD = incident + scattered 
+	const p_inc = p_inc_plane(k, r, th); 
+	const p_scat = exact_ss2(k, a, r, th); 
+	return cmath.add(p_inc, p_scat); 
+}
+
 function soft_sphere(aa, ff0, cc0, th00, ph00) { // using document parameters, for 360 angles, returning two-column string
 	var a = aa||0.01905; 
 	var f0 = ff0||38e3;
@@ -2426,11 +2556,28 @@ function soft_sphere(aa, ff0, cc0, th00, ph00) { // using document parameters, f
 	var ph0 = ph00||0    // not used
 	var s='',lbs=0;
 	for(var i=0;i<=360;i++) {
-		var r = cmath.abs(ss(2*Math.PI*f0/c0*a,(i-th0)*Math.PI/180,a))
+		var r = cmath.abs(exact_ss(2*Math.PI*f0/c0*a,(i-th0)*Math.PI/180,a))
+		//var r = cmath.abs(exact_ss2(2*Math.PI*f0/c0,a,a,(i-th0)*Math.PI/180))
 		s += ''+i+' '+r.toFixed(6)+'\\n';
 		if(i==((th0+180)%360)) lbs=r;
 	}
-	return('# mm-bem soft_sphere('+(a)+')\\n# th0='+(th0)+' ph0='+(ph0)+' f0='+(f0)+' c0='+(c0)+' lbs='+(lbs.toFixed(6))+'\\n'+s);
+	//return('# mm-bem soft_sphere('+(a)+')\\n# th0='+(th0)+' ph0='+(ph0)+' f0='+(f0)+' c0='+(c0)+' lbs='+(lbs.toFixed(6))+'\\n'+s);
+	s = '# mm-bem soft_sphere('+(a)+')\\n# th0='+(th0)+' ph0='+(ph0)+' f0='+(f0)+' c0='+(c0)+' lbs='+(lbs.toFixed(6))+'\\n'+ s;
+	//return s;
+	
+	var nn = 3; // every 3 deg
+	var NR = 15, NT = 360, RR = Array.from({length:NR},(_,i)=>0.004*(i+1)); // the same code as in calculation worker
+	console.log("soft_sphere:",2*Math.PI*f0/c0,a,RR)
+	for(var j=0;j<RR.length;j++) {
+		s += '## ';
+		for(var i=0;i<=NT;i+=nn) {
+			var r = (RR[j]>a) ? cmath.abs(exact_ss2(2*Math.PI*f0/c0,a,RR[j],(i-th0)*Math.PI/180)): 0;
+			s += ''+r.toFixed(6)+' ';
+		}
+		s += '\\n';
+	}
+	return s;
+
 }
 `;
 
@@ -2445,8 +2592,26 @@ function js_soft_sphere() {
 			document.getElementById("txt").value += s.slice(1,-1)+'\n';
 		} else {
 			var t = Date.now()/1000 - start;
-			s = '# mm-bem-soft-sphere: '+ t.toFixed(3) + 's ' + JSON.parse(s);
+			//s = '# mm-bem-soft-sphere: '+ t.toFixed(3) + 's ' + JSON.parse(s);
+			
+			s = JSON.parse(s);
+			var s0 = s.match(/^(?!#\d+\s|##).*$/gm);
+			var s1 = s.match(/^#\d+\s.*$/gm);
+			var s2 = s.match(/^##\s.*$/gm);
+			s = '# mm-bem-soft-sphere: '+ t.toFixed(3) + 's ' + s0.join('\n');
+
 			document.getElementById("txt").value = s;
+			var el=document.getElementById("txt2");
+			if(el.value.length==0 || el.value.startsWith("# re(p_i)") || el.value.startsWith("# abs(p_sc)")) {
+				if(s2) {
+					if(img_was_on) {img_onoff = 1; imag_was_on = 0; } // cancel flag;
+					var s2a = s2.map(s=>s.slice(3)).join('\n'); // skip "## "
+					document.getElementById("txt2").value = "# abs(p_sc)\n"+s2a;
+					update_near_field(s2a);
+				}
+			}
+			
+			//document.getElementById("txt").value = s;
 			plot("F","#");
 			plot();
 			psave(document.getElementById("obj").value+','+document.getElementById("th").value+','
@@ -4791,7 +4956,7 @@ if(method==1) {
 					//	return mul(Ry(ph0),[[-RR+2*RR*i/(NN-1)],[-RR+2*RR*j/(NN-1)],[0]]);});
 					var nn = 5; // every 5 deg
 					var NR = 15, NT = 360, RR = Array.from({length:NR},(_,i)=>0.004*(i+1));
-					console.log(''+NR+'x'+(NT/nn));
+					//console.log(''+NR+'x'+(NT/nn));
 					s += '## # '+NR+'x'+(NT/nn)+'\n'
 					s += '## # ';
 					for(var j=0; j<NR; j++) {
