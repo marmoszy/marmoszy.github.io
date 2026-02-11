@@ -2519,7 +2519,7 @@ function ipow(n) { // i^n helper
 }
 // Scattered pressure from soft sphere, plane-wave incidence along +z
 // k – wavenumber, a – sphere radius, r – observation radius (r >= a), th – polar angle
-function exact_ss2(k, a, r, th) {
+function exact_ss2scat(k, a, r, th) {
   const ka = k * a, kr = k * r;
   const M = Math.floor(ka) + 5; // truncation based on size parameter ka
   const j_ka = j_series(M, ka), y_ka = y_series(M, ka);
@@ -2540,11 +2540,12 @@ function exact_ss2(k, a, r, th) {
   return sum; // p_scat(r, th) for plane wave incidence
 }
 function p_inc_plane(k, r, th) {  // Incident plane wave: p_inc = exp(i k r cos θ) 
-	return cmath.exp(cmath.cplx(0, k * r * Math.cos(th))); 
+	//return cmath.exp(cmath.cplx(0, k * r * Math.cos(th))); 
+	return cmath.cplx(Math.cos(k * r * Math.cos(th)), Math.sin(k * r * Math.cos(th))); 
 }
-function exact_ss2t(k, a, r, th) { // TOTAL FIELD = incident + scattered 
+function exact_ss2total(k, a, r, th) { // TOTAL FIELD = incident + scattered 
 	const p_inc = p_inc_plane(k, r, th); 
-	const p_scat = exact_ss2(k, a, r, th); 
+	const p_scat = exact_ss2scat(k, a, r, th); 
 	return cmath.add(p_inc, p_scat); 
 }
 
@@ -2552,12 +2553,11 @@ function soft_sphere(aa, ff0, cc0, th00, ph00) { // using document parameters, f
 	var a = aa||0.01905; 
 	var f0 = ff0||38e3;
 	var c0 = cc0||1480.;
-	var th0 = th00||270; 
+	var th0 = th00||0; 
 	var ph0 = ph00||0    // not used
 	var s='',lbs=0;
 	for(var i=0;i<=360;i++) {
 		var r = cmath.abs(exact_ss(2*Math.PI*f0/c0*a,(i-th0)*Math.PI/180,a))
-		//var r = cmath.abs(exact_ss2(2*Math.PI*f0/c0,a,a,(i-th0)*Math.PI/180))
 		s += ''+i+' '+r.toFixed(6)+'\\n';
 		if(i==((th0+180)%360)) lbs=r;
 	}
@@ -2571,7 +2571,7 @@ function soft_sphere(aa, ff0, cc0, th00, ph00) { // using document parameters, f
 	for(var j=0;j<RR.length;j++) {
 		s += '## ';
 		for(var i=0;i<=NT;i+=nn) {
-			var r = (RR[j]>a) ? cmath.abs(exact_ss2(2*Math.PI*f0/c0,a,RR[j],(i-th0)*Math.PI/180)): 0;
+			var r = (RR[j]>a) ? cmath.abs(exact_ss2scat(2*Math.PI*f0/c0, a, RR[j], (i-th0)*Math.PI/180)) : 0;
 			s += ''+r.toFixed(6)+' ';
 		}
 		s += '\\n';
