@@ -776,7 +776,7 @@ onchange="select3()" value="0" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(10.2.2026)" style="text-align:center">mm-bem v2.32 (2025-2026)</p>
+<p title="(11.2.2026)" style="text-align:center">mm-bem v2.33 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -904,7 +904,7 @@ var axcolors = ["red", "green", "blue"];
 var mshcolor = "#0b22ae";
 var mshcolor2 = "rgba(11,34,174,0.25)";
 var axes_onoff = 1, box_onoff = 1, circle_onoff = 1; mesh_onoff = 2; grid_onoff = 1;
-var img_onoff = 0;
+var img_onoff = 0, img_was_on = 0; 
 
 //var wh = Math.max(window.innerHeight-150,400);
 var wh = document.getElementById("svg1").getAttribute("width")-0;
@@ -1180,7 +1180,7 @@ function y_series(N, x) { // ----- Iterative spherical Neumann y(n, x)
   return y;
 }
 // ----- soft sphere scattering function (exact solution)
-function ss(ka, th, a) {
+function exact_ss(ka, th, a) {
   const M = Math.floor(ka) + 5;
   const j = j_series(M, ka), y = y_series(M, ka), P = LP_series(M, Math.cos(th));
   let sum = cmath.cplx(0, 0);
@@ -1199,7 +1199,7 @@ function soft_sphere(aa, ff0, cc0, th00, ph00) { // using document parameters, f
 	var ph0 = ph00||parseFloat(document.getElementById('ph').value);   // not used
 	var s='',lbs=0;
 	for(var i=0;i<=360;i++) {
-		var r = cmath.abs(ss(2*Math.PI*f0/c0*a,(i-th0)*Math.PI/180,a))
+		var r = cmath.abs(exact_ss(2*Math.PI*f0/c0*a,(i-th0)*Math.PI/180,a))
 		s += ''+i+'\t'+r.toFixed(6)+'\n';
 		if(i==((th0+180)%360)) lbs=r;
 	}
@@ -1866,25 +1866,37 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
   //svg_createpoint(svg,"th_xy",V(P(p3)),circle_onoff?"green":"none",t3);
 
   var p3 = rot(Ry(ph), r*Math.cos((th+180)*pi/180), r*Math.sin((th+180)*pi/180), 0);
+  var p3a = rot(Ry(ph), (r+l/8)*Math.cos((th+180)*pi/180), (r+l/8)*Math.sin((th+180)*pi/180), 0);
   var p3b = rot(Ry(ph), (r+l/2)*Math.cos((th+180)*pi/180), (r+l/2)*Math.sin((th+180)*pi/180), 0);
+  var p3c = rot(Ry(ph), (r+l/8/2)*Math.cos((th+180)*pi/180), (r+l/8/2)*Math.sin((th+180)*pi/180), 0);
+  var p3d = rot(Ry(ph), (r+l/32)*Math.cos((th+180)*pi/180), (r+l/32)*Math.sin((th+180)*pi/180), 0);
   var pp3=[[V(P(p3b)),V(P(p3))]];	
   var t3 = '\u03b8='+th + " " + "\u03a6=" + ph;
   var el;
-  if(point_source) { // point source
-	  el=svg_createpoint(svg,"th_xy",V(P(p3)),circle_onoff?(rr<0?"gray":point_source?"black":"red"):"none",t3);
-  	  el=svg_createpath(svg,"th_xy_a",[[]],"none",1,"1,0",0,"none",0.25);	// aperture
-	  el=svg_createpath(svg,"th_xy_d",[[]],"black",1.5,"1,0",1);	        // arrow
-  } else if(aperture) { // aperture
-	  ap = circle3D(p3,rot(Ry(ph),Math.cos((th+180)*pi/180),Math.sin((th+180)*pi/180),0),l/2);
-	  for(i=0;i<ap.length;i++) ap[i] = V(P(ap[i]));
-	  el=svg_createpath(svg,"th_xy_a",[ap],"gray",1,"1,0",0,"gray",0.25);	// aperture
+  if(aperture) { // aperture
+	  var d = rot(Ry(ph),Math.cos((th+180)*pi/180),Math.sin((th+180)*pi/180),0);
+	  ap = circle3D(p3,d,l/2);
+	  ap1 = rectangle3D(p3c,d,l/8,2*l/2)
+	  ap2 = circle3D(p3d,d,l/2);
+	  for(i=0;i<ap.length;i++) {ap[i] = V(P(ap[i])); ap1[i] = V(P(ap1[i])); ap2[i] = V(P(ap2[i]));}
+	  //el=svg_createpath(svg,"th_xy_a1",[ap1],"gray",1,"1,0",0,"gray",0.25);	// aperture
+	  el=svg_createpath(svg,"th_xy_a",[ap],"lightgray",1,"1,0",0,"gray",0.25);	// aperture
+	  el=svg_createpath(svg,"th_xy_a2",[ap2],"lightgray",1,"1,0",0,"gray",0.25);	// aperture
   	  el=svg_createpoint(svg,"th_xy",[[]],"none");	                        // clear point
 	  el=svg_createpath(svg,"th_xy_d",[[]],"black",1.5,"1,0",1);	        // clear arrow
+  } else if(point_source) { // point source
+	  el=svg_createpoint(svg,"th_xy",V(P(p3)),circle_onoff?(rr<0?"gray":point_source?"black":"red"):"none",t3);
+	  el=svg_createpath(svg,"th_xy_a",[[]],"none",1,"1,0",0,"none",0.25);	// aperture
+	  //el=svg_createpath(svg,"th_xy_a1",[[]],"none",1,"1,0",0,"none",0.25);	// aperture
+	  el=svg_createpath(svg,"th_xy_a2",[[]],"none",1,"1,0",0,"none",0.25);	// aperture
+	  el=svg_createpath(svg,"th_xy_d",[[]],"black",1.5,"1,0",1);	        // arrow
   } else {  // plane wave
 	  el=svg_createpath(svg,"th_xy_d",pp3,"black",1.5,"1,0",1);	            // arrow
 	  el.setAttribute("marker-end","url(#arrowhead)");
   	  el.innerHTML = "<title>"+t3+"</title>";
   	  el=svg_createpath(svg,"th_xy_a",[[]],"none",1,"1,0",0,"none",0.25);	// clear aperture
+  	  //el=svg_createpath(svg,"th_xy_a1",[[]],"none",1,"1,0",0,"none",0.25);	// clear aperture
+  	  el=svg_createpath(svg,"th_xy_a2",[[]],"none",1,"1,0",0,"none",0.25);	// clear aperture
   	  el=svg_createpoint(svg,"th_xy",[[]],"none");	                        // clear point
     }
 }
@@ -1904,6 +1916,36 @@ function circle3D(center, normal, radius, segments = 64) {
 			center[2] + radius * (Math.cos(theta) * u.z + Math.sin(theta) * v.z)] );
   }
   return pts;
+}
+function buildBasis(normal) {
+  const nLen = Math.hypot(normal.x, normal.y, normal.z);
+  const n = {x: normal.x / nLen, y: normal.y / nLen,z: normal.z / nLen};
+  let a = Math.abs(n.x) < 0.9 ? {x: 1, y: 0, z: 0} : {x: 0, y: 1, z: 0}; // helper vector not parallel to n
+  let u = {x:a.y * n.z - a.z * n.y, y:a.z * n.x - a.x * n.z, z:a.x * n.y - a.y * n.x}; // u = normalize(a × n)
+  const uLen = Math.hypot(u.x, u.y, u.z);
+  u = {x: u.x / uLen, y: u.y / uLen, z: u.z / uLen };
+  const v = {x:n.y * u.z - n.z * u.y, y:n.z * u.x - n.x * u.z, z: n.x * u.y - n.y * u.x}; // v = n × u
+  return {u, v, n};
+}
+function normalize3(v) {
+  const len = Math.hypot(v.x, v.y, v.z);
+  return { x: v.x / len, y: v.y / len, z: v.z / len };
+}
+function cross3(a, b) {
+  return {x: a.y * b.z - a.z * b.y,y: a.z * b.x - a.x * b.z,z: a.x * b.y - a.y * b.x};
+}
+function rectangleNormalPerpendicularTo(givenNormal) { // givenNormal = n0 (normal of the known plane)
+  const n0 = normalize3(givenNormal);
+  let a = Math.abs(n0.x) < 0.9 ? {x: 1, y: 0, z: 0} : {x: 0, y: 1, z: 0};   // pick any vector not parallel to n0
+  let nr = cross3(a, n0);   // n_r = normalize(a × n0)  -> this is perpendicular to n0
+  return normalize3(nr); // this is the rectangle plane normal
+}
+function rectangle3D(c, normal, width, height) {
+  const nr = rectangleNormalPerpendicularTo({x:normal[0],y:normal[1],z:normal[2]}); // rectangle plane normal
+  const {u, v} = buildBasis(nr);
+  const hw = width / 2, hh = height / 2;
+  const corners = [{x: -hw, y: -hh}, {x:  hw, y: -hh}, {x:  hw, y:  hh}, {x: -hw, y:  hh}];
+  return corners.map(p => [c[0] + p.x * u.x + p.y * v.x, c[1] + p.x * u.y + p.y * v.y, c[2] + p.x * u.z + p.y * v.z]);
 }
 
 
@@ -2641,6 +2683,7 @@ function change1() {
 					//document.getElementById("txt2").value = "# re(p_i) im(p_i) re(v_n) im(v_n)\n"+
 					//	s1.map(s=>s.slice(1)).join('\n');
 					if(s2) {
+						if(img_was_on) {img_onoff = 1; imag_was_on = 0; } // cancel flag;
 						var s2a = s2.map(s=>s.slice(3)).join('\n'); // skip "## "
 						document.getElementById("txt2").value = "# abs(p_sc)\n"+s2a;
 						update_near_field(s2a);
@@ -2689,7 +2732,7 @@ function change1() {
 		plot("P","#");			 	// clear calculation plot
 		var el = document.getElementById("svgimg");
 		if(el) {el.setAttribute("href","")} // clear image
-		if(img_onoff) {img_onoff=0; update();}
+		if(img_onoff) {img_was_on = 1; img_onoff=0; update();}
 		var el = document.getElementById("txt2");
 		if(el && el.value.startsWith("# abs(p_sc)")) {el.value="";}
 		if(fx.length<5500) {
