@@ -738,6 +738,15 @@ r<0 - circular piston"
 onchange="select3()" value="0" style="width:48px"/> &lambda;
 <br><br>
 
+<span hidden1>
+<label for="r0">Source aperture (0-point source): <i>b<sub>0</sub></i> =</label> 
+<input type="number" id="b0" title=
+"b0=0 - point source
+b0>0 - circular piston"
+onchange="select3()" value="0.5" style="width:48px"/> &lambda;
+<br><br>
+</span>
+
 <span id="connect">
 <label for="echoSMs_url" title="EchoSMs WEB API URL"><a href="https://ices-tools-dev.github.io/echoSMs/datastore_API/">EchoSMs anatomical data store</a> endpoint URL<a href="mm-echosms.html" style="text-decoration:none" title="All specimens preview">*</a>:</label>
 <br><input id="echoSMs_url" type="text" value="" style="width:440px;background-color:#e6fff2;"/>
@@ -1231,6 +1240,44 @@ function exact_ss2(k, a, r, th) {
   }
   return sum;   // p_scat(r, θ)
 }
+// Scattered pressure from soft sphere, d=0 - plane-wave incidence along +z, d!=0 - point source
+// k – wavenumber, a – sphere radius, r – observation radius (r>=a), th – polar angle, d - point distance
+function ipow(n) { // i^n helper
+  const m = n % 4;
+  if (m === 0) return cmath.cplx(1, 0);
+  if (m === 1) return cmath.cplx(0, 1);
+  if (m === 2) return cmath.cplx(-1, 0);
+  return cmath.cplx(0, -1); // m === 3
+  //return cmath.cplx(m==0?1:m==1?0:m==2?-1:0, m==0?0:m==1?1:m==2?0:-1);
+}
+function exact_ss2scat(k, a, r, th, d) {
+  const ka = k * a, kr = k * r;
+  const M = Math.floor(ka) + 5; // truncation based on size parameter ka
+  const j_ka = j_series(M, ka), y_ka = y_series(M, ka);
+  const j_kr = j_series(M, kr), y_kr = y_series(M, kr);
+  const j_kd = j_series(M, k*d);
+  const P    = LP_series(M, Math.cos(th));
+  let sum = cmath.cplx(0, 0);
+  for (let n = 0; n <= M; n++) {
+    const twoNp1 = 2 * n + 1;
+    const h_ka = cmath.cplx(j_ka[n], y_ka[n]); // h_n(ka)
+    const h_kr = cmath.cplx(j_kr[n], y_kr[n]); // h_n(kr)
+    const ratio = cmath.div(cmath.cplx(j_ka[n], 0), h_ka); // j_n(ka) / h_n(ka)    
+    const i_n = ipow(n);                       // i^n
+	const j_nd = cmath.cplx(j_kd[n],0);        // point source distance d=r0
+    var coeff;// = cmath.mul(i_n, ratio); // coeff_n = -(2n+1)*i^n*(j_n(ka)/h_n(ka))*P_n(cos th)
+	if(d==0) {
+		coeff = cmath.mul(i_n, ratio); // coeff_n = -(2n+1)*i^n*(j_n(ka)/h_n(ka))*P_n(cos th)
+	} else {
+		coeff = cmath.mul(j_nd, ratio); // coeff_n = -(2n+1)*i^n*(j_n(ka)/h_n(ka))*P_n(cos th)
+	}
+	coeff = cmath.mul(coeff, cmath.cplx(-twoNp1 * P[n], 0));
+    const term = cmath.mul(coeff, h_kr);         // term_n = coeff_n * h_n(kr)
+    sum = cmath.add(sum, term);
+  }
+  return sum; // p_scat(r, th) for plane wave incidence
+}
+
 
 function soft_sphere(aa, ff0, cc0, th00, ph00) { // using document parameters, for 360 angles, returning two-column string
 	var a = aa||0.01905; 
@@ -1874,12 +1921,14 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
   var r = (r0max * 1.5)||(c0/f0/2 * 5); //Math.sqrt(2);
   
   var rr = parseFloat(document.getElementById("r0")?.value);
+  var b0 = parseFloat(document.getElementById("b0")?.value);
   var point_source = false, aperture=false;
   if(rr!=0 && rr!=NaN) {
 	  point_source = (rr>0);
 	  aperture = (rr<0);
 	  r = Math.abs(rr) * c0/f0;
   }
+  b0 *= c0/f0;
 
 // --- two circles for showing wave direction
 
@@ -1931,10 +1980,10 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
   var el;
   if(aperture) { // aperture
 	  var d = rot(Ry(ph),Math.cos((th+180)*pi/180),Math.sin((th+180)*pi/180),0);
-	  ap = circle3D(p3,d,l/2);
-	  ap1 = rectangle3D(p3c,d,l/8,2*l/2)
-	  ap2 = circle3D(p3d,d,l/2);
-	  for(i=0;i<ap.length;i++) {ap[i] = V(P(ap[i])); ap1[i] = V(P(ap1[i])); ap2[i] = V(P(ap2[i]));}
+	  ap = circle3D(p3,d,b0);
+	  //ap1 = rectangle3D(p3c,d,l/8,2*l/2)
+	  ap2 = circle3D(p3d,d,b0);
+	  for(i=0;i<ap.length;i++) {ap[i] = V(P(ap[i])); /*ap1[i] = V(P(ap1[i]));*/ ap2[i] = V(P(ap2[i]));}
 	  //el=svg_createpath(svg,"th_xy_a1",[ap1],"gray",1,"1,0",0,"gray",0.25);	// aperture
 	  el=svg_createpath(svg,"th_xy_a",[ap],"lightgray",1,"1,0",0,"gray",0.25);	// aperture
 	  el=svg_createpath(svg,"th_xy_a2",[ap2],"lightgray",1,"1,0",0,"gray",0.25);	// aperture
@@ -2436,8 +2485,8 @@ function msave(pname,generated_mesh) {
 
 var js_soft_sphere_worker_header=`
 onmessage = function(e) {
-	[lines,th,f0,c0,ph] = JSON.parse(e.data);
-	var s = js_soft_sphere_worker(lines,th,f0,c0,ph);
+	[lines,th,f0,c0,ph,r0,b0] = JSON.parse(e.data);
+	var s = js_soft_sphere_worker(lines,th,f0,c0,ph,r0,b0);
 	//postMessage(JSON.stringify(s));  // done in the worker
 }
 const cmath = { // Complex math functions 
@@ -2519,14 +2568,18 @@ function ipow(n) { // i^n helper
   if (m === 1) return cmath.cplx(0, 1);
   if (m === 2) return cmath.cplx(-1, 0);
   return cmath.cplx(0, -1); // m === 3
+  //return cmath.cplx(m==0?1:m==1?0:m==2?-1:0, m==0?0:m==1?1:m==2?0:-1);
 }
-// Scattered pressure from soft sphere, plane-wave incidence along +z
-// k – wavenumber, a – sphere radius, r – observation radius (r >= a), th – polar angle
-function exact_ss2scat(k, a, r, th) {
-  const ka = k * a, kr = k * r;
+// Scattered pressure from soft sphere, d=0 - plane-wave incidence along +z, d!=0 - point source
+// k – wavenumber, a – sphere radius, r – observation radius (r>=a), th – polar angle, d - point distance
+function exact_ss2scat(k, a, r, th, d, b) {
+  //console.log("exact_ss2scat():",k, a, r, th, d, b);
+  const ka = k * a, kr = k * r, kd = k * d;
   const M = Math.floor(ka) + 5; // truncation based on size parameter ka
   const j_ka = j_series(M, ka), y_ka = y_series(M, ka);
   const j_kr = j_series(M, kr), y_kr = y_series(M, kr);
+  const j_kd = j_series(M, kd);
+  const A = d<0 ? pistonCoeffs(k, b, d, Math.floor(ka)+5) : 0;
   const P    = LP_series(M, Math.cos(th));
   let sum = cmath.cplx(0, 0);
   for (let n = 0; n <= M; n++) {
@@ -2535,7 +2588,9 @@ function exact_ss2scat(k, a, r, th) {
     const h_kr = cmath.cplx(j_kr[n], y_kr[n]); // h_n(kr)
     const ratio = cmath.div(cmath.cplx(j_ka[n], 0), h_ka); // j_n(ka) / h_n(ka)    
     const i_n = ipow(n);                       // i^n
-    let coeff = cmath.mul(i_n, ratio);         // coeff_n = -(2n+1) * i^n * (j_n(ka)/h_n(ka)) * P_n(cos th)
+	const j_nd = cmath.cplx(j_kd[n],0);        // point source distance
+    //let coeff = cmath.mul(i_n, ratio); // coeff_n = -(2n+1)*i^n*(j_n(ka)/h_n(ka))*P_n(cos th)
+    let coeff = cmath.mul( (d==0)? i_n : (d<0)? A[n] : j_nd, ratio);
     coeff = cmath.mul(coeff, cmath.cplx(-twoNp1 * P[n], 0));
     const term = cmath.mul(coeff, h_kr);         // term_n = coeff_n * h_n(kr)
     sum = cmath.add(sum, term);
@@ -2551,14 +2606,51 @@ function exact_ss2total(k, a, r, th) { // TOTAL FIELD = incident + scattered
 	const p_scat = exact_ss2scat(k, a, r, th); 
 	return cmath.add(p_inc, p_scat); 
 }
+// Compute piston spherical-harmonic coefficients A_n
+// k–wavenumber, b–piston radius, z0–piston distance from sphere center (coaxial), Nmax–highest mode needed (≈ floor(ka)+5)
+function pistonCoeffs(k, b, z0, Nmax) {
+  const Nint = 200; // number of integration points (increase if needed)
+  const dr = b / Nint;
+  // Precompute Legendre polynomials P_n(x) for all n
+  // We'll evaluate P_n(cosθ(r')) inside the loop
+  let A = new Array(Nmax+1).fill(0).map(() => cmath.cplx(0,0));
+  for (let i = 0; i <= Nint; i++) {
+    const rprime = i * dr;
+    const R = Math.sqrt(z0*z0 + rprime*rprime);
+    const cos_th = z0 / R;
+    const j_kR = j_series(Nmax, k*R);      // spherical Bessel j_n(kR)
+    const P = LP_series(Nmax, cos_th);     // Legendre P_n(cosθ)
+    const w = rprime / R * dr;             // weight for integration
+    for (let n = 0; n <= Nmax; n++) {
+      const term = cmath.cplx(j_kR[n] * P[n] * w, 0); // integrand: j_n(kR) * P_n(cosθ)
+      A[n] = cmath.add(A[n], term);
+    }
+  }
+  // Multiply by piston prefactor: 2π i ρ0 c0 k v0
+  // For scattering, you can set ρ0 c0 v0 = 1 (relative amplitude)
+  // const pref = cmath.cplx(0, 2*Math.PI*k);   // i * 2π * k
+  const rho0 = 1000, c0   = 1480; // water
+  const omega = c0 * k;
+  const u0 = 5e-11;
+  const v0 = cmath.cplx(0, omega * u0); // i ω u0
+  const base = cmath.cplx(0, 2*Math.PI * k * rho0 * c0); // i 2π k ρ0 c0
+  const pref = cmath.mul(base, v0);                      // × v0 = i ω u0
+  for (let n = 0; n <= Nmax; n++) {
+    A[n] = cmath.mul(pref, A[n]);
+  }
+  return A; // array of complex coefficients A[n]
+}
 
-function soft_sphere(aa, ff0, cc0, th00, ph00) { // using document parameters, for 360 angles, returning two-column string
+function soft_sphere(aa, f00, c00, th00, ph00, r00, b00) { // 360 angles, returning two-column string
 	var a = aa||0.01905; 
-	var f0 = ff0||38e3;
-	var c0 = cc0||1480.;
+	var f0 = f00||38e3;
+	var c0 = c00||1480.;
 	var th0 = th00||0; 
-	var ph0 = ph00||0    // not used
+	var ph0 = ph00||0;    // not used
+	var r0 = r00||0;      // in lambda's
+	var b0 = b00||0;      // in lambda's	
 	var s='',lbs=0;
+	//console.log("soft_sphere: ",f0,c0,r0,b0);
 	for(var i=0;i<=360;i++) {
 		var r = cmath.abs(exact_ss(2*Math.PI*f0/c0*a,(i-th0)*Math.PI/180,a))
 		s += ''+i+' '+r.toFixed(6)+'\\n';
@@ -2570,11 +2662,11 @@ function soft_sphere(aa, ff0, cc0, th00, ph00) { // using document parameters, f
 	
 	var nn = 3; // every 3 deg
 	var NR = 15, NT = 360, RR = Array.from({length:NR},(_,i)=>0.004*(i+1)); // the same code as in calculation worker
-	console.log("soft_sphere:",2*Math.PI*f0/c0,a,RR)
+	//console.log("soft_sphere:",2*Math.PI*f0/c0,a,RR)
 	for(var j=0;j<RR.length;j++) {
 		s += '## ';
 		for(var i=0;i<=NT;i+=nn) {
-			var r = (RR[j]>a) ? cmath.abs(exact_ss2scat(2*Math.PI*f0/c0, a, RR[j], (i-th0)*Math.PI/180)) : 0;
+			var r = (RR[j]>a)?cmath.abs(exact_ss2scat(2*Math.PI*f0/c0,a,RR[j],(i-th0)*Math.PI/180,r0*c0/f0,b0*c0/f0)):0;
 			s += ''+r.toFixed(6)+' ';
 		}
 		s += '\\n';
@@ -2627,10 +2719,12 @@ function js_soft_sphere() {
 	f0 = parseFloat(document.getElementById("f0").value);
 	c0 = parseFloat(document.getElementById("c0").value);
 	ph = parseFloat(document.getElementById("ph").value);
-	worker.postMessage(JSON.stringify([lines,th,f0,c0,ph]));	
+	r0 = parseFloat(document.getElementById("r0").value);
+	b0 = parseFloat(document.getElementById("b0").value);
+	worker.postMessage(JSON.stringify([lines,th,f0,c0,ph,r0,b0]));	
 }
 
-function js_soft_sphere_worker(obj,th,f0,c0,ph) {
+function js_soft_sphere_worker(obj,th,f0,c0,ph,r0,b0) {
 	var fmin,fmax,fstep,thmin,thmax,thstep,phmin,phmax,phstep;
 
 postMessage('[Soft sphere exact solution: ...]');
@@ -2644,7 +2738,8 @@ postMessage('[Soft sphere exact solution: ...]');
 	for(var f00 = fmin; f00 <= fmax; f00 += fstep) {
 		for(var ph0 = phmin; ph0 <= phmax; ph0 += phstep) {
 			for(var th0 = thmin; th0 <= thmax; th0 += thstep) {
-				var obj2 = obj.replace(')',','+f00+','+c0+','+th0+','+ph0+')');
+				var obj2 = obj.replace(')',','+f00+','+c0+','+th0+','+ph0+','+r0+','+b0+')');
+				//console.log("eval:",obj2);
 				var s = eval(obj2);
 				postMessage(JSON.stringify(s));  // type 1 - scattering length
 				var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
