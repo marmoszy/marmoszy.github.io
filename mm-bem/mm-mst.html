@@ -592,7 +592,7 @@ function parseSpheresString(str) {
 function change() {
 	var s = document.getElementById("p").value;
     var m = s.match(/th=(\d+)\&ph=(\d+)\&obj=(.*)/);
-	var th=m[1], ph=m[2], obj=m[3];
+	var th = parseFloat(m[1]), ph = parseFloat(m[2]), obj=m[3];
 	var s = calc(obj, 38e3, 1480, th, ph);
 	document.getElementById("ta").value = s
 }
@@ -600,8 +600,14 @@ function change() {
 function calc(obj, f0, c0, th, ph) {
 	var k = 2*Math.PI*f0 / c0;
 
-	var theta = th * Math.PI/180 + Math.PI, phi = ph * Math.PI/180 + Math.PI;
-	var kdir = {x: Math.sin(theta)*Math.cos(phi), y: Math.sin(theta)*Math.sin(phi), z: Math.cos(theta)};
+	//var theta = th * Math.PI/180 + Math.PI, phi = ph * Math.PI/180 + Math.PI;
+	//var kdir = {x: Math.sin(theta)*Math.cos(phi), y: Math.sin(theta)*Math.sin(phi), z: Math.cos(theta)};
+	
+	var theta = th * Math.PI/180, phi = ph * Math.PI/180;
+	var d = {x: -Math.cos(theta), y: -Math.sin(theta), z:0};
+	var c = Math.cos(phi), s = Math.sin(phi);
+	var kdir = {x:c*d.x+s*d.z, y: d.y, z:-s*d.x+c*d.z};
+	
 	console.log("kdir",kdir);
 
 	var spheres = parseSpheresString(obj);	
@@ -612,31 +618,32 @@ function calc(obj, f0, c0, th, ph) {
 	var obs1 = {x: -kdir.x * r1, y: -kdir.y * r1, z: -kdir.z * r1};
 	let p_bsc = evaluateField(obs1, spheres, B, k, Nmax);	
 	
-	var s ='';
+	var ss ='';
 	for(var i=0;i<360;i++) {	                                // scattering angular function
 		var a = i*Math.PI/180;
-		var pt = {x: 0, y: -r1*Math.sin(a), z: -r1*Math.cos(a)};
+		var p = {x: -r1*Math.cos(a), y: -r1*Math.sin(a), z:0};
+		var pt = {x: c*p.x+s*p.z, y: p.y, z:-s*p.x+c*p.z};
 		var p_scat = evaluateField(pt, spheres, B, k, Nmax);
-	    s += i+' '+cmath.abs(p_scat)+'\n';
+	    ss += i+' '+cmath.abs(p_scat)+'\n';
 	}
-	return(s);
+	return(ss);
 }
 
-/*
-var th = 270;
-var ph = 0;
+
+var th = 0;
+var ph = 90;
 var obj="[spheres(0.005,2,[1,1,2],[0.01,0.01,0.01])]";
 document.getElementById("p").value = 'https://marmoszy.github.io/mm-bem/mm-bem2.html?th='+th+'&ph='+ph+'&obj='+obj;
 change();
-*/
 
-	
+
+/*
 // --------------------- acoustics
 
 var rho0 = 1000;
 var c0   = 1480;
-var f    = 38000;
-var omega = 2*Math.PI*f;
+var f0    = 38000;
+var omega = 2*Math.PI*f0;
 var k = omega / c0;
 
 //---------------------- geometry
@@ -652,31 +659,36 @@ var obj="[spheres(0.005,2,[1,1,2],[0.01,0.01,0.01])]";
 var spheres = parseSpheresString(obj);
 
 //---------------------- directions
-var kx=0, ky=0, kz=-1;                                       // wave direction
-var kdir = { x: kx, y: ky, z: kz };                         // must be normalized
-var th = (Math.atan2(-ky,-kx)*180/Math.PI+360)%360, ph = (Math.atan2(kz,-kx)*180/Math.PI+360)%360;
+//var kx=0, ky=0, kz=-1;                                       // wave direction
+//var kdir = { x: kx, y: ky, z: kz };                         // must be normalized
+//var th = (Math.atan2(-ky,-kx)*180/Math.PI+360)%360, ph = (Math.atan2(kz,-kx)*180/Math.PI+360)%360;
 
 //var th0 = 270, ph0 = 0;
-//var th = 0, ph = 90;
-//var theta = th * Math.PI/180 + Math.PI, phi = ph * Math.PI/180 + Math.PI;
-//var kdir = {x: Math.sin(theta)*Math.cos(phi), y: Math.sin(theta)*Math.sin(phi), z: Math.cos(theta)};
-
-var r1 = 1; var obs1 = {x: -kdir.x * r1, y: -kdir.y * r1, z: -kdir.z * r1}; // observation point
+var th = 0, ph = 90;
+var theta = th * Math.PI/180, phi = ph * Math.PI/180;
+var d = {x: -Math.cos(theta), y: -Math.sin(theta), z:0};
+var c = Math.cos(phi), s = Math.sin(phi);
+var kdir = {x: c*d.x+s*d.z, y: d.y, z: -s*d.x+c*d.z};
+var r1 = 1; 
+var obs1 = {x: -kdir.x * r1, y: -kdir.y * r1, z: -kdir.z * r1}; // observation point
 
 document.getElementById("p").value = "https://marmoszy.github.io/mm-bem/mm-bem2.html?th="+th+'&ph='+ph+'&obj='+obj;
+calc(obj, 38e3, 1480, th, ph) 
 
-
-//---------------------- MTS solution
-
+//---------------------- MST solution
 var [B, Nmax] = multiple_soft_spheres(spheres, k, kdir);
 let p_bsc = evaluateField(obs1, spheres, B, k, Nmax);
 console.log("Pressure at observation point:", obs1, p_bsc); // backscattering value
 
-for(var i=0;i<360;i++) {	                                // scattering angular function
-	var r1 = {x:0, y:-Math.sin(i*Math.PI/180), z:-Math.cos(i*Math.PI/180)};
-	var p_scat= evaluateField(r1, spheres, B, k, Nmax);
+for(var i=0; i<360; i++) {	                                // scattering angular function
+	var a = i*Math.PI/180;
+	var p = {x: -r1*Math.cos(a), y: -r1*Math.sin(a), z:0};
+	var c = Math.cos(phi), s = Math.sin(phi);
+	var pt = {x: c*p.x+s*p.z, y: p.y, z:-s*p.x+c*p.z};
+	var p_scat = evaluateField(pt, spheres, B, k, Nmax);
     strlog(i+' '+cmath.abs(p_scat));
 }
+*/
 
 //--------------------------------
 
