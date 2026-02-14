@@ -1,0 +1,706 @@
+<style>
+input,textarea {font-size:14pt;}
+</style>
+<h2> Multiple Scattering from Sphere Lattice</h2>
+<p>
+<input id="p" type="text" onchange="change();" style="width:960px"></input>
+<p>
+<textarea id="ta" rows=20 cols=64></textarea>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js">
+</script>
+
+<script>
+const cmath = { // Complex math functions 
+  cplx: (re, im) => ({ re, im }),
+  add: (a, b) => ({re: a.re + b.re, im: a.im + b.im}),
+  sub: (a, b) => ({re: a.re - b.re, im: a.im - b.im}),
+  abs: (c) => Math.sqrt(c.re * c.re + c.im * c.im),
+  mul: (a, b) => ({re: a.re * b.re - a.im * b.im,im: a.re * b.im + a.im * b.re}),
+  mulReal: (a, k) => ({re: a.re * k, im: a.im * k}),
+  div: (a, b) => {const denom = b.re * b.re + b.im * b.im;
+    return {re: (a.re * b.re + a.im * b.im) / denom,im: (a.im * b.re - a.re * b.im) / denom};
+  }
+};
+
+function gaussianEliminationComplex(A, b) {
+  const n = A.length;
+  const x = Array(n).fill(null);
+  for (let k = 0; k < n; k++) {   // Forward elimination
+    let maxRow = k;     // --- Pivoting
+    for (let i = k + 1; i < n; i++) {
+      if (cmath.abs(A[i][k]) > cmath.abs(A[maxRow][k])) {
+        maxRow = i;
+      }
+    }
+    [A[k], A[maxRow]] = [A[maxRow], A[k]];
+    [b[k], b[maxRow]] = [b[maxRow], b[k]];
+    for (let i = k + 1; i < n; i++) {     // --- Eliminate below
+      const factor = cmath.div(A[i][k],A[k][k]);
+      for (let j = k; j < n; j++) {
+        A[i][j] = cmath.sub(A[i][j],cmath.mul(factor,A[k][j]));
+      }
+      b[i] = cmath.sub(b[i],cmath.mul(factor,b[k]));
+    }
+  }
+  for (let i = n - 1; i >= 0; i--) {   // --- Back substitution
+    let sum = cmath.cplx(b[i].re,b[i].im);
+    for (let j = i + 1; j < n; j++) {
+      sum = cmath.sub(sum,cmath.mul(A[i][j],x[j]));
+    }
+    x[i] = cmath.div(sum,A[i][i]);
+  }
+  return x;
+}
+
+function solveComplexLinearSystem(A, b) { // using math.js
+	//return gaussianEliminationComplex(A, b) 
+	var AA=[]
+	for(var i=0;i<A.length;i++) {
+		var aa=[];
+		for(var j=0;j<A[i].length;j++) {
+			aa.push(math.complex(A[i][j].re,A[i][j].im));
+		}
+		AA.push(aa);
+	}
+	var bb=[];
+	for(var i=0;i<b.length;i++) {
+		bb.push(math.complex(b[i].re,b[i].im));
+	}
+	var xx = math.lusolve(AA,bb);
+	var x=[];
+	for(var i=0;i<xx.length;i++) {
+		x.push(cmath.cplx(xx[i][0].re,xx[i][0].im));
+	}
+	return x;
+}
+
+</script>
+
+<script>
+function makeCoeffArray(Nmax) {
+    let arr = [];
+    for (let n = 0; n <= Nmax; n++) {
+        arr[n] = new Array(2*n + 1);
+        for (let idx = 0; idx < 2*n + 1; idx++) {
+            arr[n][idx] = cmath.cplx(0,0);
+        }
+    }
+    return arr;
+}
+function applyTmatrix(A_sphere, Tn, Nmax) {
+    let B_sphere = makeCoeffArray(Nmax);
+    for (let n = 0; n <= Nmax; n++) {
+        for (let m = -n; m <= n; m++) {
+            let idx = m + n;  // shift m to 0..2n
+            B_sphere[n][idx] = cmath.mul(Tn[n], A_sphere[n][idx]);
+        }
+    }
+    return B_sphere;
+}
+function localIndex(n, m, Nmax) {
+    // n = 0..Nmax, m = -n..n
+    let idx = 0;
+    for (let nn = 0; nn < n; nn++) {
+        idx += (2*nn + 1);
+    }
+    idx += (m + n); // shifted m
+    return idx;     // 0 .. M-1
+}
+function globalIndex(s, n, m, Nmax) {
+    const M = (Nmax+1)*(Nmax+1);
+    return s*M + localIndex(n, m, Nmax);
+}
+function flattenCoeffs(coeff, Nmax) {
+    let out = [];
+    for (let n = 0; n <= Nmax; n++) {
+        for (let m = -n; m <= n; m++) {
+            out.push(coeff[n][m+n]);
+        }
+    }
+    return out;
+}
+function unflattenCoeffs(vec, Nmax) {
+    let coeff = makeCoeffArray(Nmax);
+    let k = 0;
+    for (let n = 0; n <= Nmax; n++) {
+        for (let m = -n; m <= n; m++) {
+            coeff[n][m+n] = vec[k++];
+        }
+    }
+    return coeff;
+}
+// r_ij: {x, y, z} = center_i - center_j  (vector from j to i)
+// B_j:  nested coeffs for sphere j: B_j[n][m+n] = cplx
+// k:    wavenumber
+// Nmax: truncation order
+function translateSphere(r_ij, B_j, k, Nmax) {
+    let A_ij = makeCoeffArray(Nmax);
+    // 1. Convert r_ij to spherical coordinates (R, theta, phi)
+    const dx = r_ij.x;
+    const dy = r_ij.y;
+    const dz = r_ij.z;
+    const R = Math.sqrt(dx*dx + dy*dy + dz*dz);
+    const theta = (R === 0) ? 0 : Math.acos(dz / R);      // 0..π
+    const phi   = Math.atan2(dy, dx);                    // -π..π
+    // 2. Loop over source modes (n', m') on sphere j
+    for (let np = 0; np <= Nmax; np++) {
+        for (let mp = -np; mp <= np; mp++) {
+            const idxp = mp + np;
+            const b_npmp = B_j[np][idxp]; // cplx
+            // skip if zero (optional micro-optimization)
+            if (b_npmp.re === 0 && b_npmp.im === 0) continue;
+            // 3. For each target mode (n, m) on sphere i
+            for (let n = 0; n <= Nmax; n++) {
+                for (let m = -n; m <= n; m++) {
+                    const idx = m + n;
+                    // Translation coefficient S_{nm,n'p'}(R,theta,phi)
+                    const S = translationCoeff(n, m, np, mp, k, R, theta, phi);
+                    // A_ij[nm] += S * b_npmp
+                    const contrib = cmath.mul(S, b_npmp);
+                    A_ij[n][idx] = cmath.add(A_ij[n][idx], contrib);
+                }
+            }
+        }
+    }
+    return A_ij;
+}
+function translationCoeff(n, m, np, mp, k, R, theta, phi) {
+    // If spheres coincide (should never happen)
+    if (R === 0) return cmath.cplx(0,0);
+    // Phase factor i^(np - n)
+    const phase_nm = complexIPow(np - n);
+    // Output accumulator
+    let S = cmath.cplx(0,0);
+    // Loop over coupling order L
+    const Lmin = Math.abs(n - np);
+    const Lmax = n + np;
+    for (let L = Lmin; L <= Lmax; L++) {
+        // i^L
+        const iL = complexIPow(L);
+        // h_L^{(1)}(kR)
+        const hL = sphHankel1(L, k*R);
+        // Spherical harmonic Y_L^{M} at direction (theta,phi)
+        const M = m - mp;
+        const YLM = sphericalHarmonic(L, M, theta, phi);
+        // Gaunt coefficient C_{n,m,np,mp,L,M}
+        const C = gauntCoefficient(n, m, np, mp, L, M);
+        // term = 4π * i^(np-n) * i^L * h_L * C * Y_L^{M}
+        let term = cmath.mul(
+            cmath.mul(
+                cmath.mul(
+                    cmath.mul(phase_nm, iL),
+                    hL
+                ),
+                C
+            ),
+            YLM
+        );
+        S = cmath.add(S, term);
+    }
+    // Multiply by 4π
+    return cmath.mulReal(S, 4*Math.PI);
+}
+function complexIPow(p) {
+    const mod = ((p % 4) + 4) % 4;
+    switch(mod) {
+        case 0: return cmath.cplx(1,0);
+        case 1: return cmath.cplx(0,1);
+        case 2: return cmath.cplx(-1,0);
+        case 3: return cmath.cplx(0,-1);
+    }
+}
+// Spherical Bessel j_0(x)
+function sphBesselJ0(x) {
+    if (x === 0) return 1;
+    return Math.sin(x) / x;
+}
+// Spherical Bessel j_1(x)
+function sphBesselJ1(x) {
+    if (x === 0) return 0;
+    return (Math.sin(x) / (x*x)) - (Math.cos(x) / x);
+}
+// General j_n(x) via upward recurrence
+function sphBesselJ(n, x) {
+    if (n === 0) return sphBesselJ0(x);
+    if (n === 1) return sphBesselJ1(x);
+
+    let jnm1 = sphBesselJ0(x); // j_0
+    let jn   = sphBesselJ1(x); // j_1
+    for (let l = 1; l < n; l++) {
+        const jnp1 = ((2*l + 1)/x) * jn - jnm1; // recurrence
+        jnm1 = jn;
+        jn   = jnp1;
+    }
+    return jn;
+}
+// Spherical Neumann y_0(x)
+function sphBesselY0(x) {
+    if (x === 0) return -Infinity;   // singular
+    return -Math.cos(x) / x;
+}
+// Spherical Neumann y_1(x)
+function sphBesselY1(x) {
+    if (x === 0) return -Infinity;
+    return -Math.cos(x)/(x*x) - Math.sin(x)/x;
+}
+// General y_n(x) via upward recurrence
+function sphBesselY(n, x) {
+    if (n === 0) return sphBesselY0(x);
+    if (n === 1) return sphBesselY1(x);
+    let ynm1 = sphBesselY0(x);  // y_0
+    let yn   = sphBesselY1(x);  // y_1
+    for (let l = 1; l < n; l++) {
+        const ynp1 = ((2*l + 1)/x) * yn - ynm1;
+        ynm1 = yn;
+        yn   = ynp1;
+    }
+    return yn;
+}
+
+function sphHankel1(n, x) {
+    // h_n = j_n + i y_n
+    const j = sphBesselJ(n, x);
+    const y = sphBesselY(n, x);
+    return cmath.cplx(j, y);
+}
+
+// Associated Legendre P_l^m(x), with m >= 0
+function assocLegendrePos(l, m, x) {
+    if (m > l) return 0;
+
+    // P_m^m(x)
+    let pmm = 1.0;
+    if (m > 0) {
+        const somx2 = Math.sqrt((1 - x)*(1 + x));
+        let fact = 1.0;
+        for (let i = 1; i <= m; i++) {
+            pmm *= -fact * somx2;
+            fact += 2.0;
+        }
+    }
+    if (l === m) return pmm;
+
+    // P_{m+1}^m(x)
+    let pmmp1 = x * (2*m + 1) * pmm;
+    if (l === m+1) return pmmp1;
+
+    // Upward recurrence for l > m+1
+    let pll = 0;
+    for (let ll = m+2; ll <= l; ll++) {
+        pll = ((2*ll - 1)*x*pmmp1 - (ll + m - 1)*pmm) / (ll - m);
+        pmm = pmmp1;
+        pmmp1 = pll;
+    }
+    return pll;
+}
+
+// Full associated Legendre P_l^m(x), including negative m
+function assocLegendre(l, m, x) {
+    if (m >= 0) {
+        return assocLegendrePos(l, m, x);
+    } else {
+        // Use the standard relation:
+        // P_l^{-m}(x) = (-1)^m * (l-m)!/(l+m)! * P_l^{m}(x)
+        const pm = assocLegendrePos(l, -m, x);
+        const sign = ((-m) % 2 === 0) ? 1 : -1;
+        return sign * pm * fact(l - m) / fact(l + m);
+    }
+}
+
+function sphericalHarmonic(n, m, theta, phi) {
+    const P = assocLegendre(n, Math.abs(m), Math.cos(theta));
+    const norm = Math.sqrt((2*n+1)/(4*Math.PI) * factorial(n-Math.abs(m))/factorial(n+Math.abs(m)));
+    const phase = (m < 0 && (m % 2 !== 0)) ? -1 : 1;
+    const real = norm * P * Math.cos(m*phi) * phase;
+    const imag = norm * P * Math.sin(m*phi) * phase;
+    return cmath.cplx(real, imag);
+}
+
+function factorial(n) {return fact(n);}
+	
+// factorial with memoization
+const factCache = {};
+function fact(n) {
+    if (n < 0) return 0;
+    if (n === 0 || n === 1) return 1;
+    if (factCache[n]) return factCache[n];
+    return factCache[n] = n * fact(n - 1);
+}
+
+// Wigner 3j symbol (j1 j2 j3; m1 m2 m3)
+function wigner3j(j1, j2, j3, m1, m2, m3) {
+    // Selection rules
+    if (m1 + m2 + m3 !== 0) return 0;
+    if (Math.abs(m1) > j1 || Math.abs(m2) > j2 || Math.abs(m3) > j3) return 0;
+    if (j3 > j1 + j2 || j3 < Math.abs(j1 - j2)) return 0;
+    // Triangle coefficient Δ(j1,j2,j3)
+    function triangle(j1, j2, j3) {
+        return Math.sqrt(
+            fact(j1 + j2 - j3) *
+            fact(j1 - j2 + j3) *
+            fact(-j1 + j2 + j3) /
+            fact(j1 + j2 + j3 + 1)
+        );
+    }
+    const prefactor =
+        Math.pow(-1, j1 - j2 - m3) *
+        triangle(j1, j2, j3) *
+        Math.sqrt(
+            fact(j1 + m1) * fact(j1 - m1) *
+            fact(j2 + m2) * fact(j2 - m2) *
+            fact(j3 + m3) * fact(j3 - m3)
+        );
+    // Summation limits
+    const tmin = Math.max(
+        0,
+        j2 - j3 - m1,
+        j1 - j3 + m2
+    );
+    const tmax = Math.min(
+        j1 + j2 - j3,
+        j1 - m1,
+        j2 + m2
+    );
+    let sum = 0;
+    for (let t = tmin; t <= tmax; t++) {
+        const denom =
+            fact(t) *
+            fact(j1 + j2 - j3 - t) *
+            fact(j1 - m1 - t) *
+            fact(j2 + m2 - t) *
+            fact(j3 - j2 + m1 + t) *
+            fact(j3 - j1 - m2 + t);
+        sum += Math.pow(-1, t) / denom;
+    }
+    return prefactor * sum;
+}
+
+function gauntCoefficient(n, m, np, mp, L, M) {
+    const pref = Math.sqrt((2*n+1)*(2*np+1)*(2*L+1)/(4*Math.PI));
+
+    const w1 = wigner3j(n, np, L, 0, 0, 0);
+    const w2 = wigner3j(n, np, L, m, mp, -M);
+
+    return cmath.cplx(pref * w1 * w2, 0);
+}
+
+function pistonExpansionAtSphere(sphere, k, Nmax, kdir) {
+    const r = Math.sqrt(sphere.x**2 + sphere.y**2 + sphere.z**2);
+    const theta = (r===0)?0:Math.acos(sphere.z/r);
+    const phi = Math.atan2(sphere.y, sphere.x);
+    let A = makeCoeffArray(Nmax);
+    for (let n = 0; n <= Nmax; n++) {
+        const jn = sphBesselJ(n, k*r);
+        const phase = complexIPow(n);  // i^n
+        for (let m = -n; m <= n; m++) {
+            const idx = m+n;
+            const Y = sphericalHarmonic(n, m, theta, phi);
+            let val = cmath.mulReal(Y, 4*Math.PI*jn);
+            val = cmath.mul(val, phase);
+            A[n][idx] = val;
+        }
+    }
+    return A;
+}
+
+function planeWaveExpansionAtSphere(sphere, k, Nmax, kdir) {
+    var phase = cmath.cplx(Math.cos(k*sphere.z), Math.sin(k*sphere.z)); // Plane wave along +z: p_inc = exp(i k z)
+	// phase = exp(i k (k̂ · r_s)) 
+	const dot = sphere.x*kdir.x + sphere.y*kdir.y + sphere.z*kdir.z; 
+	var phase = cmath.cplx(Math.cos(k*dot), Math.sin(k*dot));
+    let A = makeCoeffArray(Nmax);
+    for (let n = 0; n <= Nmax; n++) {
+        const coeff = cmath.mulReal(complexIPow(n),4*Math.PI*Math.sqrt((2*n+1)/(4*Math.PI))); // a_{n0} = 4π i^n sqrt((2n+1)/(4π))
+        const a_n0 = cmath.mul(phase, coeff);         // Multiply by phase factor exp(i k z_s)
+        A[n][n] = a_n0;   // index m+n = 0+n = n         // Store only m = 0, all other m are zero automatically
+    }
+    return A;
+}
+
+function multiple_soft_spheres(spheres, k, kdir) {
+	var Nspheres = spheres.length;
+	var a = spheres[0].a;
+	for(var i=1; i<Nspheres; i++) {
+		if(a<spheres[i].a) a = spheres[i].a;
+	}
+	var Nmax = Math.round(k*a)+5; // 7;  // good for ka ≈ 3
+	let Tn = [];
+	for (let n = 0; n <= Nmax; n++) {
+	    const jn = sphBesselJ(n, k*a);
+	    const hn = sphHankel1(n, k*a);  // complex
+		Tn[n] = cmath.div(cmath.cplx(-jn, 0), hn);  // Tn = - j_n / h_n
+	}
+	// Build incident coefficients for both spheres
+	let Aext = [];
+	for (let s = 0; s < Nspheres; s++) {
+	    Aext[s] = planeWaveExpansionAtSphere(spheres[s], k, Nmax, kdir);
+	}
+	const M = (Nmax+1)*(Nmax+1);
+	const Ntot = Nspheres * M;
+	// Global matrix A and RHS b
+	let A = new Array(Ntot);
+	let rhs = new Array(Ntot);
+	for (let i = 0; i < Ntot; i++) {
+	    A[i] = new Array(Ntot).fill(cmath.cplx(0,0));
+	    rhs[i] = cmath.cplx(0,0);
+	}
+	for (let s = 0; s < Nspheres; s++) {
+	    for (let n = 0; n <= Nmax; n++) {
+	        for (let m = -n; m <= n; m++) {
+	            const gi = globalIndex(s, n, m, Nmax);
+	            A[gi][gi] = cmath.cplx(1,0);
+	        }
+	    }
+	}
+	for (let s = 0; s < Nspheres; s++) {
+	    for (let n = 0; n <= Nmax; n++) {
+	        for (let m = -n; m <= n; m++) {
+	            const gi = globalIndex(s, n, m, Nmax);
+	            const idx = m+n;
+	            rhs[gi] = cmath.mul(Tn[n], Aext[s][n][idx]);
+	        }
+	    }
+	}
+	for (let i = 0; i < Nspheres; i++) {
+	    for (let j = 0; j < Nspheres; j++) {
+	        if (i === j) continue;
+	        const rij = {
+	            x: spheres[i].x - spheres[j].x,
+	            y: spheres[i].y - spheres[j].y,
+	            z: spheres[i].z - spheres[j].z
+	        };
+	        const Sij = translateSphere(rij, makeCoeffArray(Nmax), k, Nmax); 
+	        // Actually we need S applied to b_j, but here we only build matrix blocks.
+	        for (let n = 0; n <= Nmax; n++) {
+	            for (let m = -n; m <= n; m++) {
+	                const gi = globalIndex(i, n, m, Nmax);
+	                const idx = m+n;
+	                for (let np = 0; np <= Nmax; np++) {
+	                    for (let mp = -np; mp <= np; mp++) {
+	                        const gj = globalIndex(j, np, mp, Nmax);
+	                        const idxp = mp+np;
+	                        // A[i][j] = - T_n * S_{nm,n'm'}
+	                        const Sval = translationCoeff(n,m,np,mp,k,
+	                            Math.sqrt(rij.x**2+rij.y**2+rij.z**2),
+	                            Math.acos(rij.z/Math.sqrt(rij.x**2+rij.y**2+rij.z**2)),
+	                            Math.atan2(rij.y,rij.x)
+	                        );
+	                        const Tij = cmath.mul(Tn[n], Sval);
+	                        A[gi][gj] = cmath.sub(A[gi][gj], Tij);
+	                    }
+	                }
+	            }
+	        }
+	    }
+	}
+	let bsol = gaussianEliminationComplex(A,rhs); //solveComplexLinearSystem(A, rhs);  // returns array of cplx
+	let B = [];
+	for (let s = 0; s < Nspheres; s++) {
+	    B[s] = unflattenCoeffs(bsol.slice(s*M, (s+1)*M), Nmax);
+	}
+	return [B,Nmax];
+}
+
+function evaluateField(point, spheres, B, k, Nmax) {
+    let p = cmath.cplx(0,0);
+
+    for (let s = 0; s < spheres.length; s++) {
+        const dx = point.x - spheres[s].x;
+        const dy = point.y - spheres[s].y;
+        const dz = point.z - spheres[s].z;
+
+        const r = Math.sqrt(dx*dx + dy*dy + dz*dz);
+        const theta = Math.acos(dz/r);
+        const phi = Math.atan2(dy, dx);
+
+        for (let n = 0; n <= Nmax; n++) {
+            const hn = sphHankel1(n, k*r);
+            for (let m = -n; m <= n; m++) {
+                const idx = m+n;
+                const Y = sphericalHarmonic(n,m,theta,phi);
+                const term = cmath.mul(B[s][n][idx], cmath.mul(hn, Y));
+                p = cmath.add(p, term);
+            }
+        }
+    }
+    return p;
+}
+
+// analytic backscatter amplitude f(pi)
+function backscatterAmplitude(Tn, Nmax) {
+    let f = cmath.cplx(0,0);
+    for (let n = 0; n <= Nmax; n++) {
+        const factor = (2*n + 1) * ((n % 2 === 0) ? 1 : -1); // (-1)^n
+        f = cmath.add(f, cmath.mulReal(Tn[n], factor));
+    }
+    return f;
+}
+// analytic far-field backscatter at r
+function analyticBackscatterPressure(Tn, k, r, Nmax) {
+    const fpi = backscatterAmplitude(Tn, Nmax);
+    const phase = cmath.cplx(Math.cos(k*r), Math.sin(k*r)); // e^{ikr}
+    const denom = k * r;
+    return cmath.mulReal(cmath.mul(phase, fpi), 1/denom);
+}
+
+function strlog(s) {
+	document.getElementById("ta").value+=s+'\n';
+}
+let counter = 0;
+function cplxlog(v) {
+	counter += 1; var s= counter + ' ' + v.re.toFixed(6) + ' ' + (v.im>=0?'+':'-') +' '+ Math.abs(v.im).toFixed(6) + 'i';
+	strlog(s);
+}
+function parseSphereString(str) {            // Example entry: sphere(0.01905),[0,0,-0.05]
+    str = str.trim();
+    const entries = str.split("],").map(s => s.trim());     // Split into sphere entries
+    const spheres = [];
+    for (let entry of entries) {
+		var e = entry.split("),");
+        const radiusMatch = e[0].split("(");         // Extract radius
+        const radius = parseFloat(radiusMatch[1]);
+        const coordsMatch = e[1].match(/\[([^\]]+)\]/); // Extract coordinates
+        if (!coordsMatch) continue;
+        const coords = coordsMatch[1].split(",").map(Number);
+        spheres.push({a: radius,x: coords[0],y: coords[1],z: coords[2]});
+    }
+    return spheres;
+}
+
+function parseSpheresString(str) {
+    const m = str.match(/spheres\(([^,]+),([^,]+),\[(.*?)\],\[(.*?)\]\)/);
+    if (!m) return parseSphereString(str);
+    const radius = parseFloat(m[1]);
+    const count = m[3].split(',').map(Number);   // [Nx, Ny, Nz]
+    const gap   = m[4].split(',').map(Number);   // [dx, dy, dz]
+    const [Nx, Ny, Nz] = count;
+	const [gx, gy, gz] = gap; // const [dx, dy, dz] = gap;
+	const dx = 2*radius + gx; const dy = 2*radius + gy; const dz = 2*radius + gz; // Convert surface gaps → center spacing 	
+	const cx = (Nx - 1) / 2; const cy = (Ny - 1) / 2; const cz = (Nz - 1) / 2;    // Center offsets const 
+    const spheres = [];
+    for (let ix = 0; ix < Nx; ix++) {
+        for (let iy = 0; iy < Ny; iy++) {
+            for (let iz = 0; iz < Nz; iz++) {
+                spheres.push({a: radius, x: (ix-cx) * dx, y: (iy-cy) * dy, z: (iz-cz) * dz});
+            }
+        }
+    }
+    return spheres;
+}
+
+function change() {
+	var s = document.getElementById("p").value;
+    var m = s.match(/th=(\d+)\&ph=(\d+)\&obj=(.*)/);
+	var th=m[1], ph=m[2], obj=m[3];
+	var s = calc(obj, 38e3, 1480, th, ph);
+	document.getElementById("ta").value = s
+}
+
+function calc(obj, f0, c0, th, ph) {
+	var k = 2*Math.PI*f0 / c0;
+
+	var theta = th * Math.PI/180 + Math.PI, phi = ph * Math.PI/180 + Math.PI;
+	var kdir = {x: Math.sin(theta)*Math.cos(phi), y: Math.sin(theta)*Math.sin(phi), z: Math.cos(theta)};
+	console.log("kdir",kdir);
+
+	var spheres = parseSpheresString(obj);	
+
+	var [B, Nmax] = multiple_soft_spheres(spheres, k, kdir);
+
+    var r1 = 1; 
+	var obs1 = {x: -kdir.x * r1, y: -kdir.y * r1, z: -kdir.z * r1};
+	let p_bsc = evaluateField(obs1, spheres, B, k, Nmax);	
+	
+	var s ='';
+	for(var i=0;i<360;i++) {	                                // scattering angular function
+		var a = i*Math.PI/180;
+		var pt = {x: 0, y: -r1*Math.sin(a), z: -r1*Math.cos(a)};
+		var p_scat = evaluateField(pt, spheres, B, k, Nmax);
+	    s += i+' '+cmath.abs(p_scat)+'\n';
+	}
+	return(s);
+}
+
+/*
+var th = 270;
+var ph = 0;
+var obj="[spheres(0.005,2,[1,1,2],[0.01,0.01,0.01])]";
+document.getElementById("p").value = 'https://marmoszy.github.io/mm-bem/mm-bem2.html?th='+th+'&ph='+ph+'&obj='+obj;
+change();
+*/
+
+	
+// --------------------- acoustics
+
+var rho0 = 1000;
+var c0   = 1480;
+var f    = 38000;
+var omega = 2*Math.PI*f;
+var k = omega / c0;
+
+//---------------------- geometry
+
+var a = 0.01905;        // Sphere radius
+var spheres1 = [{a: a, x: 0, y: 0, z: 0 } ]; // one sphere at origin
+var spheres2 = [{a: a, x: 0, y: 0, z: -0.05 }, { x: 0, y: 0, z: +0.05 }]; // Two spheres on z-axis
+var obj="[sphere(0.01905),[0,0,-0.05]],[sphere(0.01905),[0,0,0.05]]";
+var obj="[spheres(0.005,2,[3,3,3],[0.01,0.01,0.01])]";
+var obj="[spheres(0.005,2,[1,1,2],[0.01,0.01,0.01])]";
+//var spheres = spheres1;
+//var spheres = parseSpheresString(obj);
+var spheres = parseSpheresString(obj);
+
+//---------------------- directions
+var kx=0, ky=0, kz=-1;                                       // wave direction
+var kdir = { x: kx, y: ky, z: kz };                         // must be normalized
+var th = (Math.atan2(-ky,-kx)*180/Math.PI+360)%360, ph = (Math.atan2(kz,-kx)*180/Math.PI+360)%360;
+
+//var th0 = 270, ph0 = 0;
+//var th = 0, ph = 90;
+//var theta = th * Math.PI/180 + Math.PI, phi = ph * Math.PI/180 + Math.PI;
+//var kdir = {x: Math.sin(theta)*Math.cos(phi), y: Math.sin(theta)*Math.sin(phi), z: Math.cos(theta)};
+
+var r1 = 1; var obs1 = {x: -kdir.x * r1, y: -kdir.y * r1, z: -kdir.z * r1}; // observation point
+
+document.getElementById("p").value = "https://marmoszy.github.io/mm-bem/mm-bem2.html?th="+th+'&ph='+ph+'&obj='+obj;
+
+
+//---------------------- MTS solution
+
+var [B, Nmax] = multiple_soft_spheres(spheres, k, kdir);
+let p_bsc = evaluateField(obs1, spheres, B, k, Nmax);
+console.log("Pressure at observation point:", obs1, p_bsc); // backscattering value
+
+for(var i=0;i<360;i++) {	                                // scattering angular function
+	var r1 = {x:0, y:-Math.sin(i*Math.PI/180), z:-Math.cos(i*Math.PI/180)};
+	var p_scat= evaluateField(r1, spheres, B, k, Nmax);
+    strlog(i+' '+cmath.abs(p_scat));
+}
+
+//--------------------------------
+
+
+
+/*
+var A =[[1,0,0],[0,1,0],[0,0,1]].map(r=>r.map(c=>cmath.cplx(c,0)));
+var b = [1,0,0].map(x=>cmath.cplx(x,0));
+var x = gaussianEliminationComplex(A, b);
+x.forEach(console.log);
+*/
+
+/*
+const x = k * a;
+for (let n = 0; n <= 0; n++) {   // start with n = 0
+    const j = sphBesselJ(n, x);
+    const y = sphBesselY(n, x);
+    const h = sphHankel1(n, x);
+    console.log("n =", n);
+    console.log("  j_n =", j);
+    console.log("  y_n =", y);
+    console.log("  h_n =", h);
+    console.log("  T_n =", Tn[n]);
+}
+*/
+
+</script>
