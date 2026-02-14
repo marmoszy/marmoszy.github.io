@@ -175,11 +175,17 @@ function translationCoeff(n, m, np, mp, k, R, theta, phi) {
     // Loop over coupling order L
     const Lmin = Math.abs(n - np);
     const Lmax = n + np;
+
+    const j_kr = j_series(Lmax, k*R); 
+    const y_kr = y_series(Lmax, k*R); // Build Hankel array 
+    const h_kr = []; for (let n = 0; n <= Lmax; n++) { h_kr[n] = cmath.cplx(j_kr[n],y_kr[n]); }	
+	
     for (let L = Lmin; L <= Lmax; L++) {
         // i^L
         const iL = complexIPow(L);
         // h_L^{(1)}(kR)
-        const hL = sphHankel1(L, k*R);
+        //const hL = sphHankel1(L, k*R);
+        const hL = h_kr[L]; // sphHankel1(L, k*R);
         // Spherical harmonic Y_L^{M} at direction (theta,phi)
         const M = m - mp;
         const YLM = sphericalHarmonic(L, M, theta, phi);
@@ -308,6 +314,22 @@ function assocLegendre(l, m, x) {
     }
 }
 
+function LP_series(N, x) { // ----- Iterative Legendre Polynomial P(n, x)
+  const P = [1, x];
+  for (let n = 2; n <= N; n++) {P[n] = ((2 * n - 1) * x * P[n - 1] - (n - 1) * P[n - 2]) / n;}
+  return P;
+}
+function j_series(N, x) { // ----- Iterative spherical Bessel j(n, x)
+  const j = []; j[0] = Math.sin(x) / x; j[1] = Math.sin(x) / (x * x) - Math.cos(x) / x;
+  for (let n = 2; n <= N; n++) {j[n] = ((2 * n - 1) / x) * j[n - 1] - j[n - 2];}
+  return j;
+}
+function y_series(N, x) { // ----- Iterative spherical Neumann y(n, x)
+  const y = []; y[0] = -Math.cos(x) / x; y[1] = -Math.cos(x) / (x * x) - Math.sin(x) / x;
+  for (let n = 2; n <= N; n++) {y[n] = ((2 * n - 1) / x) * y[n - 1] - y[n - 2];}
+  return y;
+}
+
 function sphericalHarmonic(n, m, theta, phi) {
     const P = assocLegendre(n, Math.abs(m), Math.cos(theta));
     const norm = Math.sqrt((2*n+1)/(4*Math.PI) * factorial(n-Math.abs(m))/factorial(n+Math.abs(m)));
@@ -425,12 +447,27 @@ function multiple_soft_spheres(spheres, k, kdir) {
 		if(a<spheres[i].a) a = spheres[i].a;
 	}
 	var Nmax = Math.round(k*a)+5; // 7;  // good for ka ≈ 3
+	
+	/*
 	let Tn = [];
 	for (let n = 0; n <= Nmax; n++) {
 	    const jn = sphBesselJ(n, k*a);
 	    const hn = sphHankel1(n, k*a);  // complex
 		Tn[n] = cmath.div(cmath.cplx(-jn, 0), hn);  // Tn = - j_n / h_n
 	}
+	*/
+	
+	const j_ka = j_series(Nmax, k*a); // Precompute all Bessel functions needed for this sphere
+	const y_ka = y_series(Nmax, k*a);	
+	const h_ka = [];
+	for (let n = 0; n <= Nmax; n++) { // Build Hankel array
+	    h_ka[n] = cmath.cplx(j_ka[n],y_ka[n]);
+	}
+	const Tn = [];
+	for (let n = 0; n <= Nmax; n++) { 	// Build T-matrix
+	    Tn[n] = cmath.div(cmath.cplx(-j_ka[n],0), h_ka[n]);
+	}
+	
 	// Build incident coefficients for both spheres
 	let Aext = [];
 	for (let s = 0; s < Nspheres; s++) {
@@ -514,8 +551,12 @@ function evaluateField(point, spheres, B, k, Nmax) {
         const theta = Math.acos(dz/r);
         const phi = Math.atan2(dy, dx);
 
+	    const j_kr = j_series(Nmax, k*r); 
+	    const y_kr = y_series(Nmax, k*r); // Build Hankel array 
+	    const h_kr = []; for (let n = 0; n <= Nmax; n++) { h_kr[n] = cmath.cplx(j_kr[n],y_kr[n]); }	
+
         for (let n = 0; n <= Nmax; n++) {
-            const hn = sphHankel1(n, k*r);
+            const hn = h_kr[n]; // sphHankel1(n, k*r);
             for (let m = -n; m <= n; m++) {
                 const idx = m+n;
                 const Y = sphericalHarmonic(n,m,theta,phi);
@@ -600,16 +641,11 @@ function change() {
 function calc(obj, f0, c0, th, ph) {
 	var k = 2*Math.PI*f0 / c0;
 
-	//var theta = th * Math.PI/180 + Math.PI, phi = ph * Math.PI/180 + Math.PI;
-	//var kdir = {x: Math.sin(theta)*Math.cos(phi), y: Math.sin(theta)*Math.sin(phi), z: Math.cos(theta)};
-	
 	var theta = th * Math.PI/180, phi = ph * Math.PI/180;
 	var d = {x: -Math.cos(theta), y: -Math.sin(theta), z:0};
 	var c = Math.cos(phi), s = Math.sin(phi);
 	var kdir = {x:c*d.x+s*d.z, y: d.y, z:-s*d.x+c*d.z};
 	
-	console.log("kdir",kdir);
-
 	var spheres = parseSpheresString(obj);	
 
 	var [B, Nmax] = multiple_soft_spheres(spheres, k, kdir);
@@ -628,7 +664,6 @@ function calc(obj, f0, c0, th, ph) {
 	}
 	return(ss);
 }
-
 
 var th = 0;
 var ph = 90;
