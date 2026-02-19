@@ -97,7 +97,17 @@ for: w/l = <input type="text" id="a_b_2" value="0.3" style="width:64px" onchange
 <script>
 	
 var fname="B314";
-	
+var l=undefined, w=undefined, h=undefined, a=undefined, b=undefined;
+
+function url_params() { // overwrite globals from url params
+    var s = window.location.search.substring(1);
+    var ss = s.split('&');
+    for (var i = 0; i < ss.length; i++) {
+        var sss = ss[i].split('=');
+		window[sss[0]] = sss.length>1?sss[1]:"";
+    }
+}
+
 function change(event,container_id) {
 	  var file = event.target.files[0];
 	  fname = file.name;
@@ -526,6 +536,26 @@ function superellipseParametricRotated(cx, cy, a, b, n, angleDeg) {
 
 //drawParametricToImgTag("img1",{width:800,height:400,pfun:superellipseParametricRotated(400, 200, 320, 40, 4, -11)});
 //drawParametricToImgTag("img2",{width:800,height:400,pfun:superellipseParametricRotated(400, 200, 320, 80, 4, 0)});
+
+
+url_params();
+	
+if(l) {
+	if(!w) w = l * 0.3;
+	if(!h) h = l * 0.125;
+	if(!a) a = -11;
+	if(!b) b = 0;
+	if(l && w && h && a) {
+		//alert(l+" "+w+" "+h+" "+a);
+		document.getElementById("swimbladder_length").value = l;
+		document.getElementById("a_b_1").value = h/l;
+		document.getElementById("a_b_2").value = w/l;
+		document.getElementById("tilt").value = a;
+		document.getElementById("yaw").value = b;
+		change4(document.getElementById('a_b_1'),'img1',document.getElementById('hl'),document.getElementById('tilt'));
+		change4(document.getElementById('a_b_2'),'img2',document.getElementById('wl'),document.getElementById('yaw'));
+	}
+}
 
 </script>
 
