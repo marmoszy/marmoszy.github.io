@@ -2999,7 +2999,7 @@ function change1() {
 						scan_str += ''+f00/1e3+' '+(th0)+' '+(ph0)+' '+lbs.toFixed(6)+'\n';
 						plot("F",scan_str,"#AA69D3",1);  // 1 - no closing 'Z'
 					}
-					if(th>=0 && ph>=0 && f0>0) {  // only when no scanning
+					if(th>=0 && ph>=0 && f0>0 && !s2) {  // only when no scanning and no near-field data
 						psave(document.getElementById("obj").value+','+v[1]+','+v[2]+','+v[3]+','+v[4]+'');
 					}
 				}
