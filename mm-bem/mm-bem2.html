@@ -1305,7 +1305,7 @@ function soft_sphere(aa, ff0, cc0, th00, ph00) { // using document parameters, f
 	for(var j=0;j<=RR.length;j++) {
 		s += '## ';
 		for(var i=0;i<=NT;i+=nn) {
-			var r = cmath.abs(exact_ss2(2*Math.PI*f0/c0,a,RR[j],(i-th0)*Math.PI/180))
+			var r = cmath.abs(exact_ss2(2*Math.PI*f0/c0, a, RR[j], (i-th0)*Math.PI/180))
 			s += ''+r.toFixed(6)+' ';
 		}
 		s += '\n';
@@ -1984,25 +1984,38 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
   var el;
   if(aperture) { // aperture
 	  var d = rot(Ry(ph),Math.cos((th+180)*pi/180),Math.sin((th+180)*pi/180),0);
-	  ap = circle3D(p3,d,b0);
+	  var ap = circle3D(p3,d,b0);
 	  //ap1 = rectangle3D(p3c,d,l/8,2*l/2)
-	  ap2 = circle3D(p3d,d,b0);
+	  var ap2 = circle3D(p3d,d,b0);
 	  for(i=0;i<ap.length;i++) {ap[i] = V(P(ap[i])); /*ap1[i] = V(P(ap1[i]));*/ ap2[i] = V(P(ap2[i]));}
 	  //el=svg_createpath(svg,"th_xy_a1",[ap1],"gray",1,"1,0",0,"gray",0.25);	// aperture
-	  el=svg_createpath(svg,"th_xy_a",[ap],"lightgray",1,"1,0",0,"gray",0.25);	// aperture
+	  var el = svg_createpath(svg,"th_xy_a",[ap],"lightgray",1,"1,0",0,"gray",0.25);	// aperture
+	  var h = (e) => { document.getElementById("r0").value = 0;e.preventDefault();e.stopPropagation();select3();}
+	  var t3a="<title>Piston: r0="+r.toFixed(4)+" ("+Math.abs(rr)+" \u03bb) b0="+b0.toFixed(4)+' '+t3+"</title>";
+	  el.onclick = h;
+	  el.innerHTML = t3a;
 	  el=svg_createpath(svg,"th_xy_a2",[ap2],"lightgray",1,"1,0",0,"gray",0.25);	// aperture
+	  el.onclick = h;
+	  el.innerHTML = t3a;
   	  el=svg_createpoint(svg,"th_xy",[[]],"none");	                        // clear point
 	  el=svg_createpath(svg,"th_xy_d",[[]],"black",1.5,"1,0",1);	        // clear arrow
   } else if(point_source) { // point source
-	  el=svg_createpoint(svg,"th_xy",V(P(p3)),circle_onoff?(rr<0?"gray":point_source?"black":"red"):"none",t3);
+	  var el=svg_createpoint(svg,"th_xy",V(P(p3)),circle_onoff?(rr<0?"gray":point_source?"black":"red"):"none",t3);
+	  el.onclick = (e) => { var r0 = parseFloat(document.getElementById("r0").value);
+			document.getElementById("r0").value = -r0;e.preventDefault();e.stopPropagation();select3();
+	  };
+	  el.innerHTML = "<title>Point source: r0="+r.toFixed(4)+'('+rr+' \u03bb) '+t3+")</title>";
 	  el=svg_createpath(svg,"th_xy_a",[[]],"none",1,"1,0",0,"none",0.25);	// aperture
 	  //el=svg_createpath(svg,"th_xy_a1",[[]],"none",1,"1,0",0,"none",0.25);	// aperture
 	  el=svg_createpath(svg,"th_xy_a2",[[]],"none",1,"1,0",0,"none",0.25);	// aperture
 	  el=svg_createpath(svg,"th_xy_d",[[]],"black",1.5,"1,0",1);	        // arrow
-  } else {  // plane wave
-	  el=svg_createpath(svg,"th_xy_d",pp3,"black",1.5,"1,0",1);	            // arrow
+  } else {  // plane wav
+	  var el=svg_createpath(svg,"th_xy_d",pp3,"black",1.5,"1,0",1);	            // arrow
+	  el.onclick = (e) => { var r0 = parseFloat(document.getElementById("r0").value);
+			document.getElementById("r0").value = r0+1;e.preventDefault();e.stopPropagation();select3();
+	  };
 	  el.setAttribute("marker-end","url(#arrowhead)");
-  	  el.innerHTML = "<title>"+t3+"</title>";
+  	  el.innerHTML = "<title>Plane wave: "+t3+"</title>";
   	  el=svg_createpath(svg,"th_xy_a",[[]],"none",1,"1,0",0,"none",0.25);	// clear aperture
   	  //el=svg_createpath(svg,"th_xy_a1",[[]],"none",1,"1,0",0,"none",0.25);	// clear aperture
   	  el=svg_createpath(svg,"th_xy_a2",[[]],"none",1,"1,0",0,"none",0.25);	// clear aperture
@@ -2674,7 +2687,8 @@ function soft_sphere(aa, f00, c00, th00, ph00, r00, b00) { // 360 angles, return
 	var s='',lbs=0;
 	//console.log("soft_sphere: ",f0,c0,r0,b0);
 	for(var i=0;i<=360;i++) {
-		var r = cmath.abs(exact_ss(2*Math.PI*f0/c0*a,(i-th0)*Math.PI/180,a))
+		//var r = cmath.abs(exact_ss(2*Math.PI*f0/c0*a,(i-th0)*Math.PI/180,a))
+		var r = cmath.abs(exact_ss2scat(2*Math.PI*f0/c0, a, 1, (i-th0)*Math.PI/180, r0*c0/f0, b0*c0/f0))
 		s += ''+i+' '+r.toFixed(6)+'\\n';
 		if(i==((th0+180)%360)) lbs=r;
 	}
@@ -3440,6 +3454,7 @@ function svg_createpoint(svg, id, xy, color, title, r, color2) {
 	el.setAttribute("cx",xy&&xy.length>1?xy[0]:-99);
 	el.setAttribute("cy",xy&&xy.length>1?xy[1]:-99);
 	el.innerHTML = "<title>"+(title || '')+"</title>";
+	return el;
 }
 
 function svg_createline(svg,id,x1,y1,x2,y2,color,w) { 
@@ -3455,6 +3470,7 @@ function svg_createline(svg,id,x1,y1,x2,y2,color,w) {
 	el.setAttribute("y1",y1);
 	el.setAttribute("x2",x2);
 	el.setAttribute("y2",y2);
+	return el;
 }
 
 function svg_createpath(svg,id,p,color,w,dd,zz,ffcolor,opacity) {
