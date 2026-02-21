@@ -731,7 +731,7 @@ along both direction angles.
 <script>
 function select3() {select();}
 </script>
-<span hidden1>
+<span hidden>
 <label for="r0">Source distance (0-plane wave): <i>r<sub>0</sub></i> =</label> 
 <input type="number" id="r0" title=
 "r=0 - plane wave
@@ -741,7 +741,7 @@ onchange="select3()" value="0" style="width:48px"/> &lambda;
 <br><br>
 </span>
 
-<span hidden1>
+<span hidden>
 <label for="r0">Source aperture (0-point source): <i>b<sub>0</sub></i> =</label> 
 <input type="number" id="b0" title=
 "b0=0 - point source
@@ -788,7 +788,7 @@ onchange="select3()" value="0.5" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(19.2.2026)" style="text-align:center">mm-bem v2.36 (2025-2026)</p>
+<p title="(21.2.2026)" style="text-align:center">mm-bem v2.35 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -936,9 +936,7 @@ function init_mouse() {
     var el = document.getElementById("svg1");
     // --- Mouse events ---
     el.onmousedown = function (event) {sX = event.pageX; sY = event.pageY; clk = 1; moved=0;};
-    el.onmouseup = function (event) { clk = 0; var el=document.getElementById("svg1"); 
-		if(el!=event.tatget) return; /* only for "svg1"*/ if(!moved){handleClick(event.pageX,event.pageY);} 
-	};
+    el.onmouseup = function (event) { clk = 0; if(!moved){handleClick(event.pageX,event.pageY);} };
     el.onmousemove = function (event) {if(clk==0)return; moved=1;handleMove(event.pageX, event.pageY);};
 	// --- Touch events ---
     let prevDist = null; // for pinch zoom
@@ -1933,7 +1931,6 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
 	  aperture = (rr<0);
 	  r = Math.abs(rr) * c0/f0;
   }
-  if(aperture && b0==0) b0 = 0.5;
   b0 *= c0/f0;
 
 // --- two circles for showing wave direction
@@ -1992,45 +1989,19 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
 	  for(i=0;i<ap.length;i++) {ap[i] = V(P(ap[i])); /*ap1[i] = V(P(ap1[i]));*/ ap2[i] = V(P(ap2[i]));}
 	  //el=svg_createpath(svg,"th_xy_a1",[ap1],"gray",1,"1,0",0,"gray",0.25);	// aperture
 	  el=svg_createpath(svg,"th_xy_a",[ap],"lightgray",1,"1,0",0,"gray",0.25);	// aperture
-	  h = (e) => { 
-		  document.getElementById("r0").value = 0;
-		  e.preventDefault();
-		  e.stopPropagation();
-		  select3();
-	  }
-	  el.onclick = h;
-	  var t3a="<title>Piston: r0="+r.toFixed(4)+" ("+Math.abs(rr)+" \u03bb) b0="+b0.toFixed(4)+' '+t3+"</title>";
-  	  el.innerHTML = t3a;
 	  el=svg_createpath(svg,"th_xy_a2",[ap2],"lightgray",1,"1,0",0,"gray",0.25);	// aperture
-	  el.onclick = h;
-  	  el.innerHTML = t3a;
   	  el=svg_createpoint(svg,"th_xy",[[]],"none");	                        // clear point
 	  el=svg_createpath(svg,"th_xy_d",[[]],"black",1.5,"1,0",1);	        // clear arrow
   } else if(point_source) { // point source
 	  el=svg_createpoint(svg,"th_xy",V(P(p3)),circle_onoff?(rr<0?"gray":point_source?"black":"red"):"none",t3);
-  	  el.innerHTML = "<title>Point source: r0="+r.toFixed(4)+'('+rr+' \u03bb) '+t3+")</title>";
-	  el.onclick = (e) => {
-			var r0 = parseFloat(document.getElementById("r0").value);
-			document.getElementById("r0").value = -r0;
-			e.preventDefault();
-			e.stopPropagation();
-			select3();
-	  };
 	  el=svg_createpath(svg,"th_xy_a",[[]],"none",1,"1,0",0,"none",0.25);	// aperture
 	  //el=svg_createpath(svg,"th_xy_a1",[[]],"none",1,"1,0",0,"none",0.25);	// aperture
 	  el=svg_createpath(svg,"th_xy_a2",[[]],"none",1,"1,0",0,"none",0.25);	// aperture
 	  el=svg_createpath(svg,"th_xy_d",[[]],"black",1.5,"1,0",1);	        // arrow
   } else {  // plane wave
 	  el=svg_createpath(svg,"th_xy_d",pp3,"black",1.5,"1,0",1);	            // arrow
-	  el.onclick = (e) => {
-			var r0 = parseFloat(document.getElementById("r0").value);
-			document.getElementById("r0").value = r0 + 1;
-			e.preventDefault();
-			e.stopPropagation();
-			select3();
-		};
 	  el.setAttribute("marker-end","url(#arrowhead)");
-  	  el.innerHTML = "<title>Plane wave: "+t3+"</title>";
+  	  el.innerHTML = "<title>"+t3+"</title>";
   	  el=svg_createpath(svg,"th_xy_a",[[]],"none",1,"1,0",0,"none",0.25);	// clear aperture
   	  //el=svg_createpath(svg,"th_xy_a1",[[]],"none",1,"1,0",0,"none",0.25);	// clear aperture
   	  el=svg_createpath(svg,"th_xy_a2",[[]],"none",1,"1,0",0,"none",0.25);	// clear aperture
@@ -2362,6 +2333,7 @@ function outline2msh2(s,nn) {
 	return mfrustum(resample(w.map(wi=>wi/2),n),resample(h.map(hi=>hi/2),n),resample(x,n),resample(y,n),resample(z,n));
 }
 
+
 files = {};
 function file(s) {return files[s];}
 files2 = {};
@@ -2619,7 +2591,7 @@ function ipow(n) { // i^n helper
   return cmath.cplx(0, -1); // m === 3
   //return cmath.cplx(m==0?1:m==1?0:m==2?-1:0, m==0?0:m==1?1:m==2?0:-1);
 }
-// Scattered pressure from soft sphere, d=0 - plane-wave incidence along +z, d>0 - point source, d<0 - piston
+// Scattered pressure from soft sphere, d=0 - plane-wave incidence along +z, d!=0 - point source
 // k – wavenumber, a – sphere radius, r – observation radius (r>=a), th – polar angle, d - point distance
 function exact_ss2scat(k, a, r, th, d, b) {
   //console.log("exact_ss2scat():",k, a, r, th, d, b);
@@ -2627,20 +2599,19 @@ function exact_ss2scat(k, a, r, th, d, b) {
   const M = Math.floor(ka) + 5; // truncation based on size parameter ka
   const j_ka = j_series(M, ka), y_ka = y_series(M, ka);
   const j_kr = j_series(M, kr), y_kr = y_series(M, kr);
-  const j_kd = j_series(M, kd), y_kd = y_series(M, kd);
+  const j_kd = j_series(M, kd);
   const A = d<0 ? pistonCoeffs(k, b, d, Math.floor(ka)+5) : 0;
-  const P = LP_series(M, Math.cos(th));
+  const P    = LP_series(M, Math.cos(th));
   let sum = cmath.cplx(0, 0);
   for (let n = 0; n <= M; n++) {
     const twoNp1 = 2 * n + 1;
     const h_ka = cmath.cplx(j_ka[n], y_ka[n]); // h_n(ka)
     const h_kr = cmath.cplx(j_kr[n], y_kr[n]); // h_n(kr)
-	const h_kd = cmath.cplx(j_kd[n], y_kd[n]); // h_n(kd)
     const ratio = cmath.div(cmath.cplx(j_ka[n], 0), h_ka); // j_n(ka) / h_n(ka)    
     const i_n = ipow(n);                       // i^n
-	const h_nd_ik = cmath.mul(cmath.cplx(0,k),h_kd);  // point source distance
+	const j_nd = cmath.cplx(j_kd[n],0);        // point source distance
     //let coeff = cmath.mul(i_n, ratio); // coeff_n = -(2n+1)*i^n*(j_n(ka)/h_n(ka))*P_n(cos th)
-    let coeff = cmath.mul( (d==0)? i_n : (d<0)? A[n] : h_nd_ik, ratio);
+    let coeff = cmath.mul( (d==0)? i_n : (d<0)? A[n] : j_nd, ratio);
     coeff = cmath.mul(coeff, cmath.cplx(-twoNp1 * P[n], 0));
     const term = cmath.mul(coeff, h_kr);         // term_n = coeff_n * h_n(kr)
     sum = cmath.add(sum, term);
@@ -2702,8 +2673,7 @@ function soft_sphere(aa, f00, c00, th00, ph00, r00, b00) { // 360 angles, return
 	var s='',lbs=0;
 	//console.log("soft_sphere: ",f0,c0,r0,b0);
 	for(var i=0;i<=360;i++) {
-		//var r = cmath.abs(exact_ss(2*Math.PI*f0/c0*a,(i-th0)*Math.PI/180,a))
-		var r = cmath.abs(exact_ss2scat(2*Math.PI*f0/c0,a,1,(i-th0)*Math.PI/180,r0*c0/f0,b0*c0/f0))
+		var r = cmath.abs(exact_ss(2*Math.PI*f0/c0*a,(i-th0)*Math.PI/180,a))
 		s += ''+i+' '+r.toFixed(6)+'\\n';
 		if(i==((th0+180)%360)) lbs=r;
 	}
@@ -2714,18 +2684,6 @@ function soft_sphere(aa, f00, c00, th00, ph00, r00, b00) { // 360 angles, return
 	var nn = 3; // every 3 deg
 	var NR = 15, NT = 360, RR = Array.from({length:NR},(_,i)=>0.004*(i+1)); // the same code as in calculation worker
 	//console.log("soft_sphere:",2*Math.PI*f0/c0,a,RR)
-	s += '## # '+'mm-exact-nearfield:'+'\n'
-	s += '## # '+NR+'x'+(NT/nn)+'\n'
-	s += '## # ';
-	for(var j=0; j<NR; j++) {
-		s += ''+RR[j].toFixed(3)+' ';
-	}
-	s += '\n## # ';
-	for(var j=0; j<NT; j+=nn) {
-		s += ''+(j)+' ';
-	}
-	s += '\n';
-
 	for(var j=0;j<RR.length;j++) {
 		s += '## ';
 		for(var i=0;i<=NT;i+=nn) {
@@ -3481,7 +3439,6 @@ function svg_createpoint(svg, id, xy, color, title, r, color2) {
 	el.setAttribute("cx",xy&&xy.length>1?xy[0]:-99);
 	el.setAttribute("cy",xy&&xy.length>1?xy[1]:-99);
 	el.innerHTML = "<title>"+(title || '')+"</title>";
-	return(el);
 }
 
 function svg_createline(svg,id,x1,y1,x2,y2,color,w) { 
@@ -3497,7 +3454,6 @@ function svg_createline(svg,id,x1,y1,x2,y2,color,w) {
 	el.setAttribute("y1",y1);
 	el.setAttribute("x2",x2);
 	el.setAttribute("y2",y2);
-	return(el);
 }
 
 function svg_createpath(svg,id,p,color,w,dd,zz,ffcolor,opacity) {
@@ -5167,8 +5123,7 @@ if(method==1) {
 						NT = 360, 
 						r0 = rest?.nf_r0 || 0.004,
 						RR = Array.from({length:NR},(_,i)=>r0*(i+1));
-					//console.log(''+NR+'x'+(NT/nn)+ ' r0='+r0+'   ',rest);
-					s += '## # '+'mm-bem-nearfield:'+'\n'
+					console.log(''+NR+'x'+(NT/nn)+ ' r0='+r0+'   ',rest);
 					s += '## # '+NR+'x'+(NT/nn)+'\n'
 					s += '## # ';
 					for(var j=0; j<NR; j++) {
