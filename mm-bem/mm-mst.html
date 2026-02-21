@@ -76,6 +76,46 @@ function solveComplexLinearSystem(A, b) { // using math.js
 	return x;
 }
 
+function toMathMatrix(A) {
+    const rows = A.length, cols = A[0].length;
+    const M = new Array(rows); // Build a plain JS 2D array of math.js Complex numbers
+    for (let i = 0; i < rows; i++) {
+        M[i] = new Array(cols);
+        for (let j = 0; j < cols; j++) {
+            const a = A[i][j];
+            M[i][j] = math.complex(a.re, a.im);
+        }
+    }
+    return math.matrix(M);     // Convert to a math.js Matrix object
+}
+// Convert your complex matrix A[i][j] = {re:..., im:...}
+// into a real 2N × 2N matrix usable by math.js
+function complexToRealBlock(A) {
+    const n = A.length;
+    const M = Array.from({length: 2*n}, () => Array(2*n).fill(0));
+    for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+            const re = A[i][j].re, im = A[i][j].im;
+            M[i][j]   = re;   M[i][j+n] = -im;  // Fill 2×2 block
+            M[i+n][j] = im; M[i+n][j+n] =  re;
+        }
+    }
+    return M;
+}
+function conditionNumber(A) {
+    const R = complexToRealBlock(A);       // 2N × 2N real matrix
+    const Rm = math.matrix(R);
+    const Rt = math.transpose(Rm);
+    const RtR = math.multiply(Rt, Rm);
+    const eig = math.eigs(RtR);            // math.js eigenvalues
+    const vals = eig.values.toArray();     // real numbers
+    const maxEig = Math.max(...vals);
+    const minEig = Math.min(...vals);
+    const cond = Math.sqrt(maxEig / minEig);
+    return cond;
+}
+
+
 </script>
 
 <script>
@@ -487,13 +527,15 @@ function buildTranslationMatrix(S, k, r, th, ph, Nmax) {
 	}
 }
 
+//var AAA = undefined;
+
 function multiple_soft_spheres(spheres, k, kdir, r0, b0) {
 	var Nspheres = spheres.length;
 	var a = spheres[0].a;
 	for(var i=1; i<Nspheres; i++) {
 		if(a<spheres[i].a) a = spheres[i].a;
 	}
-	var Nmax = Math.round(k*a)+7; // 7;  // good for ka ≈ 3
+	var Nmax = Math.round(k*a) + 7; // 7;  // good for ka ≈ 3
 	/* let Tn = [];
 	for (let n = 0; n <= Nmax; n++) { const jn = sphBesselJ(n, k*a), hn = sphHankel1(n, k*a);  // complex
 		Tn[n] = cmath.div(cmath.cplx(-jn, 0), hn);  // Tn = - j_n / h_n
@@ -609,6 +651,9 @@ function multiple_soft_spheres(spheres, k, kdir, r0, b0) {
 	        }
 	    }
 	}
+	//AAA = A;
+	//var cn = conditionNumber(A);
+	//console.log("cn=",cn);
 	let bsol = gaussianEliminationComplex(A,rhs); //solveComplexLinearSystem(A, rhs);  // returns array of cplx
 	let B = [];
 	for (let s = 0; s < Nspheres; s++) {
@@ -745,8 +790,9 @@ function calc(obj, f0, c0, th, ph, r0, b0) {
 	return(ss);
 }
 
-var th = 270, ph = 0, r0 = 0, b0 = 0.5, obj="[spheres(0.01905,2,[1,1,1],[0.01,0.01,0.01])]";
+//  var th = 270, ph = 0, r0 = 0, b0 = 0.5, obj="[spheres(0.01905,2,[1,1,1],[0.01,0.01,0.01])]";
 //	var th = 0, ph = 90, r0 = 0, b0 = 0.5, obj="[spheres(0.01905,2,[1,1,1],[0.01,0.01,0.01])]";
+var th = 0, ph = 0, r0 = 0, b0 = 0.5, obj="[spheres(0.01905,2,[1,1,2],[0.01,0.01,0.08])]";
 document.getElementById("p").value = 'https://marmoszy.github.io/mm-bem/mm-bem2.html?th='+th+'&ph='+ph+'&r0='+r0+'&b0='+b0+'&obj='+obj;
 change();
 
