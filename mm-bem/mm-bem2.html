@@ -2312,20 +2312,7 @@ function loadEchoSMs(ss) {
 }
 
 function outline2msh(s,nn) {
-	const lines = s.trim().split("\n").filter(line => line.trim() !== "" && !line.trim().startsWith("#"));
-	const rows = lines.map(line => line.trim().split(/[\s,;]+/).map(Number));
-	const numCols = rows[0].length;
-	const columns = Array.from({length: numCols}, (_, j) =>rows.map(row => row[j]));
-	var x =	columns[0];
-	var z =	columns[1];
-	var y =	columns[2];
-	var h = columns[3]; 
-	var w = columns[4];
-	var xoff = (Math.min(...x)+Math.max(...x))/2;
-	x = x.map(xi=>xoff-xi); 
-	//var vxfx = mfrustum(w.map(wi=>wi/2),h.map(hi=>hi/2),x,y,z);
-	var n = nn||x.length;
-	var vxfx = mfrustum(resample(w.map(wi=>wi/2),n),resample(h.map(hi=>hi/2),n),resample(x,n),resample(y,n),resample(z,n));
+	var vxfx = outline2msh2(s,nn);
 	msh_str([vxfx]);
 	return msh_flush();	
 }
@@ -2723,23 +2710,18 @@ function js_soft_sphere() {
 			document.getElementById("txt").value += s.slice(1,-1)+'\n';
 		} else {
 			var t = Date.now()/1000 - start;
-			//s = '# mm-bem-soft-sphere: '+ t.toFixed(3) + 's ' + JSON.parse(s);
-			
+			//s = '# mm-bem-soft-sphere: '+ t.toFixed(3) + 's ' + JSON.parse(s);			
 			s = JSON.parse(s);
 			var s0 = s.match(/^(?!#\d+\s|##).*$/gm);
 			var s1 = s.match(/^#\d+\s.*$/gm);
 			var s2 = s.match(/^##\s.*$/gm);
 			s = '# mm-bem-soft-sphere: '+ t.toFixed(3) + 's ' + s0.join('\n');
-
+			document.getElementById("txt").value = s;
 			var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
 			if(v) {
-				var th0 = parseFloat(v[1]);
-				var ph0 = parseFloat(v[2]);
-				var f00 = parseFloat(v[3]);
-				var c0 = parseFloat(v[4]);
+				var th0 = parseFloat(v[1]), ph0 = parseFloat(v[2]), f00 = parseFloat(v[3]), c0 = parseFloat(v[4]);
 				update_wave_direction(document.getElementById("svg1"), th0, ph0, f00, c0);
 			}
-			document.getElementById("txt").value = s;
 			var el=document.getElementById("txt2");
 			if(el.value.length==0 || el.value.startsWith("# re(p_i)") || el.value.startsWith("# abs(p_sc)")) {
 				if(s2) {
