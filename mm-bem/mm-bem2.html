@@ -936,7 +936,8 @@ function init_mouse() {
     var el = document.getElementById("svg1");
     // --- Mouse events ---
     el.onmousedown = function (event) {sX = event.pageX; sY = event.pageY; clk = 1; moved=0;};
-    el.onmouseup = function (event) { clk = 0; if(!moved){handleClick(event.pageX,event.pageY);} };
+    el.onmouseup = function (event) { clk = 0; if(event.target!=document.getElementById("svg1")) return; 
+		/* only for "svg1"*/ if(!moved){handleClick(event.pageX,event.pageY);} };
     el.onmousemove = function (event) {if(clk==0)return; moved=1;handleMove(event.pageX, event.pageY);};
 	// --- Touch events ---
     let prevDist = null; // for pinch zoom
@@ -1915,7 +1916,7 @@ function update_axes() {
 function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
 	
 // ---- wave length box update
-  var l = c0/f0;
+  var l = c0/Math.abs(f0);
   var p0 = [l/2,0,0]
   var t0 = '\u03bb/2='+(l/2).toFixed(4);
   svg_createpoint(svg,"lambda_0",V(P(p0)),axes_onoff?"#FFAA33":"none",t0);
@@ -5110,7 +5111,7 @@ if(method==1) {
 				}
 // MM 31.1.2026
 				postMessage(JSON.stringify(s));
-				if(thmin==thmax && phmin==phmax) { // when no in scan mode
+				if(thmin==thmax && phmin==phmax && fmin==fmax) { // when no in scan mode
 // Near field calculations
 					//postMessage("[ near field solution]");
 					var psc1 =[];
