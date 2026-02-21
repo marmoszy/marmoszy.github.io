@@ -2731,6 +2731,14 @@ function js_soft_sphere() {
 			var s2 = s.match(/^##\s.*$/gm);
 			s = '# mm-bem-soft-sphere: '+ t.toFixed(3) + 's ' + s0.join('\n');
 
+			var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
+			if(v) {
+				var th0 = parseFloat(v[1]);
+				var ph0 = parseFloat(v[2]);
+				var f00 = parseFloat(v[3]);
+				var c0 = parseFloat(v[4]);
+				update_wave_direction(document.getElementById("svg1"), th0, ph0, f00, c0);
+			}
 			document.getElementById("txt").value = s;
 			var el=document.getElementById("txt2");
 			if(el.value.length==0 || el.value.startsWith("# re(p_i)") || el.value.startsWith("# abs(p_sc)")) {
@@ -2745,9 +2753,13 @@ function js_soft_sphere() {
 			//document.getElementById("txt").value = s;
 			plot("F","#");
 			plot();
-			psave(document.getElementById("obj").value+','+document.getElementById("th").value+','
-					+document.getElementById("ph").value+','+document.getElementById("f0").value+','
-					+document.getElementById("c0").value+'');
+			var th = parseFloat(document.getElementById("th").value);
+			var ph = parseFloat(document.getElementById("ph").value);
+			var f0 = parseFloat(document.getElementById("f0").value);
+			if(th>0 && ph>0 && f0>0) {
+				psave(document.getElementById("obj").value+','+(th) +','+(ph)+','+(f0)+','
+					+ document.getElementById("c0").value+'');
+			}
 		}
 	};
 	var lines = document.getElementById("obj").value;
