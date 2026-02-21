@@ -1,7 +1,7 @@
 <style>
-input,textarea {font-size:14pt;}
+input,textarea {font-size:13pt;}
 </style>
-<h2> Multiple Scattering from Sphere Lattice</h2>
+<h2> Multiple Scattering from the Lattice</h2>
 <p>
 <input id="p" type="text" onchange="change();" style="width:960px"></input>
 <p>
@@ -18,6 +18,7 @@ const cmath = { // Complex math functions
   abs: (c) => Math.sqrt(c.re * c.re + c.im * c.im),
   mul: (a, b) => ({re: a.re * b.re - a.im * b.im,im: a.re * b.im + a.im * b.re}),
   mulReal: (a, k) => ({re: a.re * k, im: a.im * k}),
+  conj: (a) => ({re: a.re, im: -a.im}),
   div: (a, b) => {const denom = b.re * b.re + b.im * b.im;
     return {re: (a.re * b.re + a.im * b.im) / denom,im: (a.im * b.re - a.re * b.im) / denom};
   }
@@ -400,13 +401,29 @@ function wigner3j(j1, j2, j3, m1, m2, m3) {
 
 function gauntCoefficient(n, m, np, mp, L, M) {
     const pref = Math.sqrt((2*n+1)*(2*np+1)*(2*L+1)/(4*Math.PI));
-
     const w1 = wigner3j(n, np, L, 0, 0, 0);
     const w2 = wigner3j(n, np, L, m, mp, -M);
-
     return cmath.cplx(pref * w1 * w2, 0);
 }
 
+function directionToAngles(kdir) {
+    const norm = Math.sqrt(kdir.x*kdir.x + kdir.y*kdir.y + kdir.z*kdir.z);     // Normalize direction vector
+    const x = kdir.x / norm, y = kdir.y / norm, z = kdir.z / norm; // Polar angle θ: angle from +z axis 
+    return { theta_k: Math.acos(z), phi_k: Math.atan2(y, x) };     // Azimuth φ: angle in x–y plane from +x toward +y
+}
+function planeWaveExpansionAtSphere(sphere, k, Nmax, kdir) {
+    const {theta_k, phi_k} = directionToAngles(kdir);
+    let A = makeCoeffArray(Nmax);
+    for (let n = 0; n <= Nmax; n++) {
+        for (let m = -n; m <= n; m++) {
+            const Y = sphericalHarmonic(n, m, theta_k, phi_k); // must include exp(i*m*phi)
+            const coeff = complexIPow(n); // i^n
+            const A_nm = cmath.mulReal(cmath.conj(Y), 4*Math.PI);
+            A[n][m+n] = cmath.mul(coeff, A_nm);
+        }
+    }
+    return A;
+}
 function pistonExpansionAtSphere(sphere, k, Nmax, kdir) {
     const r = Math.sqrt(sphere.x**2 + sphere.y**2 + sphere.z**2);
     const theta = (r===0)?0:Math.acos(sphere.z/r);
@@ -426,37 +443,61 @@ function pistonExpansionAtSphere(sphere, k, Nmax, kdir) {
     return A;
 }
 
-function planeWaveExpansionAtSphere(sphere, k, Nmax, kdir) {
-    var phase = cmath.cplx(Math.cos(k*sphere.z), Math.sin(k*sphere.z)); // Plane wave along +z: p_inc = exp(i k z)
-	// phase = exp(i k (k̂ · r_s)) 
-	const dot = sphere.x*kdir.x + sphere.y*kdir.y + sphere.z*kdir.z; 
-	var phase = cmath.cplx(Math.cos(k*dot), Math.sin(k*dot));
-    let A = makeCoeffArray(Nmax);
-    for (let n = 0; n <= Nmax; n++) {
-        const coeff = cmath.mulReal(complexIPow(n),4*Math.PI*Math.sqrt((2*n+1)/(4*Math.PI))); // a_{n0} = 4π i^n sqrt((2n+1)/(4π))
-        const a_n0 = cmath.mul(phase, coeff);         // Multiply by phase factor exp(i k z_s)
-        A[n][n] = a_n0;   // index m+n = 0+n = n         // Store only m = 0, all other m are zero automatically
+function pointSourceMultipoles(Nmax, Q = 1.0) {
+    const A = new Array(Nmax + 1).fill(null);
+    A[0] = cmath.cplx(Q, 0);      // monopole strength
+    for (let n = 1; n <= Nmax; n++) {
+        A[n] = cmath.cplx(0,0);
     }
     return A;
 }
+function pistonMultipoles(Nmax, k, a) {
+	const ka = k * a;
+	const j = j_series(Nmax + 1, ka);                      // j_n(ka) for n = 0..Nmax+1
+	const A = new Array(Nmax + 1);
+	for (let n = 0; n <= Nmax; n++) {
+		const factor = 2 * (2*n + 1) * (n + 1) / (ka);
+		const phase = complexIPow(-(n + 1));              // (-i)^(n+1)
+		A[n] = cmath.mulReal(phase, factor * j[n+1]);     // A_n = phase * factor * j[n+1]
+	}
+	return A;
+}
+function translateMultipoles(A, k, r, th, ph, Nmax) {
+	const S = Array.from({ length: Nmax + 1 }, () => new Array(Nmax + 1));
+	buildTranslationMatrix(S, k, r, th, ph, Nmax);
+	const Aout = new Array(Nmax + 1);
+	for (let n = 0; n <= Nmax; n++) {
+		let sum = cmath.cplx(0, 0);
+		for (let m = 0; m <= Nmax; m++) {
+			sum = cmath.add(sum, cmath.mul(S[n][m], A[m]) );
+		}
+		Aout[n] = sum;
+	}
+	return Aout;
+}
+function buildTranslationMatrix(S, k, r, th, ph, Nmax) {
+	const kr = k * r;
+	const j = j_series(Nmax, kr);                // j_m(kr) for m = 0..Nmax
+	const P = LP_series(Nmax, Math.cos(th));     // P_m(cosθ) for m = 0..Nmax
+	for (let n = 0; n <= Nmax; n++) {            // fill S[n][m]
+		for (let m = 0; m <= Nmax; m++) {
+			const phase = complexIPow(m - n);    // i^(m-n)
+			S[n][m] = cmath.mulReal(phase, (2*m + 1)*j[m]*P[m]); // S_nm = i^(m-n) * (2m+1) * j_m(kr) * P_m(cosθ)
+		}
+	}
+}
 
-function multiple_soft_spheres(spheres, k, kdir) {
+function multiple_soft_spheres(spheres, k, kdir, r0, b0) {
 	var Nspheres = spheres.length;
 	var a = spheres[0].a;
 	for(var i=1; i<Nspheres; i++) {
 		if(a<spheres[i].a) a = spheres[i].a;
 	}
-	var Nmax = Math.round(k*a)+5; // 7;  // good for ka ≈ 3
-	
-	/*
-	let Tn = [];
-	for (let n = 0; n <= Nmax; n++) {
-	    const jn = sphBesselJ(n, k*a);
-	    const hn = sphHankel1(n, k*a);  // complex
+	var Nmax = Math.round(k*a)+7; // 7;  // good for ka ≈ 3
+	/* let Tn = [];
+	for (let n = 0; n <= Nmax; n++) { const jn = sphBesselJ(n, k*a), hn = sphHankel1(n, k*a);  // complex
 		Tn[n] = cmath.div(cmath.cplx(-jn, 0), hn);  // Tn = - j_n / h_n
-	}
-	*/
-	
+	}*/	
 	const j_ka = j_series(Nmax, k*a); // Precompute all Bessel functions needed for this sphere
 	const y_ka = y_series(Nmax, k*a);	
 	const h_ka = [];
@@ -467,11 +508,48 @@ function multiple_soft_spheres(spheres, k, kdir) {
 	for (let n = 0; n <= Nmax; n++) { 	// Build T-matrix
 	    Tn[n] = cmath.div(cmath.cplx(-j_ka[n],0), h_ka[n]);
 	}
-	
-	// Build incident coefficients for both spheres
-	let Aext = [];
-	for (let s = 0; s < Nspheres; s++) {
-	    Aext[s] = planeWaveExpansionAtSphere(spheres[s], k, Nmax, kdir);
+	var piston = undefined, point = undefined;
+	if(r0!=0) { // r0 - piston distance in lambdas, b0 - piston radius in lambdas
+		var R = Math.abs(r0/k*2*Math.PI);
+		if(b0==0) {
+			point = { x: -kdir.x * R, y: -kdir.y * R, z: -kdir.z * R};
+			console.log("point:",point);
+		} else {
+			piston = {a: Math.abs(b0)/k*2*Math.PI, x: -kdir.x * R, y: -kdir.y * R, z: -kdir.z * R};
+			console.log("piston:",piston);
+		}
+	}
+	let Aext = []; // Build incident coefficients for spheres
+	if(point) {    // point source
+	    const A_point = pointSourceMultipoles(Nmax, 1.0); // Q = 1.0 or your amplitude
+	    for (let i = 0; i < spheres.length; i++) {
+	        const dx = spheres[i].x - point.x, dy = spheres[i].y - point.y, dz = spheres[i].z - point.z;
+	        const r  = Math.hypot(dx, dy, dz), th = Math.acos(dz / r), ph = Math.atan2(dy, dx);
+	        const Atrans = translateMultipoles(A_point, k, r, th, ph, Nmax);
+	        Aext[i] = [];
+	        for (let n = 0; n <= Nmax; n++) {
+	            const arr = new Array(2*n + 1).fill(cmath.cplx(0,0));
+	            arr[n] = Atrans[n];   // m = 0 only
+	            Aext[i][n] = arr;
+	        }
+	    }
+	} else if (piston) { // piston
+		const A_piston = pistonMultipoles(Nmax, k, piston.a); // 1. Piston multipoles at piston center
+		for (let i = 0; i < spheres.length; i++) { // 2. For each sphere, translate piston multipoles to its center
+			const dx = spheres[i].x - piston.x, dy = spheres[i].y - piston.y, dz = spheres[i].z - piston.z;
+			const r  = Math.hypot(dx, dy, dz), th = Math.acos(dz / r), ph = Math.atan2(dy, dx);
+			const Atrans = translateMultipoles(A_piston, k, r, th, ph, Nmax);
+			Aext[i] = []; 
+			for (let n = 0; n <= Nmax; n++) { 
+				const arr = new Array(2*n + 1).fill(cmath.cplx(0,0)); 
+				arr[n] = Atrans[n]; // m = 0 → idx = n 
+				Aext[i][n] = arr; 
+			}
+		}
+	} else { // plane wave
+		for (let s = 0; s < Nspheres; s++) {
+		    Aext[s] = planeWaveExpansionAtSphere(spheres[s], k, Nmax, kdir);
+		}
 	}
 	const M = (Nmax+1)*(Nmax+1);
 	const Ntot = Nspheres * M;
@@ -494,7 +572,7 @@ function multiple_soft_spheres(spheres, k, kdir) {
 	    for (let n = 0; n <= Nmax; n++) {
 	        for (let m = -n; m <= n; m++) {
 	            const gi = globalIndex(s, n, m, Nmax);
-	            const idx = m+n;
+	            const idx = m + n;
 	            rhs[gi] = cmath.mul(Tn[n], Aext[s][n][idx]);
 	        }
 	    }
@@ -551,11 +629,14 @@ function evaluateField(point, spheres, B, k, Nmax) {
         const theta = Math.acos(dz/r);
         const phi = Math.atan2(dy, dx);
 
+		//console.log(theta*180/Math.PI,phi*180/Math.PI);
+		
 	    const j_kr = j_series(Nmax, k*r); 
 	    const y_kr = y_series(Nmax, k*r); // Build Hankel array 
 	    const h_kr = []; for (let n = 0; n <= Nmax; n++) { h_kr[n] = cmath.cplx(j_kr[n],y_kr[n]); }	
 
         for (let n = 0; n <= Nmax; n++) {
+            //const hn = sphHankel1(n, k*r);
             const hn = h_kr[n]; // sphHankel1(n, k*r);
             for (let m = -n; m <= n; m++) {
                 const idx = m+n;
@@ -568,21 +649,14 @@ function evaluateField(point, spheres, B, k, Nmax) {
     return p;
 }
 
-// analytic backscatter amplitude f(pi)
-function backscatterAmplitude(Tn, Nmax) {
-    let f = cmath.cplx(0,0);
+function analyticBackscatterPressure(Tn, k, r, Nmax) { // analytic far-field backscatter at r
+    let fpi = cmath.cplx(0,0);                         // analytic backscatter amplitude f(pi)
     for (let n = 0; n <= Nmax; n++) {
         const factor = (2*n + 1) * ((n % 2 === 0) ? 1 : -1); // (-1)^n
-        f = cmath.add(f, cmath.mulReal(Tn[n], factor));
+        fpi = cmath.add(f, cmath.mulReal(Tn[n], factor));
     }
-    return f;
-}
-// analytic far-field backscatter at r
-function analyticBackscatterPressure(Tn, k, r, Nmax) {
-    const fpi = backscatterAmplitude(Tn, Nmax);
     const phase = cmath.cplx(Math.cos(k*r), Math.sin(k*r)); // e^{ikr}
-    const denom = k * r;
-    return cmath.mulReal(cmath.mul(phase, fpi), 1/denom);
+    return cmath.mulReal(cmath.mul(phase, fpi), 1/(k*r));
 }
 
 function strlog(s) {
@@ -632,13 +706,15 @@ function parseSpheresString(str) {
 
 function change() {
 	var s = document.getElementById("p").value;
-    var m = s.match(/th=(\d+)\&ph=(\d+)\&obj=(.*)/);
-	var th = parseFloat(m[1]), ph = parseFloat(m[2]), obj=m[3];
-	var s = calc(obj, 38e3, 1480, th, ph);
+	const num = "(-?\\d+(?:\\.\\d+)?)";
+	const re = new RegExp("th=" + num + "&ph=" + num + "&r0=" + num + "&b0=" + num + "&obj=(.*)");
+    var m = s.match(re);
+	var th = parseFloat(m[1]), ph = parseFloat(m[2]), r0=parseFloat(m[3]), b0=parseFloat(m[4]), obj=m[5];
+	var s = calc(obj, 38e3, 1480, th, ph, r0, b0);
 	document.getElementById("ta").value = s
 }
 
-function calc(obj, f0, c0, th, ph) {
+function calc(obj, f0, c0, th, ph, r0, b0) {
 	var k = 2*Math.PI*f0 / c0;
 
 	var theta = th * Math.PI/180, phi = ph * Math.PI/180;
@@ -646,9 +722,11 @@ function calc(obj, f0, c0, th, ph) {
 	var c = Math.cos(phi), s = Math.sin(phi);
 	var kdir = {x:c*d.x+s*d.z, y: d.y, z:-s*d.x+c*d.z};
 	
+	console.log("calc",kdir);
+	
 	var spheres = parseSpheresString(obj);	
 
-	var [B, Nmax] = multiple_soft_spheres(spheres, k, kdir);
+	var [B, Nmax] = multiple_soft_spheres(spheres, k, kdir, r0, b0);
 
     var r1 = 1; 
 	var obs1 = {x: -kdir.x * r1, y: -kdir.y * r1, z: -kdir.z * r1};
@@ -659,16 +737,17 @@ function calc(obj, f0, c0, th, ph) {
 		var a = i*Math.PI/180;
 		var p = {x: -r1*Math.cos(a), y: -r1*Math.sin(a), z:0};
 		var pt = {x: c*p.x+s*p.z, y: p.y, z:-s*p.x+c*p.z};
+		//if(i==0 || i==90|| i==180) console.log(i,p,pt);
 		var p_scat = evaluateField(pt, spheres, B, k, Nmax);
+		//if(i==0 || i==90|| i==180) console.log(i,p,pt,p_scat);
 	    ss += i+' '+cmath.abs(p_scat)+'\n';
 	}
 	return(ss);
 }
 
-var th = 0;
-var ph = 90;
-var obj="[spheres(0.005,2,[1,1,2],[0.01,0.01,0.01])]";
-document.getElementById("p").value = 'https://marmoszy.github.io/mm-bem/mm-bem2.html?th='+th+'&ph='+ph+'&obj='+obj;
+var th = 270, ph = 0, r0 = 0, b0 = 0.5, obj="[spheres(0.01905,2,[1,1,1],[0.01,0.01,0.01])]";
+//	var th = 0, ph = 90, r0 = 0, b0 = 0.5, obj="[spheres(0.01905,2,[1,1,1],[0.01,0.01,0.01])]";
+document.getElementById("p").value = 'https://marmoszy.github.io/mm-bem/mm-bem2.html?th='+th+'&ph='+ph+'&r0='+r0+'&b0='+b0+'&obj='+obj;
 change();
 
 
