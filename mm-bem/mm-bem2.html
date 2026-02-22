@@ -217,6 +217,8 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="240">240&deg;</option>
   <option value="255">255&deg;</option>
 </optgroup>
+<optgroup id="thadd">
+</optgroup>
 </select>
 <label for="ph"><i>&phi;<sub>0</sub></i> =</label> 
 <select id="ph" onchange="select()">
@@ -252,6 +254,8 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="330">330&deg;</option>
   <option value="345">345&deg;</option>
 </optgroup>
+<optgroup id="phadd">
+</optgroup>
 </select>
 <br><br>
 <label for="f0">Frequency: <i>f<sub>0</sub></i> =</label> 
@@ -268,6 +272,9 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="120e3">120 kHz</option>
   <option value="200e3">200 kHz</option>
   <option value="420e3">420 kHz</option>
+  <option disabled>_________</option>
+</optgroup>
+<optgroup id="f0add">
 </optgroup>
 </select>
 <!--<input type="button" value="Calculate" onclick="change1()"></input>-->
@@ -724,6 +731,8 @@ along both direction angles.
   <option value="1515">1515 m/s</option>
   <option value="1520">1520 m/s</option>
 </optgroup>
+<optgroup id="c0add">
+</optgroup>
 </select>
 
 <br><br>
@@ -788,7 +797,7 @@ onchange="select3()" value="0.5" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(21.2.2026)" style="text-align:center">mm-bem v2.35 (2025-2026)</p>
+<p title="(22.2.2026)" style="text-align:center">mm-bem v2.36 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -5355,10 +5364,33 @@ var engine = 'wasm_soft_worker'; // 'py_soft_worker';
 
 url_params();
 
+if(!document.querySelector('#f0 option[value="'+f0+'"]')) { // add to options if not in the list
+	const option = document.createElement("option");
+	option.value = f0; 
+	option.textContent = ''+(f0/1000)+ ' kHz';
+	document.getElementById("f0add").appendChild(option);	
+}
+if(!document.querySelector('#c0 option[value="'+c0+'"]')) { // add to options if not in the list
+	const option = document.createElement("option");
+	option.value = c0; 
+	option.textContent = ''+(c0)+ ' m/s';
+	document.getElementById("c0add").appendChild(option);	
+}
+if(!document.querySelector('#th option[value="'+th+'"]')) { // add to options if not in the list
+	const option = document.createElement("option");
+	option.value = th; 
+	option.textContent = ''+(th)+ '°';
+	document.getElementById("thadd").appendChild(option);	
+}
+if(!document.querySelector('#ph option[value="'+ph+'"]')) { // add to options if not in the list
+	const option = document.createElement("option");
+	option.value = ph; 
+	option.textContent = ''+(ph)+ '°';
+	document.getElementById("phadd").appendChild(option);	
+}
 document.getElementById("th").value = parseFloat(th);
 document.getElementById("ph").value = parseFloat(ph);
 document.getElementById("rule").value = engine;
-
 nf_r0 = parseFloat(nf_r0);
 nf_m = parseFloat(nf_m);
 nf_n = parseFloat(nf_n);
