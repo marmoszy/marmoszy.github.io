@@ -122,7 +122,7 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="[sphere(0.005),[-0.01,0,0]],|[sphere(0.005),[0.01,0,0]]">Two spheres</option>
   <option value="[sphere(0.005),[-0.01,0,0]],|[sphere(0.005),[0.01,0,0]],|[sphere(0.005),[0,-0.01,0]],|[sphere(0.005),[0,0.01,0]]">Four spheres</option>
   <option value="[sphere(0.005),[-0.01,0,-0.01]],|[sphere(0.005),[0.01,0,-0.01]],|[sphere(0.005),[0,-0.01, -0.01]],|[sphere(0.005),[0, 0.01, -0.01]],|[sphere(0.005),[-0.01,0,0.01]],|[sphere(0.005),[0.01,0,0.01]],|[sphere(0.005), [0,-0.01,0.01]],|[sphere(0.005),[0,0.01,0.01]]">Eight spheres</option>
-  <option value="[spheres(0.005,2,[3,3,3],[0.01,0.01,0.01])]">Multiple spheres</option>
+  <option value="[spheres(0.004,2,[3,3,3],[0.02,0.02,0.02])]">Multiple spheres</option>
 </optgroup>
 <optgroup label="Swimmbladder examples">
   <option value="[msh(YFT_752x1500_sb)]">Yellowfin_Tuna_752x1500_sb</option>
@@ -740,7 +740,7 @@ along both direction angles.
 <script>
 function select3() {select();}
 </script>
-<span hidden>
+<span hidden1>
 <label for="r0">Source distance (0-plane wave): <i>r<sub>0</sub></i> =</label> 
 <input type="number" id="r0" title=
 "r=0 - plane wave
@@ -750,7 +750,7 @@ onchange="select3()" value="0" style="width:48px"/> &lambda;
 <br><br>
 </span>
 
-<span hidden>
+<span hidden1>
 <label for="r0">Source aperture (0-point source): <i>b<sub>0</sub></i> =</label> 
 <input type="number" id="b0" title=
 "b0=0 - point source
