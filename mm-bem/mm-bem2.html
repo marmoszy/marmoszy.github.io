@@ -2747,7 +2747,7 @@ function js_soft_sphere() {
 			var th = parseFloat(document.getElementById("th").value);
 			var ph = parseFloat(document.getElementById("ph").value);
 			var f0 = parseFloat(document.getElementById("f0").value);
-			if(th>0 && ph>0 && f0>0) {
+			if(th>=0 && ph>=0 && f0>0) {
 				psave(document.getElementById("obj").value+','+(th) +','+(ph)+','+(f0)+','
 					+ document.getElementById("c0").value+'');
 			}
@@ -3759,12 +3759,11 @@ function spheres(R = 0.01, N = 2, mmm = [3,3,3], sep = [0.01, 0.01, 0.01]) {
 	return [vx1,fx1];
 }
 
-function sphere(R = 1, N = 2) {
+function sphere0(R = 1, N = 2) {
     let vx = [[0,0,R],[0,0,-R],[-R,0,0],[0,-R,0],[R,0,0],[0,R,0]];
     let fx = [[0,3,4],[0,4,5],[0,5,2],[0,2,3],[1,4,3],[1,5,4],[1,2,5],[1,3,2]];
     let nv = vx.length;
     let nt = fx.length;
-
     for (let it = 0; it < N; it++) {
         let ntold = nt;
         for (let i = 0; i < ntold; i++) {
@@ -3781,6 +3780,127 @@ function sphere(R = 1, N = 2) {
             fx[i] = [nv, nv+1, nv+2];
             nv += 3;
             nt += 3;
+        }
+    }
+    return [vx, fx];
+}
+
+function sphere(R = 1, N = 2) {
+    // initial octahedron
+    let vx = [[0,0,R], [0,0,-R], [-R,0,0], [0,-R,0], [R,0,0], [0,R,0]];
+    let fx = [[0,3,4],[0,4,5],[0,5,2],[0,2,3],[1,4,3],[1,5,4],[1,2,5],[1,3,2]];
+    // normalize helper
+    const norm = p => {let l = Math.hypot(p[0],p[1],p[2]);return [p[0]/l, p[1]/l, p[2]/l];};
+    let midpointCache = new Map();     // midpoint cache: key = "i-j", value = vertex index
+    function midpoint(i, j) {        
+        let key = i < j ? `${i}-${j}` : `${j}-${i}`; // ensure i < j for consistent key
+        if (midpointCache.has(key)) return midpointCache.get(key);
+        let p = [(vx[i][0]+vx[j][0])/2, (vx[i][1]+vx[j][1])/2, (vx[i][2]+vx[j][2])/2];
+        p = norm(p).map(v => v * R);
+        let idx = vx.length;
+        vx.push(p);
+        midpointCache.set(key, idx);
+        return idx;
+    }
+    for (let it = 0; it < N; it++) {     // subdivision loop
+        let newFx = [];
+        midpointCache.clear(); // clear per iteration
+        for (let [i1, i2, i3] of fx) {
+            let a = midpoint(i1, i2), b = midpoint(i2, i3), c = midpoint(i3, i1);
+            newFx.push([i1, a, c]);
+            newFx.push([a, i2, b]);
+            newFx.push([c, b, i3]);
+            newFx.push([a, b, c]);
+        }
+        fx = newFx;
+    }
+    return [vx, fx];
+}
+function sphere_div(R,N,vx,fx) {
+    const norm = p => {let l = Math.hypot(p[0],p[1],p[2]);return [p[0]/l, p[1]/l, p[2]/l];};
+    let midpointCache = new Map();     // midpoint cache: key = "i-j", value = vertex index
+    function midpoint(i, j) {        
+        let key = i < j ? `${i}-${j}` : `${j}-${i}`; // ensure i < j for consistent key
+        if (midpointCache.has(key)) return midpointCache.get(key);
+        let p = [(vx[i][0]+vx[j][0])/2, (vx[i][1]+vx[j][1])/2, (vx[i][2]+vx[j][2])/2];
+        p = norm(p).map(v => v * R);
+        let idx = vx.length;
+        vx.push(p);
+        midpointCache.set(key, idx);
+        return idx;
+    }
+    for (let it = 0; it < N; it++) {     // subdivision loop
+        let newFx = [];
+        midpointCache.clear(); // clear per iteration
+        for (let [i1, i2, i3] of fx) {
+            let a = midpoint(i1, i2), b = midpoint(i2, i3), c = midpoint(i3, i1);
+            newFx.push([i1, a, c]);
+            newFx.push([a, i2, b]);
+            newFx.push([c, b, i3]);
+            newFx.push([a, b, c]);
+        }
+        fx = newFx;
+    }
+    return [vx, fx];
+}
+function icosphere(R = 1, N = 2) {
+    const phi = (1 + Math.sqrt(5)) / 2; // golden ratio
+    // 12 vertices of a unit icosahedron (centered at origin)
+    let vx = [ [-1,  phi,  0], [ 1,  phi,  0], [-1, -phi,  0], [ 1, -phi,  0],
+               [ 0, -1,  phi], [ 0,  1,  phi], [ 0, -1, -phi], [ 0,  1, -phi],
+               [ phi, 0, -1],  [ phi, 0, 1],   [-phi, 0, -1],  [-phi, 0, 1] ];
+    // normalize to radius R 
+	const norm = p => { let l = Math.hypot(p[0],p[1],p[2]); return [R*p[0]/l, R*p[1]/l, R*p[2]/l]; };
+	vx = vx.map(norm);
+    // 20 triangular faces of the icosahedron
+    let fx = [ [0, 11, 5], [0, 5, 1],  [0, 1, 7],  [0, 7, 10], [0, 10, 11],
+               [1, 5, 9],  [5, 11, 4], [11, 10, 2],[10, 7, 6], [7, 1, 8],
+               [3, 9, 4],  [3, 4, 2],  [3, 2, 6],  [3, 6, 8],  [3, 8, 9],
+               [4, 9, 5],  [2, 4, 11], [6, 2, 10], [8, 6, 7],  [9, 8, 1] ];
+    return sphere_div(R, N, vx, fx);
+}
+
+function geodesicsphere(R = 1, nEdge = 3) {
+    const phi = (1 + Math.sqrt(5)) / 2;
+    let baseV = [ [-1,  phi,  0], [ 1,  phi,  0], [-1, -phi,  0], [ 1, -phi,  0],
+                  [ 0, -1,  phi], [ 0,  1,  phi], [ 0, -1, -phi], [ 0,  1, -phi],
+                  [ phi,  0, -1], [ phi,  0,  1], [-phi,  0, -1], [-phi,  0,  1]];
+    let baseF = [[0,11,5],[0,5,1],[0,1,7],[0,7,10],[0,10,11],
+                 [1,5,9],[5,11,4],[11,10,2],[10,7,6],[7,1,8],
+                 [3,9,4],[3,4,2],[3,2,6],[3,6,8],[3,8,9],
+                 [4,9,5],[2,4,11],[6,2,10],[8,6,7],[9,8,1]];
+    const norm = p => {const l = Math.hypot(p[0], p[1], p[2]); return [R*p[0]/l, R*p[1]/l, R*p[2]/l];};
+    let vx = [], fx = [], indexMap = new Map();
+    const getIndex = p => {
+        const key = p.join(",");
+        if (indexMap.has(key)) return indexMap.get(key);
+        const idx = vx.length;
+        vx.push(p);
+        indexMap.set(key, idx);
+        return idx;
+    };
+    const triIndex = (i, j, n) => (i * (2*n + 3 - i)) / 2 + j;     // fixed indexing
+    for (let [i1, i2, i3] of baseF) {
+        const A = baseV[i1], B = baseV[i2], C = baseV[i3];
+        let grid = [];
+        for (let i = 0; i <= nEdge; i++) {
+            for (let j = 0; j <= nEdge - i; j++) {
+                const a = (nEdge - i - j) / nEdge, b = i / nEdge, c = j / nEdge;
+                const p = [ a*A[0]+b*B[0]+c*C[0], a*A[1]+b*B[1]+c*C[1], a*A[2]+b*B[2]+c*C[2]];
+                grid.push(norm(p));
+            }
+        }
+        for (let i = 0; i < nEdge; i++) {
+            for (let j = 0; j < nEdge - i; j++) {
+                const a = getIndex(grid[triIndex(i,   j,   nEdge)]);
+                const b = getIndex(grid[triIndex(i+1, j,   nEdge)]);
+                const c = getIndex(grid[triIndex(i,   j+1, nEdge)]);
+                fx.push([a, b, c]);
+                if (i + j + 1 < nEdge) {
+                    const d = getIndex(grid[triIndex(i+1, j+1, nEdge)]);
+                    fx.push([b, d, c]);
+                }
+            }
         }
     }
     return [vx, fx];
@@ -3978,7 +4098,7 @@ function msh(s) { /* parse msh string to [vx,fx] */
 }
 
 // Mesh generation logic
-let Nn = 0, Ne = 0;
+let Nn = 0, Ne = 0, Nl = 0;
 let Sn = "", Se = "";
 
 function msh_str(O) {
@@ -3993,18 +4113,19 @@ function msh_str(O) {
     }
     for (let i = 0; i < fx.length; i++) {
 		if(fx[i].length==4) { 
-			Se += `${i+Ne+1} 3 2 0 1 ${fx[i][0]+Nn+1} ${fx[i][1]+Nn+1} ${fx[i][2]+Nn+1} ${fx[i][3]+Nn+1}\n`;
+			Se += `${i+Ne+1} 3 2 0 ${Nl+1} ${fx[i][0]+Nn+1} ${fx[i][1]+Nn+1} ${fx[i][2]+Nn+1} ${fx[i][3]+Nn+1}\n`;
 		} else {    // ==3
-			Se += `${i+Ne+1} 2 2 0 1 ${fx[i][0]+Nn+1} ${fx[i][1]+Nn+1} ${fx[i][2]+Nn+1}\n`;
+			Se += `${i+Ne+1} 2 2 0 ${Nl+1} ${fx[i][0]+Nn+1} ${fx[i][1]+Nn+1} ${fx[i][2]+Nn+1}\n`;
 		}
     }
     Nn += vx.length;
     Ne += fx.length;
+	Nl += 1;
 }
 
 function msh_flush() {
     let s = `$Nodes\n${Nn}\n${Sn}$EndNodes\n$Elements\n${Ne}\n${Se}$EndElements\n`;
-    Nn = 0; Ne = 0; Sn = ""; Se = "";
+    Nn = 0; Ne = 0; Nl = 0; Sn = ""; Se = "";
     return `$MeshFormat\n2.2 0 8\n$EndMeshFormat\n` + s;
 }
 
