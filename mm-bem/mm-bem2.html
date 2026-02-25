@@ -797,7 +797,7 @@ onchange="select3()" value="0.5" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(22.2.2026)" style="text-align:center">mm-bem v2.36 (2025-2026)</p>
+<p title="(25.2.2026)" style="text-align:center">mm-bem v2.37 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -934,7 +934,7 @@ var wh = document.getElementById("svg1").getAttribute("width")-0;
 
 function imgclick(el) {
 	if(el.getAttribute("href")) {
-		img_onoff ^= 1; el.style.opacity=img_onoff?196:0;update();
+		img_onoff = (img_onoff+1)%3; el.style.opacity=img_onoff?196:0; update();
 	}
 } 
 function zoomin()  {zoom*=2; xoff-=wh/4*zoom; yoff-=wh/4*zoom;}
@@ -1859,17 +1859,21 @@ function logNormalizeMtx(arr) {
   return arr.map(row => row.map(v=>(20*Math.log10(v)+20)/30)); // logNormalize
 }
 
+var img_data = []; // global variable for near field image
+var png_data = '';
 function update_near_field(s) {
 	var svg = document.getElementById("svg");
 	const W = svg.getAttribute("width")-40;
 	const H = svg.getAttribute("height")-40;
 	const data = s.trim().split(/\r?\n/).map(l => l.replace(/#.*/, ''))
 			.filter(l => l).map(l => l.trim().split(/\s+/).map(Number));
-	const pngData = createPolarImage(logNormalizeMtx(data), nf_r0, nf_r0*nf_m); // real r1,r2
-	if(pngData) {
+	img_data = logNormalizeMtx(data);
+
+	png_data = createPolarImage(img_data, nf_r0, nf_r0*nf_m); // real r1,r2
+	if(png_data) {
 		var el = document.getElementById("svgimg");
 		if(el) {
-			el.setAttribute("href", pngData);
+			el.setAttribute("href", png_data);
 			if(!img_onoff) el.style.opacity=0;
 		}
 	}
@@ -2029,7 +2033,90 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
   	  //el=svg_createpath(svg,"th_xy_a1",[[]],"none",1,"1,0",0,"none",0.25);	// clear aperture
   	  el=svg_createpath(svg,"th_xy_a2",[[]],"none",1,"1,0",0,"none",0.25);	// clear aperture
   	  el=svg_createpoint(svg,"th_xy",[[]],"none");	                        // clear point
-    }
+  }
+
+// near field circle
+/*	
+	var p4 = [], r4 = nf_r0*nf_m;
+	for(var i=0;i<360;i++) {
+		p4.push(V(P(rot(Ry(ph),r4*Math.cos(i*pi/180+pi),r4*Math.sin(i*pi/180+pi), 0))));
+	}
+	cmap=cmapMatlab();
+	const [R,G,B]=cmap(0.33);
+	var el=svg_createpath(svg,"C4",
+	[p4],img_onoff?'black':'none',1,"1,0",0,img_onoff?`rgb(${R},${G},${B})`:'none',0.1);
+	el.innerHTML = "<title>Near field crosssection: r="+r4+" m</title>";
+*/	
+// near field in 3D using polar data (low quality image)
+/*
+	if(img_data.length>0) {	
+		let rmin = nf_r0;
+		let rmax = nf_r0*nf_m;
+		let Nr = nf_m;          // number of radial steps
+		let Nphi = 360/nf_n;     // angular resolution (5° here)
+		let dr = (rmax - rmin) / Nr;
+		let dphi = 2*Math.PI / Nphi;
+	
+		console.log("img_data:",Nr,Nphi);
+	
+		for (let ir = 0; ir < Nr; ir++) {
+		    let r1 = rmin + ir*dr, r2 = r1 + dr;
+		    for (let ip = 0; ip < Nphi; ip++) {
+		        let phi1 = ip * dphi, phi2 = phi1 + dphi;
+		        let rc = 0.5*(r1+r2); // compute color for the center of the cell
+		        let phic = 0.5*(phi1+phi2);
+		        //let val = 0.5//yourHeatFunction(rc, phic);   // <-- your function
+				//try {
+					let val = img_data[ir][ip];
+					//} catch {
+					//console.log("throw at",ir,ip);
+					//}
+				let [R,G,B] = cmap(val);
+		        // build polygon points
+		        let pA = V(P(rot(Ry(ph), r1*Math.cos(phi1), r1*Math.sin(phi1), 0)));
+		        let pB = V(P(rot(Ry(ph), r1*Math.cos(phi2), r1*Math.sin(phi2), 0)));
+		        let pC = V(P(rot(Ry(ph), r2*Math.cos(phi2), r2*Math.sin(phi2), 0)));
+		        let pD = V(P(rot(Ry(ph), r2*Math.cos(phi1), r2*Math.sin(phi1), 0)));
+		        // draw polygon
+		        svg_createpath(svg,`cell_${ir}_${ip}`,[[pA, pB, pC, pD]],
+		            'none', 1, "1,2", 0,img_onoff?`rgb(${R},${G},${B})`:'none', 0.7);
+		    }
+		}		
+	}
+*/
+	
+// near field in 3D view using png image
+	if(png_data.length>0) {
+		var r4 = nf_r0*nf_m*Math.sqrt(2);
+        let pA = V(P(rot(Ry(ph), r4*Math.cos(135*pi/180), r4*Math.sin(135*pi/180), 0)));
+        let pB = V(P(rot(Ry(ph), r4*Math.cos(45*pi/180), r4*Math.sin(45*pi/180), 0)));
+        let pC = V(P(rot(Ry(ph), r4*Math.cos(-45*pi/180), r4*Math.sin(-45*pi/180), 0)));
+        let pD = V(P(rot(Ry(ph), r4*Math.cos(-135*pi/180), r4*Math.sin(-135*pi/180), 0)));
+		svg_addHeatmapPatternAffine(svg, "png_data", png_data, 400, pA, pB, pD);
+        svg_createpath(svg,"png_data_path",[[pA, pB, pC, pD]],
+            'none', 1, "1,2", 0,(img_onoff&1)?'url(#png_data)':'none', 0.7);
+	}
+}
+
+function svg_addHeatmapPatternAffine(svg, id, url, size, pA, pB, pD) {
+    const defs = svg.querySelector("defs") ||
+        svg.insertBefore(document.createElementNS("http://www.w3.org/2000/svg","defs"), svg.firstChild);
+	const old = defs.querySelector(`#${id}`); 
+    if (old) old.remove();     // Remove old pattern if it exists 
+    const u = [pB[0]-pA[0],pB[1]-pA[1]],  v = [pD[0]-pA[0],pD[1]-pA[1]]; // compute basis vectors x and y-axis
+    const a = u[0]/size, b = u[1]/size, c = v[0]/size, d = v[1]/size, e = pA[0], f = pA[1]; // build affine matrix
+    const pat = document.createElementNS("http://www.w3.org/2000/svg", "pattern");
+    pat.setAttribute("id", id);
+    pat.setAttribute("patternUnits", "userSpaceOnUse");
+    pat.setAttribute("width", size);
+    pat.setAttribute("height", size);
+    pat.setAttribute("patternTransform", `matrix(${a} ${b} ${c} ${d} ${e} ${f})`);     // the magic line
+    const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    img.setAttribute("href", url);
+    img.setAttribute("width", size);
+    img.setAttribute("height", size);
+    pat.appendChild(img);
+    defs.appendChild(pat);
 }
 
 function circle3D(center, normal, radius, segments = 64) {
