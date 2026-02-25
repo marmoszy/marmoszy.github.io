@@ -1927,6 +1927,18 @@ function update_axes() {
 }
 
 function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
+
+// near field in 3D view using png image
+	if(png_data.length>0) {
+		var r4 = nf_r0*nf_m*Math.sqrt(2);
+        let pA = V(P(rot(Ry(ph), r4*Math.cos(135*pi/180), r4*Math.sin(135*pi/180), 0)));
+        let pB = V(P(rot(Ry(ph), r4*Math.cos(45*pi/180), r4*Math.sin(45*pi/180), 0)));
+        let pC = V(P(rot(Ry(ph), r4*Math.cos(-45*pi/180), r4*Math.sin(-45*pi/180), 0)));
+        let pD = V(P(rot(Ry(ph), r4*Math.cos(-135*pi/180), r4*Math.sin(-135*pi/180), 0)));
+		svg_addHeatmapPatternAffine(svg, "png_data", png_data, 400, pA, pB, pD);
+        svg_createpath(svg,"png_data_path",[[pA, pB, pC, pD]],
+            'none', 1, "1,2", 0,(img_onoff&1)?'url(#png_data)':'none', 0.9);
+	}
 	
 // ---- wave length box update
   var l = c0/Math.abs(f0);
@@ -2085,17 +2097,6 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
 	}
 */
 	
-// near field in 3D view using png image
-	if(png_data.length>0) {
-		var r4 = nf_r0*nf_m*Math.sqrt(2);
-        let pA = V(P(rot(Ry(ph), r4*Math.cos(135*pi/180), r4*Math.sin(135*pi/180), 0)));
-        let pB = V(P(rot(Ry(ph), r4*Math.cos(45*pi/180), r4*Math.sin(45*pi/180), 0)));
-        let pC = V(P(rot(Ry(ph), r4*Math.cos(-45*pi/180), r4*Math.sin(-45*pi/180), 0)));
-        let pD = V(P(rot(Ry(ph), r4*Math.cos(-135*pi/180), r4*Math.sin(-135*pi/180), 0)));
-		svg_addHeatmapPatternAffine(svg, "png_data", png_data, 400, pA, pB, pD);
-        svg_createpath(svg,"png_data_path",[[pA, pB, pC, pD]],
-            'none', 1, "1,2", 0,(img_onoff&1)?'url(#png_data)':'none', 0.7);
-	}
 }
 
 function svg_addHeatmapPatternAffine(svg, id, url, size, pA, pB, pD) {
