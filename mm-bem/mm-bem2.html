@@ -1520,7 +1520,7 @@ function update_mesh() {
 		}
 	}
 	
-	var el = svg_createpath(svg, "M", p, mesh_onoff?mshcolor:"none", mesh_onoff?0.5:0, "1,0", 0, 'none');
+	var el = svg_createpath(svg, "M", p, mesh_onoff?mshcolor:"none", (img_onoff&1)?2:mesh_onoff?0.5:0, "1,0", 0, 'none');
 	if(document.getElementById("obj").value.match("soft_sphere") ) {  // colored mesh hack for exact sphere !!!
 		var d = el.getAttribute('d');
 		var out = svg_extractOutlineConvexHull(d);
@@ -1536,7 +1536,7 @@ function update_mesh() {
   // ---- mesh box
     draw_box("svg1","M1",xmin,xmax,ymin,ymax,zmin,zmax,(mesh_onoff&2)?'darkblue':'none');
 	
-  // ---- mesh projection
+  // ---- mesh projection (2D polar)
 	var th = parseFloat(document.getElementById("th").value);
 	var ph = parseFloat(document.getElementById("ph").value);
 	update_mesh2(th,ph);
@@ -1927,18 +1927,6 @@ function update_axes() {
 }
 
 function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
-
-// near field in 3D view using png image
-	if(png_data.length>0) {
-		var r4 = nf_r0*nf_m*Math.sqrt(2);
-        let pA = V(P(rot(Ry(ph), r4*Math.cos(135*pi/180), r4*Math.sin(135*pi/180), 0)));
-        let pB = V(P(rot(Ry(ph), r4*Math.cos(45*pi/180), r4*Math.sin(45*pi/180), 0)));
-        let pC = V(P(rot(Ry(ph), r4*Math.cos(-45*pi/180), r4*Math.sin(-45*pi/180), 0)));
-        let pD = V(P(rot(Ry(ph), r4*Math.cos(-135*pi/180), r4*Math.sin(-135*pi/180), 0)));
-		svg_addHeatmapPatternAffine(svg, "png_data", png_data, 400, pA, pB, pD);
-        svg_createpath(svg,"png_data_path",[[pA, pB, pC, pD]],
-            'none', 1, "1,2", 0,(img_onoff&1)?'url(#png_data)':'none', 0.9);
-	}
 	
 // ---- wave length box update
   var l = c0/Math.abs(f0);
@@ -2097,6 +2085,17 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
 	}
 */
 	
+// near field in 3D view using png image
+	if(png_data.length>0) {
+		var r4 = nf_r0*nf_m*Math.sqrt(2);
+        let pA = V(P(rot(Ry(ph), r4*Math.cos(135*pi/180), r4*Math.sin(135*pi/180), 0)));
+        let pB = V(P(rot(Ry(ph), r4*Math.cos(45*pi/180), r4*Math.sin(45*pi/180), 0)));
+        let pC = V(P(rot(Ry(ph), r4*Math.cos(-45*pi/180), r4*Math.sin(-45*pi/180), 0)));
+        let pD = V(P(rot(Ry(ph), r4*Math.cos(-135*pi/180), r4*Math.sin(-135*pi/180), 0)));
+		svg_addHeatmapPatternAffine(svg, "png_data", png_data, 400, pA, pB, pD);
+        svg_createpath(svg,"png_data_path",[[pA, pB, pC, pD]],
+            'none', 1, "1,2", 0,(img_onoff&1)?'url(#png_data)':'none', 0.9);
+	}
 }
 
 function svg_addHeatmapPatternAffine(svg, id, url, size, pA, pB, pD) {
