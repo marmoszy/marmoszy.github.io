@@ -1,0 +1,74 @@
+// Scattering from soft sphere in water (SL * p = -pinc)
+// MM 12.4.2025  freefem++-mpi -wg soft.edp -fm sphere-1.905-600.msh
+load "bem"
+load "msh3"
+load "medit"
+load "gmsh"
+include "getARGV.idp"
+
+//string fname = getARGV("-fm","msh/simplify10_YFT_swimbladder_origin.msh");
+string fname = getARGV("-fm","msh/sphere-1.905-600.msh");
+real f0 = getARGV("-f0",38e3);
+real c0 = getARGV("-c0",1480);
+real th = getARGV("-th",270);
+real ph = getARGV("-ph",0);
+
+real w = 2*pi*f0, k = w/c0;
+
+// --- target
+meshS ThS; if(fname.find(".mesh")>0) ThS=readmeshS(fname); else ThS=gmshloadS(fname); // .msh
+ThS = OrientNormal(ThS,unbounded=1);
+
+//func pinc = exp(1i*k*(x*0+y*(-1)+z*0));   // incident plane wave
+//func pinc = exp(1i*k*(x*cos(pi+th*pi/180)+y*sin(pi+th*pi/180)+z*0));   // incident plane wave
+func pinc=exp(1i*k*(x*cos(pi+th*pi/180)*cos(ph*pi/180)+y*sin(pi+th*pi/180)-z*cos(pi+th*pi/180)*sin(ph*pi/180)));
+ 
+// --- surface solution 
+fespace Uh(ThS,P0);
+varf vlhs(u,v) = int2dx2d(ThS)(ThS)(BEM(BemKernel("SL",k=k),u,v));
+varf vrhs(u,v) = -int2d(ThS)(pinc*v);
+HMatrix<complex> A = vlhs(Uh,Uh);
+Uh<complex> b;   b[] = vrhs(0,Uh);
+Uh<complex> u;   u[] = A^-1 * b[]; 
+Uh               pabs = abs(u);
+medit("ThS",ThS,pabs);
+
+// --- far field pattern
+varf vpSL(u,v) = int2d(ThS)(POT(BemPotential("SL",k=k),u,v));
+real r1=1; border c1(t=0,2*pi) {x=r1*cos(t)*cos(pi*ph/180); y=r1*sin(t); z=-r1*cos(t)*sin(pi*ph/180);}; 
+int nc=360;
+meshL ThL = buildmeshL(c1(nc));
+fespace UhL(ThL,P0);
+HMatrix<complex>  SL2 = vpSL(Uh,UhL);
+UhL<complex> psc; psc[] = SL2 * u[];
+UhL               pscabs = abs(psc);
+
+// ------ output
+string oname="soft2-edp.txt";
+{ofstream fout(oname); fout << "# mm-freefem" << endl << "# th0="<<th<<" ph0="<<ph<<" f0="<<f0<<" c0="<<c0<<endl;
+ for(int i=0;i<pscabs.n;i++) {fout << i << " " << pscabs[][(i+pscabs.n/2)%pscabs.n] << endl;}
+}
+//exec("gnuplot -p -c bin/polar.gp "+ oname);
+
+// --- near field pattern
+real r2 = 0.06;  border c2(t = 0,2*pi) {x=r2*cos(t); y=r2*sin(t);}
+real r3 = 0.004; border c3(t = 0,2*pi) {x=r3*cos(t); y=r3*sin(t);}
+mesh ThOut0 = buildmesh(c2(100)+c3(-50));
+func fun1 = x*cos(pi*ph/180); func fun2 = y; func fun3 = -x*sin(pi*ph/180);
+meshS ThOut = movemesh23(ThOut0, transfo=[fun1,fun2,fun3]);
+fespace UhOut(ThOut,P0);
+
+HMatrix<complex> SL3 = vpSL(Uh,UhOut);
+UhOut<complex> psc3; psc3[] = SL3*u[];
+UhOut apsc3 = abs(psc3); // + pinc;
+//plot(ThOut,apsc3,dim=3,fill=1,value=1,cmm="p_sc"); //,pdf="soft2-edp-nf.pdf");
+medit("ThOut",ThOut,apsc3,ThS);
+
+fespace UhOut0(ThOut0, P0);
+UhOut0 apsc2; apsc2[] = apsc3[];
+plot(ThOut0,apsc2,fill=1,value=1,cmm="p_sc",pdf="soft2-edp-nf.pdf");
+
+string onameb="soft2-edp-nf.txt";
+{ofstream fout(onameb);
+ for(int i=0;i<apsc3.n;i++) {fout << i << " " << apsc3[][i] << endl;}
+}
