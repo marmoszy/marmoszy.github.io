@@ -1,5 +1,6 @@
 // Scattering from soft sphere in water (SL * p = -pinc)
-// MM 12.4.2025  freefem++-mpi -wg soft.edp -fm sphere-1.905-600.msh
+// MM 12.4.2025, 25.2.2026  
+// freefem++-mpi -wg -v 0 soft2.edp -fm sphere-1.905-600.msh
 load "bem"
 load "msh3"
 load "medit"
@@ -12,6 +13,9 @@ real f0 = getARGV("-f0",38e3);
 real c0 = getARGV("-c0",1480);
 real th = getARGV("-th",270);
 real ph = getARGV("-ph",0);
+real rmax = getARGV("-rmax",0.06);  // near field annulus rmax
+real rmin = getARGV("-rmin",0.004); // near field annulus rmin
+real dy = getARGV("-dy",0.0);   // near field annulus distance from center in y-dir
 
 real w = 2*pi*f0, k = w/c0;
 
@@ -50,9 +54,9 @@ string oname="soft2-edp.txt";
 }
 //exec("gnuplot -p -c bin/polar.gp "+ oname);
 
-// --- near field pattern
-real r2 = 0.06;  border c2(t = 0,2*pi) {x=r2*cos(t); y=r2*sin(t);}
-real r3 = 0.004; border c3(t = 0,2*pi) {x=r3*cos(t); y=r3*sin(t);}
+// --- near field pattern in annulus r = r3:r2
+border c2(t = 0,2*pi) {x=rmax*cos(t); y=rmax*sin(t)+dy;}
+border c3(t = 0,2*pi) {x=rmin*cos(t); y=rmin*sin(t)+dy;}
 mesh ThOut0 = buildmesh(c2(100)+c3(-50));
 func fun1 = x*cos(pi*ph/180); func fun2 = y; func fun3 = -x*sin(pi*ph/180);
 meshS ThOut = movemesh23(ThOut0, transfo=[fun1,fun2,fun3]);

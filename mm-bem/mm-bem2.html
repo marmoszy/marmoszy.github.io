@@ -797,7 +797,7 @@ onchange="select3()" value="0.5" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(25.2.2026)" style="text-align:center">mm-bem v2.37 (2025-2026)</p>
+<p title="(27.2.2026)" style="text-align:center">mm-bem v2.38 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -1868,7 +1868,6 @@ function update_near_field(s) {
 	const data = s.trim().split(/\r?\n/).map(l => l.replace(/#.*/, ''))
 			.filter(l => l).map(l => l.trim().split(/\s+/).map(Number));
 	img_data = logNormalizeMtx(data);
-
 	png_data = createPolarImage(img_data, nf_r0, nf_r0*nf_m); // real r1,r2
 	if(png_data) {
 		var el = document.getElementById("svgimg");
@@ -2087,15 +2086,20 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
 	
 // near field in 3D view using png image
 	if(png_data.length>0) {
-		var r4 = nf_r0*nf_m*Math.sqrt(2);
-        let pA = V(P(rot(Ry(ph), r4*Math.cos(135*pi/180), r4*Math.sin(135*pi/180), 0)));
-        let pB = V(P(rot(Ry(ph), r4*Math.cos(45*pi/180), r4*Math.sin(45*pi/180), 0)));
-        let pC = V(P(rot(Ry(ph), r4*Math.cos(-45*pi/180), r4*Math.sin(-45*pi/180), 0)));
-        let pD = V(P(rot(Ry(ph), r4*Math.cos(-135*pi/180), r4*Math.sin(-135*pi/180), 0)));
-		svg_addHeatmapPatternAffine(svg, "png_data", png_data, 400, pA, pB, pD);
-        svg_createpath(svg,"png_data_path",[[pA, pB, pC, pD]],
-            'none', 1, "1,2", 0,(img_onoff&1)?'url(#png_data)':'none', 0.9);
+		update_near_field2();
 	}
+}
+
+function update_near_field2() {
+	var svg = document.getElementById("svg1");
+	var r4 = nf_r0*nf_m*Math.sqrt(2);
+    let pA = V(P(rot(Ry(ph), r4*Math.cos(135*pi/180), r4*Math.sin(135*pi/180), 0)));
+    let pB = V(P(rot(Ry(ph), r4*Math.cos(45*pi/180), r4*Math.sin(45*pi/180), 0)));
+    let pC = V(P(rot(Ry(ph), r4*Math.cos(-45*pi/180), r4*Math.sin(-45*pi/180), 0)));
+    let pD = V(P(rot(Ry(ph), r4*Math.cos(-135*pi/180), r4*Math.sin(-135*pi/180), 0)));
+	svg_addHeatmapPatternAffine(svg, "png_data", png_data, 400, pA, pB, pD);
+    svg_createpath(svg,"png_data_path",[[pA, pB, pC, pD]],
+        'none', 1, "1,2", 0,(img_onoff&1)?'url(#png_data)':'none', 0.9);	
 }
 
 function svg_addHeatmapPatternAffine(svg, id, url, size, pA, pB, pD) {
@@ -3299,7 +3303,12 @@ function change2() {
 	if(out2!="none") {
 		var s = out2; //eval(out2);
 		document.getElementById("txt2").value=s;
-		plot("Q",s,"#4da6ff");
+		if(s.substring(0,11)=="# abs(p_sc)") {
+			update_near_field(s);
+			update_near_field2();
+		} else {
+			plot("Q",s,"#4da6ff");
+		}
 	//} else if(txt2.length>1) {
 	//plot("Q",txt2,"#4da6ff");
 	} else {
