@@ -797,7 +797,7 @@ onchange="select3()" value="0.5" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(27.2.2026)" style="text-align:center">mm-bem v2.38 (2025-2026)</p>
+<p title="(28.2.2026)" style="text-align:center">mm-bem v2.39 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -832,10 +832,10 @@ function echoSMs_process(ss) {
 	var s2 = JSON.parse(ss);
 	var s = '',n=0;
 	for(var i=0;i<s2.length;i++) {
-		if(s2[i]["anatomical_types"].indexOf("swimbladder") >=0) {
-			s += '<option value="'+s2[i]["id"]+'" >' +(i+1)+". "+s2[i]["id"]+': '+s2[i]["vernacular_name"]+' ('+s2[i]["length"]+')</option>\n';
+		//if(s2[i]["anatomical_types"].indexOf("swimbladder") >=0) {
+			s += '<option value="'+s2[i]["uuid"]+'" >' +(i+1)+". "+s2[i]["dataset_name"]+': '+s2[i]["vernacular_names"][0]+' '+s2[i]["specimen_name"]+' ('+s2[i]["length"]+')</option>\n';
 			n+=1;
-		}
+		//}
 	}
 	s = '<option value="none" disabled>'+n+' swimbladdered specimens out of ' + s2.length+':</option>\n' + s;
 	document.getElementById("echoSMs_ids").innerHTML=s;
@@ -2379,6 +2379,9 @@ function loadEchoSMs(ss) {
 		var vname = echoSMs[n].species;
 		if(vname==undefined) {
 			vname = echoSMs[n].specimens[i].vernacular_name;
+			if(vname==undefined) {
+				vname = echoSMs[n].specimens[i].vernacular_names[0];
+			}
 			res = 1;
 		}
 		var idx = 1;
@@ -2400,7 +2403,7 @@ function loadEchoSMs(ss) {
 			if(l>40) {res=40/l;}
 			var off = -(Math.min(...x)+Math.max(...x))/2;           // x offset to move to center
 			if(el) {
-				el.innerHTML += '<option value="[specimen('+(n)+','+(i)+','+(idx)+','+(res).toFixed(1)+'),['+(off).toFixed(3)+',0,0],mul(Ry(180),Rx(90))]">'+echoSMs[n].specimens[i].id+'_'+vname+'_'+(echoSMs[n].specimens[i].length)+'_sb</option>';
+				el.innerHTML += '<option value="[specimen('+(n)+','+(i)+','+(idx)+','+(res).toFixed(1)+'),['+(off).toFixed(3)+',0,0],mul(Ry(180),Rx(90))]">'+vname+'_'+echoSMs[n].specimens[i].specimen_name+'_'+(echoSMs[n].specimens[i].length)+'_sb</option>';
 			}
 		} else {
 			alert("No swimbladder description found!")
