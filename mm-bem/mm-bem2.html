@@ -355,7 +355,7 @@ Full mm-bem package contains source codes in different programming languages for
 <div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#fafcff;white;#F5EDEA;#eee">
 <svg xmlns="http://www.w3.org/2000/svg" id="svg" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
 <image id="svgimg" x="20" y="20" width="400" height="400" onclick="imgclick(this);" style="pointer-events:all">
-	<title>click to switch far field/near field</title>
+	<title>click to turn on/off near field</title>
 </image>
 <text x="10" y="10" id="title" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
 <text x="280" y="10" id="title2" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
@@ -797,7 +797,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(28.2.2026)" style="text-align:center">mm-bem v2.39 (2025-2026)</p>
+<p title="(1.3.2026)" style="text-align:center">mm-bem v2.40 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -2098,8 +2098,10 @@ function update_near_field2() {
     let pC = V(P(rot(Ry(ph), r4*Math.cos(-45*pi/180), r4*Math.sin(-45*pi/180), 0)));
     let pD = V(P(rot(Ry(ph), r4*Math.cos(-135*pi/180), r4*Math.sin(-135*pi/180), 0)));
 	svg_addHeatmapPatternAffine(svg, "png_data", png_data, 400, pA, pB, pD);
-    svg_createpath(svg,"png_data_path",[[pA, pB, pC, pD]],
-        'none', 1, "1,2", 0,(img_onoff&1)?'url(#png_data)':'none', 0.9);	
+    var el=svg_createpath(svg,"png_data_path",[[pA, pB, pC, pD]],
+        'none', 1, "1,2", 0,(img_onoff&1)?'url(#png_data)':'none', 0.9);
+    el.innerHTML='<title>'+'click to turn on/off near field'+'</title>';
+	el.setAttribute("onclick","imgclick(document.getElementById('svgimg'))")
 }
 
 function svg_addHeatmapPatternAffine(svg, id, url, size, pA, pB, pD) {
@@ -2787,8 +2789,11 @@ function soft_sphere(aa, f00, c00, th00, ph00, r00, b00) { // 360 angles, return
 	//return s;
 	
 	var nn = 3; // every 3 deg
-	var NR = 15, NT = 360, RR = Array.from({length:NR},(_,i)=>0.004*(i+1)); // the same code as in calculation worker
+	var NR = 15, NT = 360;
+	var rmin = 0.004, rmax=rmin*NR;
+	var RR = Array.from({length:NR},(_,i)=>rmin*(i+1)); // the same code as in calculation worker
 	//console.log("soft_sphere:",2*Math.PI*f0/c0,a,RR)
+	s += '## # '+(NR)+'x'+(NT/nn)+' r='+(rmin)+':'+(rmin)+':'+(rmax)+' c=[0,0,0] ph='+ph0+'+'\\n';
 	for(var j=0;j<RR.length;j++) {
 		s += '## ';
 		for(var i=0;i<=NT;i+=nn) {
@@ -5363,8 +5368,9 @@ if(method==1) {
 						NT = 360, 
 						r0 = rest?.nf_r0 || 0.004,
 						RR = Array.from({length:NR},(_,i)=>r0*(i+1));
-					console.log(''+NR+'x'+(NT/nn)+ ' r0='+r0+'   ',rest);
-					s += '## # '+NR+'x'+(NT/nn)+'\n'
+					//console.log(''+NR+'x'+(NT/nn)+ ' r0='+r0+'   ',rest);
+					s += '## # '+NR+'x'+(NT/nn)+' r='+(r0)+':'+(r0)+':'+(r0*NR)+' c=[0,0,0]'+' ph='+(ph0)+'\n'
+/*
 					s += '## # ';
 					for(var j=0; j<NR; j++) {
 						s += ''+RR[j].toFixed(3)+' ';
@@ -5373,7 +5379,8 @@ if(method==1) {
 					for(var j=0; j<NT; j+=nn) {
 						s += ''+(j)+' ';
 					}
-					s += '\n';
+*/
+										s += '\n';
 					for(var j=0;j<NR;j++) { // polar grid: NR x 360/n
 						var grid1 = Array.from({length: NT/nn}, (_, i)=>mul(Ry(ph0),
 						  [[RR[j]*Math.cos(l*i*nn*pi/180+pi)],[RR[j]*Math.sin(l*i*nn*pi/180+pi)],[0]]));
