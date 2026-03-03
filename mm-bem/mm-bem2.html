@@ -931,6 +931,7 @@ var axes_onoff = 1, box_onoff = 1, circle_onoff = 1; mesh_onoff = 2; grid_onoff 
 var img_onoff = 0, img_was_on = 0; 
 
 var nf_r0 = 0.004, nf_m = 15, nf_n = 5, nf_c0=[0,0,0], nf_ph=0;  // near field params
+var nf_r1 = nf_r0, nf_r2 = nf_r0*nf_m; 
 
 //var wh = Math.max(window.innerHeight-150,400);
 var wh = document.getElementById("svg1").getAttribute("width")-0;
@@ -1868,19 +1869,20 @@ function update_near_field(s) {
 	var svg = document.getElementById("svg");
 	const W = svg.getAttribute("width")-40;
 	const H = svg.getAttribute("height")-40;
-	var m = s.match(/#\s+(\d+)x(\d+) r=(.*):(.*):(.*) c=\[(.*),(.*),(.*)\] ph=(.*)/);
+	var m = s.match(/#\s+(\d+)x(\d+) r=(.*):(.*) c=\[(.*),(.*),(.*)\] ph=(.*)/);
 	if(m) {
 		console.log("update_near_field:",m);
 		nf_m = parseInt(m[1]);
 		nf_n = parseInt(m[2]);
 		nf_r0= parseFloat(m[3]);
-		nf_c0 = [parseFloat(m[6]),parseFloat(m[7]),parseFloat(m[8])];
-		nf_ph = parseFloat(m[9]);
+		nf_r2= parseFloat(m[4]);
+		nf_c0 = [parseFloat(m[5]),parseFloat(m[6]),parseFloat(m[7])];
+		nf_ph = parseFloat(m[8]);
 	}
 	const data = s.trim().split(/\r?\n/).map(l => l.replace(/#.*/, ''))
 			.filter(l => l).map(l => l.trim().split(/\s+/).map(Number));
 	img_data = logNormalizeMtx(data);
-	png_data = createPolarImage(img_data, nf_r0, nf_r0*nf_m); // real r1,r2
+	png_data = createPolarImage(img_data, nf_r0, nf_r2); // real r1,r2
 	if(png_data) {
 		var el = document.getElementById("svgimg");
 		if(el) {
@@ -2102,14 +2104,14 @@ function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
 	}
 }
 
-function update_near_field2() {
+function update_near_field2() {  // plot png_data in 3D using globals nf_r0, nf_r2, nf_c0, nf_ph
 	var svg = document.getElementById("svg1");
-	var r4 = nf_r0*nf_m*Math.sqrt(2);
+	var r4 = nf_r2*Math.sqrt(2);
 	var [dx,dy,dz] = nf_c0;
-    let pA = V(P(rot(Ry(ph), r4*Math.cos(135*pi/180)+dx, r4*Math.sin(135*pi/180)+dy, 0+dz)));
-    let pB = V(P(rot(Ry(ph), r4*Math.cos(45*pi/180)+dx, r4*Math.sin(45*pi/180)+dy, 0+dz)));
-    let pC = V(P(rot(Ry(ph), r4*Math.cos(-45*pi/180)+dx, r4*Math.sin(-45*pi/180)+dy, 0+dz)));
-    let pD = V(P(rot(Ry(ph), r4*Math.cos(-135*pi/180)+dx, r4*Math.sin(-135*pi/180)+dy, 0+dz)));
+    let pA = V(P(rot(Ry(nf_ph), r4*Math.cos(135*pi/180)+dx, r4*Math.sin(135*pi/180)+dy, 0+dz)));
+    let pB = V(P(rot(Ry(nf_ph), r4*Math.cos(45*pi/180)+dx, r4*Math.sin(45*pi/180)+dy, 0+dz)));
+    let pC = V(P(rot(Ry(nf_ph), r4*Math.cos(-45*pi/180)+dx, r4*Math.sin(-45*pi/180)+dy, 0+dz)));
+    let pD = V(P(rot(Ry(nf_ph), r4*Math.cos(-135*pi/180)+dx, r4*Math.sin(-135*pi/180)+dy, 0+dz)));
 	svg_addHeatmapPatternAffine(svg, "png_data", png_data, 400, pA, pB, pD);
     var el=svg_createpath(svg,"png_data_path",[[pA, pB, pC, pD]],
         'none', 1, "1,2", 0,(img_onoff&1)?'url(#png_data)':'none', 0.9);
@@ -2806,7 +2808,7 @@ function soft_sphere(aa, f00, c00, th00, ph00, r00, b00) { // 360 angles, return
 	var rmin = 0.004, rmax=rmin*NR;
 	var RR = Array.from({length:NR},(_,i)=>rmin*(i+1)); // the same code as in calculation worker
 	//console.log("soft_sphere:",2*Math.PI*f0/c0,a,RR)
-	s += '## # '+(NR)+'x'+(NT/nn)+' r='+(rmin)+':'+(rmin)+':'+(rmax)+' c=[0,0,0] ph='+ph0+'+'\\n';
+	s += '## # '+(NR)+'x'+(NT/nn)+' r='+(rmin)+':'+(rmax)+' c=[0,0,0] ph='+ph0+'+'\\n';
 	for(var j=0;j<RR.length;j++) {
 		s += '## ';
 		for(var i=0;i<=NT;i+=nn) {
@@ -5387,7 +5389,7 @@ if(method==1) {
 						r0 = rest?.nf_r0 || 0.004,
 						RR = Array.from({length:NR},(_,i)=>r0*(i+1));
 					//console.log(''+NR+'x'+(NT/nn)+ ' r0='+r0+'   ',rest);
-					s += '## # '+NR+'x'+(NT/nn)+' r='+(r0)+':'+(r0)+':'+(r0*NR)+' c=[0,0,0]'+' ph='+(ph0)+'\n'
+					s += '## # '+NR+'x'+(NT/nn)+' r='+(r0)+':'+(r0*NR)+' c=[0,0,0]'+' ph='+(ph0)+'\n'
 /*
 					s += '## # ';
 					for(var j=0; j<NR; j++) {
