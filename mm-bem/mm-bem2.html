@@ -122,7 +122,7 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="[sphere(0.005),[-0.01,0,0]],|[sphere(0.005),[0.01,0,0]]">Two spheres</option>
   <option value="[sphere(0.005),[-0.01,0,0]],|[sphere(0.005),[0.01,0,0]],|[sphere(0.005),[0,-0.01,0]],|[sphere(0.005),[0,0.01,0]]">Four spheres</option>
   <option value="[sphere(0.005),[-0.01,0,-0.01]],|[sphere(0.005),[0.01,0,-0.01]],|[sphere(0.005),[0,-0.01, -0.01]],|[sphere(0.005),[0, 0.01, -0.01]],|[sphere(0.005),[-0.01,0,0.01]],|[sphere(0.005),[0.01,0,0.01]],|[sphere(0.005), [0,-0.01,0.01]],|[sphere(0.005),[0,0.01,0.01]]">Eight spheres</option>
-  <option value="[spheres(0.004,2,[3,3,3],[0.02,0.02,0.02])]">Multiple spheres</option>
+  <option value="[spheres(0.0055,2,[3,3,3],[0.004,0.004,0.004])]">Multiple spheres</option>
 </optgroup>
 <optgroup label="Swimmbladder examples">
   <option value="[msh(YFT_752x1500_sb)]">Yellowfin_Tuna_752x1500_sb</option>
@@ -930,8 +930,10 @@ var mshcolor2 = "rgba(11,34,174,0.25)";
 var axes_onoff = 1, box_onoff = 1, circle_onoff = 1; mesh_onoff = 2; grid_onoff = 1;
 var img_onoff = 0, img_was_on = 0; 
 
-var nf_r0 = 0.004, nf_m = 15, nf_n = 5, nf_c0=[0,0,0], nf_ph=0;  // near field params
-var nf_r1 = nf_r0, nf_r2 = nf_r0*nf_m; 
+var nf_r0 = 0.004, nf_m = 15, nf_n = 5, nf_ph = 0;  // near field params
+var nf_cx = 0, nf_cy = 0, nf_cz = 0;  // center of annular ring
+var nf_c0 = [nf_cx, nf_cy, nf_cz]; 
+var nf_r1 = nf_r0, nf_r2 = nf_r0*nf_m; // params of annular ring r0:r1:r2
 
 //var wh = Math.max(window.innerHeight-150,400);
 var wh = document.getElementById("svg1").getAttribute("width")-0;
@@ -3141,7 +3143,7 @@ function change1() {
 		c0 = parseFloat(document.getElementById("c0").value);
 		ph = parseFloat(document.getElementById("ph").value);
 		rr = parseFloat(document.getElementById("r0")?.value) || 0; // point source distance
-		var rest = {nf_r0:nf_r0, nf_m:nf_m, nf_n:nf_n};
+		var rest = {nf_r0:nf_r0, nf_m:nf_m, nf_n:nf_n, nf_cx:nf_cx, nf_cy:nf_cy, nf_cz:nf_cz};
 		const m = parseInt(document.getElementById("method").value);
 		const solver = parseInt(document.getElementById("solver")?.value);
 		if(f0<0) {scan_str='# mm-'+(m==1?'bem':'mfs')+'-scan-mode: '+(-f0/1e3)+'kHz scan\n';}
@@ -5387,9 +5389,10 @@ if(method==1) {
 						NR = rest?.nf_m || 15,
 						NT = 360, 
 						r0 = rest?.nf_r0 || 0.004,
+						cx = rest?.nf_cx || 0, cy = rest?.nf_cy || 0, cz = rest?.nf_cz || 0,
 						RR = Array.from({length:NR},(_,i)=>r0*(i+1));
 					//console.log(''+NR+'x'+(NT/nn)+ ' r0='+r0+'   ',rest);
-					s += '## # '+NR+'x'+(NT/nn)+' r='+(r0)+':'+(r0*NR)+' c=[0,0,0]'+' ph='+(ph0)+'\n'
+					s += '## # '+NR+'x'+(NT/nn)+' r='+(r0)+':'+(r0*NR)+' c=['+cx+','+cy+','+cz+']'+' ph='+(ph0)+'\n'
 /*
 					s += '## # ';
 					for(var j=0; j<NR; j++) {
@@ -5403,7 +5406,7 @@ if(method==1) {
 										s += '\n';
 					for(var j=0;j<NR;j++) { // polar grid: NR x 360/n
 						var grid1 = Array.from({length: NT/nn}, (_, i)=>mul(Ry(ph0),
-						  [[RR[j]*Math.cos(l*i*nn*pi/180+pi)],[RR[j]*Math.sin(l*i*nn*pi/180+pi)],[0]]));
+						  [[RR[j]*Math.cos(l*i*nn*pi/180+pi)+cx],[RR[j]*Math.sin(l*i*nn*pi/180+pi)+cy],[0+cz]]));
 						const Sff1 = grid1.map(v => x.map(xj => {const r=dist(xj,v);
 							return new Complex(Math.cos(k*r)/(4*pi*r),Math.sin(k*r)/(4*pi*r))}));
 						psc1 = multiplyMatrixVector(Sff1, phi);
@@ -5642,7 +5645,9 @@ document.getElementById("rule").value = engine;
 nf_r0 = parseFloat(nf_r0)||0.004;
 nf_m = parseFloat(nf_m)||15;
 nf_n = parseFloat(nf_n)||72;
-nf_c0 = [0,0,0];
+nf_cx = parseFloat(nf_cx)||0;
+nf_cy = parseFloat(nf_cy)||0;
+nf_cz = parseFloat(nf_cz)||0;
 nf_ph = parseFloat(nf_ph)||0;
 
 var ss = window.location.search.substring(1).split('&')
