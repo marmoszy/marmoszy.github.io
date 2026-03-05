@@ -271,7 +271,7 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="70e3">70 kHz</option>
   <option value="120e3">120 kHz</option>
   <option value="200e3">200 kHz</option>
-  <option value="420e3">420 kHz</option>
+  <option value="333e3">333 kHz</option>
   <option disabled>_________</option>
 </optgroup>
 <optgroup id="f0add">
@@ -797,7 +797,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(3.3.2026)" style="text-align:center">mm-bem v2.41 (2025-2026)</p>
+<p title="(5.3.2026)" style="text-align:center">mm-bem v2.42 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -2810,7 +2810,7 @@ function soft_sphere(aa, f00, c00, th00, ph00, r00, b00) { // 360 angles, return
 	var rmin = 0.004, rmax=rmin*NR;
 	var RR = Array.from({length:NR},(_,i)=>rmin*(i+1)); // the same code as in calculation worker
 	//console.log("soft_sphere:",2*Math.PI*f0/c0,a,RR)
-	s += '## # '+(NR)+'x'+(NT/nn)+' r='+(rmin)+':'+(rmax)+' c=[0,0,0] ph='+ph0+'+'\\n';
+	s += '## # '+(NR)+'x'+(NT/nn)+' r='+(rmin)+':'+(rmax)+' c=[0,0,0] ph='+(ph0)+'\\n';
 	for(var j=0;j<RR.length;j++) {
 		s += '## ';
 		for(var i=0;i<=NT;i+=nn) {
@@ -4533,8 +4533,8 @@ function requestResponse(worker, msg) {
 	return promise;
 }
 
-let blob = new Blob([workerCode], {type:"application/javascript"});
-const pyodideWorker  = new Worker(URL.createObjectURL(blob));
+//let blob = new Blob([workerCode], {type:"application/javascript"});  // no pyodide
+//const pyodideWorker  = new Worker(URL.createObjectURL(blob));
 
 function asyncRun(script, context) {
 	return requestResponse(pyodideWorker, {context, python: script});
