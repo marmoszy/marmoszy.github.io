@@ -1875,7 +1875,7 @@ function update_near_field(s) {
 	if(m) {
 		console.log("update_near_field:",m);
 		nf_m = parseInt(m[1]);
-		nf_n = parseInt(m[2]);
+		nf_n = 360/parseInt(m[2]);
 		nf_r0= parseFloat(m[3]);
 		nf_r2= parseFloat(m[4]);
 		nf_c0 = [parseFloat(m[5]),parseFloat(m[6]),parseFloat(m[7])];
