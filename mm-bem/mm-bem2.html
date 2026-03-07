@@ -691,7 +691,7 @@ along both direction angles.
   <option value="2">MFS</option>
   <option value="3">KRM</option>
 </select>
-&nbsp;&nbsp;(ctrl-shift M, ctrl-shift K)
+&nbsp;&nbsp;ctrl-shift M, ctrl-shift K
 <span hidden>
 <label for="solver" style="margin-left:32px">Solver: </label> 
 <select id="solver" onchange="select()" style="background-color:#ffe6e6">
@@ -748,7 +748,7 @@ function select3() {select();}
 r>0 - point source
 r<0 - circular piston"
 onchange="select3()" value="0" style="width:48px"/> &lambda;
-&nbsp; (ctrl-shift P)
+&nbsp; ctrl-shift P, ctrl-shift R
 <br><br>
 </span>
 
@@ -945,7 +945,7 @@ function imgclick(el) {
 	if(el.getAttribute("href")) {
 		img_onoff = (img_onoff+1)%3; el.style.opacity=img_onoff?196:0; update();
 	}
-} 
+}
 function zoomin()  {zoom*=2; xoff-=wh/4*zoom; yoff-=wh/4*zoom;}
 function zoomout() {if(zoom>1/8) {xoff+=wh/4*zoom; yoff+=wh/4*zoom; zoom/=2; }}
 
@@ -1049,6 +1049,9 @@ document.onkeydown = function(e) {
   }
   if(e.keyCode==77 && e.ctrlKey && e.shiftKey) { // ctrl-shift M
 	e.preventDefault(); var m=document.getElementById("method"); m.value=(m.value!=2)?2:1; select();
+  }
+  if(e.keyCode==78 && e.ctrlKey && e.shiftKey) { // ctrl-shift N
+	  e.preventDefault(); imgclick(document.getElementById('svgimg'));
   }
   if(e.keyCode==80 && e.ctrlKey && e.shiftKey) { // ctrl-shift P
 	e.preventDefault(); var r0=document.getElementById("r0"); r0.value=(r0.value==0)?1:r0.value>0?-r0.value:0; select();
@@ -2259,8 +2262,8 @@ function main() {
 var about =`mm-bem web-demo (2025-2026)
 
 Shortcuts:
-click on 2D - include near field onoff (far only by default)
-click on 3D - view of scattering plane
+click on 2D - Near field onoff
+click on 3D - set the view to scattering plane
 ctrl A - Axes on/off (axes colors: 1-red, 2-green, 3-blue)
 ctrl B - wave length Box on/off (size of wavelength)
 ctrl C - scanning Circles on/off (1.5*meshsize)
@@ -2275,9 +2278,10 @@ ctrl + - zoom in
 ctrl - - zoom out
 ctrl-shift cursors - move
 ctrl-shift M = MFS method on/off
+ctrl-shift N = Near field on/off
 ctrl-shift K = KRM method on/off 
 ctrl-shift P = plane wave/point/piston switch 
-ctrl-shift R = point/piston distance 
+ctrl-shift R = point and piston distance (r0 []) 
 
 marek.moszynski@pg.edu.pl`;
 
@@ -5507,8 +5511,13 @@ if(method==3) { // KRM
 				const R_eq = equivalentRadiusFromMesh(v, e); // Precompute equivalent radius and Minnaert frequency
 				const fM   = minnaertFrequency(R_eq); // you can tweak P0, gamma if needed
 				for(var i=0;i<360/l;i++) {
-					var amp = krmScatteringAmplitude_KA_RM(v,e,f0,c0,th0*pi/180+pi,ph0*pi/180,l*i*pi/180+pi,ph0*pi/180,R_eq,fM);
-					psc[i] = new Complex(amp.re,amp.im);
+					var inside = ( Math.abs(l*i-th0) > (180-45) && Math.abs(l*i-th0) < (180+45) );
+					if(inside) {
+					  var a= krmScatteringAmplitude_KA_RM(v,e,f0,c0,th0*pi/180+pi,ph0*pi/180,l*i*pi/180+pi,ph0*pi/180,R_eq,fM);
+					  psc[i] = new Complex(a.re,a.im);
+					} else { 
+					  psc[i] = new Complex(0,0);
+				    }
 				}
 				var ts=targetStrength(v, e, f0, c0, 270*Math.PI/180, 0);
 } else if(method==1) { // BEM
