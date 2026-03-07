@@ -689,8 +689,9 @@ along both direction angles.
 <select id="method" onchange="select()" style="background-color:#ffe6e6">
   <option value="1" selected>BEM</option>
   <option value="2">MFS</option>
+  <option value="3">KRM</option>
 </select>
-&nbsp;&nbsp;
+&nbsp;&nbsp;(ctrl-shift M, ctrl-shift K)
 <span hidden>
 <label for="solver" style="margin-left:32px">Solver: </label> 
 <select id="solver" onchange="select()" style="background-color:#ffe6e6">
@@ -747,6 +748,7 @@ function select3() {select();}
 r>0 - point source
 r<0 - circular piston"
 onchange="select3()" value="0" style="width:48px"/> &lambda;
+&nbsp; (ctrl-shift P)
 <br><br>
 </span>
 
@@ -756,6 +758,7 @@ onchange="select3()" value="0" style="width:48px"/> &lambda;
 "b0=0 - point source
 b0>0 - circular piston"
 onchange="select3()" value="1" style="width:48px"/> &lambda;
+&nbsp; (ctrl-shift B)
 <br><br>
 </span>
 
@@ -797,7 +800,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(5.3.2026)" style="text-align:center">mm-bem v2.42 (2025-2026)</p>
+<p title="(7.3.2026)" style="text-align:center">mm-bem v2.43 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -1016,11 +1019,11 @@ function init_mouse() {
 }
 
 document.onkeydown = function(e) {
-  if(e.keyCode==65 ) { // ctrl A
-    if(e.ctrlKey) {e.preventDefault(); axes_onoff^=1;}
+  if(e.keyCode==65 && e.ctrlKey && !e.shiftKey) { // ctrl A
+    e.preventDefault(); axes_onoff^=1;
   }
-  if(e.keyCode==66 ) { // ctrl B
-    if(e.ctrlKey) {e.preventDefault(); box_onoff^=1;}
+  if(e.keyCode==66 && e.ctrlKey && !e.shiftKey) { // ctrl B
+    e.preventDefault(); box_onoff^=1;
 /*
     if(e.ctrlKey) {
       e.preventDefault(); 
@@ -1032,23 +1035,38 @@ document.onkeydown = function(e) {
     }
 */
   }
-  if(e.keyCode==67 ) { // ctrl C
-    if(e.ctrlKey) {e.preventDefault(); circle_onoff^=1;}
+  if(e.keyCode==67 && e.ctrlKey && !e.shiftKey ) { // ctrl C
+    e.preventDefault(); circle_onoff^=1;
   }
-  if(e.keyCode==71 ) { // ctrl G
-	  if(e.ctrlKey) {e.preventDefault(); grid_onoff^=1;}
+  if(e.keyCode==71 && e.ctrlKey && !e.shiftKey) { // ctrl G
+	  e.preventDefault(); grid_onoff^=1;
   }
-  if(e.keyCode==72 ) { // ctrl H
-	  if(e.ctrlKey) {e.preventDefault(); alert(about);}
+  if(e.keyCode==72 && e.ctrlKey && !e.shiftKey) { // ctrl H
+	  e.preventDefault(); alert(about);
+  }
+  if(e.keyCode==75 && e.ctrlKey && e.shiftKey) { // ctrl-shift K
+	e.preventDefault(); var m=document.getElementById("method"); m.value=(m.value!=3)?3:1; select();
+  }
+  if(e.keyCode==77 && e.ctrlKey && e.shiftKey) { // ctrl-shift M
+	e.preventDefault(); var m=document.getElementById("method"); m.value=(m.value!=2)?2:1; select();
+  }
+  if(e.keyCode==80 && e.ctrlKey && e.shiftKey) { // ctrl-shift P
+	e.preventDefault(); var r0=document.getElementById("r0"); r0.value=(r0.value==0)?1:r0.value>0?-r0.value:0; select();
+  }
+  if(e.keyCode==82 && e.ctrlKey && e.shiftKey) { // ctrl-shift R
+	e.preventDefault(); var r0=document.getElementById("r0"); var v=parseInt(r0.value); r0.value=v+(v>0?1:-1); select();
+  }
+  if(e.keyCode==66 && e.ctrlKey && e.shiftKey) { // ctrl-shift B
+	e.preventDefault(); var b0=document.getElementById("b0"); b0.value=parseInt(b0.value)+1; select();
   }
   if(e.keyCode==48 || e.keyCode==82 ) { // ctrl 0 
 	  if(e.ctrlKey) {e.preventDefault(); a=0.4; b=-0.2; c=0.0; init3d(); /*zoom=1; xoff=0; yoff=0;*/}
   }
-  if(e.keyCode==77) { // ctrl M
-	  if(e.ctrlKey) {e.preventDefault(); mesh_onoff=(mesh_onoff+1)%3;}
+  if(e.keyCode==77 && e.ctrlKey && !e.shiftKey) { // ctrl M
+	  e.preventDefault(); mesh_onoff=(mesh_onoff+1)%3;
   }
-  if(e.keyCode==82 ) { // ctrl R 
-	  if(e.ctrlKey) {e.preventDefault(); zoom=1; xoff=0; yoff=0;}
+  if(e.keyCode==82 && e.ctrlKey && !e.shiftKey ) { // ctrl R 
+	  e.preventDefault(); zoom=1; xoff=0; yoff=0;
   }
   if(e.keyCode==49 ) { // ctrl 1
 	  if(e.ctrlKey) {e.preventDefault(); a_fun();}
@@ -2255,7 +2273,11 @@ ctrl 2 - view from second axis (+/-)
 ctrl 3 - view from third axis (+/-)
 ctrl + - zoom in
 ctrl - - zoom out
-ctrl-shift-cursors - move
+ctrl-shift cursors - move
+ctrl-shift M = MFS method on/off
+ctrl-shift K = KRM method on/off 
+ctrl-shift P = plane wave/point/piston switch 
+ctrl-shift R = point/piston distance 
 
 marek.moszynski@pg.edu.pl`;
 
@@ -3092,7 +3114,7 @@ function change1() {
 				var s0 = s.match(/^(?!#\d+\s|##).*$/gm);
 				var s1 = s.match(/^#\d+\s.*$/gm);
 				var s2 = s.match(/^##\s.*$/gm);
-				s = '# mm-'+(m==1?'bem':'mfs')+'-'+(sol==1?'gauss':'blockedLU')+': '+ t.toFixed(3) + 's ' + s0.join('\n');
+				s = '# mm-'+(m==3?'krm':m==2?'mfs':'bem')+'-'+(sol==1?'gauss':'blockedLU')+': '+ t.toFixed(3) + 's ' + s0.join('\n');
 				document.getElementById("msh").value += elem_data(s1,t,nStep);
 				nStep += 1;
 				document.getElementById("txt").value = s;
@@ -3107,7 +3129,7 @@ function change1() {
 						update_near_field(s2a);
 					}
 				}
-				plot(undefined,undefined,m!=1?'#C8102E':undefined); // FFCD00
+				plot(undefined,undefined, m==3?'#990099':m==2?'#C8102E':undefined ); // FFCD00
 				// extract ph0,th0,f0,c0,lbs
 				var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
 				if(v) {
@@ -3146,7 +3168,7 @@ function change1() {
 		var rest = {nf_r0:nf_r0, nf_m:nf_m, nf_n:nf_n, nf_cx:nf_cx, nf_cy:nf_cy, nf_cz:nf_cz};
 		const m = parseInt(document.getElementById("method").value);
 		const solver = parseInt(document.getElementById("solver")?.value);
-		if(f0<0) {scan_str='# mm-'+(m==1?'bem':'mfs')+'-scan-mode: '+(-f0/1e3)+'kHz scan\n';}
+		if(f0<0) {scan_str='# mm-'+(m==3?'krm':m==2?'mfs':'bem')+'-scan-mode: '+(-f0/1e3)+'kHz scan\n';}
 		else {plot("F",'#');} 		// clear frequency plot
 		plot("P","#");			 	// clear calculation plot
 		var el = document.getElementById("svgimg");
@@ -5201,6 +5223,133 @@ function buildRHS_soft_piston(targetNodes, k, f, d, R, r, u, rho0, Ntheta) {
   return rhs;
 }
 
+// ----- Vector helpers -----
+function vecSub(a, b) { return [a[0]-b[0], a[1]-b[1], a[2]-b[2]]; }
+function vecAdd(a, b) { return [a[0]+b[0], a[1]+b[1], a[2]+b[2]]; }
+function vecScale(a, s) { return [a[0]*s, a[1]*s, a[2]*s]; }
+function vecDot(a, b) { return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]; }
+function vecCross(a, b) {return [a[1]*b[2] - a[2]*b[1],a[2]*b[0] - a[0]*b[2],a[0]*b[1] - a[1]*b[0]];}
+function vecNorm(a) { return Math.sqrt(vecDot(a, a)); }
+function vecNormalize(a) {const n = vecNorm(a);return [a[0]/n, a[1]/n, a[2]/n];}
+
+// ----- Complex helpers -----
+function cAdd(a, b) { return { re: a.re + b.re, im: a.im + b.im }; }
+function cScale(a, s) { return { re: a.re * s, im: a.im * s }; }
+function cMul(a, b) {return {re: a.re*b.re - a.im*b.im,im: a.re*b.im + a.im*b.re};}
+function cExp(iPhase) {return { re: Math.cos(iPhase), im: Math.sin(iPhase)};} // exp(i * phase)
+
+//function incidentDirection(theta, phi) {const st=Math.sin(theta); return [st*Math.cos(phi),st*Math.sin(phi),Math.cos(theta)];}
+function incidentDirection(theta, phi) {
+	var dir = mul(Ry(phi*180/Math.PI),[[Math.cos(theta)],[Math.sin(theta)],[0]]);
+	return [dir[0][0],dir[1][0],dir[2][0]];
+}
+
+// Signed volume of a tetrahedron (0, v0, v1, v2)
+function tetVolume(v0, v1, v2) {return vecDot(v0, vecCross(v1, v2)) / 6.0;}
+function meshVolume(vx, fx) {let V=0; for(const f of fx) {V += tetVolume(vx[f[0]],vx[f[1]],vx[f[2]]);} return Math.abs(V);}
+function equivalentRadiusFromMesh(vx, fx) {const V = meshVolume(vx, fx);return Math.cbrt(3*V/(4*Math.PI));} // R_eq from V
+
+// Minnaert-like resonance for an air/vacuum cavity in water
+function minnaertFrequency(R, rho = 1000, P0 = 1e5, gamma = 1.4) {return (1/(2*Math.PI*R))*Math.sqrt(3*gamma*P0/rho);}
+
+function rayModeMonopoleAmplitude(f0, fM, R_eq, rho = 1000, c = 1480, Q = 10) {
+  const w  = 2 * Math.PI * f0, wM = 2 * Math.PI * fM;
+  const V = (4/3) * Math.PI * R_eq * R_eq * R_eq;   // Bubble volume
+  const k = w / c;                                  // k = w/c
+  const A0 = V * k * k / (rho * c * c);             // Dimensionally correct monopole strength
+  const denRe = 1 - (w*w)/(wM*wM);                  // Resonant denominator
+  const denIm = (w/wM) / Q;
+  const denMag2 = denRe*denRe + denIm*denIm;
+  const re =  A0 * denRe / denMag2, im = -A0 * denIm / denMag2;   // Complex amplitude
+  return { re, im };
+}
+
+
+/**
+ * Compute scattering amplitude in one observation direction using a Kirchhoff-like
+ * pressure-release approximation on a triangulated mesh.
+ *
+ * vx: array of vertices, each [x,y,z]
+ * fx: array of faces, each [i0, i1, i2] (indices into vx)
+ * f0: frequency [Hz]
+ * c: sound speed in water [m/s]
+ * thetaInc, phiInc: incident direction angles [rad]
+ * thetaScat, phiScat: scattering direction angles [rad]
+ */
+function krmScatteringAmplitude(vx, fx, f0, c, thetaInc, phiInc, thetaScat, phiScat) {
+  const k = 2 * Math.PI * f0 / c;
+  const kHatInc  = incidentDirection(thetaInc, phiInc);
+  const kHatScat = incidentDirection(thetaScat, phiScat);
+  let amp = { re: 0, im: 0 };
+  for (const f of fx) {
+    const v0 = vx[f[0]], v1 = vx[f[1]], v2 = vx[f[2]];
+    const e1 = vecSub(v1, v0), e2 = vecSub(v2, v0);
+    let nVec = vecCross(e1, e2);
+    const area = 0.5 * vecNorm(nVec);
+    let nHat = vecNormalize(nVec);
+    const rc = vecScale(vecAdd(vecAdd(v0, v1), v2), 1/3);
+    //if (vecDot(nHat, rc) < 0) nHat = vecScale(nHat, -1); // ensure outward
+    const cosInc = vecDot(nHat, kHatInc);
+    if (cosInc <= 0) continue;
+    const kDiff = vecSub(kHatInc, kHatScat);
+    const phase = k * vecDot(kDiff, rc);
+    const contrib = cScale(cExp(phase), cosInc * area);
+    amp = cAdd(amp, contrib);
+  }
+  const scale = k / (2 * Math.PI); // Kirchhoff pressure-release scaling: 2ik / (4π) = k / (2π)
+  amp = cScale(amp, scale);
+  return amp;
+}
+
+function krmScatteringAmplitude_KA_RM(vx, fx, f0, c, thetaInc, phiInc, thetaScat, phiScat,  R_eq, fM, Q = 10) {
+  const k = 2 * Math.PI * f0 / c;
+  const kHatInc  = incidentDirection(thetaInc, phiInc);
+  const kHatScat = incidentDirection(thetaScat, phiScat);
+  let amp = { re: 0, im: 0 };
+  for (const f of fx) {
+    const v0 = vx[f[0]], v1 = vx[f[1]], v2 = vx[f[2]];
+    const e1 = vecSub(v1, v0), e2 = vecSub(v2, v0);
+    let nVec = vecCross(e1, e2);
+    const area = 0.5 * vecNorm(nVec);
+    let nHat = vecNormalize(nVec);
+    const rc = vecScale(vecAdd(vecAdd(v0, v1), v2), 1/3);
+    //if (vecDot(nHat, rc) < 0) nHat = vecScale(nHat, -1);
+    const cosInc = vecDot(nHat, kHatInc);
+    if (cosInc <= 0) continue;
+    const kDiff = vecSub(kHatInc, kHatScat);
+    const phase = k * vecDot(kDiff, rc);
+    const contrib = cScale(cExp(phase), cosInc * area);
+    amp = cAdd(amp, contrib);
+  }
+  const scaleKA = k / (2 * Math.PI); // Kirchhoff pressure-release scaling
+  amp = cScale(amp, scaleKA);
+  const ampRM = rayModeMonopoleAmplitude(f0, fM, R_eq, Q); // Ray-Mode monopole (isotropic)
+  return cAdd(amp, ampRM); // Total KRM amplitude
+}
+
+function targetStrength(vx, fx, f0, c, thetaInc, phiInc) {
+  const thetaScat = Math.PI - thetaInc;
+  const phiScat   = phiInc + Math.PI;
+  console.log("thetaInc",thetaInc);
+  var dir=incidentDirection(thetaInc,phiInc);
+  console.log("dir",dir);
+  const amp = krmScatteringAmplitude(vx, fx, f0, c,thetaInc, phiInc,thetaScat, phiScat);
+  const mag2 = amp.re*amp.re + amp.im*amp.im;
+  const TS = 10 * Math.log10(mag2 + 1e-30);
+  console.log("TS=",TS);
+  return { amp, TS };
+}
+
+function targetStrength_KRM(vx, fx, f0, c, thetaInc, phiInc, R_eq, fM, Q = 10) {
+  const thetaScat = Math.PI - thetaInc;
+  const phiScat   = phiInc + Math.PI;
+  const amp = krmScatteringAmplitude_KA_RM(vx, fx,f0, c,thetaInc, phiInc,thetaScat, phiScat,R_eq, fM, Q);
+  const mag2 = amp.re*amp.re + amp.im*amp.im;
+  const TS = 10 * Math.log10(mag2 + 1e-30);
+  return { amp, TS };
+}
+
+
 `;
 
 function wasm_soft_worker(lines,th,f0,c0,ph,rr,method,solver,rest) {
@@ -5219,14 +5368,11 @@ function wasm_soft_worker(lines,th,f0,c0,ph,rr,method,solver,rest) {
 		//d = [Math.cos(th*pi/180), Math.sin(th*pi/180), 0];
 
 		const n = parseInt(lines[4]);
-		const v = lines.slice(5, 5 + n).map(line =>
-		  line.trim().split(/\s+/).slice(1, 4).map(parseFloat)
-		);
+		const v = lines.slice(5, 5 + n).map(line => line.trim().split(/\s+/).slice(1, 4).map(parseFloat));
 		const m = parseInt(lines[n + 7]);
 		const e = lines.slice(n + 8, n + 8 + m).map(line =>
 		  line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x)-1)  // 0-based indexing
 		);
-
 		// Triangle centers
 		var x=[], x2=[];
 		for(var i=0;i<m;i++) {
@@ -5238,7 +5384,9 @@ function wasm_soft_worker(lines,th,f0,c0,ph,rr,method,solver,rest) {
 	postMessage("[ assembling]");
 
 		var S = new Array(m);
-if(method==1) {
+if(method==3) { // KRM
+	
+} else if(method==1) { // BEM
 		for (let i = 0; i < m; i++) { 		// Helmholtz single layer matrix
 		  S[i] = new Array(m);
 		  for (let j = 0; j < m; j++) {
@@ -5247,7 +5395,7 @@ if(method==1) {
 		                      : new Complex(0, k/(4*pi) ) ;
 		  }
 		}
-} else {
+} else { // MFS
 		function dot(a, b) {return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];}
 		function cross(a, b) {return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];}
 		function norm(v) {return Math.sqrt(v[0]**2 + v[1]**2 + v[2]**2);}
@@ -5282,18 +5430,20 @@ if(method==1) {
 	//	var phi = gaussianWasm(S,f);
 	//postMessage("[... LU Wasm Solver]");
 	//	var phi = luWasm(S,f);
-if(solver==1) {
+if(method!=3) {
+	if(solver==1) {
 		postMessage("[ gauss0 wasm solver]");
 		gaussian0Wasm(S);
 		postMessage("[ gauss1 wasm solver]");
-} else if(solver==2) {
+	} else if(solver==2) {
 		postMessage("[ Blocked LU0 wasm solver]");
 		gaussian0Wasm(S,solver);
 		postMessage("[ Blocked LU1 wasm solver]");
-} else {
+	} else {
 		postMessage("[ gmres0 wasm solver]");
 		gmres0Wasm(S);
 		postMessage("[ gmres1 wasm solver]");
+	}
 }
 		// wave direction scanning setup
 		var thmin,thmax,thstep, phmin,phmax,phstep;
@@ -5328,19 +5478,23 @@ if(solver==1) {
 				} else {
 					f = x.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));					
 				}
-			} else {
+			} else if(method==2) {
   		      f = x2.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));
 //              f = x2.map(p => {let phase = dot(p, d);
 //                  return new Complex(-Math.cos(k*phase),-Math.sin(k*phase)); });
 //                return math.multiply(-1, math.exp(math.multiply(math.complex(0,1), k*phase))); });
+			} else {
+				
 			}
 		      var phi;
-if(solver==1) {
+if(method!=3) {
+	if(solver==1) {
 		      phi = gaussian1Wasm(f);
-} else if(solver==2) {
+	} else if(solver==2) {
 		      phi = gaussian1Wasm(f,solver);
-} else {
+	} else {
 		      phi = gmres1Wasm(f);
+	}
 }
 		      postMessage("[ far field solution]");
 
@@ -5349,13 +5503,21 @@ if(solver==1) {
 		      const r1 = Array.from({length: 360/l},
 				  (_, i)=>mul(Ry(ph0),[[a1*Math.cos(l*i*pi/180+pi)],[a1*Math.sin(l*i*pi/180+pi)],[0]]));
 		      var psc=[];
-if(method==1) {
+if(method==3) { // KRM
+				const R_eq = equivalentRadiusFromMesh(v, e); // Precompute equivalent radius and Minnaert frequency
+				const fM   = minnaertFrequency(R_eq); // you can tweak P0, gamma if needed
+				for(var i=0;i<360/l;i++) {
+					var amp = krmScatteringAmplitude_KA_RM(v,e,f0,c0,th0*pi/180+pi,ph0*pi/180,l*i*pi/180+pi,ph0*pi/180,R_eq,fM);
+					psc[i] = new Complex(amp.re,amp.im);
+				}
+				var ts=targetStrength(v, e, f0, c0, 270*Math.PI/180, 0);
+} else if(method==1) { // BEM
 				const Sff = r1.map(v => x.map(xj =>
 					new Complex(Math.cos(-k * dot(xj,v))/(4*pi), Math.sin(-k * dot(xj,v))/(4*pi)
 					// new Complex(Math.cos(k * dist(xj,v))/(4*pi*dist(xj,v)), Math.sin(k * dist(xj,v))/(4*pi*dist(xj,v)) )));
 )));
 				psc = multiplyMatrixVector(Sff, phi);
-} else {
+} else { // MFS
 				for (let i=0; i<r1.length; i++) {
 					let r = r1[i]; // [Math.cos(a), Math.sin(a), 0];
 					let sumv = new Complex(0,0);
@@ -5377,7 +5539,7 @@ if(method==1) {
 				}
 // MM 31.1.2026
 				postMessage(JSON.stringify(s));
-				if(thmin==thmax && phmin==phmax && fmin==fmax) { // when no in scan mode
+				if(thmin==thmax && phmin==phmax && fmin==fmax && method!=3) { // when no in scan mode
 // Near field calculations
 					//postMessage("[ near field solution]");
 					var psc1 =[];
