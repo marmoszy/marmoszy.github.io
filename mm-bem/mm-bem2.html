@@ -937,6 +937,7 @@ var nf_r0 = 0.004, nf_m = 15, nf_n = 5, nf_ph = 0;  // near field params
 var nf_cx = 0, nf_cy = 0, nf_cz = 0;  // center of annular ring
 var nf_c0 = [nf_cx, nf_cy, nf_cz]; 
 var nf_r1 = nf_r0, nf_r2 = nf_r0*nf_m; // params of annular ring r0:r1:r2
+var krm_ang = 45; // krm off-axis angle
 
 //var wh = Math.max(window.innerHeight-150,400);
 var wh = document.getElementById("svg1").getAttribute("width")-0;
@@ -3169,7 +3170,7 @@ function change1() {
 		c0 = parseFloat(document.getElementById("c0").value);
 		ph = parseFloat(document.getElementById("ph").value);
 		rr = parseFloat(document.getElementById("r0")?.value) || 0; // point source distance
-		var rest = {nf_r0:nf_r0, nf_m:nf_m, nf_n:nf_n, nf_cx:nf_cx, nf_cy:nf_cy, nf_cz:nf_cz};
+		var rest = {nf_r0:nf_r0, nf_m:nf_m, nf_n:nf_n, nf_cx:nf_cx, nf_cy:nf_cy, nf_cz:nf_cz, krm_ang:krm_ang};
 		const m = parseInt(document.getElementById("method").value);
 		const solver = parseInt(document.getElementById("solver")?.value);
 		if(f0<0) {scan_str='# mm-'+(m==3?'krm':m==2?'mfs':'bem')+'-scan-mode: '+(-f0/1e3)+'kHz scan\n';}
@@ -5510,8 +5511,9 @@ if(method!=3) {
 if(method==3) { // KRM
 				const R_eq = equivalentRadiusFromMesh(v, e); // Precompute equivalent radius and Minnaert frequency
 				const fM   = minnaertFrequency(R_eq); // you can tweak P0, gamma if needed
+				krm_ang = rest.krm_ang||45;
 				for(var i=0;i<360/l;i++) {
-					var inside = ( Math.abs(l*i-th0) > (180-45) && Math.abs(l*i-th0) < (180+45) );
+					var inside = ( Math.abs(l*i-th0) >= (180-krm_ang) && Math.abs(l*i-th0) <= (180+krm_ang) );
 					if(inside) {
 					  var a= krmScatteringAmplitude_KA_RM(v,e,f0,c0,th0*pi/180+pi,ph0*pi/180,l*i*pi/180+pi,ph0*pi/180,R_eq,fM);
 					  psc[i] = new Complex(a.re,a.im);
@@ -5820,6 +5822,7 @@ nf_cx = parseFloat(nf_cx)||0;
 nf_cy = parseFloat(nf_cy)||0;
 nf_cz = parseFloat(nf_cz)||0;
 nf_ph = parseFloat(nf_ph)||0;
+krm_ang = parseFloat(krm_ang)||45;
 
 var ss = window.location.search.substring(1).split('&')
 for(var i = 0; i < ss.length; i++) {
