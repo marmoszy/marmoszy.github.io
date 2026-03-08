@@ -3119,7 +3119,7 @@ function change1() {
 				var s0 = s.match(/^(?!#\d+\s|##).*$/gm);
 				var s1 = s.match(/^#\d+\s.*$/gm);
 				var s2 = s.match(/^##\s.*$/gm);
-				s = '# mm-'+(m==3?'krm':m==2?'mfs':'bem')+'-'+(sol==1?'gauss':'blockedLU')+': '+ t.toFixed(3) + 's ' + s0.join('\n');
+				s = '# mm-'+(m==3?'krm':m==2?'mfs':'bem')+(m==3?'':sol==1?'-gauss':'-blockedLU')+': '+ t.toFixed(3) + 's ' + s0.join('\n');
 				document.getElementById("msh").value += elem_data(s1,t,nStep);
 				nStep += 1;
 				document.getElementById("txt").value = s;
