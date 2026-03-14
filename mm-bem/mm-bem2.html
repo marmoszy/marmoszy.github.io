@@ -939,6 +939,8 @@ var nf_c0 = [nf_cx, nf_cy, nf_cz];
 var nf_r1 = nf_r0, nf_r2 = nf_r0*nf_m; // params of annular ring r0:r1:r2
 var krm_ang = 45; // krm off-axis angle
 
+var exp = 0;
+
 //var wh = Math.max(window.innerHeight-150,400);
 var wh = document.getElementById("svg1").getAttribute("width")-0;
 
@@ -3181,7 +3183,7 @@ function change1() {
 		if(img_onoff) {img_was_on = 1; img_onoff=0; update();}
 		var el = document.getElementById("txt2");
 		if(el && el.value.startsWith("# abs(p_sc)")) {el.value="";}
-		if(fx.length<5500) {
+		if(fx.length<(exp==1?11000:5500)) {
 			worker.postMessage(JSON.stringify([lines,th,f0,c0,ph,rr,m,solver,rest]));
 		} else {
 			document.getElementById("txt").value="The mesh too large for BEM inside the browser!"
@@ -4830,7 +4832,7 @@ var run_gauss0,run_gauss1;
 var blocked_lu_soa, blocked_lu_solver_soa;
 
 onmessage = function(e) {
-	const memory = new WebAssembly.Memory({ initial: 512*16 }); // 512MiB = 512*16*64 KiB
+	const memory = new WebAssembly.Memory({ initial: 2*1024*16 }); // 2 * (1024MiB = 2*1024*16*64 KiB)
 	//const { instance } = await WebAssembly.instantiateStreaming(
   	//	fetch('data:application/wasm;base64,'+gauss2b_wasm), {env: { memory }});
 	//fetch('data:application/wasm;base64,'+gauss2b_wasm)
