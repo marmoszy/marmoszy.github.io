@@ -691,7 +691,7 @@ along both direction angles.
   <option value="2">MFS</option>
   <option value="3">KRM</option>
 </select>
-&nbsp;&nbsp;ctrl-shift M, ctrl-shift K
+&nbsp;ctrl-shift M, ctrl-shift K
 <br><br>
 <span id="hsolver" hidden1>
 <label for="solver" style="margin-left:0px">Solver: </label> 
@@ -751,7 +751,7 @@ function select3() {select();}
 r>0 - point source
 r<0 - circular piston"
 onchange="select3()" value="0" style="width:48px"/> &lambda;
-&nbsp; ctrl-shift P, ctrl-shift R
+&nbsp;ctrl-shift P, ctrl-shift R
 <br><br>
 </span>
 
@@ -761,7 +761,7 @@ onchange="select3()" value="0" style="width:48px"/> &lambda;
 "b0=0 - point source
 b0>0 - circular piston"
 onchange="select3()" value="1" style="width:48px"/> &lambda;
-&nbsp; (ctrl-shift B)
+&nbsp;ctrl-shift B
 <br><br>
 </span>
 
@@ -805,7 +805,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(17.3.2026)" style="text-align:center">mm-bem v2.51 (2025-2026)</p>
+<p title="(22.3.2026)" style="text-align:center">mm-bem v2.52 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -5013,8 +5013,10 @@ function gaussian0Wasm(S,solver=1) { // using gauss, heap
   var k = matOffset;
   const off = solver==2 ? n*n : 1;
   const inc = solver==2 ? 1 : 2;
-  for(var i=0; i<n; i++) {for(var j=0; j<n; j++) {
-		heap[k] = S[i][j].re; heap[k+off] = S[i][j].im; k += inc;}}
+//  assuming direct write to C/Webassembly memory (MM 22.3.2026)
+//  for(var i=0; i<n; i++) {for(var j=0; j<n; j++) { 
+//		heap[k] = S[i][j].re; heap[k+off] = S[i][j].im; k += inc; 
+//  }}
 
   if(solver==2) {
 	//blocked_lu(n, matOffset * 8, 32);
@@ -6203,6 +6205,7 @@ if(solver!=3) {
 if(method==3) { // KRM
 	
 } else if(method==1) { // BEM
+/*
 		for (let i = 0; i < m; i++) { 		// Helmholtz single layer matrix
 		  S[i] = new Array(m);
 		  for (let j = 0; j < m; j++) {
@@ -6211,6 +6214,27 @@ if(method==3) { // KRM
 		                      : new Complex(0, k/(4*pi) ) ;
 		  }
 		}
+*/
+		{ // direct write to C/Webassembly memory (MM 22.3.2026)
+			const m = S.length;
+			const matOffset = 0;
+			var kk = matOffset;
+			const off = solver==2 ? m*m : 1;
+			const inc = solver==2 ? 1 : 2;
+			for (let i = 0; i < m; i++) { 		// Helmholtz single layer matrix
+			  S[i] = new Array(m);
+			  for (let j = 0; j < m; j++) {
+			    const r = dist(x[i],x[j]);
+			    S[i] = (r!==0)?new Complex(Math.cos(k*r)/(4*pi*r),Math.sin(k*r)/(4*pi*r))
+			                      : new Complex(0, k/(4*pi) ) ;
+			    heap[kk]=S[i].re;
+			    heap[kk+off]=S[i].im;
+			    kk += inc;
+			  }
+			}
+		}
+		
+		
 } else { // MFS
 		function dot(a, b) {return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];}
 		function cross(a, b) {return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];}
@@ -6238,7 +6262,23 @@ if(method==3) { // KRM
 			let nrm = normal([v[f[0]], v[f[1]], v[f[2]]]);
 			return [x[i][0]-offset*nrm[0], x[i][1]-offset*nrm[1], x[i][2]-offset*nrm[2]];
 		});
-        S = x2.map(p => G(p, x, k));   // assemble A, k = 2*Math.PI*f0/c0;
+		// S = x2.map(p => G(p, x, k));   // assemble A, k = 2*Math.PI*f0/c0;
+		{  // direct write to C/Webassembly memory for MFS 
+			var mm = x2.length;
+			const matOffset = 0;
+			var kk = matOffset;
+			const off = solver==2 ? mm*mm : 1;
+			const inc = solver==2 ? 1 : 2;
+		    for(var i=0; i<mm; i++) {
+				S = G(x2[i], x, k);
+				for(var j=0;j<mm;j++) {
+					heap[kk]=S/*[i]*/[j].re;
+					heap[kk+off]=S/*[i]*/[j].im;
+					kk += inc;
+				}
+		     }
+		}    		
+		
 	}
 	//postMessage("[... Gauss Javascript Solver]");
 	//	var phi = gaussianEliminationComplex(S, f)
