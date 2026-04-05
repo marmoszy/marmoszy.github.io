@@ -805,7 +805,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(22.3.2026)" style="text-align:center">mm-bem v2.52 (2025-2026)</p>
+<p title="(5.4.2026)" style="text-align:center">mm-bem v2.53 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -1903,7 +1903,7 @@ function update_near_field(s) {
 	var svg = document.getElementById("svg");
 	const W = svg.getAttribute("width")-40;
 	const H = svg.getAttribute("height")-40;
-	var m = s.match(/#\s+(\d+)x(\d+) r=(.*):(.*) c=\[(.*),(.*),(.*)\] ph=(.*)/);
+	var m = s.match(/#\s+(\d+)x(\d+)\s+r=(.*):(.*)\s+c=\[(.*),(.*),(.*)\]\s+ph=(.*)/);
 	if(m) {
 		//console.log("update_near_field:",m);
 		nf_m = parseInt(m[1]);
@@ -3362,6 +3362,7 @@ function elem_data(s2,t,n,mode=1) { // s2: data_string t:time, n:n_seq, mode==0:
 }
 
 function plot2(s) {
+	debugger;
 	if(s.substring(0,11)=="# abs(p_sc)") {
 		update_near_field(s);
 		update_near_field2();
@@ -3608,7 +3609,7 @@ function svg_polar(svg,x,y,W,H,id,c,z) {
 			svg_createpoint(svg,id,[p[0][0],p[0][1]],c||"red"
 				,"TS("+x[0]+ "&deg;)="+t.toFixed(2),4,c||"red");
 	} else {
-		svg_createpath(svg,id,[p],c||"red",z==1?3:3,(id=="Q"||id=="R")?"4,2":"1,0",z);
+		svg_createpath(svg,id,[p],c||"red",z==1?3:3,(id=="Q"||id=="R")?"4,2":"1,0",z,c||"red",0.1);
 	}
 }
 
@@ -6163,6 +6164,59 @@ console.log("2.",(t1-t).toFixed(3)+"s");
     return { sigma, psc, Psc };
 }
 
+function singularIntegralTriangle(i, vx, fx) {
+    const ids = fx[i];
+    const v1 = vx[ids[0]];
+    const v2 = vx[ids[1]];
+    const v3 = vx[ids[2]];
+
+    // centroid
+    const xc = [
+        (v1[0] + v2[0] + v3[0]) / 3,
+        (v1[1] + v2[1] + v3[1]) / 3,
+        (v1[2] + v2[2] + v3[2]) / 3
+    ];
+
+    // distances from centroid to vertices
+    const r1 = dist(xc, v1);
+    const r2 = dist(xc, v2);
+    const r3 = dist(xc, v3);
+
+    // edge lengths
+    const L1 = dist(v1, v2);
+    const L2 = dist(v2, v3);
+    const L3 = dist(v3, v1);
+
+    // analytic formula
+    const A =
+        L1 * Math.log(r2 / r1) +
+        L2 * Math.log(r3 / r2) +
+        L3 * Math.log(r1 / r3);
+
+    return Math.abs(A); // ensure positive
+}
+
+function triangleArea(i, vx, fx) {
+    const [a, b, c] = fx[i].map(idx => vx[idx]);
+    const ab = [b[0]-a[0], b[1]-a[1], b[2]-a[2]];
+    const ac = [c[0]-a[0], c[1]-a[1], c[2]-a[2]];
+    const cross = [
+        ab[1]*ac[2] - ab[2]*ac[1],
+        ab[2]*ac[0] - ab[0]*ac[2],
+        ab[0]*ac[1] - ab[1]*ac[0]
+    ];
+    return 0.5 * Math.sqrt(cross[0]**2 + cross[1]**2 + cross[2]**2);
+}
+
+function triangleCentroid(i, vx, fx) {
+    const [a, b, c] = fx[i].map(idx => vx[idx]);
+    return [
+        (a[0] + b[0] + c[0]) / 3,
+        (a[1] + b[1] + c[1]) / 3,
+        (a[2] + b[2] + c[2]) / 3
+    ];
+}
+
 
 `;
 
@@ -6225,8 +6279,15 @@ if(method==3) { // KRM
 			  S[i] = new Array(m);
 			  for (let j = 0; j < m; j++) {
 			    const r = dist(x[i],x[j]);
-			    S[i] = (r!==0)?new Complex(Math.cos(k*r)/(4*pi*r),Math.sin(k*r)/(4*pi*r))
-			                      : new Complex(0, k/(4*pi) ) ;
+//			    S[i] = (r!==0)?new Complex(Math.cos(k*r)/(4*pi*r),Math.sin(k*r)/(4*pi*r))
+//			                      : new Complex(0, -k/(4*pi) ) ;
+				if(r!=0) { 
+					S[i]=new Complex(Math.cos(k*r)/(4*pi*r),Math.sin(k*r)/(4*pi*r)); 
+				} else {
+					const I = singularIntegralTriangle(i, v, e);
+					const A = triangleArea(i, v, e);
+					S[i] = new Complex( I/(4*pi*A), k/(4*pi)); 
+				}
 			    heap[kk]=S[i].re;
 			    heap[kk+off]=S[i].im;
 			    kk += inc;
