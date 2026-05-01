@@ -273,6 +273,12 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="200e3">200 kHz</option>
   <option value="333e3">333 kHz</option>
   <option disabled>_________</option>
+  <option value="+18e3">18 kHz band</option>
+  <option value="+38e3">38 kHz band</option>
+  <option value="+70e3">70 kHz band</option>
+  <option value="+120e3">120 kHz band</option>
+  <option value="+200e3">200 kHz band</option>
+  <option value="+333e3">333 kHz band</option>
 </optgroup>
 <optgroup id="f0add">
 </optgroup>
@@ -805,7 +811,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(5.4.2026)" style="text-align:center">mm-bem v2.53 (2025-2026)</p>
+<p title="(1.5.2026)" style="text-align:center">mm-bem v2.54 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -943,6 +949,7 @@ var nf_cx = 0, nf_cy = 0, nf_cz = 0;  // center of annular ring
 var nf_c0 = [nf_cx, nf_cy, nf_cz]; 
 var nf_r1 = nf_r0, nf_r2 = nf_r0*nf_m; // params of annular ring r0:r1:r2
 var krm_ang = 45; // krm off-axis angle
+var band = 0;  // band calculation if band nq 0
 
 var exp = 0;
 
@@ -3178,10 +3185,11 @@ function change1() {
 		var lines = document.getElementById("msh").value.split('\n');
 		th = parseFloat(document.getElementById("th").value);
 		f0 = parseFloat(document.getElementById("f0").value);
+		if(document.getElementById("f0").value[0]=='+') {band=10e3} else {band=0;}
 		c0 = parseFloat(document.getElementById("c0").value);
 		ph = parseFloat(document.getElementById("ph").value);
 		rr = parseFloat(document.getElementById("r0")?.value) || 0; // point source distance
-		var rest = {nf_r0:nf_r0, nf_m:nf_m, nf_n:nf_n, nf_cx:nf_cx, nf_cy:nf_cy, nf_cz:nf_cz, krm_ang:krm_ang};
+		var rest = {nf_r0:nf_r0, nf_m:nf_m, nf_n:nf_n, nf_cx:nf_cx, nf_cy:nf_cy, nf_cz:nf_cz, krm_ang:krm_ang, band:band};
 		const m = parseInt(document.getElementById("method").value);
 		const solver = parseInt(document.getElementById("solver")?.value);
 		if(f0<0) {scan_str='# mm-'+(m==3?'krm':m==2?'mfs':'bem')+'-scan-mode: '+(-f0/1e3)+'kHz scan\n';}
@@ -3445,14 +3453,15 @@ function plot(id2,s,c,z) {
 		c0=parseFloat(document.getElementById("c0").value);				
 	}
 	var ss=s.split('\n');
-	var x=[],y=[],x2=[],xy={off:[],x:[],y:[]},ncols=0,mblocks=0;
+	var x=[],y=[],x2=[],xy={off:[],x:[],y:[]},ncols=0,mblocks=0,band=0;
 	//console.log(ss.length);
 	for(var i=0;i<ss.length;i++) {
 		s2=ss[i].trim().split(/\s+/);
                 // if(s2[0].length==0) {mblocks += 1;xy.off.push(i)} // no mblocks for now
 		if(s2[0][0]!='#' && s2[0][0]!='%' && s2.length>=2) {
 			if(ncols==0) ncols=s2.length;
-			var xval=parseFloat(s2[m==1?1:0]);  
+			var xval=parseFloat(s2[m==1?1:0]);
+			if(band) {xval=Math.atan2(s2[ncols-2],s2[ncols-3])*180/pi;}
 			x.push(xval>=1000?xval/1000:xval); // column 1: degrees
 			if(s2[ncols-1].match(/^[a-zA-Z]+/)) ncols-=1; // gp generated table
 			if(mblocks==0) {
@@ -3468,10 +3477,18 @@ function plot(id2,s,c,z) {
 				m = parseInt(v[1]);
 				n = parseInt(v[2]);
 			}
-			var v = ss[i].match(/# (\d+)-(\d+)/); // detection of scan mode
+			var v = ss[i].match(/# (\d+)\-(\d+)/); // detection of frequency sweep mode
 			if(v) {
 				fmin = parseFloat(v[1]);
 				fmax = parseFloat(v[2]);
+			}
+			var v = ss[i].match(/# (\d+)\+(\d+)/); // detection of frequency band mode
+			if(v) {
+				//fmin = parseFloat(v[1])-parseFloat(v[2])/2;
+				//fmax = parseFloat(v[1])+parseFloat(v[2])/2;
+				fmin = parseFloat(v[1]);
+				fmax = parseFloat(v[2]);
+				band = fmax-fmin;
 			}
 		}
 	}
@@ -3481,7 +3498,7 @@ function plot(id2,s,c,z) {
 
 	svg0 = document.getElementById("svg0");
 //	svg_polar(svg0,x,y,W,H,id2||"P",c||(ncols==2?((fmin!=fmax)?"#AA69D3":"#ff6633"):"#92ba6c"),z);  
-	svg_polar(svg0,x,y,W,H,id2||"P",c||((ncols==2)?"#ff6633":(ncols==3)?"#92ba6c":"#AA69D3"),z);  
+	svg_polar(svg0,x,y,W,H,id2||"P",(band?"#00AAAA":c)||((ncols==2)?"#ff6633":(ncols==3)?"#92ba6c":"#AA69D3"),(band?1:z));  
 
 	if(mblocks==2 && xy.y.length>0) svg_polar(svg0,xy.x,xy.y,W,H,"R","#008800",z);
 	else  svg_polar(svg0,[],[],W,H,"R","#008800",z);
@@ -6229,9 +6246,18 @@ function wasm_soft_worker(lines,th,f0,c0,ph,rr,method,solver,rest) {
 
 	var fmin,fmax,fstep;
 
-	if(f0<0) {fmin=-f0;fmax=360e3;fstep=-f0;} else {fmin=f0;fmax=f0;fstep=f0;}
+	var band = parseFloat(rest.band);
+    if(band>0) {
+		fmin=f0-band/2;fmax=f0+band/2+band/8;fstep=band/20;
+	}
+	else {
+		if(f0<0) {fmin=-f0;fmax=360e3;fstep=-f0;} 
+		else {fmin=f0;fmax=f0;fstep=f0;}
+	}
 	var LBS2=[];
 
+    console.log(rest.band," f:",fmin,fmax,fstep);
+	
 	for(f0=fmin;f0<=fmax;f0+=fstep) {
 	
 		const k = 2 * pi * f0 / c0;
@@ -6271,6 +6297,7 @@ if(method==3) { // KRM
 */
 		{ // direct write to C/Webassembly memory (MM 22.3.2026)
 			const m = S.length;
+			//console.log("m=",m);
 			const matOffset = 0;
 			var kk = matOffset;
 			const off = solver==2 ? m*m : 1;
@@ -6288,6 +6315,7 @@ if(method==3) { // KRM
 					const A = triangleArea(i, v, e);
 					S[i] = new Complex( I/(4*pi*A), k/(4*pi)); 
 				}
+				//if(m<16) {console.log(S[i]);} // MM debug
 			    heap[kk]=S[i].re;
 			    heap[kk+off]=S[i].im;
 			    kk += inc;
@@ -6408,6 +6436,13 @@ if(method!=3) {
 			} else { // KRM
 				
 			}
+			/*
+			if(m<16) {
+				for(var i=0;i<f.length;i++) {
+					console.log(i,f[i]); // MM debug
+				}
+			}
+			*/
 		      var phi;
 if(method!=3) {
 	if(solver==1) {
@@ -6461,7 +6496,8 @@ if(method==3) { // KRM
 				}
 }
 				var idx = (th0/l+180/l)%(360/l);
-				var lbs = psc[idx].abs();
+				var clbs = psc[idx];
+				var lbs = clbs.abs();
 				// Return results
 				var s = '# th0='+th0+' ph0='+ph0+' f0='+f0+' c0='+c0+' lbs='+lbs.toFixed(6)+'\n';
 				for(let i=0; i<psc.length; i++) {
@@ -6495,7 +6531,7 @@ if(method==3) { // KRM
 						s += ''+(j)+' ';
 					}
 */
-										s += '\n';
+					s += '\n';
 					for(var j=0;j<NR;j++) { // polar grid: NR x 360/n
 						var grid1 = Array.from({length: NT/nn}, (_, i)=>mul(Ry(ph0),
 						  [[RR[j]*Math.cos(l*i*nn*pi/180+pi)+cx],[RR[j]*Math.sin(l*i*nn*pi/180+pi)+cy],[0+cz]]));
@@ -6519,7 +6555,7 @@ if(method==3) { // KRM
 				}
 				postMessage(JSON.stringify(s));
 				LBS.push([(th0+180)%360,ph0,lbs]);
-				LBS2.push([f0,th0,ph0,lbs])
+				LBS2.push([f0,th0,ph0,clbs.re,clbs.im,lbs])
 			}
 			LBS.push(["\n"]); // append empty line as the block separator
 		}
@@ -6536,9 +6572,9 @@ if(method==3) { // KRM
 		}
 	}
 	if(fmin!=fmax) {
-		s = '# ' +  (fmin) + '-' + (fmax) +'\n'; 
+		s = '# ' +  (fmin) + (rest.band?'+':'-') + (fmax) +'\n'; 
 		for(var i=0;i<LBS2.length;i++) {
-			s += '' + (LBS2[i][0])+ ' '+ (LBS2[i][1])+ ' '+(LBS2[i][2])+ ' '+(LBS2[i][3].toFixed(6))+'\n'; 
+			s += '' + (LBS2[i][0])+ ' '+ (LBS2[i][1])+ ' '+(LBS2[i][2])+ ' '+(LBS2[i][3].toFixed(6))+ ' '+(LBS2[i][4].toFixed(6))+ ' '+(LBS2[i][5].toFixed(6))+'\n'; 
 		}
 		postMessage(JSON.stringify(s));
 	}	
@@ -6708,7 +6744,7 @@ var solver = 3;
 
 url_params();
 
-if(!document.querySelector('#f0 option[value="'+f0+'"]')) { // add to options if not in the list
+if(!document.querySelector('#f0 option[value="'+(f0/1000)+'e3"]')) { // add to options if not in the list
 	const option = document.createElement("option");
 	option.value = f0; 
 	option.textContent = ''+(f0/1000)+ ' kHz';
