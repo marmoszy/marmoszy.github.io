@@ -2847,10 +2847,12 @@ function soft_sphere(aa, f00, c00, th00, ph00, r00, b00) { // 360 angles, return
 		var r = cmath.abs(psc);
 		//s += ''+i+' '+(psc.re).toFixed(6)+' '+(psc.im).toFixed(6)+' '+r.toFixed(6)+'\\n';
 		s += ''+i+' '+r.toFixed(6)+'\\n';
-		if(i==((th0+180)%360)) lbs=r;
+		if(i==((th0+180)%360)) {lbs=r;lbsre=psc.re;lbsim=psc.im;}
 	}
 	//return('# mm-bem soft_sphere('+(a)+')\\n# th0='+(th0)+' ph0='+(ph0)+' f0='+(f0)+' c0='+(c0)+' lbs='+(lbs.toFixed(6))+'\\n'+s);
-	s = '# mm-bem soft_sphere('+(a)+')\\n# th0='+(th0)+' ph0='+(ph0)+' f0='+(f0)+' c0='+(c0)+' lbs='+(lbs.toFixed(6))+'\\n'+ s;
+	var s1 = '# mm-bem soft_sphere('+(a)+')\\n# th0='+(th0)+' ph0='+(ph0)+' f0='+(f0)+' c0='+(c0)+' lbs='+(lbs.toFixed(6));
+	s1 +=  ' ('+(lbsre.toFixed(6))+','+(lbsim.toFixed(6))+')\\n';
+	s = s1 + s;
 	//return s;
 	
 	var nn = 3; // every 3 deg
@@ -2925,7 +2927,6 @@ function js_soft_sphere() {
 	r0 = parseFloat(document.getElementById("r0").value);
 	b0 = parseFloat(document.getElementById("b0").value);
 	band = document.getElementById("f0").value[0]=='+'?10e3:0;
-console.log("band:",band);
 	worker.postMessage(JSON.stringify([lines,th,f0,c0,ph,r0,b0,band]));	
 }
 
@@ -2933,8 +2934,6 @@ function js_soft_sphere_worker(obj,th,f0,c0,ph,r0,b0,band) {
 	var fmin,fmax,fstep,thmin,thmax,thstep,phmin,phmax,phstep,re,im;
 
 postMessage('[Soft sphere exact solution: ...]');
-
-console.log("band2:",band);
 
     if(band>0) {
 	   fmin=f0-band/2; fmax=f0+band/2+band/8; fstep=band/20;
@@ -2954,14 +2953,15 @@ console.log("band2:",band);
 				//console.log("eval:",obj2);
 				var s = eval(obj2);
 				postMessage(JSON.stringify(s));  // type 1 - scattering length
-				var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
+				var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+) \((\S+),(\S+)\)/);
 				if(v) {
 					s2 += '' +(th0)+' '+(ph0)+' ' + parseFloat(v[5]).toFixed(6)+'\n';
+					re = parseFloat(v[6]);
+					im = parseFloat(v[7]);
 				}
 			}
 			s2 += '\n';
 		}
-		re=im=parseFloat(v[5])/Math.sqrt(2); // temporary
 		LBS2.push([f00,parseFloat(v[1]),parseFloat(v[2]),re,im,parseFloat(v[5])]);
 	}
 	if( (thmin!=thmax) || (phmin!=phmax)) {
@@ -6324,9 +6324,10 @@ if(method==3) { // KRM
 				if(r!=0) { 
 					S[i]=new Complex(Math.cos(k*r)/(4*pi*r),Math.sin(k*r)/(4*pi*r)); 
 				} else {
-					const I = singularIntegralTriangle(i, v, e);
-					const A = triangleArea(i, v, e);
-					S[i] = new Complex( I/(4*pi*A), k/(4*pi)); 
+					//const I = singularIntegralTriangle(i, v, e);
+					//const A = triangleArea(i, v, e);
+					//S[i] = new Complex( I/(4*pi*A), k/(4*pi)); 
+					S[i] = new Complex( k/4, k/(4*pi)); 
 				}
 				//if(m<16) {console.log(S[i]);} // MM debug
 			    heap[kk]=S[i].re;
@@ -6512,7 +6513,8 @@ if(method==3) { // KRM
 				var clbs = psc[idx];
 				var lbs = clbs.abs();
 				// Return results
-				var s = '# th0='+th0+' ph0='+ph0+' f0='+f0+' c0='+c0+' lbs='+lbs.toFixed(6)+'\n';
+				var s = '# th0='+th0+' ph0='+ph0+' f0='+f0+' c0='+c0+' lbs='+lbs.toFixed(6);
+				s += ' ('+clbs.re.toFixed(6)+','+clbs.im.toFixed(6)+')\n';
 				for(let i=0; i<psc.length; i++) {
 					s += l*i + ' ' + psc[i].abs().toFixed(6) + '\n';
 				}
@@ -6587,7 +6589,7 @@ if(method==3) { // KRM
 	if(fmin!=fmax) {
 		s = '# ' +  (fmin) + (rest.band?'+':'-') + (fmax) +'\n'; 
 		for(var i=0;i<LBS2.length;i++) {
-			s += '' + (LBS2[i][0])+ ' '+ (LBS2[i][1])+ ' '+(LBS2[i][2])+ ' '+(LBS2[i][3].toFixed(6))+ ' '+(LBS2[i][4].toFixed(6))+ ' '+(LBS2[i][5].toFixed(6))+'\n'; 
+			s += '' + (LBS2[i][0])+ ' '+ (LBS2[i][1])+ ' '+(LBS2[i][2])+ ' '+(LBS2[i][3].toFixed(6))+ ' '+(LBS2[i][4].toFixed(6))+ ' '+(LBS2[i][5].toFixed(6))+'\n';  // f0, th0, ph0, lbs.re, lbs.im, |lbs|
 		}
 		postMessage(JSON.stringify(s));
 	}	
