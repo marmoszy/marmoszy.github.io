@@ -2785,7 +2785,10 @@ function exact_ss2scat(k, a, r, th, d, b) {
     const term = cmath.mul(coeff, h_kr);         // term_n = coeff_n * h_n(kr)
     sum = cmath.add(sum, term);
   }
-  return sum; // p_scat(r, th) for plane wave incidence
+  //return sum; // p_scat(r, th) for plane wave incidence
+  let inv_dist = cmath.cplx(r, 0.0)
+  let inv_phase = cmath.cplx(Math.cos(-k * r), Math.sin(-k * r))
+  return cmath.mul(cmath.mul(sum, inv_dist), inv_phase);
 }
 function p_inc_plane(k, r, th) {  // Incident plane wave: p_inc = exp(i k r cos θ) 
 	//return cmath.exp(cmath.cplx(0, k * r * Math.cos(th))); 
@@ -2832,6 +2835,7 @@ function pistonCoeffs(k, b, z0, Nmax) {
 }
 
 function soft_sphere(aa, f00, c00, th00, ph00, r00, b00) { // 360 angles, returning two-column string
+	var r1 = 1;    // far field distance
 	var a = aa||0.01905; 
 	var f0 = f00||38e3;
 	var c0 = c00||1480.;
@@ -2841,13 +2845,15 @@ function soft_sphere(aa, f00, c00, th00, ph00, r00, b00) { // 360 angles, return
 	var b0 = b00||0;      // in lambda's	
 	var s='',lbs=0;
 	//console.log("soft_sphere: ",f0,c0,r0,b0);
-	for(var i=0;i<=360;i++) {
-		//var r = cmath.abs(exact_ss(2*Math.PI*f0/c0*a,(i-th0)*Math.PI/180,a));
-		var psc = exact_ss2scat(2*Math.PI*f0/c0, a, 1, (i-th0)*Math.PI/180, r0*c0/f0, b0*c0/f0);
-		var r = cmath.abs(psc);
-		//s += ''+i+' '+(psc.re).toFixed(6)+' '+(psc.im).toFixed(6)+' '+r.toFixed(6)+'\\n';
-		s += ''+i+' '+r.toFixed(6)+'\\n';
-		if(i==((th0+180)%360)) {lbs=r;lbsre=psc.re;lbsim=psc.im;}
+	for(var i=0; i<=360; i++) {
+		//var apsc = cmath.abs(exact_ss(2*Math.PI*f0/c0*a,(i-th0)*Math.PI/180,a));
+		var psc = exact_ss2scat(2*Math.PI*f0/c0, a, r1, (i-th0)*Math.PI/180, r0*c0/f0, b0*c0/f0);
+		var apsc = cmath.abs(psc);
+		//s += ''+i+' '+(psc.re).toFixed(6)+' '+(psc.im).toFixed(6)+' '+apsc.toFixed(6)+'\\n';
+		s += ''+i+' '+apsc.toFixed(6)+'\\n';
+		if(i==((th0+180)%360)) {
+			lbs=apsc; lbsre=psc.re; lbsim=psc.im;
+		}
 	}
 	//return('# mm-bem soft_sphere('+(a)+')\\n# th0='+(th0)+' ph0='+(ph0)+' f0='+(f0)+' c0='+(c0)+' lbs='+(lbs.toFixed(6))+'\\n'+s);
 	var s1 = '# mm-bem soft_sphere('+(a)+')\\n# th0='+(th0)+' ph0='+(ph0)+' f0='+(f0)+' c0='+(c0)+' lbs='+(lbs.toFixed(6));
@@ -2864,8 +2870,8 @@ function soft_sphere(aa, f00, c00, th00, ph00, r00, b00) { // 360 angles, return
 	for(var j=0;j<RR.length;j++) {
 		s += '## ';
 		for(var i=0;i<=NT;i+=nn) {
-			var r = (RR[j]>a)?cmath.abs(exact_ss2scat(2*Math.PI*f0/c0,a,RR[j],(i-th0)*Math.PI/180,r0*c0/f0,b0*c0/f0)):0;
-			s += ''+r.toFixed(6)+' ';
+			var apsc = (RR[j]>a)?cmath.abs(exact_ss2scat(2*Math.PI*f0/c0,a,RR[j],(i-th0)*Math.PI/180,r0*c0/f0,b0*c0/f0)):0;
+			s += ''+apsc.toFixed(6)+' ';
 		}
 		s += '\\n';
 	}
