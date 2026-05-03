@@ -1564,8 +1564,9 @@ function update_mesh() {
 			p.push([V(P(vx[fx[k][0]])),V(P(vx[fx[k][1]])),V(P(vx[fx[k][2]]))]);
 		}
 	}
-	
-	var el = svg_createpath(svg, "M", p, mesh_onoff?mshcolor:"none", (img_onoff&1)?2:mesh_onoff?0.5:0, "1,0", 0, 'none');
+	var mcolor=mshcolor;
+	if(document.getElementById("obj").value.startsWith("lbs:")) {mcolor="#008000";}
+	var el = svg_createpath(svg, "M", p, mesh_onoff?mcolor:"none", (img_onoff&1)?2:mesh_onoff?0.5:0, "1,0", 0, 'none');
 	if(document.getElementById("obj").value.match("soft_sphere") ) {  // colored mesh hack for exact sphere !!!
 		var d = el.getAttribute('d');
 		var out = svg_extractOutlineConvexHull(d);
@@ -2674,8 +2675,8 @@ function msave(pname,generated_mesh) {
 
 var js_soft_sphere_worker_header=`
 onmessage = function(e) {
-	[lines,th,f0,c0,ph,r0,b0] = JSON.parse(e.data);
-	var s = js_soft_sphere_worker(lines,th,f0,c0,ph,r0,b0);
+	[lines,th,f0,c0,ph,r0,b0,band] = JSON.parse(e.data);
+	var s = js_soft_sphere_worker(lines,th,f0,c0,ph,r0,b0,band);
 	//postMessage(JSON.stringify(s));  // done in the worker
 }
 const cmath = { // Complex math functions 
@@ -2841,8 +2842,10 @@ function soft_sphere(aa, f00, c00, th00, ph00, r00, b00) { // 360 angles, return
 	var s='',lbs=0;
 	//console.log("soft_sphere: ",f0,c0,r0,b0);
 	for(var i=0;i<=360;i++) {
-		//var r = cmath.abs(exact_ss(2*Math.PI*f0/c0*a,(i-th0)*Math.PI/180,a))
-		var r = cmath.abs(exact_ss2scat(2*Math.PI*f0/c0, a, 1, (i-th0)*Math.PI/180, r0*c0/f0, b0*c0/f0))
+		//var r = cmath.abs(exact_ss(2*Math.PI*f0/c0*a,(i-th0)*Math.PI/180,a));
+		var psc = exact_ss2scat(2*Math.PI*f0/c0, a, 1, (i-th0)*Math.PI/180, r0*c0/f0, b0*c0/f0);
+		var r = cmath.abs(psc);
+		//s += ''+i+' '+(psc.re).toFixed(6)+' '+(psc.im).toFixed(6)+' '+r.toFixed(6)+'\\n';
 		s += ''+i+' '+r.toFixed(6)+'\\n';
 		if(i==((th0+180)%360)) lbs=r;
 	}
@@ -2921,16 +2924,21 @@ function js_soft_sphere() {
 	ph = parseFloat(document.getElementById("ph").value);
 	r0 = parseFloat(document.getElementById("r0").value);
 	b0 = parseFloat(document.getElementById("b0").value);
-	worker.postMessage(JSON.stringify([lines,th,f0,c0,ph,r0,b0]));	
+	band = document.getElementById("f0").value[0]=='+'?10e3:0;
+console.log("band:",band);
+	worker.postMessage(JSON.stringify([lines,th,f0,c0,ph,r0,b0,band]));	
 }
 
-function js_soft_sphere_worker(obj,th,f0,c0,ph,r0,b0,band=0) {
-	var fmin,fmax,fstep,thmin,thmax,thstep,phmin,phmax,phstep;
+function js_soft_sphere_worker(obj,th,f0,c0,ph,r0,b0,band) {
+	var fmin,fmax,fstep,thmin,thmax,thstep,phmin,phmax,phstep,re,im;
 
 postMessage('[Soft sphere exact solution: ...]');
 
+console.log("band2:",band);
+
     if(band>0) {
 	   fmin=f0-band/2; fmax=f0+band/2+band/8; fstep=band/20;
+	   re=0;im=0;
     } else {
    	   if(f0<0) {fmin=10e3; fmax=360e3; fstep=-f0;} else {fmin=f0; fmax=f0; fstep=f0;}
 	}
@@ -2953,7 +2961,8 @@ postMessage('[Soft sphere exact solution: ...]');
 			}
 			s2 += '\n';
 		}
-		LBS2.push([f00,parseFloat(v[1]),parseFloat(v[2]),parseFloat(v[5])]);
+		re=im=parseFloat(v[5])/Math.sqrt(2); // temporary
+		LBS2.push([f00,parseFloat(v[1]),parseFloat(v[2]),re,im,parseFloat(v[5])]);
 	}
 	if( (thmin!=thmax) || (phmin!=phmax)) {
 		s2 = '# '+ ((thmax-thmin)/thstep+1) + 'x' +((phmax-phmin)/phstep+1) + '\n' + s2;
@@ -2962,7 +2971,7 @@ postMessage('[Soft sphere exact solution: ...]');
 	if( (fmin!=fmax) ) {
 		s2 = '# ' +  (fmin) + (band?'+':'-') + (fmax) +'\n'; 
 		for(var i=0;i<LBS2.length;i++) {
-			s2 += '' + (LBS2[i][0])+ ' '+ (LBS2[i][1])+ ' '+(LBS2[i][2])+' ' + (LBS2[i][3].toFixed(6))+'\n'; 
+			s2 += '' + (LBS2[i][0])+ ' '+ (LBS2[i][1])+ ' '+(LBS2[i][2])+' ' + (LBS2[i][3].toFixed(6))+' ' + (LBS2[i][4].toFixed(6))+' ' + (LBS2[i][5].toFixed(6))+'\n'; 
 		}
 		postMessage(JSON.stringify(s2));  // type 3 - backscattering length frequency dependent
 	}
