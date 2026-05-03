@@ -811,7 +811,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(1.5.2026)" style="text-align:center">mm-bem v2.54 (2025-2026)</p>
+<p title="(3.5.2026)" style="text-align:center">mm-bem v2.55 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -2924,12 +2924,16 @@ function js_soft_sphere() {
 	worker.postMessage(JSON.stringify([lines,th,f0,c0,ph,r0,b0]));	
 }
 
-function js_soft_sphere_worker(obj,th,f0,c0,ph,r0,b0) {
+function js_soft_sphere_worker(obj,th,f0,c0,ph,r0,b0,band=0) {
 	var fmin,fmax,fstep,thmin,thmax,thstep,phmin,phmax,phstep;
 
 postMessage('[Soft sphere exact solution: ...]');
 
-	if(f0<0) {fmin=10e3; fmax=360e3; fstep=-f0;} else {fmin=f0; fmax=f0; fstep=f0;}
+    if(band>0) {
+	   fmin=f0-band/2; fmax=f0+band/2+band/8; fstep=band/20;
+    } else {
+   	   if(f0<0) {fmin=10e3; fmax=360e3; fstep=-f0;} else {fmin=f0; fmax=f0; fstep=f0;}
+	}
 	if(th<0) {thmin=0; thmax=360; thstep=-th;} else {thmin=th; thmax=th; thstep=1;}
 	if(ph<0) {phmin=0; phmax=(ph<0)?180:360; phstep=-ph;} else {phmin=ph;phmax=ph;phstep=1;}
 
@@ -2956,7 +2960,7 @@ postMessage('[Soft sphere exact solution: ...]');
 		postMessage(JSON.stringify(s2));  // type 2 - backscattering length 2D or 3D
 	}
 	if( (fmin!=fmax) ) {
-		s2 = '# ' +  (fmin) + '-' + (fmax) +'\n'; 
+		s2 = '# ' +  (fmin) + (band?'+':'-') + (fmax) +'\n'; 
 		for(var i=0;i<LBS2.length;i++) {
 			s2 += '' + (LBS2[i][0])+ ' '+ (LBS2[i][1])+ ' '+(LBS2[i][2])+' ' + (LBS2[i][3].toFixed(6))+'\n'; 
 		}
@@ -3568,8 +3572,8 @@ console.log(m,n);
 	for(var i=0;i<n;i++) {
 		for(var j=0;j<m;j++) {
 				s += (k+1);
-				s += ' '+ (y[k]*Math.sin(x[k]*pi/180)).toFixed(6);
 				s += ' '+ (y[k]*Math.cos(x[k]*pi/180)*Math.cos(x2[k]*pi/180)).toFixed(6);
+				s += ' '+ (y[k]*Math.sin(x[k]*pi/180)).toFixed(6);
 				s += ' '+ (y[k]*Math.cos(x[k]*pi/180)*Math.sin(x2[k]*pi/180)).toFixed(6);
 				s += '\n';
 				k += 1;
