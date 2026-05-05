@@ -811,7 +811,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(3.5.2026)" style="text-align:center">mm-bem v2.55 (2025-2026)</p>
+<p title="(5.5.2026)" style="text-align:center">mm-bem v2.56 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -6489,7 +6489,7 @@ if(method==3) { // KRM
 				for(var i=0;i<360/l;i++) {
 					var inside = ( Math.abs(l*i-th0) >= (180-krm_ang) && Math.abs(l*i-th0) <= (180+krm_ang) );
 					if(inside) {
-					  var a= krmScatteringAmplitude_KA_RM(v,e,f0,c0,th0*pi/180+pi,ph0*pi/180,l*i*pi/180+pi,ph0*pi/180,R_eq,fM);
+					  var a= krmScatteringAmplitude_KA_RM(v,e,f0,c0,th0*pi/180+0*pi,ph0*pi/180,l*i*pi/180+0*pi,ph0*pi/180,R_eq,fM);
 					  psc[i] = new Complex(a.re,a.im);
 					} else { 
 					  psc[i] = new Complex(0,0);
