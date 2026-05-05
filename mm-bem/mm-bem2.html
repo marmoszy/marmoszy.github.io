@@ -360,7 +360,7 @@ Full mm-bem package contains source codes in different programming languages for
 <!------------ svg plot2D -------------->
 <div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#fafcff;white;#F5EDEA;#eee">
 <svg xmlns="http://www.w3.org/2000/svg" id="svg" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
-<image id="svgimg" x="20" y="20" width="400" height="400" onclick="imgclick(this);" style="pointer-events:all">
+<image id="svgimg" x="20" y="20" width="400" height="400" onclick="imgclick(this);" style="pointer-events:all" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
 	<title>click to turn on/off near field</title>
 </image>
 <text x="10" y="10" id="title" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
@@ -3215,7 +3215,7 @@ function change1() {
 		else {plot("F",'#');} 		// clear frequency plot
 		plot("P","#");			 	// clear calculation plot
 		var el = document.getElementById("svgimg");
-		if(el) {el.setAttribute("href","")} // clear image
+		if(el) {el.setAttribute("href","data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=")} // clear image
 		if(img_onoff) {img_was_on = 1; img_onoff=0; update();}
 		var el = document.getElementById("txt2");
 		if(el && el.value.startsWith("# abs(p_sc)")) {el.value="";}
