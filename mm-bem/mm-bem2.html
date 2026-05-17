@@ -698,13 +698,15 @@ along both direction angles.
   <option value="3">KRM</option>
   <option value="4">IPA</option>
 </select>
-&nbsp;ctrl-shift M, ctrl-shift K
+&nbsp;ctrl-shift M, ctrl-shift K, ctrl-shift I
 <br><br>
 <span id="hsolver" hidden1>
 <label for="solver" style="margin-left:0px">Solver: </label> 
 <select id="solver" onchange="select()" style="background-color:#ffe6e6">
+  <!--
   <option value="1">Gauss</option>
   <option value="2">Blocked LU</option>
+  -->
   <option value="3" selected>ACA-GMRES</option>
   <option value="4">LDLt</option>
 </select>
@@ -1081,7 +1083,7 @@ document.onkeydown = function(e) {
 	e.preventDefault(); var r0=document.getElementById("r0"); var v=parseInt(r0.value); r0.value=v+(v>0?1:-1); select();
   }
   if(e.keyCode==83 && e.ctrlKey && e.shiftKey) { // ctrl-shift S
-	e.preventDefault(); var el=document.getElementById("solver"); var v=parseInt(el.value); el.value=(v%4)+1; select();
+	e.preventDefault(); var el=document.getElementById("solver"); var v=parseInt(el.value); el.value=((v-3)+1)%2+3/*(v%4)+1*/; select();
   }
   if(e.keyCode==66 && e.ctrlKey && e.shiftKey) { // ctrl-shift B
 	e.preventDefault(); var b0=document.getElementById("b0"); b0.value=parseInt(b0.value)+1; select();
@@ -1510,7 +1512,8 @@ var vx=[],fx=[],cx=[],x0,y0,z0,M=[],r0max,xmax2,ymax2,zmax2,xmin,xmax,ymin,ymax,
 
 function init_mesh() {
 	var s = document.getElementById("msh").value;
-	var ss = s.split('$EndElements\n');
+	//var ss = s.split('$EndElements\n');
+        var ss = s.match(/\$MeshFormat.*?\$EndElements/gs);
 	vx=[]; fx=[]; cx=[0];
 	for(var i=0; i<ss.length; i++) {
 		if(ss[i].length>0 && ss[i].startsWith("$MeshFormat") ) {
@@ -1521,8 +1524,8 @@ function init_mesh() {
 			for(var j=0;j<fi.length;j++) {
 				fi[j][0]+=N; fi[j][1]+=N; fi[j][2]+=N;
 			}
-                        cx.push(fi.length)
 			fx=fx.concat(fi);
+                        cx.push(fx.length);
 		}
 	}
 	x0=0.0, y0=0; z0=0; M = R1();
@@ -1565,7 +1568,7 @@ function update_mesh() {
     }
     for(i=0; i<cx.length-1; i++) { // cx - global tab indices for different materials
         var p = [];
-        for(var k=cx[i]; k<(cx[i]+cx[i+1])/*fx.length*/; k++) {
+        for(var k=cx[i]; k<cx[i+1]; k++) {
 	    if(fx[k].length==4) {
                 p.push([V(P(vx[fx[k][0]])),V(P(vx[fx[k][1]])),V(P(vx[fx[k][2]])),V(P(vx[fx[k][3]]))]);
 	    } else {
@@ -2306,9 +2309,10 @@ ctrl 3 - view from third axis (+/-)
 ctrl + - zoom in
 ctrl - - zoom out
 ctrl-shift cursors - move
+ctrl-shift I - IPA method on/off
+ctrl-shift K - KRM method on/off 
 ctrl-shift M - MFS method on/off
 ctrl-shift N - Near field on/off
-ctrl-shift K - KRM method on/off 
 ctrl-shift P - plane wave/point/piston switch 
 ctrl-shift R - point and piston distance (r0 [])
 ctrl-shift S - change solver 
@@ -3399,7 +3403,6 @@ function elem_data(s2,t,n,mode=1) { // s2: data_string t:time, n:n_seq, mode==0:
 }
 
 function plot2(s) {
-	debugger;
 	if(s.substring(0,11)=="# abs(p_sc)") {
 		update_near_field(s);
 		update_near_field2();
@@ -3465,7 +3468,7 @@ function drop2(e) {
 
 function plot(id2, s, c, z) {
 	s = s||document.getElementById("txt").value;
-	var m=0,n=0;
+	var m=0, n=0;
 	var th = undefined, ph = undefined, f0=undefined, lbs = undefined, TS = undefined, fmin=undefined, fmax=undefined;
 	var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
 	if(v) {
@@ -3482,7 +3485,7 @@ function plot(id2, s, c, z) {
 		c0=parseFloat(document.getElementById("c0").value);				
 	}
 	var ss=s.split('\n');
-	var x=[],y=[],x2=[],xy={off:[],x:[],y:[]},ncols=0,mblocks=0,band=0;
+	var x=[], y=[], x2=[], xy={off:[],x:[],y:[]}, ncols=0, mblocks=0, band=0;
 	//console.log(ss.length);
 	for(var i=0;i<ss.length;i++) {
 		s2=ss[i].trim().split(/\s+/);
@@ -3544,7 +3547,7 @@ function plot(id2, s, c, z) {
 	}
 
 	var pname = document.getElementById("obj").value;
-	if(ncols>=3 && m>1 && n>1 && !pname.startsWith("lbs:")) { // only when mesh is constructered from 3D scan
+	if(ncols>=3 && m>1 && n>1 /*&& !pname.startsWith("lbs:")*/) { // only when mesh is constructered from 3D scan
                 var c = f0==38e3 ?3: f0==70e3 ?4: f0==120e3 ?5: f0==200e3 ?6: f0=333e3 ?7: 8;                 
 		var gen_mesh =  msh_from3cols(m, n, x, x2, y, c);
 		if(gen_mesh.length>0) {
@@ -5226,7 +5229,6 @@ function luWasm(S,f) { // using gauss, heap
 }
 
 function test() {
-	debugger;
 /*
 	S = [ 1+0i,   2+1i,   0-1i;
 	      0+2i,   3+0i,   1+0i;
@@ -6781,118 +6783,18 @@ function ldlt1Wasm(b) {
     return result;
 }
 
-`;
-
-function wasm_soft_worker(lines,th,f0,c0,ph,rr,method,solver,rest) {
-
-  //console.log("wasm_soft_worker: "+th+" "+ph+" "+rr+" "+method+" "+solver);
-  //test();
-	
-  if(method==2 && solver==3) solver=2; // if MFS not use ACA+GMRES
-  if(method==2 && solver==4) solver=2; // if MFS not use LDLt
-
-  var fmin,fmax,fstep;
-
-  var band = parseFloat(rest.band);
-  if(band>0) {
-    fmin=f0-band/2;fmax=f0+band/2+band/8;fstep=band/20;
-  } else {
-    if(f0<0) {fmin=-f0;fmax=360e3;fstep=-f0;} 
-    else {fmin=f0;fmax=f0;fstep=f0;}
-  }
-  var LBS2=[];
-
-
-  const n = parseInt(lines[4]);
-  const v = lines.slice(5, 5 + n).map(line => line.trim().split(/\s+/).slice(1, 4).map(parseFloat));
-  const m = parseInt(lines[n + 7]);
-  const e = lines.slice(n + 8, n + 8 + m).map(line =>
-    line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x)-1)  // 0-based indexing
-  );
-  // Triangle centers
-  var x=[], x2=[];
-  for(var i=0;i<m;i++) {
-    x.push( [ (v[e[i][0]][0]+v[e[i][1]][0]+v[e[i][2]][0])/3
-             ,(v[e[i][0]][1]+v[e[i][1]][1]+v[e[i][2]][1])/3
-  	       ,(v[e[i][0]][2]+v[e[i][1]][2]+v[e[i][2]][2])/3]);
-  }
-  var mesh,kernel;
-  if(method==4) {
-	 postMessage("[ IPA geometry]");
-     mesh = computeGeometry(v, e, heap);
-  }
-  postMessage("[ assembling]");
-
-  console.log(rest.band," f:",fmin,fmax,fstep);
-	
-  for(f0=fmin;f0<=fmax;f0+=fstep) {
-    const k = 2 * pi * f0 / c0;
-    //d = [Math.cos(th*pi/180), Math.sin(th*pi/180), 0];
-    if(method==4) {
-	 	postMessage("[ IPA kernel]");
-		kernel   = computeKernelAtFrequency(mesh, k);
-    }
-    var S;
-    if(solver!=3) {
-      if(solver!=4) {
-        S = new Array(m);
-        if(method==3) { // KRM 
-        	
-        } else if (method==4) { // IPA
-
-        } else if(method==1) { // BEM
-/*
-		for (let i = 0; i < m; i++) { 		// Helmholtz single layer matrix
-		  S[i] = new Array(m);
-		  for (let j = 0; j < m; j++) {
-		    const r = dist(x[i],x[j]);
-		    S[i][j] = (r!==0)?new Complex(Math.cos(k*r)/(4*pi*r),Math.sin(k*r)/(4*pi*r))
-		                      : new Complex(0, k/(4*pi) ) ;
-		  }
-		}
-*/
-		{ // direct write to C/Webassembly memory (MM 22.3.2026)
-			const m = S.length;
-			//console.log("m=",m);
-			const matOffset = 0;
-			var kk = matOffset;
-			const off = solver==2 ? m*m : 1;
-			const inc = solver==2 ? 1 : 2;
-			for (let i = 0; i < m; i++) { 		// Helmholtz single layer matrix
-			  S[i] = new Array(m);
-			  for (let j = 0; j < m; j++) {
-			    const r = dist(x[i],x[j]);
-//			    S[i] = (r!==0)?new Complex(Math.cos(k*r)/(4*pi*r),Math.sin(k*r)/(4*pi*r))
-//			                      : new Complex(0, -k/(4*pi) ) ;
-				if(r!=0) { 
-					S[i]=new Complex(Math.cos(k*r)/(4*pi*r),Math.sin(k*r)/(4*pi*r)); 
-				} else {
-					//const I = singularIntegralTriangle(i, v, e);
-					//const A = triangleArea(i, v, e);
-					//S[i] = new Complex( I/(4*pi*A), k/(4*pi)); 
-					S[i] = new Complex( k/4, k/(4*pi)); 
-				}
-				//if(m<16) {console.log(S[i]);} // MM debug
-			    heap[kk]=S[i].re;
-			    heap[kk+off]=S[i].im;
-			    kk += inc;
-			  }
-			}
-		}
-		
-		
-  } else { // MFS
-		function dot(a, b) {return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];}
-		function cross(a, b) {return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];}
-		function norm(v) {return Math.sqrt(v[0]**2 + v[1]**2 + v[2]**2);}
-		function normal(t) {
-			let v1 = [t[1][0]-t[0][0], t[1][1]-t[0][1], t[1][2]-t[0][2]];
-			let v2 = [t[2][0]-t[0][0], t[2][1]-t[0][1], t[2][2]-t[0][2]];
-			let n = cross(v1, v2);
-			let nn = norm(n);
-			return nn > 0 ? n.map(x => x/nn) : [0,0,0];
-		}
-		function G(x, pts, k) {
+// functions used by MFS
+function dot3(a, b) {return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];}
+function cross(a, b) {return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]];}
+function norm(v) {return Math.sqrt(v[0]**2 + v[1]**2 + v[2]**2);}
+function normal(t) {
+	let v1 = [t[1][0]-t[0][0], t[1][1]-t[0][1], t[1][2]-t[0][2]];
+	let v2 = [t[2][0]-t[0][0], t[2][1]-t[0][1], t[2][2]-t[0][2]];
+	let n = cross(v1, v2);
+	let nn = norm(n);
+	return nn > 0 ? n.map(x => x/nn) : [0,0,0];
+}
+function Gr(x, pts, k) {
 			let out = [];
 			for (let j=0; j<pts.length; j++) {
 				let dx = x[0]-pts[j][0], dy = x[1]-pts[j][1], dz = x[2]-pts[j][2];
@@ -6902,264 +6804,342 @@ function wasm_soft_worker(lines,th,f0,c0,ph,rr,method,solver,rest) {
 				out.push(val);
 			}
 			return out;
-		}
-		let offset = c0/f0/20;
-		x2 = e.map((f, i) => {         // source points
-			let nrm = normal([v[f[0]], v[f[1]], v[f[2]]]);
-			return [x[i][0]-offset*nrm[0], x[i][1]-offset*nrm[1], x[i][2]-offset*nrm[2]];
-		});
-		// S = x2.map(p => G(p, x, k));   // assemble A, k = 2*Math.PI*f0/c0;
-		{  // direct write to C/Webassembly memory for MFS 
-			var mm = x2.length;
-			const matOffset = 0;
-			var kk = matOffset;
-			const off = solver==2 ? mm*mm : 1;
-			const inc = solver==2 ? 1 : 2;
-		    for(var i=0; i<mm; i++) {
-				S = G(x2[i], x, k);
-				for(var j=0;j<mm;j++) {
-					heap[kk]=S/*[i]*/[j].re;
-					heap[kk+off]=S/*[i]*/[j].im;
-					kk += inc;
-				}
-		     }
-		}    		
-		
-	}
-	//postMessage("[... Gauss Javascript Solver]");
-	//	var phi = gaussianEliminationComplex(S, f)
-	//postMessage("[... Gauss Wasm Solver]");
-	//	var phi = gaussianWasm(S,f);
-	//postMessage("[... LU Wasm Solver]");
-	//	var phi = luWasm(S,f);
- } // not for solver==4
-
-  if(method!=3 && method!=4) {
-	if(solver==1) {
-		postMessage("[ gauss0 wasm solver]");
-		gaussian0Wasm(S);
-		postMessage("[ gauss1 wasm solver]");
-	} else if(solver==2) {
-		postMessage("[ Blocked LU (0) wasm solver]");
-		gaussian0Wasm(S,solver);
-		postMessage("[ Blocked LU (1) wasm solver]");
-	} else if(solver==3) { // not for ACA-gmres
-		//postMessage("[ ACA-gmres (0) wasm solver]");
-		//acagmres0Wasm(S);
-		//postMessage("[ ACA-gmres (1) wasm solver]");
-	} else if(solver==4) { // LDLt
-		postMessage("[ LDLt (1) solver]");
-		ldlt0Wasm(x, x, k)
-		postMessage("[ LDLt (2) solver]");
-	} else {
-		postMessage("[ gmres0 wasm solver]");
-		gmres0Wasm(S);
-		postMessage("[ gmres1 wasm solver]");
-	}
-  } // method
-} // solver
-		// wave direction scanning setup
-		var thmin,thmax,thstep, phmin,phmax,phstep;
-	
-		if(ph<0) {if(th<0){phmin=0;phmax=180;} else {phmin=0;phmax=360;} phstep=-ph;} 
-	        else {phmin=ph;phmax=ph;phstep=1;}
-		if(th<0) {thmin=0;thmax=360;thstep=-th;} else { thmin=th;thmax=th;thstep=1; }
-
-		var LBS=[];
-		const l=thstep;
-		for(var ph0=phmin;ph0<=phmax;ph0+=phstep) {
-			if(method==4) {
-			    	
-			}
-		   for(var th0=thmin;th0<=thmax;th0+=thstep) {
-		      // Incident field
-		      d = mul(Ry(ph0),[[Math.cos(th0*pi/180+pi)],[Math.sin(th0*pi/180+pi)],[0]]);
-			  var f;
-			if(method==1) { // BEM
-				function dot(a,b) {return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];}
-				if(rr!=NaN && rr!=0) {
-					rr *= c0/f0; // in wave-length
-					if(rr>0) {
-						function sub(a,b) {return [a[0]-b[0], a[1]-b[1], a[2]-b[2]];}
-						function norm(v) {return Math.sqrt(dot(v, v));}
-						function G(x,y,k,rr) {const r = norm(sub(x,y)); 
-							return new Complex(-Math.cos(k*r)*(4*pi/4/pi)/(4*pi*r),-Math.sin(k*r)*(4*pi/4/pi)/(4*pi*r));}
-						const xs = [-rr*d[0], -rr*d[1], -rr*d[2]]; 
-						f = x.map(x => G(x,xs,k,rr));
-						//f = x.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));
-				    } else { // circular piston
-						rr = Math.abs(rr);
-						f = buildRHS_soft_piston(x, k, f0, d, rr, 0.019);
-				    }
-				} else {
-					f = x.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));					
-				}
-			} else if(method==2) { // MFS
-  		      f = x2.map(p => new Complex(-Math.cos(k * dot(p,d)), -Math.sin(k * dot(p,d))));
-//              f = x2.map(p => {let phase = dot(p, d);
-//                  return new Complex(-Math.cos(k*phase),-Math.sin(k*phase)); });
-//                return math.multiply(-1, math.exp(math.multiply(math.complex(0,1), k*phase))); });
-			} else { // KRM and IPA
-				
-			}
-			/*
-			if(m<16) {
-				for(var i=0;i<f.length;i++) {
-					console.log(i,f[i]); // MM debug
-				}
-			}
-			*/
-		      var phi;
-if(method!=3 && method!=4) {
-	if(solver==1) {
-		      phi = gaussian1Wasm(f);
-	} else if(solver==2) {
-		      phi = gaussian1Wasm(f, solver);
-	} else if(solver==3) {
-		      phi = acagmres1Wasm(v, e, f, f0, c0, th0, ph0);
-	} else if(solver==4) {
-		      phi = ldlt1Wasm(f);
-	} else {
-		      phi = gmres1Wasm(f);
-	}
 }
-		      postMessage("[ far field solution]");
 
-		      // Far field solution
-			  const a1 = 1;
-		      const r1 = Array.from({length: 360/l},
-				  (_, i)=>mul(Ry(ph0),[[a1*Math.cos(l*i*pi/180+pi)],[a1*Math.sin(l*i*pi/180+pi)],[0]]));
-		      var psc=[];
-if(method==3 || method==4) { // KRM || IPA
-				const R_eq = equivalentRadiusFromMesh(v, e); // Precompute equivalent radius and Minnaert frequency
-				const fM   = minnaertFrequency(R_eq); // you can tweak P0, gamma if needed
-				krm_ang = rest.krm_ang||45;
-				var qRe, qIm;
-				if(method==4) {
-					krm_ang =180;
-					var q = krmScatteringAmplitudeIterative1(kernel, th0*pi/180+0*pi, ph0*pi/180, rest.ipa_iter);
-					qRe = q.qRe; qIm = q.qIm;	
-				}
-				for(var i=0;i<360/l;i++) {
-					var inside = ( Math.abs(l*i-th0) >= (180-krm_ang) && Math.abs(l*i-th0) <= (180+krm_ang) );
-					if(method==4) inside = true;
-					if(inside) {
-						var a;
-	if(method==4) {
-		a = krmScatteringAmplitudeIterative2(kernel, qRe, qIm, l*i*pi/180+0*pi, ph0*pi/180);	
-	} else {
-		a = krmScatteringAmplitude_KA_RM(v,e,f0,c0, th0*pi/180+0*pi,ph0*pi/180, l*i*pi/180+0*pi,ph0*pi/180, R_eq,fM);
-	}		  
-					  psc[i] = new Complex(a.re,a.im);
-					} else { 
-					  psc[i] = new Complex(0,0);
-				    }
-				}
-				var ts=targetStrength(v, e, f0, c0, 270*Math.PI/180, 0);
-} else if(method==1 || method==2) { // BEM || MFS
-				const Sff = r1.map(v => x.map(xj =>
-					new Complex(Math.cos(-k * dot(xj,v))/(4*pi), Math.sin(-k * dot(xj,v))/(4*pi)
-					// new Complex(Math.cos(k * dist(xj,v))/(4*pi*dist(xj,v)), Math.sin(k * dist(xj,v))/(4*pi*dist(xj,v)) )));
-)));
-				psc = multiplyMatrixVector(Sff, phi);
-} else { // old MFS
-				for (let i=0; i<r1.length; i++) {
-					let r = r1[i]; // [Math.cos(a), Math.sin(a), 0];
-					let sumv = new Complex(0,0);
-					for (let j=0; j<phi.length; j++) {
-						let phase = dot(x[j], r);
-						let term = phi[j].mul(new Complex(Math.cos(-k*phase)/(4*pi),Math.sin(-k*phase)/(4*pi)));
-							//math.multiply(c[j], math.exp(math.multiply(math.complex(0,-1), k*phase)));
-						sumv = sumv.add(term);
-					}
-					psc.push(sumv);
-				}
-}
-				var idx = (th0/l+180/l)%(360/l);
-				var clbs = psc[idx];
-				var lbs = clbs.abs();
-				// Return results
-				var s = '# th0='+th0+' ph0='+ph0+' f0='+f0+' c0='+c0+' lbs='+lbs.toFixed(6);
-				s += ' ('+clbs.re.toFixed(6)+','+clbs.im.toFixed(6)+')\n';
-				for(let i=0; i<psc.length; i++) {
-					s += l*i + ' ' + psc[i].abs().toFixed(6) + '\n';
-				}
-// MM 31.1.2026
-				postMessage(JSON.stringify(s));
-				if(thmin==thmax && phmin==phmax && fmin==fmax && method!=3 && method!=4) { // when no in scan mode
-// Near field calculations
-					//postMessage("[ near field solution]");
-					var psc1 =[];
-					//var NN = 400, NR=NN, NT=NN, RR = 1; //0.5*c0/f0;
-					//var grid1 = Array.from({length: NN*NN}, (_,k) => { // rect grid: NN x NN
-					//	const i = Math.floor(k / NN); j = k % NN;
-					//	return mul(Ry(ph0),[[-RR+2*RR*i/(NN-1)],[-RR+2*RR*j/(NN-1)],[0]]);});
-					var nn = rest?.nf_n || 5, // every 5 deg
-						NR = rest?.nf_m || 15,
-						NT = 360, 
-						r0 = rest?.nf_r0 || 0.004,
-						cx = rest?.nf_cx || 0, cy = rest?.nf_cy || 0, cz = rest?.nf_cz || 0,
-						RR = Array.from({length:NR},(_,i)=>r0*(i+1));
-					//console.log(''+NR+'x'+(NT/nn)+ ' r0='+r0+'   ',rest);
-					s += '## # '+NR+'x'+(NT/nn)+' r='+(r0)+':'+(r0*NR)+' c=['+cx+','+cy+','+cz+']'+' ph='+(ph0)+'\n'
-/*
-					s += '## # ';
-					for(var j=0; j<NR; j++) {
-						s += ''+RR[j].toFixed(3)+' ';
-					}
-					s += '\n## # ';
-					for(var j=0; j<NT; j+=nn) {
-						s += ''+(j)+' ';
-					}
-*/
-					s += '\n';
-					for(var j=0;j<NR;j++) { // polar grid: NR x 360/n
-						var grid1 = Array.from({length: NT/nn}, (_, i)=>mul(Ry(ph0),
-						  [[RR[j]*Math.cos(l*i*nn*pi/180+pi)+cx],[RR[j]*Math.sin(l*i*nn*pi/180+pi)+cy],[0+cz]]));
-						const Sff1 = grid1.map(v => x.map(xj => {const r=dist(xj,v);
-							return new Complex(Math.cos(k*r)/(4*pi*r),Math.sin(k*r)/(4*pi*r))}));
-						psc1 = multiplyMatrixVector(Sff1, phi);
-						s += '## ';
-						for(var i=0; i<psc1.length; i++) {
-							s += psc1[i].abs().toFixed(6) + ' ';
-						}
-						s += '\n';
-					}
-// surface incident pressure and normal velocity 
-					for(var i=0;i<phi.length;i++) { 
-						s += '#' + (i+1) + 
-							 ' ' + (f[i].re).toFixed(6) + 
-							 ' ' + (f[i].im).toFixed(6) + 
-							 ' ' + (phi[i].re).toFixed(6)+
-							 ' ' + (phi[i].im).toFixed(6)+'\n';
-					}
-				}
-				postMessage(JSON.stringify(s));
-				LBS.push([(th0+180)%360,ph0,lbs]);
-				LBS2.push([f0,th0,ph0,clbs.re,clbs.im,lbs])
-			}
-			LBS.push(["\n"]); // append empty line as the block separator
-		}
-	
-		if(thmin!=thmax || phmin!=phmax) {
-			s = '# '+ ((thmax-thmin)/thstep+1) + 'x' +((phmax-phmin)/phstep+1) + '\n';
-			for(var i=0; i<LBS.length; i++) {
-				if( LBS[i]=='\n') 
-					s+='\n'; 
-				else
-					s+=LBS[i][0]+' '+LBS[i][1]+' '+ LBS[i][2].toFixed(6)+'\n';
-			}
-			postMessage(JSON.stringify(s));
-		}
-	}
-	if(fmin!=fmax) {
-		s = '# ' +  (fmin) + (rest.band?'+':'-') + (fmax) +'\n'; 
-		for(var i=0;i<LBS2.length;i++) {
-			s += '' + (LBS2[i][0])+ ' '+ (LBS2[i][1])+ ' '+(LBS2[i][2])+ ' '+(LBS2[i][3].toFixed(6))+ ' '+(LBS2[i][4].toFixed(6))+ ' '+(LBS2[i][5].toFixed(6))+'\n';  // f0, th0, ph0, lbs.re, lbs.im, |lbs|
-		}
-		postMessage(JSON.stringify(s));
-	}	
-	return(s);
+`;
+
+function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest) {
+
+  if (method == 2 && solver == 3) solver = 2; // if MFS not use ACA+GMRES
+
+  var fmin, fmax, fstep;
+
+  var band = parseFloat(rest.band);
+  if (band > 0) {
+    fmin = f0 - band / 2; fmax = f0 + band / 2 + band / 8; fstep = band / 20;
+  } else {
+    if (f0 < 0) { fmin = -f0; fmax = 360e3; fstep = -f0; }
+    else { fmin = f0; fmax = f0; fstep = f0; }
+  }
+  var LBS2 = [];
+
+  const n = parseInt(lines[4]);
+  const v = lines.slice(5, 5 + n).map(line => line.trim().split(/\s+/).slice(1, 4).map(parseFloat));
+  const m = parseInt(lines[n + 7]);
+  const e = lines.slice(n + 8, n + 8 + m).map(line =>
+    line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x) - 1)  // 0-based indexing
+  );
+
+  // Triangle centers
+  var x = [], x2 = [];
+  for (var i = 0; i < m; i++) {
+    x.push([
+      (v[e[i][0]][0] + v[e[i][1]][0] + v[e[i][2]][0]) / 3,
+      (v[e[i][0]][1] + v[e[i][1]][1] + v[e[i][2]][1]) / 3,
+      (v[e[i][0]][2] + v[e[i][1]][2] + v[e[i][2]][2]) / 3
+    ]);
+  }
+  x2 = x; // for LDLt & BEM
+
+  var mesh, kernel;
+  if (method == 4) {
+    postMessage("[ IPA geometry]");
+    mesh = computeGeometry(v, e, heap);
+  }
+  postMessage("[ assembling]");
+
+  console.log(rest.band, " f:", fmin, fmax, fstep);
+
+  for (f0 = fmin; f0 <= fmax; f0 += fstep) {
+    const k = 2 * pi * f0 / c0;
+
+    if (method == 4) {
+      postMessage("[ IPA kernel]");
+      kernel = computeKernelAtFrequency(mesh, k);
+    }
+
+    var S;
+    if (solver != 3) {
+      if (solver != 4) {
+        S = new Array(m);
+        if (method == 3) { // KRM
+
+        } else if (method == 4) { // IPA
+
+        } else if (method == 1) { // BEM
+          { // direct write to C/Webassembly memory (MM 22.3.2026)
+            const m = S.length;
+            const matOffset = 0;
+            var kk = matOffset;
+            const off = solver == 2 ? m * m : 1;
+            const inc = solver == 2 ? 1 : 2;
+            for (let i = 0; i < m; i++) { // Helmholtz single layer matrix
+              S[i] = new Array(m);
+              for (let j = 0; j < m; j++) {
+                const r = dist(x[i], x[j]);
+                if (r != 0) {
+                  S[i] = new Complex(Math.cos(k * r) / (4 * pi * r), Math.sin(k * r) / (4 * pi * r));
+                } else {
+                  S[i] = new Complex(k / 4, k / (4 * pi));
+                }
+                heap[kk] = S[i].re;
+                heap[kk + off] = S[i].im;
+                kk += inc;
+              }
+            }
+          }
+        } else { // MFS
+          let offset = c0 / f0 / 20;
+          x2 = e.map((f, i) => { // source points
+            let nrm = normal([v[f[0]], v[f[1]], v[f[2]]]);
+            return [x[i][0] - offset * nrm[0], x[i][1] - offset * nrm[1], x[i][2] - offset * nrm[2]];
+          });
+          if (solver != 4) { // direct write to C/Webassembly memory for MFS not for LDLt
+            var mm = x2.length;
+            const matOffset = 0;
+            var kk = matOffset;
+            const off = solver == 2 ? mm * mm : 1;
+            const inc = solver == 2 ? 1 : 2;
+            for (var i = 0; i < mm; i++) {
+              S = Gr(x2[i], x, k);
+              for (var j = 0; j < mm; j++) {
+                heap[kk] = S[j].re;
+                heap[kk + off] = S[j].im;
+                kk += inc;
+              }
+            }
+          }
+        }
+      } // not for solver==4 (LDLt)
+
+      if (method != 3 && method != 4) {
+        if (solver == 1) {
+          postMessage("[ gauss0 wasm solver]");
+          gaussian0Wasm(S);
+          postMessage("[ gauss1 wasm solver]");
+        } else if (solver == 2) {
+          postMessage("[ Blocked LU (0) wasm solver]");
+          gaussian0Wasm(S, solver);
+          postMessage("[ Blocked LU (1) wasm solver]");
+        } else if (solver == 3) { // not for ACA-gmres
+          // postMessage("[ ACA-gmres (0) wasm solver]");
+          // acagmres0Wasm(S);
+          // postMessage("[ ACA-gmres (1) wasm solver]");
+        } else if (solver == 4) { // LDLt
+          postMessage("[ LDLt (1) solver]");
+          ldlt0Wasm(x, x2, k);
+          postMessage("[ LDLt (2) solver]");
+        } else {
+          postMessage("[ gmres0 wasm solver]");
+          gmres0Wasm(S);
+          postMessage("[ gmres1 wasm solver]");
+        }
+      } // method
+    } // solver
+
+    // wave direction scanning setup
+    var thmin, thmax, thstep, phmin, phmax, phstep;
+
+    if (ph < 0) {
+      if (th < 0) { phmin = 0; phmax = 180; }
+      else { phmin = 0; phmax = 360; }
+      phstep = -ph;
+    } else { phmin = ph; phmax = ph; phstep = 1; }
+
+    if (th < 0) { thmin = 0; thmax = 360; thstep = -th; }
+    else { thmin = th; thmax = th; thstep = 1; }
+
+    var LBS = [];
+    const l = thstep;
+
+    for (var ph0 = phmin; ph0 <= phmax; ph0 += phstep) {
+      if (method == 4) {
+
+      }
+      for (var th0 = thmin; th0 <= thmax; th0 += thstep) {
+        // Incident field
+        d = mul(Ry(ph0), [[Math.cos(th0 * pi / 180 + pi)], [Math.sin(th0 * pi / 180 + pi)], [0]]);
+        var f;
+
+        if (method == 1) { // BEM
+          if (rr != NaN && rr != 0) {
+            rr *= c0 / f0; // in wave-length
+            if (rr > 0) {
+              function sub(a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; }
+              function norm(v) { return Math.sqrt(dot(v, v)); }
+              function G(x, y, k, rr) {
+                const r = norm(sub(x, y));
+                return new Complex(
+                  -Math.cos(k * r) * (4 * pi / 4 / pi) / (4 * pi * r),
+                  -Math.sin(k * r) * (4 * pi / 4 / pi) / (4 * pi * r)
+                );
+              }
+              const xs = [-rr * d[0], -rr * d[1], -rr * d[2]];
+              f = x.map(x => G(x, xs, k, rr));
+            } else { // circular piston
+              rr = Math.abs(rr);
+              f = buildRHS_soft_piston(x, k, f0, d, rr, 0.019);
+            }
+          } else {
+            f = x.map(p => new Complex(-Math.cos(k * dot3(p, d)), -Math.sin(k * dot3(p, d))));
+          }
+        } else if (method == 2) { // MFS
+          f = x2.map(p => new Complex(-Math.cos(k * dot3(p, d)), -Math.sin(k * dot3(p, d))));
+        } else { // KRM and IPA
+
+        }
+
+        var phi;
+        if (method != 3 && method != 4) {
+          if (solver == 1) {
+            phi = gaussian1Wasm(f);
+          } else if (solver == 2) {
+            phi = gaussian1Wasm(f, solver);
+          } else if (solver == 3) {
+            phi = acagmres1Wasm(v, e, f, f0, c0, th0, ph0);
+          } else if (solver == 4) {
+            phi = ldlt1Wasm(f);
+          } else {
+            phi = gmres1Wasm(f);
+          }
+        }
+        postMessage("[ far field solution]");
+
+        // Far field solution
+        const a1 = 1;
+        const r1 = Array.from({ length: 360 / l },
+          (_, i) => mul(Ry(ph0), [[a1 * Math.cos(l * i * pi / 180 + pi)], [a1 * Math.sin(l * i * pi / 180 + pi)], [0]]));
+        var psc = [];
+
+        if (method == 3 || method == 4) { // KRM || IPA
+          const R_eq = equivalentRadiusFromMesh(v, e); // Precompute equivalent radius and Minnaert frequency
+          const fM = minnaertFrequency(R_eq); // you can tweak P0, gamma if needed
+          krm_ang = rest.krm_ang || 45;
+          var qRe, qIm;
+          if (method == 4) {
+            krm_ang = 180;
+            var q = krmScatteringAmplitudeIterative1(kernel, th0 * pi / 180 + 0 * pi, ph0 * pi / 180, rest.ipa_iter);
+            qRe = q.qRe; qIm = q.qIm;
+          }
+          for (var i = 0; i < 360 / l; i++) {
+            var inside = (Math.abs(l * i - th0) >= (180 - krm_ang) && Math.abs(l * i - th0) <= (180 + krm_ang));
+            if (method == 4) inside = true;
+            if (inside) {
+              var a;
+              if (method == 4) {
+                a = krmScatteringAmplitudeIterative2(kernel, qRe, qIm, l * i * pi / 180 + 0 * pi, ph0 * pi / 180);
+              } else {
+                a = krmScatteringAmplitude_KA_RM(v, e, f0, c0, th0 * pi / 180 + 0 * pi, ph0 * pi / 180, l * i * pi / 180 + 0 * pi, ph0 * pi / 180, R_eq, fM);
+              }
+              psc[i] = new Complex(a.re, a.im);
+            } else {
+              psc[i] = new Complex(0, 0);
+            }
+          }
+          var ts = targetStrength(v, e, f0, c0, 270 * Math.PI / 180, 0);
+        } else if (method == 1 || method == 2) { // BEM || MFS
+          const Sff = r1.map(v => x.map(xj =>
+            new Complex(
+              Math.cos(-k * dot3(xj, v)) / (4 * pi),
+              Math.sin(-k * dot3(xj, v)) / (4 * pi)
+            )
+          ));
+          psc = multiplyMatrixVector(Sff, phi);
+        } else { // old MFS
+          for (let i = 0; i < r1.length; i++) {
+            let r = r1[i];
+            let sumv = new Complex(0, 0);
+            for (let j = 0; j < phi.length; j++) {
+              let phase = dot(x[j], r);
+              let term = phi[j].mul(new Complex(
+                Math.cos(-k * phase) / (4 * pi),
+                Math.sin(-k * phase) / (4 * pi)
+              ));
+              sumv = sumv.add(term);
+            }
+            psc.push(sumv);
+          }
+        }
+
+        var idx = (th0 / l + 180 / l) % (360 / l);
+        var clbs = psc[idx];
+        var lbs = clbs.abs();
+
+        // Return results
+        var s = '# th0=' + th0 + ' ph0=' + ph0 + ' f0=' + f0 + ' c0=' + c0 + ' lbs=' + lbs.toFixed(6);
+        s += ' (' + clbs.re.toFixed(6) + ',' + clbs.im.toFixed(6) + ')\n';
+        for (let i = 0; i < psc.length; i++) {
+          s += l * i + ' ' + psc[i].abs().toFixed(6) + '\n';
+        }
+
+        // MM 31.1.2026
+        postMessage(JSON.stringify(s));
+
+        if (thmin == thmax && phmin == phmax && fmin == fmax && method != 3 && method != 4) { // when no in scan mode
+          // Near field calculations
+          var psc1 = [];
+          var nn = rest?.nf_n || 5, // every 5 deg
+            NR = rest?.nf_m || 15,
+            NT = 360,
+            r0 = rest?.nf_r0 || 0.004,
+            cx = rest?.nf_cx || 0, cy = rest?.nf_cy || 0, cz = rest?.nf_cz || 0,
+            RR = Array.from({ length: NR }, (_, i) => r0 * (i + 1));
+          s += '## # ' + NR + 'x' + (NT / nn) + ' r=' + (r0) + ':' + (r0 * NR) + ' c=[' + cx + ',' + cy + ',' + cz + ']' + ' ph=' + (ph0) + '\n';
+          s += '\n';
+
+          for (var j = 0; j < NR; j++) { // polar grid: NR x 360/n
+            var grid1 = Array.from({ length: NT / nn }, (_, i) => mul(Ry(ph0),
+              [[RR[j] * Math.cos(l * i * nn * pi / 180 + pi) + cx], [RR[j] * Math.sin(l * i * nn * pi / 180 + pi) + cy], [0 + cz]]));
+            const Sff1 = grid1.map(v => x.map(xj => {
+              const r = dist(xj, v);
+              return new Complex(Math.cos(k * r) / (4 * pi * r), Math.sin(k * r) / (4 * pi * r));
+            }));
+            psc1 = multiplyMatrixVector(Sff1, phi);
+            s += '## ';
+            for (var i = 0; i < psc1.length; i++) {
+              s += psc1[i].abs().toFixed(6) + ' ';
+            }
+            s += '\n';
+          }
+
+          // surface incident pressure and normal velocity
+          for (var i = 0; i < phi.length; i++) {
+            s += '#' + (i + 1) +
+              ' ' + (f[i].re).toFixed(6) +
+              ' ' + (f[i].im).toFixed(6) +
+              ' ' + (phi[i].re).toFixed(6) +
+              ' ' + (phi[i].im).toFixed(6) + '\n';
+          }
+        }
+
+        postMessage(JSON.stringify(s));
+        LBS.push([(th0 + 180) % 360, ph0, lbs]);
+        LBS2.push([f0, th0, ph0, clbs.re, clbs.im, lbs]);
+      }
+      LBS.push(["\n"]); // append empty line as the block separator
+    }
+
+    if (thmin != thmax || phmin != phmax) {
+      s = '# ' + ((thmax - thmin) / thstep + 1) + 'x' + ((phmax - phmin) / phstep + 1) + '\n';
+      for (var i = 0; i < LBS.length; i++) {
+        if (LBS[i] == '\n')
+          s += '\n';
+        else
+          s += LBS[i][0] + ' ' + LBS[i][1] + ' ' + LBS[i][2].toFixed(6) + '\n';
+      }
+      postMessage(JSON.stringify(s));
+    }
+  }
+
+  if (fmin != fmax) {
+    s = '# ' + (fmin) + (rest.band ? '+' : '-') + (fmax) + '\n';
+    for (var i = 0; i < LBS2.length; i++) {
+      s += '' + (LBS2[i][0]) + ' ' + (LBS2[i][1]) + ' ' + (LBS2[i][2]) + ' ' + (LBS2[i][3].toFixed(6)) + ' ' + (LBS2[i][4].toFixed(6)) + ' ' + (LBS2[i][5].toFixed(6)) + '\n';
+    }
+    postMessage(JSON.stringify(s));
+  }
+
+  return s;
 }
 
 // ----
