@@ -815,7 +815,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(17.5.2026)" style="text-align:center">mm-bem v2.58 (2025-2026)</p>
+<p title="(18.5.2026)" style="text-align:center">mm-bem v2.59 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -3185,7 +3185,7 @@ function change1() {
 						update_near_field(s2a);
 					}
 				}
-				plot(undefined,undefined, m==3?'#990099':m==2?'#C8102E':undefined ); // FFCD00
+				plot(undefined,undefined, m==4?'#9C2007':m==3?'#990099':m==2?'#C8102E':undefined ); // FFCD00
 				// extract ph0,th0,f0,c0,lbs
 				var v = s.match(/th0=(\S+)\s+ph0=(\S+)\s+f0=(\S+)\s+c0=(\S+)\s+lbs=(\S+)/);
 				if(v) {
@@ -3198,8 +3198,14 @@ function change1() {
 					var lbs = parseFloat(v[5]);
 					var TS = 20*Math.log10(lbs);   // console.log(th_lbs+' '+TS);
 					update_mesh2(th0,ph0);
-					if(f0<0) { // scan mode
-						scan_str += ''+f00/1e3+' '+(th0)+' '+(ph0)+' '+lbs.toFixed(6)+'\n';
+					if(f0<0 || rest.band>0) { // scan mode
+						var v2 = s.match(/lbs=(\S+) \((\S+),(\S+)\)/);
+						console.log("rest.band:",v2);
+						if(v2) {
+							scan_str += ''+f00/1e3+' '+(th0)+' '+(ph0)+' '+v2[2]+' '+v2[3]+' '+lbs.toFixed(6)+'\n';
+						} else {
+							scan_str += ''+f00/1e3+' '+(th0)+' '+(ph0)+' '+lbs.toFixed(6)+'\n';
+						}
 						plot("F",scan_str,"#AA69D3",1);  // 1 - no closing 'Z'
 					}
 					if(th>=0 && ph>=0 && f0>0 && !s2) {  // only when no scanning and no near-field data
@@ -3225,8 +3231,12 @@ function change1() {
 		var rest = {nf_r0:nf_r0, nf_m:nf_m, nf_n:nf_n, nf_cx:nf_cx, nf_cy:nf_cy, nf_cz:nf_cz, krm_ang:krm_ang, ipa_iter:ipa_iter, band:band};
 		const m = parseInt(document.getElementById("method").value);
 		const solver = parseInt(document.getElementById("solver")?.value);
-		if(f0<0) {scan_str='# mm-'+(m==4?'ipa':m==3?'krm':m==2?'mfs':'bem')+'-scan-mode: '+(-f0/1e3)+'kHz scan\n';}
-		else {plot("F",'#');} 		// clear frequency plot
+		if(f0<0 || rest.band>0) {
+			scan_str='# mm-'+(m==4?'ipa':m==3?'krm':m==2?'mfs':'bem')+'-scan-mode: '+(-f0/1e3)+'kHz scan\n';
+			if(rest.band>0) { 
+				scan_str='# '+(f0-rest.band/2)+'+'+(f0+rest.band/2)+'\n';
+			}
+		} else {plot("F",'#');} 		// clear frequency plot
 		plot("P","#");			 	// clear calculation plot
 		var el = document.getElementById("svgimg");
 		if(el) {el.setAttribute("href","data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=")} // clear image
@@ -3516,6 +3526,7 @@ function plot(id2, s, c, z) {
 			}
 			var v = ss[i].match(/# (\d+)\+(\d+)/); // detection of frequency band mode
 			if(v) {
+debugger;
 				//fmin = parseFloat(v[1])-parseFloat(v[2])/2;
 				//fmax = parseFloat(v[1])+parseFloat(v[2])/2;
 				fmin = parseFloat(v[1]);
