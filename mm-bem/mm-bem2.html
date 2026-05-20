@@ -119,6 +119,7 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="[sphere(0.01905,3),[0,0,0]]">Medium resolution sphere</option>
   <option value="[sphere(0.01905,4),[0,0,0]]">High resolution sphere</option>
   <option value="soft_sphere(0.01905)">Exact sphere (theory)*</option>
+  <option value="[sphere(0.01905,3),[0,0,0],mul(Rz(-22),Sxyz(3,0.3,1))]">Scaled sphere</option>
   <option value="[sphere(0.005),[-0.01,0,0]],|[sphere(0.005),[0.01,0,0]]">Two spheres</option>
   <option value="[sphere(0.005),[-0.01,0,0]],|[sphere(0.005),[0.01,0,0]],|[sphere(0.005),[0,-0.01,0]],|[sphere(0.005),[0,0.01,0]]">Four spheres</option>
   <option value="[sphere(0.005),[-0.01,0,-0.01]],|[sphere(0.005),[0.01,0,-0.01]],|[sphere(0.005),[0,-0.01, -0.01]],|[sphere(0.005),[0, 0.01, -0.01]],|[sphere(0.005),[-0.01,0,0.01]],|[sphere(0.005),[0.01,0,0.01]],|[sphere(0.005), [0,-0.01,0.01]],|[sphere(0.005),[0,0.01,0.01]]">Eight spheres</option>
@@ -815,7 +816,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(18.5.2026)" style="text-align:center">mm-bem v2.59 (2025-2026)</p>
+<p title="(21.5.2026)" style="text-align:center">mm-bem v2.60 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -1478,6 +1479,13 @@ function Rx(a, M = R1()) {
   const rad = a * PI / 180;
   const R = [[1,0,0],[0,Math.cos(rad),-Math.sin(rad)],[0,Math.sin(rad),Math.cos(rad)]];
   return mul(R, M);
+}
+
+function Sxyz(sx,sy,sz,M=R1()) {
+    sy=sy||sx;
+	sz=sz||sy;
+    const R = [[sx,0,0],[0,sy,0],[0,0,sz]];
+    return mul(R, M);	
 }
 
 // --- mesh functions
