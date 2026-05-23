@@ -171,8 +171,11 @@ Full mm-bem package contains source codes in different programming languages for
 </optgroup>
 <optgroup id="files" label="Opened files">
 </optgroup>
-</select>
-
+</select> <input id="reduce" type="checkbox" title="Halving the mesh size" onchange="on_reduce()"/>
+<script>
+var reduce_msh=0;
+function on_reduce() {reduce_msh^=1; change();}
+</script>
 <br><span style="margin-left:32px"></span> or <input accept=".msh,.stl,.json,.tsv" id="openfile" title="Load from msh (2.0), stl or echoSMs json" type="file" onchange="readFile(this);" multiple/>
 
 <textarea id="obj" style="width:438;height:92" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905,2),[0,0,0]]</textarea>
@@ -816,7 +819,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(21.5.2026)" style="text-align:center">mm-bem v2.60 (2025-2026)</p>
+<p title="(22.5.2026)" style="text-align:center">mm-bem v2.61 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -4321,6 +4324,62 @@ function ellipsoid(rx, ry, rz, N = 2) {
       return [vx, fx];
 }
 
+function tri2quad( vxfx) {
+    var vx = vxfx[0] // vx: [[x1, y1, z1], [x2, y2, z2], ...]
+    var fx = vxfx[1] // fx: [[i1, i2, i3], [j1, j2, j3], ...]
+    const quadsAndTris = [];
+    const usedTriangles = new Set();
+    const edgeMap = new Map(); // neibourghhood edge map with "minID-maxID" as a key
+    for (let tIdx = 0; tIdx < fx.length; tIdx++) {
+        const t = fx[tIdx];
+        const edges = [
+            [t[0], t[1]],
+            [t[1], t[2]],
+            [t[2], t[0]]
+        ];
+        for (const edge of edges) {
+            const edgeKey = Math.min(edge[0], edge[1]) + "-" + Math.max(edge[0], edge[1]);
+            if (!edgeMap.has(edgeKey)) {
+                edgeMap.set(edgeKey, []);
+            }
+            edgeMap.get(edgeKey).push(tIdx);
+        }
+    }
+    for (let t1Idx = 0; t1Idx < fx.length; t1Idx++) {
+        if (usedTriangles.has(t1Idx)) continue;
+        const t1 = fx[t1Idx];
+        let paired = false;
+        const edges = [
+            [t1[0], t1[1]],
+            [t1[1], t1[2]],
+            [t1[2], t1[0]]
+        ];
+        for (const edge of edges) {
+            const edgeKey = Math.min(edge[0], edge[1]) + "-" + Math.max(edge[0], edge[1]);
+            const neighbors = edgeMap.get(edgeKey);
+            // Szukamy sąsiada, który nie został jeszcze zużyty
+            const t2Idx = neighbors.find(idx => idx !== t1Idx && !usedTriangles.has(idx));
+            if (t2Idx !== undefined) {
+                const t2 = fx[t2Idx];
+                const opposite1 = t1.find(v => v !== edge[0] && v !== edge[1]);
+                const opposite2 = t2.find(v => v !== edge[0] && v !== edge[1]);
+                const quad = [edge[0], opposite2, edge[1], opposite1]; // CCW - order
+                quadsAndTris.push(quad);
+                usedTriangles.add(t1Idx);
+                usedTriangles.add(t2Idx);
+                paired = true;
+                break; // go to next free triangle
+            }
+        }
+        if (!paired) {
+            quadsAndTris.push(t1);
+            usedTriangles.add(t1Idx);
+        }
+    }
+    return [vx, quadsAndTris];
+}
+
+
 function msh(s) { /* parse msh string to [vx,fx] */
 	var lines = s;
 	if(typeof s === 'string' || s instanceof String) {
@@ -4332,7 +4391,7 @@ function msh(s) { /* parse msh string to [vx,fx] */
 	);
 	const m = parseInt(lines[n + 7]);
 	const e = lines.slice(n + 8, n + 8 + m).map(line =>
-	  line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x) - 1)  // 0-based indexing
+	  line.trim().split(/\s+/).slice(5, 9).map(x => parseInt(x) - 1)  // 0-based indexing
 	);
 	return [v, e];
 }
@@ -4342,6 +4401,9 @@ let Nn = 0, Ne = 0, Nl = 0;
 let Sn = "", Se = "";
 
 function msh_str(O) {
+    if(reduce_msh) {
+       O[0] = tri2quad(O[0]);
+    }
     let [vx, fx] = O[0];
     let [xo, yo, zo] = O.length > 1 ? O[1] : [0, 0, 0];
     let M = O.length > 2 ? O[2] : R1()
@@ -4396,7 +4458,7 @@ function js_soft(lines,th,f0,c0,ph) {
 	);
 	const m = parseInt(lines[n + 7]);
 	const e = lines.slice(n + 8, n + 8 + m).map(line =>
-	  line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x) - 1)  // 0-based indexing
+	  line.trim().split(/\s+/).slice(5, 9).map(x => parseInt(x) - 1)  // 0-based indexing
 	);
 
 	// Triangle centers
@@ -4475,7 +4537,7 @@ function js_soft_worker(lines,th,f0,c0,ph) {
 	);
 	const m = parseInt(lines[n + 7]);
 	const e = lines.slice(n + 8, n + 8 + m).map(line =>
-	  line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x)-1)  // 0-based indexing
+	  line.trim().split(/\s+/).slice(5, 9).map(x => parseInt(x)-1)  // 0-based indexing
 	);
 
 	// Triangle centers
@@ -4792,7 +4854,7 @@ function js2_soft_worker(lines,th,f0,c0,ph) {
 	);
 	const m = parseInt(lines[n + 7]);
 	const e = lines.slice(n + 8, n + 8 + m).map(line =>
-	  line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x)-1)  // 0-based indexing
+	  line.trim().split(/\s+/).slice(5, 9).map(x => parseInt(x)-1)  // 0-based indexing
 	);
 
 	// Triangle centers
@@ -6825,6 +6887,51 @@ function Gr(x, pts, k) {
 			return out;
 }
 
+function generateMfsPoints(vx, quads, d) { //offset: d = lambda / 20.0
+    const collocationPoints = [];
+    const sourcePoints = [];
+    for (const quad of quads) {
+        const isQuad = quad.length === 4;
+        let cx = 0, cy = 0, cz = 0;
+        const count = quad.length;
+        for (const idx of quad) {
+            cx += vx[idx][0];
+            cy += vx[idx][1];
+            cz += vx[idx][2];
+        }
+        const Xc = [cx / count, cy / count, cz / count];
+        collocationPoints.push(Xc);
+        const P1 = vx[quad[0]];
+        const P2 = vx[quad[1]];
+        const P3 = vx[quad[2]];
+        let nx = 0, ny = 0, nz = 0;
+        if (isQuad) { // quad
+            const P4 = vx[quad[3]];
+            const v13 = [P3[0] - P1[0], P3[1] - P1[1], P3[2] - P1[2]];
+            const v24 = [P4[0] - P2[0], P4[1] - P2[1], P4[2] - P2[2]];
+            nx = v13[1] * v24[2] - v13[2] * v24[1]; // v13 x v24
+            ny = v13[2] * v24[0] - v13[0] * v24[2];
+            nz = v13[0] * v24[1] - v13[1] * v24[0];
+        } else { // tri
+            const v12 = [P2[0] - P1[0], P2[1] - P1[1], P2[2] - P1[2]];
+            const v13 = [P3[0] - P1[0], P3[1] - P1[1], P3[2] - P1[2]];
+            nx = v12[1] * v13[2] - v12[2] * v13[1];
+            ny = v12[2] * v13[0] - v12[0] * v13[2];
+            nz = v12[0] * v13[1] - v12[1] * v13[0];
+        }
+        const len = Math.sqrt(nx*nx + ny*ny + nz*nz);
+        const n = [nx / len, ny / len, nz / len];
+        const Yj = [
+            Xc[0] - d * n[0],
+            Xc[1] - d * n[1],
+            Xc[2] - d * n[2]
+        ];
+        sourcePoints.push(Yj);
+    }
+    return { x:collocationPoints, x2:sourcePoints };
+}
+
+
 `;
 
 function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest) {
@@ -6846,19 +6953,30 @@ function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest) {
   const v = lines.slice(5, 5 + n).map(line => line.trim().split(/\s+/).slice(1, 4).map(parseFloat));
   const m = parseInt(lines[n + 7]);
   const e = lines.slice(n + 8, n + 8 + m).map(line =>
-    line.trim().split(/\s+/).slice(5, 8).map(x => parseInt(x) - 1)  // 0-based indexing
+    line.trim().split(/\s+/).slice(5, 9).map(x => parseInt(x) - 1)  // 0-based indexing
   );
 
   // Triangle centers
+
   var x = [], x2 = [];
   for (var i = 0; i < m; i++) {
-    x.push([
-      (v[e[i][0]][0] + v[e[i][1]][0] + v[e[i][2]][0]) / 3,
-      (v[e[i][0]][1] + v[e[i][1]][1] + v[e[i][2]][1]) / 3,
-      (v[e[i][0]][2] + v[e[i][1]][2] + v[e[i][2]][2]) / 3
-    ]);
+    //if(e[i].length!=4) {
+      x.push([
+        (v[e[i][0]][0] + v[e[i][1]][0] + v[e[i][2]][0]) / 3,
+        (v[e[i][0]][1] + v[e[i][1]][1] + v[e[i][2]][1]) / 3,
+        (v[e[i][0]][2] + v[e[i][1]][2] + v[e[i][2]][2]) / 3
+      ]);
+    /*} else {
+      x.push([
+        (v[e[i][0]][0] + v[e[i][1]][0] + v[e[i][2]][0] + v[e[i][3]][0]) / 4,
+        (v[e[i][0]][1] + v[e[i][1]][1] + v[e[i][2]][1] + v[e[i][3]][1]) / 4,
+        (v[e[i][0]][2] + v[e[i][1]][2] + v[e[i][2]][2] + v[e[i][3]][2]) / 4,
+      ]);
+    }*/
   }
   x2 = x; // for LDLt & BEM
+
+  //var {x, x2} = generateMfsPoints(v, e, 0)
 
   var mesh, kernel;
   if (method == 4) {
@@ -6909,10 +7027,13 @@ function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest) {
           }
         } else { // MFS
           let offset = c0 / f0 / 20;
+/*
           x2 = e.map((f, i) => { // source points
             let nrm = normal([v[f[0]], v[f[1]], v[f[2]]]);
             return [x[i][0] - offset * nrm[0], x[i][1] - offset * nrm[1], x[i][2] - offset * nrm[2]];
           });
+*/
+          var {x, x2} = generateMfsPoints(v, e, offset);
           if (solver != 4) { // direct write to C/Webassembly memory for MFS not for LDLt
             var mm = x2.length;
             const matOffset = 0;
@@ -6929,7 +7050,7 @@ function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest) {
             }
           }
         }
-      } // not for solver==4 (LDLt)
+      } // not if solver==4 (LDLt)
 
       if (method != 3 && method != 4) {
         if (solver == 1) {
