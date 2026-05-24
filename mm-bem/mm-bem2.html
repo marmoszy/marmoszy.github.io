@@ -819,7 +819,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(22.5.2026)" style="text-align:center">mm-bem v2.61 (2025-2026)</p>
+<p title="(24.5.2026)" style="text-align:center">mm-bem v2.62 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -2810,10 +2810,13 @@ function exact_ss2scat(k, a, r, th, d, b) {
     const term = cmath.mul(coeff, h_kr);         // term_n = coeff_n * h_n(kr)
     sum = cmath.add(sum, term);
   }
-  //return sum; // p_scat(r, th) for plane wave incidence
-  let inv_dist = cmath.cplx(r, 0.0)
-  let inv_phase = cmath.cplx(Math.cos(-k * r), Math.sin(-k * r))
-  return cmath.mul(cmath.mul(sum, inv_dist), inv_phase);
+  if(r!=1) {
+    return sum; // p_scat(r, th) for plane wave incidence
+  } else { // far field correction
+    let inv_dist = cmath.cplx(r, 0.0)
+    let inv_phase = cmath.cplx(Math.cos(-k * r), Math.sin(-k * r))
+    return cmath.mul(cmath.mul(sum, inv_dist), inv_phase);
+  }
 }
 function p_inc_plane(k, r, th) {  // Incident plane wave: p_inc = exp(i k r cos θ) 
 	//return cmath.exp(cmath.cplx(0, k * r * Math.cos(th))); 
