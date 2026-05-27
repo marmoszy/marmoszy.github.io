@@ -128,7 +128,7 @@ async function loadTgzFromUrl(urlString) {
         console.log(`[URL] Sukces. Wyodrębniono ${dataTransfer.files.length} plików. Przekazywanie do lokalnego handlera...`);
 
         // 5. Pobieramy Twój istniejący element input i ręcznie przypisujemy mu te pliki (opcjonalne, ale przydatne)
-        const fileInput = document.getElementById('imageLoader');
+        const fileInput = document.getElementById('fileInput');
         if (fileInput) {
             fileInput.files = dataTransfer.files; 
         }
