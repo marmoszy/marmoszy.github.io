@@ -66,7 +66,7 @@ async function handleFile() {
         const ext = file.name.split('.').pop().toLowerCase();
         const arrayBuffer = await file.arrayBuffer();
         let pingsData = [];
-		let nav = "";
+		let navs = "";
 
         if (ext === 'tgz' || file.name.endsWith('.tar.gz')) {
             status.innerText = `Decompressing ${file.name}...`;
@@ -80,11 +80,13 @@ async function handleFile() {
         }
         try {
             if (ext === 'raw') {
-                pingsData = processEK60Logic(arrayBuffer, ch, th);
+                var data = processEK60Logic(arrayBuffer, ch, th);
+				pingsData = data.pings;
+				navs = data.navs;
             } else if (ext === 'ek5') {
                 var data = processEK5Logic(arrayBuffer, ch, th);
 				pingsData = data.pings;
-				nav = data.navStr;
+				navs = data.navs;
             } else if (ext === 'dt4') {
                 pingsData = processDT4Logic(arrayBuffer, ch, th);
             } else if (ext === '01a' || ext === '01b') {
@@ -111,12 +113,13 @@ async function handleFile() {
                 container.appendChild(label);
                 container.appendChild(canvas);
                 drawEchogram(pingsData, th, canvas);
-				if(nav) {
+				if(navs) {
 					const ta = document.createElement('textarea');
                     ta.id = "T_"+file.name;
-				    ta.value = nav;
+				    ta.value = navs;
 				    ta.style.width = "400px";
                     container.appendChild(ta);
+					navs = "";
 				}
             } else {
                 console.warn(`${file.name} no channel data ${ch}`);
@@ -375,7 +378,7 @@ async function exportAllToTgz(outputFilename = "mm-echo.tgz") {
     //console.log(`[Eksport SUKCES] ${finalName}`);
 }
 document.getElementById('exportBtn').addEventListener('click', async () => {
-    await exportAllToTgz("mm-echo.tgz");     // with finding C_filename  T_filename
+    await exportAllToTgz("mm-echo.png.tgz");     // with finding C_filename  T_filename
 });
 
 
@@ -504,21 +507,18 @@ function processAZFPLogic(buffer, targetCh, th, config) {
 
 
 // --- EK60 Decoder  ---
-function processEK60Logic(buffer, targetCh, th) {
+function processEK60Logic0(buffer, targetCh, th) {
     const dv = new DataView(buffer);
     let offset = 0;
     let pings = [];
-
+	var navs = "";
     while (offset + 4 <= dv.byteLength) {
-        // 1. Rozmiar bloku (4 bajty, UInt32)
-        const datagramLength = dv.getUint32(offset, true);
+        const datagramLength = dv.getUint32(offset, true);  // (4 bytes, UInt32)
         const datagramStart = offset + 4;
-
         if (datagramStart + datagramLength + 4 > dv.byteLength) {
-            console.warn("Plik ucięty lub błędny rozmiar bloku przy offset:", offset);
+            console.warn("Error in block at offset:", offset);
             break;
         }
-
         if (datagramLength >= 4) {
             const typeStr = String.fromCharCode(
                 dv.getUint8(datagramStart),
@@ -526,64 +526,129 @@ function processEK60Logic(buffer, targetCh, th) {
                 dv.getUint8(datagramStart + 2),
                 dv.getUint8(datagramStart + 3)
             );
-
-            // 2. Obsługa datagramu próbki RAW0
             if (typeStr === 'RAW0') {
-                // Kanał (short) jest na offsecie 12 od początku datagramu
                 const channel = dv.getUint16(datagramStart + 12, true);
-
                 if (channel === targetCh) {
                     const mode = dv.getUint16(datagramStart + 14, true); 
-                    
-                    // --- DYNAMICZNY PARSING OD OFFSETU 76 ---
                     let currentInternalOffset = 76;
-                    
-                    // W formacie Simrad ciągi tekstowe są zapisane jako: [Długość jako Int32] + [Zgrupowane bajty znaków]
                     const stringLength = dv.getInt32(datagramStart + currentInternalOffset, true);
-                    currentInternalOffset += 4; // przeskakujemy pole długości tekstu
-                    
-                    // Przeskakujemy rzeczywiste znaki nazwy przetwornika (np. 16 bajtów)
+                    currentInternalOffset += 4;
                     currentInternalOffset += stringLength; 
-                    
-                    // Zaraz po nazwie przetwornika znajduje się pole 'count' (Int32)
                     const count = dv.getInt32(datagramStart + currentInternalOffset, true);
-                    currentInternalOffset += 4; // przeskakujemy pole 'count'
-                    
-                    // Teraz wskaźnik 'currentInternalOffset' stoi dokładnie na pierwszej próbce!
+                    currentInternalOffset += 4; 
                     const headerSize = currentInternalOffset; 
-
-                    if (count > 0 && count < 65535) { // proste zabezpieczenie przed śmieciowymi danymi
+                    if (count > 0 && count < 65535) { 
                         let y = [];
                         const maxSamplesInBlock = Math.floor((datagramLength - headerSize) / 2);
                         const samplesToRead = Math.min(count, maxSamplesInBlock);
-
-                        for (let i = 0; i < samplesToRead; i++) {
-                            // Mode 0: Tylko Power. Mode 1: Power + Angles.
-                            // W obu przypadkach tablica Power[count] (2 bajty na próbkę) jest zawsze na początku.
+                        for (let i = 0; i < samplesToRead; i++) { // Mode 0: only Power; Mode 1: Power + Angles.
                             const sampleOffset = datagramStart + headerSize + (i * 2);
-
                             if (sampleOffset + 2 <= dv.byteLength) {
                                 const wVal = dv.getInt16(sampleOffset, true);
-                                
-                                // Przeliczenie surowej wartości na dB (wartość ujemna)
-                                const val = wVal * 0.01175893351; 
-                                
+                                const val = wVal * 0.01175893351;  // to dB 
                                 y.push(val > th ? val : th);
                             }
                         }
                         if (y.length > 0) pings.push(y);
                     } else {
-                        // Jeśli nadal czyta 0, wypiszmy debug, żeby zobaczyć co dokładnie tam leży:
-                        console.log(`[DEBUG] Wykryto RAW0 dla kanału ${channel}, ale obliczony count to: ${count}. Długość tekstu: ${stringLength}`);
+                        console.log(`[DEBUG] RAW0 for channel ${channel}, count: ${count}. str: ${stringLength}`);
                     }
                 }
             }
         }
-
-        // 3. Przesunięcie o: 4 (rozmiar) + dane + 4 (powtórzony rozmiar na końcu)
         offset += (4 + datagramLength + 4);
     }
-    return pings;
+    return {pings,navs};
+}
+
+function processEK60Logic(buffer, targetCh, th) {
+    const dv = new DataView(buffer);
+    let offset = 0;
+    let pings = [];
+    let navsCollection = []; 
+    const textDecoder = new TextDecoder("utf-8");
+    while (offset + 4 <= dv.byteLength) {
+        const datagramLength = dv.getUint32(offset, true);  // (4 bytes, UInt32)
+        const datagramStart = offset + 4;
+        
+        if (datagramStart + datagramLength + 4 > dv.byteLength) {
+            console.warn("Error in block at offset:", offset);
+            break;
+        }
+        
+        if (datagramLength >= 4) {
+            const typeStr = String.fromCharCode(
+                dv.getUint8(datagramStart),
+                dv.getUint8(datagramStart + 1),
+                dv.getUint8(datagramStart + 2),
+                dv.getUint8(datagramStart + 3)
+            );
+            if (typeStr === 'NME0') { // 0-3: 'NME0',  4-11: Low/High DateTime (64-bitowy timestamp Windows)
+                const textOffset = datagramStart + 12;
+                const textLength = datagramLength - 12;
+                if (textLength > 0) {
+					debugger;
+                    const stringBuffer = new Uint8Array(buffer, textOffset, textLength);
+                    const cleanString = textDecoder.decode(stringBuffer).trim();
+		            const parts = cleanString.split(",");
+		            let latDec = null, lonDec = null;
+		            const lonMatch = parts[3] ? parts[3].match(/^(\d{3})(\d{2}\.\d+)$/) : null;
+		            if (lonMatch) {
+		                const d = parseFloat(lonMatch[1]);
+		                const m = parseFloat(lonMatch[2]);
+		                lonDec = d + (m / 60);
+		                if (parts[4] === "W") lonDec = -lonDec;
+		            }
+		            const latMatch = parts[1] ? parts[1].match(/^(\d{2})(\d{2}\.\d+)$/) : null;
+		            if (latMatch) {
+		                const d = parseFloat(latMatch[1]);
+		                const m = parseFloat(latMatch[2]);
+		                latDec = d + (m / 60);
+		                if (parts[2] === "S") latDec = -latDec;
+		            }
+                    // if (cleanString.length > 0) {navStrCollection.push(cleanString);}
+					// navsCollection.push(""+(lonDec)+" "+(latDec));
+                    if (cleanString.length > 0 && cleanString.startsWith("$GPGLL")) {
+                        //navsCollection.push(cleanString);
+						navsCollection.push(""+(lonDec)+" "+(latDec));
+                    }
+                }
+            } 
+            // --- Istniejąca logika odczytu echogramu 'RAW0' ---
+            else if (typeStr === 'RAW0') {
+                const channel = dv.getUint16(datagramStart + 12, true);
+                if (channel === targetCh) {
+                    const mode = dv.getUint16(datagramStart + 14, true); 
+                    let currentInternalOffset = 76;
+                    const stringLength = dv.getInt32(datagramStart + currentInternalOffset, true);
+                    currentInternalOffset += 4;
+                    currentInternalOffset += stringLength; 
+                    const count = dv.getInt32(datagramStart + currentInternalOffset, true);
+                    currentInternalOffset += 4; 
+                    const headerSize = currentInternalOffset;                     
+                    if (count > 0 && count < 65535) { 
+                        let y = [];
+                        const maxSamplesInBlock = Math.floor((datagramLength - headerSize) / 2);
+                        const samplesToRead = Math.min(count, maxSamplesInBlock);
+                        for (let i = 0; i < samplesToRead; i++) {
+                            const sampleOffset = datagramStart + headerSize + (i * 2);
+                            if (sampleOffset + 2 <= dv.byteLength) {
+                                const wVal = dv.getInt16(sampleOffset, true);
+                                const val = wVal * 0.01175893351;  // to dB 
+                                y.push(val > th ? val : th);
+                            }
+                        }
+                        if (y.length > 0) pings.push(y);
+                    } else {
+                        console.log(`[DEBUG] RAW0 for channel ${channel}, count: ${count}. str: ${stringLength}`);
+                    }
+                }
+            }
+        }
+        offset += (4 + datagramLength + 4);
+    }
+    const navs = navsCollection.join('\n');
+    return { pings, navs };
 }
 
 // --- EK5 Decoder---
@@ -595,21 +660,15 @@ function processEK5Logic0(buffer, targetCh, th) {
 	var navStr = "";
 
     while (offset + 2 <= dv.byteLength) {
-        // 1. Czytamy rozmiar bloku (2 bajty)
         const size = dv.getUint16(offset, true);
         const blockStart = offset + 2;
-
-        // Sprawdzenie, czy cały blok mieści się w buforze
         if (blockStart + size > dv.byteLength) {
             console.warn("Plik ucięty lub błędny rozmiar bloku przy offset:", offset);
             break;
         }
-
-        // 2. Czytamy typy (sprawdzenie czy mamy przynajmniej 2 bajty danych w bloku)
         if (size >= 2) {
             const t1 = String.fromCharCode(dv.getUint8(blockStart));
             const t2 = String.fromCharCode(dv.getUint8(blockStart + 1));
-
             if (t1 === 'G' && t2 === 'L') { //  'GL' (navigation string)
                 navstr += ''+'\n';
             } else if (t1 === 'Q' && t2 === chStr) {  //  'Q' (Echogram): 44 bytes + data (s*)
@@ -640,13 +699,13 @@ function processEK5Logic(buffer, targetCh, th) {
     let pings = [];
     const chStr = targetCh.toString();
     let navStrCollection = []; 
-    const textDecoder = new TextDecoder("windows-1252");
+    const textDecoder = new TextDecoder("utf-8");
 
     while (offset + 2 <= dv.byteLength) {
         const size = dv.getUint16(offset, true);
         const blockStart = offset + 2;
         if (blockStart + size > dv.byteLength) {
-            console.warn("Plik ucięty lub błędny rozmiar bloku przy offset:", offset);
+            console.warn("File error in block at offset:", offset);
             break;
         }
         if (size >= 2) {
@@ -659,8 +718,7 @@ function processEK5Logic(buffer, targetCh, th) {
                     const stringBuffer = new Uint8Array(buffer, stringOffset, stringLength);
                     const cleanString = textDecoder.decode(stringBuffer).trim();
 		            const parts = cleanString.split(",");
-		            let latDec = null;
-		            let lonDec = null;
+		            let latDec = null, lonDec = null;
 		            const lonMatch = parts[4] ? parts[4].match(/^(\d{3})(\d{2}\.\d+)$/) : null;
 		            if (lonMatch) {
 		                const d = parseFloat(lonMatch[1]);
@@ -675,9 +733,7 @@ function processEK5Logic(buffer, targetCh, th) {
 		                latDec = d + (m / 60);
 		                if (parts[3] === "S") latDec = -latDec;
 		            }
-                    /*if (cleanString.length > 0) {
-                        navStrCollection.push(cleanString);
-                    }*/
+                    // if (cleanString.length > 0) {navStrCollection.push(cleanString);}
 					navStrCollection.push(""+(lonDec)+" "+(latDec));
                 }
             } else if (t1 === 'Q' && t2 === chStr) {  //  'Q' (Echogram)
@@ -700,8 +756,8 @@ function processEK5Logic(buffer, targetCh, th) {
         }
         offset += (2 + size);
     }
-    const navStr = navStrCollection.join('\n');
-    return { pings, navStr };
+    const navs = navStrCollection.join('\n');
+    return { pings, navs };
 }
 
 
