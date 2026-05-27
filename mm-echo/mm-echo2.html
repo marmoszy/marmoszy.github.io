@@ -11,9 +11,10 @@
 <body>
 
 <div id="upload" style="">
-    <input type="file" id="imageLoader" accept="image/*, text/plain, .tar.gz, .tgz"  multiple>
-	<input type=button onclick="loadTgzFromUrl('dat/20020714.ek5.tgz');" value="Load"/> or 
-	<span style="text-align:right" title="Download and then open">download example: <a href="dat/20020714.ek5.tgz">20020714.ek5.tgz</a></span>
+    <b style="fonst-size:1.17em;">mm-echo2 - 3D echogram viewer:&nbsp;</b>
+    <input type="file" id="imageLoader" accept="image/*, text/plain, .tar.gz, .tgz"  multiple> or
+	<input type=button onclick="loadTgzFromUrl('dat/20020714.ek5.tgz');" value="Load example"/> or 
+	<span style="text-align:right" title="Download and then open">download it: <a href="dat/20020714.ek5.tgz">20020714.ek5.tgz</a></span>
 </div>
 
 <script type="module">
@@ -894,6 +895,8 @@ async function loadTgzFromUrl(urlString) {
                 mimeType = "image/png";
             } else if (extFile.name.endsWith('.jpg') || extFile.name.endsWith('.jpeg')) {
                 mimeType = "image/jpeg";
+            } else {
+            	mimeType = 'application/octet-stream';
             }
 
             // Tworzymy prawdziwy obiekt File z binarnego bufora

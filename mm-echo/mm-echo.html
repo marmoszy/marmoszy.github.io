@@ -14,12 +14,12 @@
 <body>
 
 <div class="controls">
-    <h3>mm-echogram</h3>
+    <h3>mm-echo - minimalistic echogram viewer</h3>
     Channel: <input type="text" id="chInput" value="1" style="width:32px">
     Threshold: <input type="number" id="thInput" value="-120" style="width:56px">
     Sounder raw file: <input type="file" id="fileInput" onchange="handleFile()" multiple>
     <button onclick="handleFile()">Process</button>
-	<br><span style="text-align:right" title="Download and then open"> Download example: <a href="dat/08241502.dt4">08241502.dt4</a></span>
+	<br><input type=button value="Load example" onclick="loadTgzFromUrl('dat/08241502.dt4.tgz')"> or <span style="text-align:right" title="Download and then open"> download it: <a href="dat/08241502.dt4">08241502.dt4</a></span>
 	
     <div id="status" class="status"></div>
 </div>
@@ -41,6 +41,105 @@ const pal = [
     255,0,0,   239,0,0,     223,0,0,   207,0,0,   191,0,0,   175,0,0,     159,0,0,   143,0,0
 ];
 
+// tgz processing
+
+async function gunzip(arrayBuffer) {
+    const ds = new DecompressionStream("gzip");
+    const decompressed = new Response(
+        new Response(arrayBuffer).body.pipeThrough(ds)
+    );
+    return await decompressed.arrayBuffer();
+}
+function untar(arrayBuffer) {
+    const bytes = new Uint8Array(arrayBuffer);
+    const files = [];
+    let offset = 0;
+    while (offset < bytes.length) {
+        const name = readString(bytes, offset, 100);
+        if (!name) break;
+        const sizeOctal = readString(bytes, offset + 124, 12).trim();
+        const size = parseInt(sizeOctal, 8);
+        const fileStart = offset + 512;
+        const fileEnd = fileStart + size;
+        const fileBytes = bytes.slice(fileStart, fileEnd);
+        files.push({name, arrayBuffer:fileBytes.buffer});
+        const blocks = Math.ceil(size / 512);
+        offset = fileStart + blocks * 512;
+    }
+    return files;
+}
+function readString(bytes, start, length) {
+    let out = "";
+    for (let i = start; i < start + length; i++) {
+        if (bytes[i] === 0) break;
+        out += String.fromCharCode(bytes[i]);
+    }
+    return out;
+}
+async function loadTgzFromUrl(urlString) {
+    if (!urlString) return;
+
+    try {
+        console.log(`[URL] Pobieranie archiwum: ${urlString}`);
+        const response = await fetch(urlString);
+        if (!response.ok) throw new Error(`HTTP Status: ${response.status}`);
+        
+        const archiveBuffer = await response.arrayBuffer();
+        const unzippedBuffer = await gunzip(archiveBuffer);
+        const extractedFiles = untar(unzippedBuffer);
+
+        // 1. Tworzymy obiekt DataTransfer, który pozwala wygenerować sztuczną listę plików (FileList)
+        const dataTransfer = new DataTransfer();
+
+        // 2. Mapujemy rozpakowane pliki (ArrayBuffer) na natywne obiekty File
+        for (const extFile of extractedFiles) {
+            // Ustalamy prawidłowy typ MIME dla obrazów i plików tekstowych
+            let mimeType = "application/octet-stream";
+            if (extFile.name.endsWith('.txt')) {
+                mimeType = "text/plain";
+            } else if (extFile.name.endsWith('.png')) {
+                mimeType = "image/png";
+            } else if (extFile.name.endsWith('.jpg') || extFile.name.endsWith('.jpeg')) {
+                mimeType = "image/jpeg";
+            } else {
+            	mimeType = 'application/octet-stream';
+            }
+
+            // Tworzymy prawdziwy obiekt File z binarnego bufora
+            const fileObj = new File([extFile.arrayBuffer], extFile.name, { type: mimeType });
+            
+            // Dodajemy plik do kontenera transferu danych
+            dataTransfer.items.add(fileObj);
+        }
+
+        // 3. Sprawdzamy, czy w ogóle wyodrębniliśmy jakieś pliki
+        if (dataTransfer.files.length === 0) {
+            console.warn("[URL] Archiwum jest puste.");
+            return;
+        }
+
+        // 4. Budujemy sztuczny obiekt zdarzenia (Mock Event), który idealnie udaje zachowanie 'change'
+        const mockEvent = {
+            target: {
+                files: dataTransfer.files // Tutaj znajduje się wygenerowany obiekt FileList
+            }
+        };
+
+        console.log(`[URL] Sukces. Wyodrębniono ${dataTransfer.files.length} plików. Przekazywanie do lokalnego handlera...`);
+
+        // 5. Pobieramy Twój istniejący element input i ręcznie przypisujemy mu te pliki (opcjonalne, ale przydatne)
+        const fileInput = document.getElementById('imageLoader');
+        if (fileInput) {
+            fileInput.files = dataTransfer.files; 
+        }
+		fileInput.dispatchEvent(new Event('change'));
+    } catch (error) {
+        console.error("[URL BŁĄD] Nie udało się dostarczyć struktury plików do lokalnego handlera:", error);
+    }
+}
+//window.loadTgzFromUrl = loadTgzFromUrl; // when module
+
+// file procesing
 
 async function handleFile() {
     const fileList = document.getElementById('fileInput').files;
