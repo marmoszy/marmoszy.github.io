@@ -2,6 +2,7 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>mm-echogram</title>
     <style>
         body { font-family: sans-serif; padding: 10px; }
@@ -14,12 +15,12 @@
 <body>
 
 <div class="controls">
-    <h3>mm-echo - minimalistic echogram viewer</h3>
+    <h3>mm-echo - minimalistic echograms viewer <span style="font-weight: normal;"> (see also 3D viewer: <a href="mm-echo2.html">mm-echo2</a>)</span></h3>
     Channel: <input type="text" id="chInput" value="1" style="width:32px">
     Threshold: <input type="number" id="thInput" value="-120" style="width:56px">
     Sounder raw file: <input type="file" id="fileInput" onchange="handleFile()" multiple>
     <button onclick="handleFile()">Process</button>
-	<br><input type=button value="Load example" onclick="loadTgzFromUrl('dat/08241502.dt4.tgz')"> or <span style="text-align:right" title="Download and then open"> download it: <a href="dat/08241502.dt4">08241502.dt4</a></span>
+	<br><input type=button value="Load example" onclick="loadTgzFromUrl('dat/08241502.dt4.tgz')"> or <span style="text-align:right" title="Download and then open"> download it: <a href="dat/08241502.dt4.tgz">08241502.dt4.tgz</a></span>
 	
     <div id="status" class="status"></div>
 </div>
@@ -153,11 +154,23 @@ async function handleFile() {
 	container.innerHTML = ""
     status.innerText = "";
 
-    for (const file of fileList) {
+    const filesToProcess = Array.from(fileList);
+    while (filesToProcess.length > 0) {
+        const file = filesToProcess.shift(); // Pobieramy pierwszy plik z kolejki        
         const ext = file.name.split('.').pop().toLowerCase();
         const arrayBuffer = await file.arrayBuffer();
         let pingsData = [];
 
+        if (ext === 'tgz' || file.name.endsWith('.tar.gz')) {
+            status.innerText = `Decompressing ${file.name}...`;
+            const unzippedBuffer = await gunzip(arrayBuffer);
+            const extractedFiles = untar(unzippedBuffer);
+            const decodedFiles = extractedFiles.map(extFile => {
+                return new File([extFile.arrayBuffer], extFile.name);
+            });
+            filesToProcess.unshift(...decodedFiles);
+            continue;
+        }
         try {
             if (ext === 'raw') {
                 pingsData = processEK60Logic(arrayBuffer, ch, th);

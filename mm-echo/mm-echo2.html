@@ -2,6 +2,7 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>mm-echo2</title>
     <style>
         body { margin: 0; background: #fff; overflow: hidden; font-family: sans-serif; }
@@ -209,46 +210,47 @@ mainGroup.rotation.x = rotationX;
 mainGroup.rotation.y = rotationY;
 
 // ==========================================
-// mouse (rot + shift zoom)
+// mouse, touchpad (rot + shift zoom)
 // ==========================================
-window.addEventListener('mousedown', (e) => {
+window.addEventListener('pointerdown', (e) => {
     if (e.target.tagName === 'INPUT') return; 
     isDragging = true;
     previousMousePosition = { x: e.clientX, y: e.clientY };
 });
 
-window.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
-    
+window.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;    
     const deltaX = e.clientX - previousMousePosition.x;
     const deltaY = e.clientY - previousMousePosition.y;
-    
-    // ZMIANA: Jeśli trzymamy SHIFT, pionowy ruch myszy działa jako ZOOM (modyfikuje FOV)
     if (e.shiftKey) {
         const mouseZoomSpeed = 0.1;
-        camera.fov += deltaY * mouseZoomSpeed; // Ruch w dół oddala, w górę przybliża
+        camera.fov += deltaY * mouseZoomSpeed; 
         camera.fov = THREE.MathUtils.clamp(camera.fov, 10, 75);
         camera.updateProjectionMatrix();
     } else {
-        // Standardowy obrót myszką (bez Shiftu)
         rotationY += deltaX * 0.01;
-        rotationX += deltaY * 0.01;
-        
+        rotationX += deltaY * 0.01;        
         mainGroup.rotation.y = rotationY;
         mainGroup.rotation.x = rotationX;
-    }
-    
+    }   
     previousMousePosition = { x: e.clientX, y: e.clientY };
 });
-window.addEventListener('mouseup', () => {
+
+window.addEventListener('pointerup', () => {
     isDragging = false;
 });
+
+// Ulepszona obsługa kółka myszy oraz gestu uszczypnięcia (Pinch-to-zoom) na touchpadzie
 window.addEventListener('wheel', (e) => {
-    const zoomSpeed = 0.05;
+    let zoomSpeed = 0.05;
+    if (e.ctrlKey) {
+        e.preventDefault(); 
+        zoomSpeed = 0.02; 
+    }
     camera.fov += e.deltaY * zoomSpeed;
     camera.fov = THREE.MathUtils.clamp(camera.fov, 10, 75);
     camera.updateProjectionMatrix();
-}, { passive: true });
+}, { passive: false });
 
 
 // animation
