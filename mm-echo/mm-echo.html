@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>mm-echogram</title>
+    <style>
+        body { font-family: sans-serif; padding: 10px; }
+        .controls { padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+        #canvasContainer { overflow-x: auto; }
+        canvas { display: block; }
+        .status { margin-top: 10px; font-family: monospace; }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+    <h3>mm-echogram</h3>
+    Channel: <input type="text" id="chInput" value="1" style="width:32px">
+    Threshold: <input type="number" id="thInput" value="-120" style="width:56px">
+    Sounder raw file: <input type="file" id="fileInput" onchange="handleFile()" multiple>
+    <button onclick="handleFile()">Process</button>
+    <div id="status" class="status"></div>
+</div>
+
+<div id="echogramContainer">
+   
+</div>
+
+<script>
+// 64-kolorowa paleta z Twojego skryptu Perl
+const pal = [
+    0,0,143,   0,0,159,     0,0,175,   0,0,191,   0,0,207,   0,0,223,     0,0,239,   0,0,255,
+    0,15,255,  0,31,255,    0,47,255,  0,63,255,  0,79,255,  0,95,255,    0,111,255, 0,127,255,
+    0,143,255, 0,159,255,   0,175,255, 0,191,255, 0,207,255, 0,223,255,   0,239,255, 0,255,255,
+    15,255,255,31,255,239,  47,255,223,63,255,207,79,255,191,95,255,175,  111,255,159,127,255,143,
+    143,255,127,159,255,111,175,255,95,191,255,79,207,255,63,223,255,47,  239,255,31,255,255,15,
+    255,255,0, 255,239,0,   255,223,0, 255,207,0, 255,191,0, 255,175,0,   255,159,0, 255,143,0,
+    255,127,0, 255,111,0,   255,95,0,  255,79,0,  255,63,0,  255,47,0,    255,31,0,  255,15,0,
+    255,0,0,   239,0,0,     223,0,0,   207,0,0,   191,0,0,   175,0,0,     159,0,0,   143,0,0
+];
+
+
+async function handleFile() {
+    const fileList = document.getElementById('fileInput').files;
+    const container = document.getElementById('echogramContainer');
+    const status = document.getElementById('status');
+    const ch = parseInt(document.getElementById('chInput').value);
+    const th = parseFloat(document.getElementById('thInput').value);
+
+    if (fileList.length === 0) return;
+    
+	container.innerHTML = ""
+    status.innerText = "";
+
+    for (const file of fileList) {
+        const ext = file.name.split('.').pop().toLowerCase();
+        const arrayBuffer = await file.arrayBuffer();
+        let pingsData = [];
+
+        try {
+            if (ext === 'raw') {
+                pingsData = processEK60Logic(arrayBuffer, ch, th);
+            } else if (ext === 'ek5') {
+                pingsData = processEK5Logic(arrayBuffer, ch, th);
+            } else if (ext === 'dt4') {
+                pingsData = processDT4Logic(arrayBuffer, ch, th);
+            } else if (ext === '01a' || ext === '01b') {
+                pingsData = processAZFPLogic(arrayBuffer, ch, th, azfpConfig);
+            } else if (ext === 'xml') {
+                const decoder = new TextDecoder("utf-8");
+                const xmlText = decoder.decode(arrayBuffer);
+                azfpConfig = parseAZFPXml(xmlText);
+                continue;
+            } else {
+                alert(`Skiping ${file.name}: format not known.`);
+                continue;
+            }
+
+            if (pingsData.length > 0) {
+                const label = document.createElement('div');
+                label.style.color = "white";
+                label.style.marginTop = "20px";
+                label.innerText = `File: ${file.name} | Pings: ${pingsData.length} | Samples: ${pingsData[0].length}`;
+                const canvas = document.createElement('canvas');
+                canvas.style.display = "block";
+                canvas.style.border = "1px solid #555";
+                container.appendChild(label);
+                container.appendChild(canvas);
+                drawEchogram(pingsData, th, canvas);
+            } else {
+                console.warn(`${file.name} no channel data ${ch}`);
+            }
+        } catch (e) {
+            console.error(`File ${file.name} error:`, e);
+        }
+    }
+    
+    status.innerText = "";
+}
+
+// Draw Echogram
+
+function drawEchogram(pingsData, th, canvas) {
+    const ctx = canvas.getContext('2d');
+    const w = pingsData.length;
+    const h = Math.max(...pingsData.map(p => p.length));
+    
+    canvas.width = w;
+    canvas.height = h;
+    const img = ctx.createImageData(w, h);
+
+    for (let j = 0; j < w; j++) {
+        for (let i = 0; i < h; i++) {
+            let colorIdx = 0;
+            if (i < pingsData[j].length) {
+                const val = pingsData[j][i];
+                // Twoja logika kolorów 64-paletowa
+                colorIdx = val >= 0 ? 63 : (val > th ? Math.floor((val + 128) / 2) : 0);
+            }
+            const pIdx = (i * w + j) * 4;
+            colorIdx = Math.max(0, Math.min(63, colorIdx));
+            
+            img.data[pIdx] = pal[colorIdx * 3];
+            img.data[pIdx+1] = pal[colorIdx * 3 + 1];
+            img.data[pIdx+2] = pal[colorIdx * 3 + 2];
+            img.data[pIdx+3] = 255;
+        }
+    }
+    ctx.putImageData(img, 0, 0);
+}
+
+function parseAZFPXml(xmlText) {
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+
+    // Rygorystyczne sprawdzenie, czy struktura XML nie jest uszkodzona
+    if (xmlDoc.getElementsByTagName("parsererror").length > 0) {
+        console.error("Błąd parsowania struktury XML");
+        return null;
+    }
+
+    // Główne kontenery na wyjściowe stałe naukowe
+    let calib = {};
+    let samples = {};
+
+    // 1. Ekstrakcja współczynników kalibracyjnych (DS oraz EL) dla każdej częstotliwości
+    const freqNodes = xmlDoc.querySelectorAll("LogAcousticCoefficients Frequencies Frequency");
+    freqNodes.forEach(function(node) {
+        const khz = node.querySelector("kHz") ? node.querySelector("kHz").textContent : null;
+        if (khz) {
+            calib[khz] = {
+                ds: parseFloat(node.querySelector("DS") ? node.querySelector("DS").textContent : 0),
+                el: parseFloat(node.querySelector("EL") ? node.querySelector("EL").textContent : 0)
+            };
+        }
+    });
+
+    // 2. Ekstrakcja liczby próbek (RangeSamples) dla każdej częstotliwości (z Fazy 1)
+    const phase1Freqs = xmlDoc.querySelectorAll("AZFP_Parameters Phases Phase[Number='1'] Frequencies Frequency");
+    phase1Freqs.forEach(function(node) {
+        const freqNum = node.getAttribute("Number"); // "1", "2", "3", "4"
+        if (freqNum) {
+            samples[freqNum] = parseInt(node.querySelector("RangeSamples") ? node.querySelector("RangeSamples").textContent : 0, 10);
+        }
+    });
+
+    // 3. Zwrot czystej struktury danych bez żadnego fałszowania wyników
+    return {
+        calibration: calib, // Słownik stałych naukowych indexed po kHz (np. config.calibration["38"].ds)
+        samples: samples    // Słownik liczby próbek indexed po kanale EK5 (np. config.samples["1"] -> 2970)
+    };
+}
+
+function processAZFPLogic(buffer, targetCh, th, config) {
+    let validTh = Number(th);
+    if (isNaN(validTh) || !isFinite(validTh)) {
+        validTh = -100;
+    }
+
+    if (!config || !config.samples || !config.calibration) {
+        console.error("[AZFP] Błąd: Brak prawidłowego obiektu konfiguracji XML.");
+        return [];
+    }
+
+    const dv = new DataView(buffer);
+    const totalBytes = dv.byteLength;
+
+    // Przeliczenie numeru kanału (np. "1", "2") na indeks od 0 do 3
+    const targetIdx = Number(targetCh) - 1;
+
+    // 1. ODCZYT PARAMETRÓW GEOMETRII PRZEPLOTU Z XML
+    const ch1Bins = config.samples["1"] || 0;
+    const ch2Bins = config.samples["2"] || 0;
+    const ch3Bins = config.samples["3"] || 0;
+    const ch4Bins = config.samples["4"] || 0;
+
+    const channelBins = [ch1Bins, ch2Bins, ch3Bins, ch4Bins];
+    const numChannels = channelBins.filter(b => b > 0).length;
+    const maxBins = Math.max(...channelBins);
+
+    if (targetIdx < 0 || targetIdx >= numChannels) {
+        console.error(`[AZFP] Błąd: Kanał o indeksie ${targetCh} nie istnieje w konfiguracji.`);
+        return [];
+    }
+
+    // Pobranie stałych kalibracyjnych dla wybranej częstotliwości
+    const freqKeys = Object.keys(config.calibration);
+    const targetFreqKey = freqKeys[targetIdx];
+    const cal = config.calibration[targetFreqKey] || { ds: 1, el: 0 };
+
+    let pings = [];
+
+    // Stałe rozmiary nagłówków AZFP
+    const profileHeaderSize = 124;
+    const channelHeadersSize = numChannels * 112;
+    const headersTotalSize = profileHeaderSize + channelHeadersSize;
+
+    // FIZYCZNY I NAUKOWY STRIDE: Każda próbka zajmuje w pliku binarnym ZAWSZE dokładnie 2 bajty (Uint16)
+    const totalBinsInPing = ch1Bins + ch2Bins + ch3Bins + ch4Bins;
+    const exactPingSize = headersTotalSize + (totalBinsInPing * 2);
+
+    let offset = 0;
+
+    // 2. POMINIĘCIE NAGŁÓWKA PLIKU (336 BAJTÓW) I GŁÓWNA PĘTLA ODCZYTU
+    while (offset + exactPingSize <= totalBytes) {
+        
+        // Szukamy wyłącznie sprzętowego znacznika początku pingu 0x7F7F
+        if (dv.getUint16(offset, true) !== 0x7F7F) {
+            offset++;
+            continue;
+        }
+
+        const dataStartOffset = offset + headersTotalSize;
+        let currentPingSamplePtr = 0;
+        let currentPingSamples = [];
+
+        // Rozplatanie struktury przeplatanej (Interleaved) w pionie krok po kroku
+        for (let bin = 0; bin < maxBins; bin++) {
+            for (let c = 0; c < numChannels; c++) {
+                if (bin < channelBins[c]) {
+                    
+                    // Izolujemy wyłącznie dane dla żądanego kanału
+                    if (c === targetIdx) {
+                        if (bin < channelBins[targetIdx]) {
+                            // Każda próbka w przeplocie to dokładnie 2 bajty (currentPingSamplePtr * 2)
+                            const sampleOffset = dataStartOffset + (currentPingSamplePtr * 2);
+                            
+                            if (sampleOffset + 2 <= totalBytes) {
+                                const rawCount = dv.getUint16(sampleOffset, true);
+
+                                if (rawCount > 0) {
+                                    // Matematyka skali logarytmicznej na bazie stałych z pliku XML
+                                    let dbVal = (rawCount * cal.ds) - cal.el;
+                                    
+                                    // Kompensacja TVG tłumienia fali w pionie
+                                    if (bin > 0) {
+                                        dbVal += 20 * Math.log10(bin);
+                                    }
+
+                                    if (isNaN(dbVal) || !isFinite(dbVal)) {
+                                        dbVal = validTh;
+                                    } else if (dbVal > 0) {
+                                        dbVal = 0;
+                                    }
+                                    
+                                    currentPingSamples.push(dbVal > validTh ? dbVal : validTh);
+                                } else {
+                                    currentPingSamples.push(validTh); // Jeśli surowa wartość to 0, zwracamy threshold
+                                }
+                            }
+                        }
+                    }
+                    // Inkrementacja wskaźnika próbki w pingu (musi wykonać się zawsze dla zachowania przeplotu)
+                    currentPingSamplePtr++;
+                }
+            }
+        }
+
+        // Zapisujemy wyodrębnioną kolumnę pingu
+        if (currentPingSamples.length === channelBins[targetIdx]) {
+            pings.push(currentPingSamples);
+        }
+
+        // Bezwzględny i bezpieczny skok o dokładną, stałą wielkość pingu (46 412 bajtów)
+        offset += exactPingSize;
+    }
+
+    console.log("--- NOWA GEOMETRIA MACIERZY ---");
+    console.log("Łączna liczba rozpakowanych pingów (Szerokość):", pings.length);
+    if (pings.length > 0) {
+        console.log("Liczba próbek w kolumnie (Wysokość):", pings[0].length);
+    }
+
+    return pings;
+}
+
+
+// --- EK60 Decoder  ---
+function processEK60Logic(buffer, targetCh, th) {
+    const dv = new DataView(buffer);
+    let offset = 0;
+    let pings = [];
+
+    while (offset + 4 <= dv.byteLength) {
+        // 1. Rozmiar bloku (4 bajty, UInt32)
+        const datagramLength = dv.getUint32(offset, true);
+        const datagramStart = offset + 4;
+
+        if (datagramStart + datagramLength + 4 > dv.byteLength) {
+            console.warn("Plik ucięty lub błędny rozmiar bloku przy offset:", offset);
+            break;
+        }
+
+        if (datagramLength >= 4) {
+            const typeStr = String.fromCharCode(
+                dv.getUint8(datagramStart),
+                dv.getUint8(datagramStart + 1),
+                dv.getUint8(datagramStart + 2),
+                dv.getUint8(datagramStart + 3)
+            );
+
+            // 2. Obsługa datagramu próbki RAW0
+            if (typeStr === 'RAW0') {
+                // Kanał (short) jest na offsecie 12 od początku datagramu
+                const channel = dv.getUint16(datagramStart + 12, true);
+
+                if (channel === targetCh) {
+                    const mode = dv.getUint16(datagramStart + 14, true); 
+                    
+                    // --- DYNAMICZNY PARSING OD OFFSETU 76 ---
+                    let currentInternalOffset = 76;
+                    
+                    // W formacie Simrad ciągi tekstowe są zapisane jako: [Długość jako Int32] + [Zgrupowane bajty znaków]
+                    const stringLength = dv.getInt32(datagramStart + currentInternalOffset, true);
+                    currentInternalOffset += 4; // przeskakujemy pole długości tekstu
+                    
+                    // Przeskakujemy rzeczywiste znaki nazwy przetwornika (np. 16 bajtów)
+                    currentInternalOffset += stringLength; 
+                    
+                    // Zaraz po nazwie przetwornika znajduje się pole 'count' (Int32)
+                    const count = dv.getInt32(datagramStart + currentInternalOffset, true);
+                    currentInternalOffset += 4; // przeskakujemy pole 'count'
+                    
+                    // Teraz wskaźnik 'currentInternalOffset' stoi dokładnie na pierwszej próbce!
+                    const headerSize = currentInternalOffset; 
+
+                    if (count > 0 && count < 65535) { // proste zabezpieczenie przed śmieciowymi danymi
+                        let y = [];
+                        const maxSamplesInBlock = Math.floor((datagramLength - headerSize) / 2);
+                        const samplesToRead = Math.min(count, maxSamplesInBlock);
+
+                        for (let i = 0; i < samplesToRead; i++) {
+                            // Mode 0: Tylko Power. Mode 1: Power + Angles.
+                            // W obu przypadkach tablica Power[count] (2 bajty na próbkę) jest zawsze na początku.
+                            const sampleOffset = datagramStart + headerSize + (i * 2);
+
+                            if (sampleOffset + 2 <= dv.byteLength) {
+                                const wVal = dv.getInt16(sampleOffset, true);
+                                
+                                // Przeliczenie surowej wartości na dB (wartość ujemna)
+                                const val = wVal * 0.01175893351; 
+                                
+                                y.push(val > th ? val : th);
+                            }
+                        }
+                        if (y.length > 0) pings.push(y);
+                    } else {
+                        // Jeśli nadal czyta 0, wypiszmy debug, żeby zobaczyć co dokładnie tam leży:
+                        console.log(`[DEBUG] Wykryto RAW0 dla kanału ${channel}, ale obliczony count to: ${count}. Długość tekstu: ${stringLength}`);
+                    }
+                }
+            }
+        }
+
+        // 3. Przesunięcie o: 4 (rozmiar) + dane + 4 (powtórzony rozmiar na końcu)
+        offset += (4 + datagramLength + 4);
+    }
+    return pings;
+}
+
+// --- EK5 Decoder---
+function processEK5Logic(buffer, targetCh, th) {
+    const dv = new DataView(buffer);
+    let offset = 0;
+    let pings = [];
+    const chStr = targetCh.toString();
+
+    while (offset + 2 <= dv.byteLength) {
+        // 1. Czytamy rozmiar bloku (2 bajty)
+        const size = dv.getUint16(offset, true);
+        const blockStart = offset + 2;
+
+        // Sprawdzenie, czy cały blok mieści się w buforze
+        if (blockStart + size > dv.byteLength) {
+            console.warn("Plik ucięty lub błędny rozmiar bloku przy offset:", offset);
+            break;
+        }
+
+        // 2. Czytamy typy (sprawdzenie czy mamy przynajmniej 2 bajty danych w bloku)
+        if (size >= 2) {
+            const t1 = String.fromCharCode(dv.getUint8(blockStart));
+            const t2 = String.fromCharCode(dv.getUint8(blockStart + 1));
+
+            // 3. Logika dla telegramu 'Q' (Echogram)
+            if (t1 === 'Q' && t2 === chStr) {
+                // Nagłówek 'Q' ma minimum 44 bajty przed danymi s*
+                if (size >= 44) {
+                    const pelCo = dv.getUint32(blockStart + 24, true);
+                    let y = [];
+                    
+                    // 4. Kluczowe zabezpieczenie: obliczamy ile próbek faktycznie mieści się w bloku
+                    // (rozmiar bloku - 44 bajty nagłówka) / 2 bajty na próbkę (short)
+                    const maxSamplesInBlock = Math.floor((size - 44) / 2);
+                    const samplesToRead = Math.min(pelCo, maxSamplesInBlock);
+
+                    for (let i = 0; i < samplesToRead; i++) {
+                        const sampleOffset = blockStart + 44 + (i * 2);
+                        
+                        // Ostateczne sprawdzenie przed odczytem próbki
+                        if (sampleOffset + 2 <= dv.byteLength) {
+                            const wVal = dv.getInt16(sampleOffset, true);
+                            const val = 3.0103 * wVal / 256;
+                            y.push(val > th ? val : th);
+                        }
+                    }
+                    if (y.length > 0) pings.push(y);
+                }
+            }
+        }
+
+        // 5. Przesunięcie o nagłówek (2 bajty) + rozmiar bloku (size)
+        offset += (2 + size);
+    }
+    return pings;
+}
+
+// --- DT4 decodere ---
+function processDT4Logic0(buffer, targetCh, th) {
+    const dv = new DataView(buffer);
+    let offset = 0;
+    let pings = [];
+
+    // Stan globalny dekodera (zmienne współdzielone między blokami)
+    let st = {
+        a:0, sv:0, tm:0, sa:0, pw:0, nch:0,
+        ch:0, pc:0, spp:0, sp:0, et:0, pl:0, pr:0, ib:0, dl:0, th_desc:0,
+        sn:"", sl:0, rs:0, wsl:0, wrs:0, tt:0, f:0, sr:1,
+        ab:0, sv3:1480, sv0:1480
+    };
+
+    while (offset + 4 <= dv.byteLength) {
+        // Czytamy nagłówek bloku (4 bajty)
+        const size = dv.getUint16(offset, true);
+        const type = dv.getInt16(offset + 2, true);
+        const dataStart = offset + 4;
+
+        // Kluczowe dla DT4: skrypt czyta size + 2
+        if (dataStart + size + 2 > dv.byteLength) break;
+
+        // --- TYP 24/30: HEADER ---
+        if (type === 24 || type === 30) {
+            st.a = dv.getUint16(dataStart, true);
+            st.sv = dv.getUint16(dataStart + 2, true);
+            st.tm = dv.getInt16(dataStart + 4, true);
+            st.sa = dv.getUint16(dataStart + 6, true);
+            if (type === 30) {
+                st.pw = dv.getUint16(dataStart + 8, true);
+                st.nch = dv.getUint16(dataStart + 10, true);
+            } else {
+                st.nch = dv.getUint16(dataStart + 8, true);
+                st.pw = 0;
+            }
+        }
+        // --- TYP 1/18: CHANNEL DESCRIPTOR ---
+		else if (type === 1 || type === 18) {
+		    const b = dataStart;
+    
+		    if (type === 1) {
+		        // --- Mapowanie dla Typu 1 ---
+		        // Na podstawie zrzutu: l(4) + S(2)*7 + s(2) + S(2)*5 + a8(8) + L(4) + a8(8) + S(2)
+		        // Suma offsetu do IB: 4 + 14 + 2 + 10 + 8 + 4 + 8 + 2 = 52
+        
+		        st.pc  = dv.getUint16(b + 4, true);   // Offset 4
+		        st.spp = dv.getUint16(b + 6, true);   // Offset 6
+		        st.sp  = dv.getUint16(b + 8, true);   // Offset 8
+		        st.et  = dv.getUint16(b + 10, true);  // Offset 10
+		        st.pl  = dv.getUint16(b + 12, true);  // Offset 12
+		        st.pr  = dv.getUint16(b + 14, true);  // Offset 14
+        
+		        st.ib  = dv.getUint16(b + 52, true);  // Offset 52 (Twoje 0x37 = 55)
+		        st.dl  = dv.getUint16(b + 54, true);  // Offset 54
+		        st.th  = dv.getInt16(b + 56, true);   // Offset 56 (Próg th)
+
+		        // Parametry sonaru (sl, rs, f)
+		        st.sl  = dv.getUint16(b + 60, true);  // Offset 60
+		        st.rs  = dv.getUint16(b + 62, true);  // Offset 62
+        
+		        // Częstotliwość (f) - przesunięta o a12 i L
+		        // b + 52 (ib) + S*2 + S*2 + a12(12) + L(4) = ok. 76
+		        st.f   = dv.getUint32(b + 76, true);  // Offset 76
+        
+		        // Sample Rate (sr) i szerokości wiązki
+		        st.bwj = dv.getUint16(b + 100, true); // Offset 100
+		        st.bwn = dv.getUint16(b + 102, true); // Offset 102
+		        st.sr  = dv.getUint32(b + 104, true); // Offset 104
+		    } 
+		    else if (type === 18) {
+		        // --- Mapowanie dla Typu 18 (zazwyczaj przesunięte o +2 bajty) ---
+		        st.ch  = dv.getUint16(b, true);
+		        st.pc  = dv.getUint16(b + 6, true);
+		        st.ib  = dv.getUint16(b + 54, true);  // Offset 54
+		        st.th  = dv.getInt16(b + 58, true);
+		        st.f   = dv.getUint32(b + 78, true);
+		        st.sr  = dv.getUint32(b + 106, true);
+		    }
+
+		    // Obliczenia fizyczne (wywoływane po ustawieniu st.f i st.tm)
+		    st.ab = getAbsorp(st.tm / 100, st.sa / 100, st.f / 1000);
+		    st.sv0 = 1400 + st.sv / 400; // Używane w Twoim wzorze na głębokość
+		    st.sv3 = getSvel(st.tm / 100, st.sa / 100);
+		}
+
+
+
+        // --- TYP 14: POSITION ---
+        else if (type === 14) {
+            const lat = dv.getUint32(dataStart, true);
+            const lon = dv.getInt32(dataStart + 4, true);
+            // console.log(`Lat: ${lat}, Lon: ${lon}`);
+        }
+        // --- TYP 5/21/28/29: PING DATA ---
+        else if ([5, 21, 28, 29].includes(type)) {
+            let ch, ping_no, w = [];
+            let currentDataStart = dataStart;
+
+            if (type === 5) {
+                ch = 1;
+                ping_no = dv.getUint32(currentDataStart, true);
+                for (let i = currentDataStart + 4; i < currentDataStart + size + 2; i += 2) {
+                    w.push(dv.getUint16(i, true));
+                }
+            } else {
+                ch = dv.getUint16(currentDataStart, true);
+                ping_no = dv.getUint32(currentDataStart + 2, true);
+                //ptime = dv.getUint32(currentDataStart + 6, true);
+                //N = dv.getUint16(currentDataStart + 10, true);
+                for (let i = currentDataStart + 12; i < currentDataStart + size + 2; i += 2) {
+                    w.push(dv.getUint16(i, true));
+                }
+            }
+
+            if (ch === targetCh) {
+                let decoded = [];
+                if (type < 28) decoded = RleWords(w);
+                else if (type === 28) decoded = RleWords2(w);
+                else if (type === 29) decoded = RleWords3(w);
+
+                let y = [];
+                // Przetwarzanie próbek na wartości dB (zgodnie z krokiem pętli w Perlu)
+                let step = (type === 28 || type === 29) ? 2 : 1;
+                
+                for (let i = 0; i < decoded.length; i += step) {
+                    let sampleIdx = i / step;
+                    let depth = (sampleIdx + st.ib) * st.sv0 / 2 / st.sr;
+                    let amplitude = decoded[i];
+                    
+                    // TVG i logarytmowanie
+                    let val = 20 * Math.log10(amplitude * depth * depth + 1e-10) 
+                              + 2 * st.ab * depth - st.sl/10 - st.rs/10 - st.pw/10;
+                    
+                    if (val < th) val = th;
+                    y.push(val);
+                }
+                if (y.length > 0) pings.push(y);
+            }
+        }
+
+        // Przesunięcie: 2 (size) + 2 (type) + size + 2 (extra) = size + 6
+        offset += (size + 6);
+    }
+    return pings;
+}
+
+function processDT4Logic(buffer, targetCh, th) {
+    const dv = new DataView(buffer);
+    let offset = 0;
+    let pings = [];
+    let st = {
+        tm: 0, sa: 0, sv: 0, pw: 0, ch: 0, ib: 0, f: 0, sl: 0, rs: 0, sr: 1, ab: 0, sv0: 1480
+    };
+    while (offset + 4 <= dv.byteLength) {
+        const size = dv.getUint16(offset, true);
+        const type = dv.getInt16(offset + 2, true);
+        const b = offset + 4; // Start danych bloku
+        const dataStart = offset + 4;
+        if (b + size + 2 > dv.byteLength) break;
+        if (type === 30) {         // --- TYP 30: HEADER ---
+            st.sv = dv.getUint16(b + 2, true);  // 1446
+            st.tm = dv.getInt16(b + 4, true);   // 1000
+            st.sa = dv.getUint16(b + 6, true);  // 0
+            st.pw = dv.getUint16(b + 8, true);  // 0
+        }
+		else if (type === 18) {    // --- TYP 18: CHANNEL DESCRIPTOR ---
+		    st.ch  = dv.getUint16(b + 0, true);   // [0] S
+		    st.pc  = dv.getInt32(b + 2, true);    // [1] l
+		    st.spp = dv.getUint16(b + 6, true);   // [2] S
+		    st.sp  = dv.getUint16(b + 8, true);   // [3] S
+		    st.et  = dv.getUint16(b + 10, true);  // [4] S
+		    st.pl  = dv.getUint16(b + 12, true);  // [5] S
+		    st.pr  = dv.getUint16(b + 14, true);  // [6] S
+		    st.ib  = dv.getUint16(b + 16, true);  // [7] S -> 55
+		    st.dl  = dv.getUint16(b + 18, true);  // [8] S
+		    st.th  = dv.getInt16(b + 20, true);   // [9] s
+		    let sn = "";
+		    for (let i = 0; i < 8; i++) sn += String.fromCharCode(dv.getUint8(b + 24 + i));
+		    st.sn = sn.trim(); // offset 24-31
+		    st.sl = dv.getInt16(b + 80, true); 
+		    st.rs = dv.getInt16(b + 86, true);
+		    st.wsl = dv.getInt16(b + 92, true);
+		    st.wrs = dv.getInt16(b + 98, true);
+		    st.tt   = dv.getUint16(b + 98, true);  // [30] S -> 4
+		    st.f    = dv.getUint32(b + 100, true); // [31] L -> 208000
+		    st.alcs = dv.getUint16(b + 104, true); // [32] S
+		    st.atcs = dv.getUint16(b + 106, true); // [33] S
+		    st.alpo = dv.getInt8(b + 108);         // [34] c
+		    st.atpo = dv.getInt8(b + 109);         // [35] c
+		    st.alao = dv.getUint16(b + 110, true); // [36] S
+		    st.atao = dv.getUint16(b + 112, true); // [37] S
+		    st.bwj  = dv.getUint8(b + 114);        // [38] C -> 62
+		    st.bwn  = dv.getUint8(b + 115);        // [39] C -> 62
+		    st.sr   = dv.getUint32(b + 116, true); // [40] L -> 41667
+		    st.wbwj = dv.getUint8(b + 120);        // [41] C
+		    st.wbwn = dv.getUint8(b + 121);        // [42] C
+		    st.ab = getAbsorp(st.tm / 100, st.sa / 100, st.f / 1000);
+		    st.bpf = bp_factor(st.bwj / 10, st.bwn / 10);
+		    st.sv0 = 1400 + st.sv / 400;
+		    st.sv1 = 1410 + 4.21 * (st.tm / 100) - 0.037 * Math.pow(st.tm / 100, 2) + 1.1 * (st.sa / 100);
+		    st.sv2 = svel2(st.tm / 100, st.sa / 100);
+		    st.sv3 = getSvel(st.tm / 100, st.sa / 100);
+	      }
+	      else if ([5, 21, 28, 29].includes(type)) { // --- PING DATA (29-Split Beam) ---
+	          let ch, ping_no, w = [];
+	          let currentDataStart = dataStart;
+	          if (type === 5) {
+	              ch = 1;
+	              ping_no = dv.getUint32(currentDataStart, true);
+	              for (let i = currentDataStart + 4; i < currentDataStart + size + 2; i += 2) {
+	                  w.push(dv.getUint16(i, true));
+	              }
+	          } else {
+	              ch = dv.getUint16(currentDataStart, true);
+	              ping_no = dv.getUint32(currentDataStart + 2, true);
+	              //ptime = dv.getUint32(currentDataStart + 6, true);
+	              //N = dv.getUint16(currentDataStart + 10, true);
+	              for (let i = currentDataStart + 12; i < currentDataStart + size + 2; i += 2) {
+	                  w.push(dv.getUint16(i, true));
+	              }
+	          }
+	          if (ch === targetCh) {
+	              let decoded = [];
+	              if (type < 28) decoded = RleWords(w);
+	              else if (type === 28) decoded = RleWords2(w);
+	              else if (type === 29) decoded = RleWords3(w);
+	              let y = [];
+	              // Przetwarzanie próbek na wartości dB (zgodnie z krokiem pętli w Perlu)
+	              let step = (type === 28 || type === 29) ? 2 : 1;          
+	              for (let i = 0; i < decoded.length; i += step) {
+	                  let sampleIdx = i / step;
+	                  let depth = (sampleIdx + st.ib) * st.sv0 / 2 / st.sr;
+	                  let amplitude = decoded[i];              
+	                  let val = 20 * Math.log10(amplitude * depth * depth + 1e-10) 
+	                            + 2 * st.ab * depth - st.sl/10 - st.rs/10 - st.pw/10;
+	                  if (val < th) val = th;
+	                  y.push(val);
+	              }
+	              if (y.length > 0) pings.push(y);
+	          }
+	      }
+		  offset += (size + 6);
+    }
+    return pings;
+}
+
+// --- RLE decoders ---
+
+function RleWords(w) {
+    let f = [];
+    for (let i = 0; i < w.length; i++) {
+        if ((w[i] & 0xF000) === 0xF000) {
+            let l = (w[i] & 0xFF) + 2;
+            while (l--) f.push(0);
+        } else {
+            let m = w[i] & 0x0FFF;
+            let e = (w[i] & 0xF000) >> 12;
+            f.push(e === 0 ? m : (m + 4096) << (e - 1));
+        }
+    }
+    return f;
+}
+function RleWords2(w) {
+    let f = [];
+    for (let i = 0; i < w.length; i++) {
+        if ((w[i] & 0xF000) === 0xF000) {
+            let l = 2 * ((w[i] & 0xFF) + 2);
+            while (l--) f.push(0);
+            i++; 
+        } else {
+            let m = w[i] & 0x0FFF;
+            let e = (w[i] & 0xF000) >> 12;
+            f.push(e === 0 ? m : (m + 4096) << (e - 1));
+        }
+    }
+    return f;
+}
+function RleWords3(w) {
+    // Identyczna jak RleWords2, ale zachowuje kąty (co drugi element)
+    let f = [];
+    for (let i = 0; i < w.length; i++) {
+        if ((w[i] & 0xF000) === 0xF000) {
+            let l = 2 * ((w[i] & 0xFF) + 2);
+            while (l--) f.push(0);
+            i++; 
+        } else {
+            let m = w[i] & 0x0FFF;
+            let e = (w[i] & 0xF000) >> 12;
+            f.push(e === 0 ? m : (m + 4096) << (e - 1));
+            f.push(w[++i]); // Along/Athwart
+        }
+    }
+    return f;
+}
+
+// --- Utils ---
+
+function bp_factor(bwj, bwn) {
+    return 0.00011010832 * bwj / 2 * bwn / 2; // 10^(-3.16)/2pi
+}
+
+function getAbsorp(tm, sa, f) {
+    // Perlowe log(10) to logarytm naturalny z 10
+    const ft = 21.9 * Math.exp(Math.log(10) * (6 - 1520 / (tm + 273)));
+    return (0.0186 * f * f * ft * sa / (ft * ft + f * f) + 0.0268 * f * f / ft) / 914.4;
+}
+
+function getSvel(tm, sa) {
+    return 1449.2 + (4.6 + (-0.055 + 0.00029 * tm) * tm) * tm + (1.34 - 0.010 * tm) * (sa - 35) + 0.016 * 1;
+}
+
+function svel2(tm, sa) {
+    let tmp = tm - 10;
+    let ss = 1492.9 + 3 * tmp - 0.006 * tmp * tmp;
+    tmp -= 8;
+    ss += (-0.04 * tmp * tmp + 1 / 61);
+    let sal = sa - 35;
+    if (sa !== 0) {
+        ss += 1.2 * sal - 0.01 * tmp * sal;
+    }
+    return ss;
+}
+
+function svel4(t, s, p) {
+    p = p / 10.0;
+    const sr = Math.sqrt(s);    
+    let d = 1.727E-3 - 7.9836E-6 * p;
+    let a1 = 7.3637E-5 + 1.7945E-7 * t;
+    let a0 = -1.922E-2 - 4.42E-5 * t;
+    let b = a0 + a1 * p;    
+    let a3 = (-3.389E-13 * t + 6.649E-12) * t + 1.100E-10;
+    let a2 = ((7.988E-12 * t - 1.6002E-10) * t + 9.1041E-9) * t - 3.9064E-7;
+    a1 = (((-2.0122E-10 * t + 1.0507E-8) * t - 6.4885E-8) * t - 1.2580E-5) * t + 9.4742E-5;
+    a0 = (((-3.21E-8 * t + 2.006E-6) * t + 7.164E-5) * t - 1.262E-2) * t + 1.389;
+    let a = ((a3 * p + a2) * p + a1) * p + a0;    
+    a3 = (-2.3643E-12 * t + 3.8504E-10) * t - 9.7729E-9;
+    a2 = (((1.0405E-12 * t - 2.5335E-10) * t + 2.5974E-8) * t - 1.7107E-6) * t + 3.1260E-5;
+    a1 = (((-6.1185E-10 * t + 1.3621E-7) * t - 8.1788E-6) * t + 6.8982E-4) * t + 0.153563;
+    a0 = ((((3.1464E-9 * t - 1.47800E-6) * t + 3.3420E-4) * t - 5.80852E-2) * t + 5.03711) * t + 1402.388;
+    let c = ((a3 * p + a2) * p + a1) * p + a0;    
+    return c + (a + b * sr + d * s) * s;
+}
+
+
+</script>
+
+</body>
+</html>
+
