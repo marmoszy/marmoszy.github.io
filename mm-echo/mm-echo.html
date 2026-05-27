@@ -132,7 +132,7 @@ async function loadTgzFromUrl(urlString) {
         if (fileInput) {
             fileInput.files = dataTransfer.files; 
         }
-		fileInput.dispatchEvent(new Event('change'));
+		handleFile(); //fileInput.dispatchEvent(new Event('change'));
     } catch (error) {
         console.error("[URL BŁĄD] Nie udało się dostarczyć struktury plików do lokalnego handlera:", error);
     }
