@@ -45,103 +45,6 @@ const pal = [
     255,0,0,   239,0,0,     223,0,0,   207,0,0,   191,0,0,   175,0,0,     159,0,0,   143,0,0
 ];
 
-// tgz processing
-
-async function gunzip(arrayBuffer) {
-    const ds = new DecompressionStream("gzip");
-    const decompressed = new Response(
-        new Response(arrayBuffer).body.pipeThrough(ds)
-    );
-    return await decompressed.arrayBuffer();
-}
-function untar(arrayBuffer) {
-    const bytes = new Uint8Array(arrayBuffer);
-    const files = [];
-    let offset = 0;
-    while (offset < bytes.length) {
-        const name = readString(bytes, offset, 100);
-        if (!name) break;
-        const sizeOctal = readString(bytes, offset + 124, 12).trim();
-        const size = parseInt(sizeOctal, 8);
-        const fileStart = offset + 512;
-        const fileEnd = fileStart + size;
-        const fileBytes = bytes.slice(fileStart, fileEnd);
-        files.push({name, arrayBuffer:fileBytes.buffer});
-        const blocks = Math.ceil(size / 512);
-        offset = fileStart + blocks * 512;
-    }
-    return files;
-}
-function readString(bytes, start, length) {
-    let out = "";
-    for (let i = start; i < start + length; i++) {
-        if (bytes[i] === 0) break;
-        out += String.fromCharCode(bytes[i]);
-    }
-    return out;
-}
-async function loadTgzFromUrl(urlString) {
-    if (!urlString) return;
-
-    try {
-        console.log(`[URL] Pobieranie archiwum: ${urlString}`);
-        const response = await fetch(urlString);
-        if (!response.ok) throw new Error(`HTTP Status: ${response.status}`);
-        
-        const archiveBuffer = await response.arrayBuffer();
-        const unzippedBuffer = await gunzip(archiveBuffer);
-        const extractedFiles = untar(unzippedBuffer);
-
-        // 1. Tworzymy obiekt DataTransfer, który pozwala wygenerować sztuczną listę plików (FileList)
-        const dataTransfer = new DataTransfer();
-
-        // 2. Mapujemy rozpakowane pliki (ArrayBuffer) na natywne obiekty File
-        for (const extFile of extractedFiles) {
-            // Ustalamy prawidłowy typ MIME dla obrazów i plików tekstowych
-            let mimeType = "application/octet-stream";
-            if (extFile.name.endsWith('.txt')) {
-                mimeType = "text/plain";
-            } else if (extFile.name.endsWith('.png')) {
-                mimeType = "image/png";
-            } else if (extFile.name.endsWith('.jpg') || extFile.name.endsWith('.jpeg')) {
-                mimeType = "image/jpeg";
-            } else {
-            	mimeType = 'application/octet-stream';
-            }
-
-            // Tworzymy prawdziwy obiekt File z binarnego bufora
-            const fileObj = new File([extFile.arrayBuffer], extFile.name, { type: mimeType });
-            
-            // Dodajemy plik do kontenera transferu danych
-            dataTransfer.items.add(fileObj);
-        }
-
-        // 3. Sprawdzamy, czy w ogóle wyodrębniliśmy jakieś pliki
-        if (dataTransfer.files.length === 0) {
-            console.warn("[URL] Archiwum jest puste.");
-            return;
-        }
-
-        // 4. Budujemy sztuczny obiekt zdarzenia (Mock Event), który idealnie udaje zachowanie 'change'
-        const mockEvent = {
-            target: {
-                files: dataTransfer.files // Tutaj znajduje się wygenerowany obiekt FileList
-            }
-        };
-
-        console.log(`[URL] Sukces. Wyodrębniono ${dataTransfer.files.length} plików. Przekazywanie do lokalnego handlera...`);
-
-        // 5. Pobieramy Twój istniejący element input i ręcznie przypisujemy mu te pliki (opcjonalne, ale przydatne)
-        const fileInput = document.getElementById('fileInput');
-        if (fileInput) {
-            fileInput.files = dataTransfer.files; 
-        }
-		handleFile(); //fileInput.dispatchEvent(new Event('change'));
-    } catch (error) {
-        console.error("[URL BŁĄD] Nie udało się dostarczyć struktury plików do lokalnego handlera:", error);
-    }
-}
-//window.loadTgzFromUrl = loadTgzFromUrl; // when module
 
 // file procesing
 
@@ -163,6 +66,7 @@ async function handleFile() {
         const ext = file.name.split('.').pop().toLowerCase();
         const arrayBuffer = await file.arrayBuffer();
         let pingsData = [];
+		let nav = "";
 
         if (ext === 'tgz' || file.name.endsWith('.tar.gz')) {
             status.innerText = `Decompressing ${file.name}...`;
@@ -178,7 +82,9 @@ async function handleFile() {
             if (ext === 'raw') {
                 pingsData = processEK60Logic(arrayBuffer, ch, th);
             } else if (ext === 'ek5') {
-                pingsData = processEK5Logic(arrayBuffer, ch, th);
+                var data = processEK5Logic(arrayBuffer, ch, th);
+				pingsData = data.pings;
+				nav = data.navStr;
             } else if (ext === 'dt4') {
                 pingsData = processDT4Logic(arrayBuffer, ch, th);
             } else if (ext === '01a' || ext === '01b') {
@@ -205,11 +111,13 @@ async function handleFile() {
                 container.appendChild(label);
                 container.appendChild(canvas);
                 drawEchogram(pingsData, th, canvas);
-				const ta = document.createElement('textarea');
-                ta.id = "T_"+file.name;
-				ta.value=file.name;
-				ta.style.width = "400px";
-                container.appendChild(ta);
+				if(nav) {
+					const ta = document.createElement('textarea');
+                    ta.id = "T_"+file.name;
+				    ta.value = nav;
+				    ta.style.width = "400px";
+                    container.appendChild(ta);
+				}
             } else {
                 console.warn(`${file.name} no channel data ${ch}`);
             }
@@ -252,6 +160,86 @@ function drawEchogram(pingsData, th, canvas) {
     ctx.putImageData(img, 0, 0);
 }
 
+// ---- tgz processing
+
+async function gunzip(arrayBuffer) {
+    const ds = new DecompressionStream("gzip");
+    const decompressed = new Response(
+        new Response(arrayBuffer).body.pipeThrough(ds)
+    );
+    return await decompressed.arrayBuffer();
+}
+function untar(arrayBuffer) {
+    const bytes = new Uint8Array(arrayBuffer);
+    const files = [];
+    let offset = 0;
+    while (offset < bytes.length) {
+        const name = readString(bytes, offset, 100);
+        if (!name) break;
+        const sizeOctal = readString(bytes, offset + 124, 12).trim();
+        const size = parseInt(sizeOctal, 8);
+        const fileStart = offset + 512;
+        const fileEnd = fileStart + size;
+        const fileBytes = bytes.slice(fileStart, fileEnd);
+        files.push({name, arrayBuffer:fileBytes.buffer});
+        const blocks = Math.ceil(size / 512);
+        offset = fileStart + blocks * 512;
+    }
+    return files;
+}
+function readString(bytes, start, length) {
+    let out = "";
+    for (let i = start; i < start + length; i++) {
+        if (bytes[i] === 0) break;
+        out += String.fromCharCode(bytes[i]);
+    }
+    return out;
+}
+async function loadTgzFromUrl(urlString) {
+    if (!urlString) return;
+    try {
+        console.log(`[URL] Pobieranie archiwum: ${urlString}`);
+        const response = await fetch(urlString);
+        if (!response.ok) throw new Error(`HTTP Status: ${response.status}`);        
+        const archiveBuffer = await response.arrayBuffer();
+        const unzippedBuffer = await gunzip(archiveBuffer);
+        const extractedFiles = untar(unzippedBuffer);
+        const dataTransfer = new DataTransfer();
+        for (const extFile of extractedFiles) {
+            let mimeType = "application/octet-stream";
+            if (extFile.name.endsWith('.txt')) {
+                mimeType = "text/plain";
+            } else if (extFile.name.endsWith('.png')) {
+                mimeType = "image/png";
+            } else if (extFile.name.endsWith('.jpg') || extFile.name.endsWith('.jpeg')) {
+                mimeType = "image/jpeg";
+            } else {
+            	mimeType = 'application/octet-stream';
+            }
+            const fileObj = new File([extFile.arrayBuffer], extFile.name, { type: mimeType });
+            dataTransfer.items.add(fileObj);
+        }
+        if (dataTransfer.files.length === 0) {
+            console.warn("[URL] Archiwum jest puste.");
+            return;
+        }
+        const mockEvent = {
+            target: {
+                files: dataTransfer.files // Tutaj znajduje się wygenerowany obiekt FileList
+            }
+        };
+        console.log(`[URL] Sukces. Wyodrębniono ${dataTransfer.files.length} plików. Przekazywanie do lokalnego handlera...`);
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) {
+            fileInput.files = dataTransfer.files; 
+        }
+		handleFile(); //fileInput.dispatchEvent(new Event('change'));
+    } catch (error) {
+        console.error("[URL BŁĄD] Nie udało się dostarczyć struktury plików do lokalnego handlera:", error);
+    }
+}
+//window.loadTgzFromUrl = loadTgzFromUrl; // when module
+
 // ---- save button ----
 
 async function gzipWholeTar(tarBlob) {
@@ -265,9 +253,7 @@ function createTarHeader(filename, size) {
     const encoder = new TextEncoder();
     function writeField(str, offset, maxLen) {
         const bytes = encoder.encode(str);
-        for (let i = 0; i < Math.min(bytes.length, maxLen - 1); i++) {
-            view[offset + i] = bytes[i];
-        }
+        for (let i = 0; i < Math.min(bytes.length, maxLen - 1); i++) {view[offset + i] = bytes[i];}
         view[offset + Math.min(bytes.length, maxLen - 1)] = 0;
     }
     writeField(filename, 0, 100);
@@ -284,19 +270,11 @@ function createTarHeader(filename, size) {
     view[264] = 48; // '0'
     writeField("root", 265, 32);
     writeField("root", 297, 32);
-    for (let i = 148; i < 156; i++) {
-        view[i] = 32; 
-    }
-    let checksum = 0;
-    for (let i = 0; i < 512; i++) {
-        checksum += view[i];
-    }
+    for (let i = 148; i < 156; i++) {view[i] = 32; }
+    let checksum = 0; for (let i = 0; i < 512; i++) {checksum += view[i];}
     const checksumStr = checksum.toString(8).padStart(6, '0') + '\0 ';
     const chkBytes = encoder.encode(checksumStr);
-    for (let i = 0; i < chkBytes.length; i++) {
-        view[148 + i] = chkBytes[i];
-    }
-
+    for (let i = 0; i < chkBytes.length; i++) {view[148 + i] = chkBytes[i];}
     return buffer;
 }
 async function createPackAndDownload(canvasElement, textData, outputFilename = "paczka.tgz") {
@@ -318,9 +296,7 @@ async function createPackAndDownload(canvasElement, textData, outputFilename = "
     tarBlocks.push(new Uint8Array(1024));
     const uncompressedTarBlob = new Blob(tarBlocks, { type: "application/x-tar" });
     const finalGzippedBlob = await gzipWholeTar(uncompressedTarBlob);
-    const finalName = outputFilename.endsWith('.tgz') || outputFilename.endsWith('.tar.gz') 
-                      ? outputFilename 
-                      : outputFilename + '.tgz';
+    const finalName = outputFilename + (outputFilename.endsWith('.tgz') || outputFilename.endsWith('.tar.gz')?'':'.tgz');
     const downloadLink = document.createElement("a");
     downloadLink.href = URL.createObjectURL(finalGzippedBlob);
     downloadLink.download = finalName;
@@ -330,7 +306,6 @@ async function createPackAndDownload(canvasElement, textData, outputFilename = "
     URL.revokeObjectURL(downloadLink.href);
 }
 /*document.getElementById('exportBtn').addEventListener('click', async () => {
-	debugger;
     const canvas = document.getElementById('canvas1');
     const text = document.getElementById('textarea1').value;
     await createPackAndDownload(canvas, text, "eksport_danych.tar");
@@ -451,121 +426,79 @@ function processAZFPLogic(buffer, targetCh, th, config) {
     if (isNaN(validTh) || !isFinite(validTh)) {
         validTh = -100;
     }
-
     if (!config || !config.samples || !config.calibration) {
-        console.error("[AZFP] Błąd: Brak prawidłowego obiektu konfiguracji XML.");
+        console.error("[AZFP] error: No XML config.");
         return [];
     }
-
     const dv = new DataView(buffer);
     const totalBytes = dv.byteLength;
-
-    // Przeliczenie numeru kanału (np. "1", "2") na indeks od 0 do 3
     const targetIdx = Number(targetCh) - 1;
-
-    // 1. ODCZYT PARAMETRÓW GEOMETRII PRZEPLOTU Z XML
     const ch1Bins = config.samples["1"] || 0;
     const ch2Bins = config.samples["2"] || 0;
     const ch3Bins = config.samples["3"] || 0;
     const ch4Bins = config.samples["4"] || 0;
-
     const channelBins = [ch1Bins, ch2Bins, ch3Bins, ch4Bins];
     const numChannels = channelBins.filter(b => b > 0).length;
     const maxBins = Math.max(...channelBins);
-
     if (targetIdx < 0 || targetIdx >= numChannels) {
-        console.error(`[AZFP] Błąd: Kanał o indeksie ${targetCh} nie istnieje w konfiguracji.`);
+        console.error(`[AZFP] error: No channel ${targetCh}.`);
         return [];
     }
-
-    // Pobranie stałych kalibracyjnych dla wybranej częstotliwości
     const freqKeys = Object.keys(config.calibration);
     const targetFreqKey = freqKeys[targetIdx];
     const cal = config.calibration[targetFreqKey] || { ds: 1, el: 0 };
-
     let pings = [];
-
-    // Stałe rozmiary nagłówków AZFP
     const profileHeaderSize = 124;
     const channelHeadersSize = numChannels * 112;
     const headersTotalSize = profileHeaderSize + channelHeadersSize;
-
-    // FIZYCZNY I NAUKOWY STRIDE: Każda próbka zajmuje w pliku binarnym ZAWSZE dokładnie 2 bajty (Uint16)
     const totalBinsInPing = ch1Bins + ch2Bins + ch3Bins + ch4Bins;
     const exactPingSize = headersTotalSize + (totalBinsInPing * 2);
-
     let offset = 0;
-
-    // 2. POMINIĘCIE NAGŁÓWKA PLIKU (336 BAJTÓW) I GŁÓWNA PĘTLA ODCZYTU
     while (offset + exactPingSize <= totalBytes) {
-        
-        // Szukamy wyłącznie sprzętowego znacznika początku pingu 0x7F7F
         if (dv.getUint16(offset, true) !== 0x7F7F) {
             offset++;
             continue;
         }
-
         const dataStartOffset = offset + headersTotalSize;
         let currentPingSamplePtr = 0;
         let currentPingSamples = [];
-
-        // Rozplatanie struktury przeplatanej (Interleaved) w pionie krok po kroku
         for (let bin = 0; bin < maxBins; bin++) {
             for (let c = 0; c < numChannels; c++) {
                 if (bin < channelBins[c]) {
-                    
-                    // Izolujemy wyłącznie dane dla żądanego kanału
                     if (c === targetIdx) {
                         if (bin < channelBins[targetIdx]) {
-                            // Każda próbka w przeplocie to dokładnie 2 bajty (currentPingSamplePtr * 2)
                             const sampleOffset = dataStartOffset + (currentPingSamplePtr * 2);
-                            
                             if (sampleOffset + 2 <= totalBytes) {
                                 const rawCount = dv.getUint16(sampleOffset, true);
-
                                 if (rawCount > 0) {
-                                    // Matematyka skali logarytmicznej na bazie stałych z pliku XML
                                     let dbVal = (rawCount * cal.ds) - cal.el;
-                                    
-                                    // Kompensacja TVG tłumienia fali w pionie
                                     if (bin > 0) {
                                         dbVal += 20 * Math.log10(bin);
                                     }
-
                                     if (isNaN(dbVal) || !isFinite(dbVal)) {
                                         dbVal = validTh;
                                     } else if (dbVal > 0) {
                                         dbVal = 0;
                                     }
-                                    
                                     currentPingSamples.push(dbVal > validTh ? dbVal : validTh);
                                 } else {
-                                    currentPingSamples.push(validTh); // Jeśli surowa wartość to 0, zwracamy threshold
+                                    currentPingSamples.push(validTh);
                                 }
                             }
                         }
                     }
-                    // Inkrementacja wskaźnika próbki w pingu (musi wykonać się zawsze dla zachowania przeplotu)
                     currentPingSamplePtr++;
                 }
             }
         }
-
-        // Zapisujemy wyodrębnioną kolumnę pingu
         if (currentPingSamples.length === channelBins[targetIdx]) {
             pings.push(currentPingSamples);
         }
-
-        // Bezwzględny i bezpieczny skok o dokładną, stałą wielkość pingu (46 412 bajtów)
         offset += exactPingSize;
     }
-
-    console.log("--- NOWA GEOMETRIA MACIERZY ---");
-    console.log("Łączna liczba rozpakowanych pingów (Szerokość):", pings.length);
     if (pings.length > 0) {
-        console.log("Liczba próbek w kolumnie (Wysokość):", pings[0].length);
+        console.log("Pings length:", pings[0].length);
     }
-
     return pings;
 }
 
@@ -654,11 +587,12 @@ function processEK60Logic(buffer, targetCh, th) {
 }
 
 // --- EK5 Decoder---
-function processEK5Logic(buffer, targetCh, th) {
+function processEK5Logic0(buffer, targetCh, th) {
     const dv = new DataView(buffer);
     let offset = 0;
     let pings = [];
     const chStr = targetCh.toString();
+	var navStr = "";
 
     while (offset + 2 <= dv.byteLength) {
         // 1. Czytamy rozmiar bloku (2 bajty)
@@ -676,22 +610,16 @@ function processEK5Logic(buffer, targetCh, th) {
             const t1 = String.fromCharCode(dv.getUint8(blockStart));
             const t2 = String.fromCharCode(dv.getUint8(blockStart + 1));
 
-            // 3. Logika dla telegramu 'Q' (Echogram)
-            if (t1 === 'Q' && t2 === chStr) {
-                // Nagłówek 'Q' ma minimum 44 bajty przed danymi s*
+            if (t1 === 'G' && t2 === 'L') { //  'GL' (navigation string)
+                navstr += ''+'\n';
+            } else if (t1 === 'Q' && t2 === chStr) {  //  'Q' (Echogram): 44 bytes + data (s*)
                 if (size >= 44) {
                     const pelCo = dv.getUint32(blockStart + 24, true);
                     let y = [];
-                    
-                    // 4. Kluczowe zabezpieczenie: obliczamy ile próbek faktycznie mieści się w bloku
-                    // (rozmiar bloku - 44 bajty nagłówka) / 2 bajty na próbkę (short)
                     const maxSamplesInBlock = Math.floor((size - 44) / 2);
                     const samplesToRead = Math.min(pelCo, maxSamplesInBlock);
-
                     for (let i = 0; i < samplesToRead; i++) {
                         const sampleOffset = blockStart + 44 + (i * 2);
-                        
-                        // Ostateczne sprawdzenie przed odczytem próbki
                         if (sampleOffset + 2 <= dv.byteLength) {
                             const wVal = dv.getInt16(sampleOffset, true);
                             const val = 3.0103 * wVal / 256;
@@ -702,12 +630,80 @@ function processEK5Logic(buffer, targetCh, th) {
                 }
             }
         }
-
-        // 5. Przesunięcie o nagłówek (2 bajty) + rozmiar bloku (size)
         offset += (2 + size);
     }
     return pings;
 }
+function processEK5Logic(buffer, targetCh, th) {
+    const dv = new DataView(buffer);
+    let offset = 0;
+    let pings = [];
+    const chStr = targetCh.toString();
+    let navStrCollection = []; 
+    const textDecoder = new TextDecoder("windows-1252");
+
+    while (offset + 2 <= dv.byteLength) {
+        const size = dv.getUint16(offset, true);
+        const blockStart = offset + 2;
+        if (blockStart + size > dv.byteLength) {
+            console.warn("Plik ucięty lub błędny rozmiar bloku przy offset:", offset);
+            break;
+        }
+        if (size >= 2) {
+            const t1 = String.fromCharCode(dv.getUint8(blockStart));
+            const t2 = String.fromCharCode(dv.getUint8(blockStart + 1));
+            if (t1 === 'G' && t2 === 'L') { //  'GL' (navigation string)
+                const stringOffset = blockStart + 2;
+                const stringLength = size - 2;
+                if (stringLength > 0) {
+                    const stringBuffer = new Uint8Array(buffer, stringOffset, stringLength);
+                    const cleanString = textDecoder.decode(stringBuffer).trim();
+		            const parts = cleanString.split(",");
+		            let latDec = null;
+		            let lonDec = null;
+		            const lonMatch = parts[4] ? parts[4].match(/^(\d{3})(\d{2}\.\d+)$/) : null;
+		            if (lonMatch) {
+		                const d = parseFloat(lonMatch[1]);
+		                const m = parseFloat(lonMatch[2]);
+		                lonDec = d + (m / 60);
+		                if (parts[5] === "W") lonDec = -lonDec;
+		            }
+		            const latMatch = parts[2] ? parts[2].match(/^(\d{2})(\d{2}\.\d+)$/) : null;
+		            if (latMatch) {
+		                const d = parseFloat(latMatch[1]);
+		                const m = parseFloat(latMatch[2]);
+		                latDec = d + (m / 60);
+		                if (parts[3] === "S") latDec = -latDec;
+		            }
+                    /*if (cleanString.length > 0) {
+                        navStrCollection.push(cleanString);
+                    }*/
+					navStrCollection.push(""+(lonDec)+" "+(latDec));
+                }
+            } else if (t1 === 'Q' && t2 === chStr) {  //  'Q' (Echogram)
+                if (size >= 44) {
+                    const pelCo = dv.getUint32(blockStart + 24, true);
+                    let y = [];
+                    const maxSamplesInBlock = Math.floor((size - 44) / 2);
+                    const samplesToRead = Math.min(pelCo, maxSamplesInBlock);
+                    for (let i = 0; i < samplesToRead; i++) {
+                        const sampleOffset = blockStart + 44 + (i * 2);
+                        if (sampleOffset + 2 <= dv.byteLength) {
+                            const wVal = dv.getInt16(sampleOffset, true);
+                            const val = 3.0103 * wVal / 256;
+                            y.push(val > th ? val : th);
+                        }
+                    }
+                    if (y.length > 0) pings.push(y);
+                }
+            }
+        }
+        offset += (2 + size);
+    }
+    const navStr = navStrCollection.join('\n');
+    return { pings, navStr };
+}
+
 
 // --- DT4 decodere ---
 function processDT4Logic0(buffer, targetCh, th) {
