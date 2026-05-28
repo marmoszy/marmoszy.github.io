@@ -80,7 +80,7 @@ async function handleFile() {
         }
         try {
             if (ext === 'raw') {
-                var data = processEK60Logic(arrayBuffer, ch, th);
+                var data = processEK60AndEK80Logic(arrayBuffer, ch, th);
 				pingsData = data.pings;
 				navs = data.navs;
             } else if (ext === 'ek5') {
@@ -561,7 +561,7 @@ function processEK60Logic0(buffer, targetCh, th) {
     return {pings,navs};
 }
 
-function processEK60Logic(buffer, targetCh, th) {
+function processEK60Logic1(buffer, targetCh, th) {
     const dv = new DataView(buffer);
     let offset = 0;
     let pings = [];
@@ -650,6 +650,222 @@ function processEK60Logic(buffer, targetCh, th) {
     const navs = navsCollection.join('\n');
     return { pings, navs };
 }
+
+function processEK60AndEK80Logic(buffer, targetCh, th) {
+    const dv = new DataView(buffer);
+    let offset = 0;
+    let pings = [];
+    let navsCollection = []; 
+    const textDecoder = new TextDecoder("utf-8");
+    let ek80ChannelsOrdered = []; 
+
+    while (offset + 4 <= dv.byteLength) {
+        const datagramLength = dv.getUint32(offset, true);  // (4 bytes, UInt32)
+        const datagramStart = offset + 4;        
+        if (datagramStart + datagramLength + 4 > dv.byteLength) {
+            console.warn("Error in block at offset:", offset);
+            break;
+        }
+        if (datagramLength >= 4) {
+            const typeStr = String.fromCharCode(
+                dv.getUint8(datagramStart),
+                dv.getUint8(datagramStart + 1),
+                dv.getUint8(datagramStart + 2),
+                dv.getUint8(datagramStart + 3)
+            );
+
+            // --- NMEA (EK60 i EK80) ---
+if (typeStr === 'NME0') { 
+    const textOffset = datagramStart + 12;
+    const textLength = datagramLength - 12;
+
+    if (textLength > 0) {
+        const stringBuffer = new Uint8Array(buffer, textOffset, textLength);
+        const cleanString = textDecoder.decode(stringBuffer).trim();       
+        const nmeaLines = cleanString.split(/[\r\n]+/);
+        for (let line of nmeaLines) {
+            if (!line.startsWith('$')) continue;
+            const pureLine = line.split('*')[0];
+            const parts = pureLine.split(",");            
+            if (parts.length < 5) continue;
+            const sentenceType = parts[0].substring(3, 6); 
+            let latStr = "", latDir = "";
+            let lonStr = "", lonDir = "";
+            if (sentenceType === "GGA") {
+                latStr = parts[2]; latDir = parts[3];
+                lonStr = parts[4]; lonDir = parts[5];
+            } else if (sentenceType === "RMC") {
+                latStr = parts[3]; latDir = parts[4];
+                lonStr = parts[5]; lonDir = parts[6];
+            } else if (sentenceType === "GLL") {
+                latStr = parts[1]; latDir = parts[2];
+                lonStr = parts[3]; lonDir = parts[4];
+            }
+            if (latStr && latDir && lonStr && lonDir) {
+                let latDec = null;
+                let lonDec = null;
+                const latMatch = latStr.match(/^(\d{2})(\d{2}\.\d+)$/);
+                if (latMatch) {
+                    const deg = parseFloat(latMatch[1]);
+                    const min = parseFloat(latMatch[2]);
+                    latDec = deg + (min / 60);
+                    if (latDir === "S") latDec = -latDec;
+                }
+                const lonMatch = lonStr.match(/^(\d{3})(\d{2}\.\d+)$/);
+                if (lonMatch) {
+                    const deg = parseFloat(lonMatch[1]);
+                    const min = parseFloat(lonMatch[2]);
+                    lonDec = deg + (min / 60);
+                    if (lonDir === "W") lonDec = -lonDec;
+                }
+                if (latDec !== null && lonDec !== null) {
+                    const coordString = `${lonDec.toFixed(8)} ${latDec.toFixed(8)}`;
+                    if (navsCollection.length === 0 || navsCollection[navsCollection.length - 1] !== coordString) {
+                        navsCollection.push(coordString);
+                    }
+                    break; 
+                }
+            }
+        }
+    }
+}
+/*
+            // --- XML0 (EK80) ---
+            else if (typeStr === 'XML0') {
+                const xmlOffset = datagramStart + 12;
+                const xmlLength = datagramLength - 12;
+                if (xmlLength > 0) {
+                    const xmlBuffer = new Uint8Array(buffer, xmlOffset, xmlLength);
+                    const xmlString = textDecoder.decode(xmlBuffer).trim();
+                    
+                    try {
+                        const parser = new DOMParser();
+                        const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+                        const channels = xmlDoc.getElementsByTagName("Channel");
+                        for (let i = 0; i < channels.length; i++) {
+                            const chId = channels[i].getAttribute("ChannelID");
+                            if (chId && !ek80ChannelsOrdered.includes(chId)) {
+                                ek80ChannelsOrdered.push(chId);
+                            }
+                        }
+                    } catch (e) {
+                        console.warn("Error parsing XML0:", e);
+                    }
+                }
+            }
+*/
+else if (typeStr === 'XML0') {  // with Regex
+    const xmlOffset = datagramStart + 12;
+    const xmlLength = datagramLength - 12;
+    if (xmlLength > 0) {
+        const xmlBuffer = new Uint8Array(buffer, xmlOffset, xmlLength);
+        const xmlString = textDecoder.decode(xmlBuffer).trim();
+        const channelRegex = /<Channel\s+[^>]*ChannelID=["']([^"']+)["']/g;
+        let match;
+        while ((match = channelRegex.exec(xmlString)) !== null) {
+            const chId = match[1];
+            if (chId && !ek80ChannelsOrdered.includes(chId)) {
+                ek80ChannelsOrdered.push(chId);
+            }
+        }
+    }
+}
+
+
+            // --- RAW0 (EK60) ---
+            else if (typeStr === 'RAW0') {
+                const channel = dv.getUint16(datagramStart + 12, true);
+                if (channel === targetCh) {
+                    let currentInternalOffset = 76;
+                    const stringLength = dv.getInt32(datagramStart + currentInternalOffset, true);
+                    currentInternalOffset += 4;
+                    currentInternalOffset += stringLength; 
+                    const count = dv.getInt32(datagramStart + currentInternalOffset, true);
+                    currentInternalOffset += 4; 
+                    const headerSize = currentInternalOffset;                     
+                    if (count > 0 && count < 65535) { 
+                        let y = [];
+                        const maxSamplesInBlock = Math.floor((datagramLength - headerSize) / 2);
+                        const samplesToRead = Math.min(count, maxSamplesInBlock);
+                        for (let i = 0; i < samplesToRead; i++) {
+                            const sampleOffset = datagramStart + headerSize + (i * 2);
+                            if (sampleOffset + 2 <= dv.byteLength) {
+                                const wVal = dv.getInt16(sampleOffset, true);
+                                const val = wVal * 0.01175893351;  
+                                y.push(val > th ? val : th);
+                            }
+                        }
+                        pings.push(y);
+                    }
+                }
+            }
+            // --- RAW3 (EK80) ---
+else if (typeStr === 'RAW3') {
+    const chIdBytes = new Uint8Array(buffer, datagramStart + 12, 128);
+    let chId = textDecoder.decode(chIdBytes).replace(/\0/g, '').trim();
+    let currentChannelNumber = ek80ChannelsOrdered.indexOf(chId) + 1;
+    if (currentChannelNumber === 0) {
+        ek80ChannelsOrdered.push(chId);
+        currentChannelNumber = ek80ChannelsOrdered.length;
+    }
+
+if (currentChannelNumber === targetCh) {
+    const dataType = dv.getUint16(datagramStart + 140, true); 
+    const count = dv.getUint32(datagramStart + 148, true); 
+    const headerSize = 152; 
+    if (count > 0 && count < 100000) { 
+        let y = [];
+        if (dataType === 1) { // CW: 4 bytes: 2B Int16 (power) + 2B (angles)
+            const sampleStride = 4; 
+            for (let i = 0; i < count; i++) {
+                const sampleOffset = datagramStart + headerSize + (i * sampleStride);
+                if (sampleOffset + 2 <= dv.byteLength) {
+                    const wVal = dv.getInt16(sampleOffset, true);
+                    const val = wVal * 0.01175893351; 
+                    y.push(val > th ? val : th);
+                }
+            }
+        }        
+        else if (dataType === 3 || dataType === 1032) { // FM:  4 x I/Q
+            const numSectors = 4; 
+            const sectorBytes = 8;
+            const sampleStride = numSectors * sectorBytes; 
+            const realDepthSamples = Math.floor(count / numSectors); 
+            for (let i = 0; i < realDepthSamples; i++) {
+                let sumI = 0;
+                let sumQ = 0;
+                const timeOffset = datagramStart + headerSize + (i * sampleStride);
+                for (let sector = 0; sector < numSectors; sector++) {
+                    const sectorOffset = timeOffset + (sector * sectorBytes);
+                    if (sectorOffset + 8 <= dv.byteLength) {
+                        sumI += dv.getFloat32(sectorOffset, true);
+                        sumQ += dv.getFloat32(sectorOffset + 4, true);
+                    }
+                }
+                const magnitude = Math.sqrt(sumI * sumI + sumQ * sumQ);
+                let val = th;
+                if (magnitude > 0) {
+                    val = 20 * Math.log10(magnitude);
+                }
+                y.push(val > th ? val : th);
+            }
+        }
+        if (y.length > 0) {
+            pings.push(y);
+        }
+    }
+}
+
+
+}
+
+        }
+        offset += datagramLength + 8;
+    }
+    var navs = navsCollection.join('\n');
+    return { pings, navs  };
+}
+
 
 // --- EK5 Decoder---
 function processEK5Logic0(buffer, targetCh, th) {
