@@ -13,7 +13,7 @@
 
 <div id="upload" style="">
     <b style="fonst-size:1.17em;">mm-echo2 - 3D echogram viewer:&nbsp;</b>
-    <input type="file" id="imageLoader" accept="image/*, text/plain, .tar.gz, .tgz"  multiple> or
+    <input type="file" id="imageLoader" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw"  multiple> or
 	<input type=button onclick="loadTgzFromUrl('dat/20020714.ek5.png.tgz');" value="Load example"/> or 
 	<span style="text-align:right" title="Download and then open">download it: <a href="dat/20020714.ek5.png.tgz">20020714.ek5.png.tgz</a></span>
 </div>
@@ -561,39 +561,272 @@ function debugCurveStringAsLine(curveString) {
 }
 
 // ==========================================
+// RYSOWANIE ECHOGRAMU - ZWRACA OBIEKT IMAGE
+// ==========================================
+// 64-kolorowa paleta z Twojego skryptu Perl
+const pal = [
+    0,0,143,   0,0,159,     0,0,175,   0,0,191,   0,0,207,   0,0,223,     0,0,239,   0,0,255,
+    0,15,255,  0,31,255,    0,47,255,  0,63,255,  0,79,255,  0,95,255,    0,111,255, 0,127,255,
+    0,143,255, 0,159,255,   0,175,255, 0,191,255, 0,207,255, 0,223,255,   0,239,255, 0,255,255,
+    15,255,255,31,255,239,  47,255,223,63,255,207,79,255,191,95,255,175,  111,255,159,127,255,143,
+    143,255,127,159,255,111,175,255,95,191,255,79,207,255,63,223,255,47,  239,255,31,255,255,15,
+    255,255,0, 255,239,0,   255,223,0, 255,207,0, 255,191,0, 255,175,0,   255,159,0, 255,143,0,
+    255,127,0, 255,111,0,   255,95,0,  255,79,0,  255,63,0,  255,47,0,    255,31,0,  255,15,0,
+    255,0,0,   239,0,0,     223,0,0,   207,0,0,   191,0,0,   175,0,0,     159,0,0,   143,0,0
+];
+
+function generateEchogramImage(pingsData, th) {
+    return new Promise((resolve) => {
+        if (!pingsData || pingsData.length === 0) {
+            resolve(new Image()); // Zwróć pusty obraz, jeśli brak danych
+            return;
+        }
+
+        const w = pingsData.length;
+        const h = Math.max(...pingsData.map(p => p.length));
+
+        // Używamy ukrytego elementu canvas do wyrenderowania obrazu w pamięci
+        const offscreenCanvas = document.createElement('canvas');
+        offscreenCanvas.width = w;
+        offscreenCanvas.height = h;
+        const ctx = offscreenCanvas.getContext('2d');
+        const imgData = ctx.createImageData(w, h);
+
+        for (let j = 0; j < w; j++) {
+            for (let i = 0; i < h; i++) {
+                let colorIdx = 0;
+                if (i < pingsData[j].length) {
+                    const val = pingsData[j][i];
+                    // Logika kolorów 64-paletowa
+                    colorIdx = val >= 0 ? 63 : (val > th ? Math.floor((val + 128) / 2) : 0);
+                }
+                const pIdx = (i * w + j) * 4;
+                colorIdx = Math.max(0, Math.min(63, colorIdx));
+                
+                imgData.data[pIdx]     = pal[colorIdx * 3];
+                imgData.data[pIdx + 1] = pal[colorIdx * 3 + 1];
+                imgData.data[pIdx + 2] = pal[colorIdx * 3 + 2];
+                imgData.data[pIdx + 3] = 255; // Alpha
+            }
+        }
+        ctx.putImageData(imgData, 0, 0);
+
+        // Konwersja wyrenderowanego płótna na obiekt typu Image (wymagany przez applyNewData)
+        const img = new Image();
+        img.onload = () => {
+            resolve(img); // Zwracamy obiekt Image, gdy dane base64 zostaną załadowane
+        };
+        img.src = offscreenCanvas.toDataURL();
+    });
+}
+
+function processEK5Logic(buffer, targetCh, th) {
+    const dv = new DataView(buffer);
+    let offset = 0;
+    let pings = [];
+    const chStr = targetCh.toString();
+    let navStrCollection = []; 
+    // Poprawiono dekoder na "windows-1252" lub "ascii", EK500 nie używa natywnie wielobajtowego UTF-8
+    const textDecoder = new TextDecoder("windows-1252");
+
+    while (offset + 2 <= dv.byteLength) {
+        const size = dv.getUint16(offset, true);
+        const blockStart = offset + 2;
+        if (blockStart + size > dv.byteLength) {
+            console.warn("File error in block at offset:", offset);
+            break;
+        }
+        if (size >= 2) {
+            const t1 = String.fromCharCode(dv.getUint8(blockStart));
+            const t2 = String.fromCharCode(dv.getUint8(blockStart + 1));
+            if (t1 === 'G' && t2 === 'L') { 
+                const stringOffset = blockStart + 2;
+                const stringLength = size - 2;
+                if (stringLength > 0) {
+                    const stringBuffer = new Uint8Array(buffer, stringOffset, stringLength);
+                    const cleanString = textDecoder.decode(stringBuffer).trim();
+                    const parts = cleanString.split(",");
+                    let latDec = null, lonDec = null;
+                    
+                    const lonMatch = parts[4] ? parts[4].match(/^(\d{3})(\d{2}\.\d+)$/) : null;
+                    if (lonMatch) {
+                        const d = parseFloat(lonMatch[1]);
+                        const m = parseFloat(lonMatch[2]);
+                        lonDec = d + (m / 60);
+                        if (parts[5] === "W") lonDec = -lonDec;
+                    }
+                    const latMatch = parts[2] ? parts[2].match(/^(\d{2})(\d{2}\.\d+)$/) : null;
+                    if (latMatch) {
+                        const d = parseFloat(latMatch[1]);
+                        const m = parseFloat(latMatch[2]);
+                        latDec = d + (m / 60);
+                        if (parts[3] === "S") latDec = -latDec;
+                    }
+                    
+                    if (latDec !== null && lonDec !== null) {
+                        navStrCollection.push(lonDec + " " + latDec);
+                    }
+                }
+            } else if (t1 === 'Q' && t2 === chStr) {  
+                if (size >= 44) {
+                    const pelCo = dv.getUint32(blockStart + 24, true);
+                    let y = [];
+                    const maxSamplesInBlock = Math.floor((size - 44) / 2);
+                    const samplesToRead = Math.min(pelCo, maxSamplesInBlock);
+                    for (let i = 0; i < samplesToRead; i++) {
+                        const sampleOffset = blockStart + 44 + (i * 2);
+                        if (sampleOffset + 2 <= dv.byteLength) {
+                            const wVal = dv.getInt16(sampleOffset, true);
+                            const val = 3.0103 * wVal / 256;
+                            y.push(val > th ? val : th);
+                        }
+                    }
+                    if (y.length > 0) pings.push(y);
+                }
+            }
+        }
+        offset += (2 + size);
+    }
+    const navs = navStrCollection.join('\n');
+    return { pings, navs };
+}
+
+function processEK60Logic(buffer, targetCh, th) {
+    const dv = new DataView(buffer);
+    let offset = 0;
+    let pings = [];
+    let navsCollection = []; 
+    const textDecoder = new TextDecoder("utf-8");
+    while (offset + 4 <= dv.byteLength) {
+        const datagramLength = dv.getUint32(offset, true);  // (4 bytes, UInt32)
+        const datagramStart = offset + 4;
+        
+        if (datagramStart + datagramLength + 4 > dv.byteLength) {
+            console.warn("Error in block at offset:", offset);
+            break;
+        }
+        
+        if (datagramLength >= 4) {
+            const typeStr = String.fromCharCode(
+                dv.getUint8(datagramStart),
+                dv.getUint8(datagramStart + 1),
+                dv.getUint8(datagramStart + 2),
+                dv.getUint8(datagramStart + 3)
+            );
+            if (typeStr === 'NME0') { // 0-3: 'NME0',  4-11: Low/High DateTime (64-bitowy timestamp Windows)
+                const textOffset = datagramStart + 12;
+                const textLength = datagramLength - 12;
+                if (textLength > 0) {
+					debugger;
+                    const stringBuffer = new Uint8Array(buffer, textOffset, textLength);
+                    const cleanString = textDecoder.decode(stringBuffer).trim();
+		            const parts = cleanString.split(",");
+		            let latDec = null, lonDec = null;
+		            const lonMatch = parts[3] ? parts[3].match(/^(\d{3})(\d{2}\.\d+)$/) : null;
+		            if (lonMatch) {
+		                const d = parseFloat(lonMatch[1]);
+		                const m = parseFloat(lonMatch[2]);
+		                lonDec = d + (m / 60);
+		                if (parts[4] === "W") lonDec = -lonDec;
+		            }
+		            const latMatch = parts[1] ? parts[1].match(/^(\d{2})(\d{2}\.\d+)$/) : null;
+		            if (latMatch) {
+		                const d = parseFloat(latMatch[1]);
+		                const m = parseFloat(latMatch[2]);
+		                latDec = d + (m / 60);
+		                if (parts[2] === "S") latDec = -latDec;
+		            }
+                    // if (cleanString.length > 0) {navStrCollection.push(cleanString);}
+					// navsCollection.push(""+(lonDec)+" "+(latDec));
+                    if (cleanString.length > 0 && cleanString.startsWith("$GPGLL")) {
+                        //navsCollection.push(cleanString);
+						navsCollection.push(""+(lonDec)+" "+(latDec));
+                    }
+                }
+            } 
+            // --- Istniejąca logika odczytu echogramu 'RAW0' ---
+            else if (typeStr === 'RAW0') {
+                const channel = dv.getUint16(datagramStart + 12, true);
+                if (channel === targetCh) {
+                    const mode = dv.getUint16(datagramStart + 14, true); 
+                    let currentInternalOffset = 76;
+                    const stringLength = dv.getInt32(datagramStart + currentInternalOffset, true);
+                    currentInternalOffset += 4;
+                    currentInternalOffset += stringLength; 
+                    const count = dv.getInt32(datagramStart + currentInternalOffset, true);
+                    currentInternalOffset += 4; 
+                    const headerSize = currentInternalOffset;                     
+                    if (count > 0 && count < 65535) { 
+                        let y = [];
+                        const maxSamplesInBlock = Math.floor((datagramLength - headerSize) / 2);
+                        const samplesToRead = Math.min(count, maxSamplesInBlock);
+                        for (let i = 0; i < samplesToRead; i++) {
+                            const sampleOffset = datagramStart + headerSize + (i * 2);
+                            if (sampleOffset + 2 <= dv.byteLength) {
+                                const wVal = dv.getInt16(sampleOffset, true);
+                                const val = wVal * 0.01175893351;  // to dB 
+                                y.push(val > th ? val : th);
+                            }
+                        }
+                        if (y.length > 0) pings.push(y);
+                    } else {
+                        console.log(`[DEBUG] RAW0 for channel ${channel}, count: ${count}. str: ${stringLength}`);
+                    }
+                }
+            }
+        }
+        offset += (4 + datagramLength + 4);
+    }
+    const navs = navsCollection.join('\n');
+    return { pings, navs };
+}
+
+// ==========================================
 // ARCHITEKTURA PARSERÓW DLA RÓŻNYCH FORMATÓW PLIKÓW
 // ==========================================
 var img_z = -2;
 
 const FileParsers = {
-    // Parser 1: Standardowe pliki graficzne (rastrowe)
     handleRasterImage: function(file, curve) {
         const reader = new FileReader();
         reader.onload = function(event) {
             const img = new Image();
             img.onload = function() {
-                // Jeśli to zwykły obraz, generujemy automatycznie prostą linię na osi X
-                // (współrzędne ustandaryzowane 0.0 do 1.0, o równej wysokości 0.0)
-                // const strPath = "-2,0; 2,0";
-                applyNewData(img, curve?curve:"-2,"+img_z+"; 2,"+img_z);
-                img_z += 0.4 ;
+                applyNewData(img, curve ? curve : "-2," + img_z + "; 2," + img_z);
+                img_z += 0.4;
             }
             img.src = event.target.result;
         }
         reader.readAsDataURL(file);
     },
-
-    // Parser 2: Miejsce na Twój przyszły format (np. JSON, XML lub plik tekstowy TXT)
-    handleCustomFormat: function(file) {
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            // Przykładowa symulacja odczytu struktury Twojego innego formatu:
-            // const parsedData = JSON.parse(event.target.result);
-            // const img = new Image();
-            // img.src = parsedData.base64Image;
-            // img.onload = () => applyNewData(img, parsedData.curveString);
-        }
-        // reader.readAsText(file);
+    handleCustomFormat: function(file) {     // returning Promise with img and curve
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = async function(event) {
+                try {
+                    const arrayBuffer = event.target.result; 
+                    const targetCh = 1;
+                    const th = -120;
+                    var  data = null;
+                    if (file.name.endsWith('.ek5')) {
+                        data = processEK5Logic(arrayBuffer, targetCh, th);
+                    } else if (file.name.endsWith('.raw')) {
+                        data = processEK60Logic(arrayBuffer, targetCh, th);
+                    } else {
+                        console.log(`File format not supported: ${file.name}`);
+                    }
+                    if(data) {
+                        const cleanStr = data.navs.replace(/\r?\n/g, ";").replace(/ +/g, ",");
+                        const img = await generateEchogramImage(data.pings, th);
+                        resolve({ img, curve: cleanStr });
+                    }
+                } catch (err) {
+                    reject(err);
+                }
+            }
+            reader.onerror = () => reject(reader.error);
+            reader.readAsArrayBuffer(file);
+        });
     }
 };
 
@@ -750,14 +983,15 @@ document.getElementById('imageLoader').addEventListener('change', async function
     const txtFiles = new Map();   // Klucz: rdzeń, Wartość: wyczyszczony string danych
     const imageFiles = new Map(); // Klucz: rdzeń, Wartość: obiekt Blob (File lub Blob z TAR)
     const customFiles = [];
+    
+    // NOWOŚĆ: Struktura na przetworzone gotowe dane z plików .ek5 (Klucz: rdzeń)
+    const ek5ProcessedData = new Map(); 
 
-    // Funkcja pomocnicza do wyciągania rdzenia nazwy (ignoruje foldery z TAR i rozszerzenia)
     function getNameCore(filepath) {
         const filename = filepath.split('/').pop();
         return filename.substring(0, filename.lastIndexOf('.')) || filename;
     }
 
-    // Sprawdzamy, czy użytkownik wybrał dokładnie jeden plik i jest to archiwum TAR.GZ
     const isTarGz = e.target.files.length === 1 && 
                     (e.target.files[0].name.endsWith('.tar.gz') || e.target.files[0].name.endsWith('.tgz'));
 
@@ -783,30 +1017,32 @@ document.getElementById('imageLoader').addEventListener('change', async function
                 }
             }
         } else {
-            // --- SCENARIUSZ B: KLASYCZNY MULTIPLE FILE SELECTION ---
-            const rawTxtDataMap = new Map(); // Rdzeń -> Plik File
-
+            const rawTxtDataMap = new Map();
             for (const file of e.target.files) {
                 const core = getNameCore(file.name);
-                
                 if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
                     rawTxtDataMap.set(core, file);
                 } else if (file.type.startsWith('image/')) {
-                    // Tradycyjny plik graficzny (File dziedziczy po Blob, więc jest bezpieczny)
                     imageFiles.set(core, file);
-                } else if (file.name.endsWith('.custom') || file.type === 'application/json') {
-                    customFiles.push(file);
+                } else if (file.name.endsWith('.ek5') || file.name.endsWith('.raw')) {
+                    customFiles.push(file); // for async processing
                 } else {
                     console.warn(`Nierozpoznany format pliku: ${file.name}. Brak pasującego parsera.`);
                 }
             }
-
-            // Przetwarzanie plików .custom (idą osobną ścieżką jak dawniej)
-            for (const file of customFiles) {
-                FileParsers.handleCustomFormat(file);
+            if (customFiles.length > 0) {             // async processing  (.ek5, .raw) 
+                const ek5Promises = customFiles.map(async (file) => {
+                    const core = getNameCore(file.name);
+                    try {
+                        const result = await FileParsers.handleCustomFormat(file);
+                        // Zapisujemy sparsowany sparowany komplet (obraz + tekstowa krzywa)
+                        ek5ProcessedData.set(core, result);
+                    } catch (err) {
+                        console.error(`Błąd parsowania pliku EK5 (${file.name}):`, err);
+                    }
+                });
+                await Promise.all(ek5Promises);
             }
-
-            // Wczytujemy asynchronicznie luźne pliki tekstowe przy użyciu FileReader
             if (rawTxtDataMap.size > 0) {
                 const txtPromises = Array.from(rawTxtDataMap.entries()).map(([core, file]) => {
                     return new Promise((resolve) => {
@@ -822,49 +1058,43 @@ document.getElementById('imageLoader').addEventListener('change', async function
                 await Promise.all(txtPromises);
             }
         }
+        if (txtFiles.size === 0 && ek5ProcessedData.size === 0) return;
 
-        // Jeśli po obu ścieżkach nie mamy żadnych plików tekstowych, przerywamy
-        if (txtFiles.size === 0) return;
-
-        // =================================================================================
-        // KROK 2: FAZA 1 - Przejrzenie wszystkich zgromadzonych krzywych i wyznaczenie globalBounds
-        // =================================================================================
         let globalBounds = { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity };
-
-        for (const [core, cleanStr] of txtFiles.entries()) {
+        function updateBoundsFromCurve(cleanStr) {
             const points = parsePointsToObjects(cleanStr);
             for (const p of points) {
                 if (p.x < globalBounds.minX) globalBounds.minX = p.x;
                 if (p.x > globalBounds.maxX) globalBounds.maxX = p.x;
-                if (p.y < globalBounds.minZ) globalBounds.minZ = p.y; // .y z Twojego parsera to oś Z
+                if (p.y < globalBounds.minZ) globalBounds.minZ = p.y;
                 if (p.y > globalBounds.maxZ) globalBounds.maxZ = p.y;
             }
         }
-
-        // =================================================================================
-        // KROK 3: FAZA 2 - Skalowanie krzywych globalnym boxem i parowanie z obrazami (Blob)
-        // =================================================================================
         for (const [core, cleanStr] of txtFiles.entries()) {
-            // Skalujemy krzywą przy użyciu zunifikowanego, wspólnego bounding boxa
+            updateBoundsFromCurve(cleanStr);
+        }
+        for (const [core, data] of ek5ProcessedData.entries()) {
+            updateBoundsFromCurve(data.curve);
+        }
+        for (const [core, cleanStr] of txtFiles.entries()) {
             const scaledCurveString = mapCurveStringWithAspectRatio(cleanStr, globalBounds);
-            
-            // Szukamy obrazu (File lub Blob) o tym samym rdzeniu nazwy
             const matchingImageBlob = imageFiles.get(core);
-
             if (matchingImageBlob) {
-                // Aktualizujemy globalny wskaźnik bezpośrednio przed wywołaniem parsera rastrowego
                 lastLoadedCurveString = scaledCurveString;
-
-                // Wywołujemy oryginalny parser – typ Blob/File bezpiecznie przejdzie przez FileReader.readAsDataURL
                 FileParsers.handleRasterImage(matchingImageBlob, scaledCurveString);
-                
-                console.log(`[SUKCES] Sparowano i załadowano: ${core}`);
+                console.log(`[SUKCES] Sparowano i załadowano standardową parę: ${core}`);
             } else {
                 console.log(`[INFO] Plik "${core}.txt" nie posiada pasującego obrazu. Rysowanie samej krzywej.`);
                 if (typeof debugCurveStringAsLine === 'function') {
                     debugCurveStringAsLine(scaledCurveString);
                 }
             }
+        }
+        for (const [core, data] of ek5ProcessedData.entries()) {
+            const scaledCurveString = mapCurveStringWithAspectRatio(data.curve, globalBounds);
+            lastLoadedCurveString = scaledCurveString;
+            applyNewData(data.img, scaledCurveString);
+            console.log(`[SUKCES] Loaded: ${core}`);
         }
 
     } catch (error) {
