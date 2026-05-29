@@ -1208,14 +1208,14 @@ document.getElementById('imageLoader').addEventListener('change', async function
             const rawTxtDataMap = new Map();
             for (const file of e.target.files) {
                 const core = getNameCore(file.name);
-                if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+                if (file.name.endsWith('.ek5') || file.name.endsWith('.raw')) {
+                    customFiles.push(file); // for async processing
+                } else if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
                     rawTxtDataMap.set(core, file);
                 } else if (file.type.startsWith('image/')) {
                     imageFiles.set(core, file);
-                } else if (file.name.endsWith('.ek5') || file.name.endsWith('.raw')) {
-                    customFiles.push(file); // for async processing
                 } else {
-                    console.warn(`Nierozpoznany format pliku: ${file.name}. Brak pasującego parsera.`);
+                    console.warn(`File not known: ${file.name}.`);
                 }
             }
             if (customFiles.length > 0) {             // async processing  (.ek5, .raw) 
@@ -1226,7 +1226,7 @@ document.getElementById('imageLoader').addEventListener('change', async function
                         // Zapisujemy sparsowany sparowany komplet (obraz + tekstowa krzywa)
                         ek5ProcessedData.set(core, result);
                     } catch (err) {
-                        console.error(`Błąd parsowania pliku EK5 (${file.name}):`, err);
+                        console.error(`Error in parsing: (${file.name}):`, err);
                     }
                 });
                 await Promise.all(ek5Promises);
