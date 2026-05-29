@@ -13,7 +13,7 @@
 
 <div id="upload" style="">
     <b style="fonst-size:1.17em;">mm-echo2 - 3D echogram viewer:&nbsp;</b>
-    <input type="file" id="imageLoader" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw"  multiple> or
+    <input type="file" id="imageLoader" title="Select .dgx, .ek5, .raw file(s) or its tgz archive" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9"  multiple> or
 	<input type=button onclick="loadTgzFromUrl('dat/20020714.ek5.png.tgz');" value="Load example"/> or 
 	<span style="text-align:right" title="Download and then open">download it: <a href="dat/20020714.ek5.png.tgz">20020714.ek5.png.tgz</a></span>
 </div>
@@ -68,7 +68,7 @@ const axesGeometry = new THREE.BufferGeometry();
 const axesVertices = [
     // --- main axes ---
     -2.0, 0.0,  0.0,   2.0, 0.0,  0.0, // X (center)
-     0.0, 0.0,  0.0,   0.0, 0.3,  0.0, // Y (center)
+     0.0, 0.0,  0.0,   0.0, 0.0,  0.0, // Y (center)
      0.0, 0.0, -2.0,   0.0, 0.0,  2.0, // Z (center)
     // --- X (red) ---
     -2.0, 0.0, -2.0,   2.0, 0.0, -2.0, // top
@@ -114,7 +114,6 @@ const lineVertices = [];
 for(let i = 0; i <= 200; i++) {
     const xTarget = i / 200.0;
     let yTarget = 0.0;
-
     for (let j = 0; j < punktyDlaLinii.length - 1; j++) {
         if (xTarget >= punktyDlaLinii[j].x && xTarget <= punktyDlaLinii[j+1].x) {
             const t = (xTarget - punktyDlaLinii[j].x) / (punktyDlaLinii[j+1].x - punktyDlaLinii[j].x);
@@ -122,45 +121,36 @@ for(let i = 0; i <= 200; i++) {
             break;
         }
     }
-    // Przeliczenie na pozycję w świecie 3D (identycznie jak w shaderze)
-    lineVertices.push((xTarget - 0.5) * meshWidth, 0.0, yTarget);
+    lineVertices.push((xTarget - 0.5) * meshWidth, 0.0, yTarget); // pos in 3D (like in shader)
 }
 lineGeometry.setAttribute('position', new THREE.Float32BufferAttribute(lineVertices, 3));
-const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // Czarny kolor
+const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 }); // black
 const pathLine = new THREE.Line(lineGeometry, lineMaterial);
 
 
-// SHADERS
+// --- Shaders ---
 
 const vertexShader = `
     varying vec2 vUv;
     uniform sampler2D u_dataTexture;
     uniform float u_numPoints;
     uniform float u_botOffset;
-
     void main() {
         vUv = uv; 
-        
         // Obliczamy indeks punktu chronologicznie na podstawie liniowego uv.x
         float pointIndex = uv.x * (u_numPoints - 1.0);
-        
         // Zabezpieczenie przed wyjściem poza 201 punktów na prawym brzegu
         pointIndex = clamp(pointIndex, 0.0, u_numPoints - 1.0);
-        
         // Trafiamy idealnie w środek piksela danych
         float texelX = (pointIndex + 0.5) / u_numPoints;
-        
         // Pobieramy nienaruszone, chronologiczne współrzędne z pliku tekstowego
         vec4 dataSample = texture2D(u_dataTexture, vec2(texelX, 0.5));
-        
         // Karta graficzna buduje geometrię dokładnie po śladzie zapisanym w TXT
         float currentWorldX = dataSample.r;
         float topEdge = dataSample.g;
-
         float yPositionInMesh = uv.y; 
         float finalY = mix(-u_botOffset, 0.0, yPositionInMesh);
         float finalZ = topEdge;
-
         vec3 deformedPosition = vec3(currentWorldX, finalY, finalZ);
         gl_Position = projectionMatrix * modelViewMatrix * vec4(deformedPosition, 1.0);
     }
@@ -169,15 +159,13 @@ const vertexShader = `
 const fragmentShader = `
     varying vec2 vUv;
     uniform sampler2D u_imageTexture;
-
     void main() {
         gl_FragColor = texture2D(u_imageTexture, vUv);
     }
 `;
 
-// ==========================================
-// TWORZENIE OBIEKTU 3D
-// ==========================================
+// object in 3D
+
 const loader = new THREE.TextureLoader();
 // internal Base64 placeholder 
 const imageTexture = loader.load("data:image/svg+xml;utf8,<svg xmlns='http://w3.org' width='512' height='512'><rect width='512' height='512' fill='%239b59b6'/><text x='50%23' y='50%23' font-family='sans-serif' font-size='24' fill='white' text-anchor='middle' dominant-baseline='middle'>Wgraj zdjecie z dysku</text></svg>");
@@ -188,7 +176,6 @@ const customUniforms = {
     u_numPoints: { value: numPoints },
     u_botOffset: { value: dolnyOffset }
 };
-
 const customMaterial = new THREE.ShaderMaterial({
     vertexShader: vertexShader,
     fragmentShader: fragmentShader,
@@ -209,15 +196,13 @@ scene.add(mainGroup);
 mainGroup.rotation.x = rotationX;
 mainGroup.rotation.y = rotationY;
 
-// ==========================================
-// mouse, touchpad (rot + shift zoom)
-// ==========================================
+// --- mouse, touchpad (rot + shift zoom) ---
+
 window.addEventListener('pointerdown', (e) => {
     if (e.target.tagName === 'INPUT') return; 
     isDragging = true;
     previousMousePosition = { x: e.clientX, y: e.clientY };
 });
-
 window.addEventListener('pointermove', (e) => {
     if (!isDragging) return;    
     const deltaX = e.clientX - previousMousePosition.x;
@@ -235,12 +220,9 @@ window.addEventListener('pointermove', (e) => {
     }   
     previousMousePosition = { x: e.clientX, y: e.clientY };
 });
-
 window.addEventListener('pointerup', () => {
     isDragging = false;
 });
-
-// Ulepszona obsługa kółka myszy oraz gestu uszczypnięcia (Pinch-to-zoom) na touchpadzie
 window.addEventListener('wheel', (e) => {
     let zoomSpeed = 0.05;
     if (e.ctrlKey) {
@@ -432,43 +414,30 @@ function applyNewData000(imageElement, curveString, maxPoints = 201) {
 }
 
 function applyNewData(imageElement, curveString) {
-    // 1. Parsowanie oryginalnych 1020 punktów - BEZ SORTOWANIA!
     let points = parsePointsToObjects(curveString);
-    
     if (!points || points.length === 0) return;
-
-    // 2. DECJMACJA: Wybieramy dokładnie 201 punktów, zachowując 100% oryginalną kolejność pliku
-    const targetCount = 201; // 200 segmentów wymaga dokładnie 201 wierzchołków
+    const targetCount = 201; // 200 segments -> 201 vertices
     const sampledPoints = [];
-    const totalPoints = points.length;
-    
+    const totalPoints = points.length;   
     for (let i = 0; i < targetCount; i++) {
-        // Wybieramy indeksy równomiernie z oryginalnej chronologii (np. co 5. punkt)
         const index = Math.floor((i * (totalPoints - 1)) / (targetCount - 1));
         sampledPoints.push(points[index]);
     }
-
-    // 3. Tworzenie Float32Array dla DataTexture
     const data = new Float32Array(targetCount * 4);
     for (let i = 0; i < targetCount; i++) {
-        data[i * 4 + 0] = sampledPoints[i].x; // Rzeczywiste X z pliku (może się cofać!)
-        data[i * 4 + 1] = sampledPoints[i].y; // Rzeczywiste Z z pliku
+        data[i * 4 + 0] = sampledPoints[i].x; // x
+        data[i * 4 + 1] = sampledPoints[i].y; // z 
         data[i * 4 + 2] = 0.0;
         data[i * 4 + 3] = 1.0;
     }
-    
     const newBufferTexture = new THREE.DataTexture(data, targetCount, 1, THREE.RGBAFormat, THREE.FloatType);
-    
-    // Filtrowanie Nearest jest kluczowe, aby karta nie mieszała losowo sąsiednich, cofających się punktów
     newBufferTexture.minFilter = THREE.NearestFilter;
     newBufferTexture.magFilter = THREE.NearestFilter;
     newBufferTexture.wrapS = THREE.ClampToEdgeWrapping;
     newBufferTexture.wrapT = THREE.ClampToEdgeWrapping;
     newBufferTexture.needsUpdate = true;
-    
     const newImageTexture = new THREE.Texture(imageElement); 
     newImageTexture.needsUpdate = true;
-
     const instanceMaterial = new THREE.ShaderMaterial({
         vertexShader: vertexShader,
         fragmentShader: fragmentShader,
@@ -481,88 +450,65 @@ function applyNewData(imageElement, curveString) {
         side: THREE.DoubleSide, 
         transparent: true
     });
-
-    // 4. Tworzenie geometrii ze STANDARDOWYMI, liniowymi współrzędnymi UV
-    // Ponieważ nasza tekstura danych ma dokładnie taki sam postęp chronologiczny (0..200) 
-    // jak segmenty siatki (200), domyślne liniowe UV z PlaneGeometry jest tutaj IDEALNE!
     const geometry = new THREE.PlaneGeometry(meshWidth, 1.0, 200, 1);
-
     const newMesh = new THREE.Mesh(geometry, instanceMaterial);
     mainGroup.add(newMesh);
-    
     if (typeof createPathLine === 'function') {
         const pathLine = createPathLine(curveString);
         mainGroup.add(pathLine);
     }
+    const line0 = thLine([[points[0].x,0,points[0].y],[points[0].x,0.2,points[0].y]],0x008080);
+    mainGroup.add(line0);
 }
 
-
-// Funkcja pomocnicza do decymacji (równomierne próbkowanie)
-function reducePointsSample(points, targetCount) {
+function reducePointsSample(points, targetCount) { // decimation
     const sampled = [];
     const totalPoints = points.length;
-    
-    // Zawsze zachowaj pierwszy punkt
     sampled.push(points[0]);
-    
     for (let i = 1; i < targetCount - 1; i++) {
-        // Wylicz indeks proporcjonalnie rozłożony w tablicy wejściowej
         const index = Math.floor((i * (totalPoints - 1)) / (targetCount - 1));
         sampled.push(points[index]);
     }
-    
-    // Zawsze zachowaj ostatni punkt
     sampled.push(points[totalPoints - 1]);
-    
     return sampled;
 }
 
 function debugCurveStringAsLine(curveString) {
-    // 1. Parsowanie oryginalnych 1020 punktów (BEZ SORTOWANIA)
     const points = parsePointsToObjects(curveString);
-    
     if (!points || points.length === 0) {
-        console.error("[DEBUG] Brak punktów do wyświetlenia lub błąd parsowania.");
+        console.error("[DEBUG] No points.");
         return;
     }
-
-    // 2. Przygotowanie tablicy wierzchołków dla geometrii Three.js
     const vertices = [];
-    
     for (let i = 0; i < points.length; i++) {
         const p = points[i];
-        
-        // Zgodnie z Twoimi założeniami:
-        // x z pliku -> oś X w świecie 3D
-        // y z pliku -> oś Z w świecie 3D (profil wysokościowy krzywej)
-        // Oś Y ustawiona na sztywno na 0.0 (płaska powierzchnia)
         vertices.push(new THREE.Vector3(p.x, 0.0, p.y));
     }
-
-    // 3. Tworzenie czystej geometrii linii na podstawie surowych wierzchołków
     const geometry = new THREE.BufferGeometry().setFromPoints(vertices);
-
-    // 4. Tworzenie prostego, dobrze widocznego materiału (wyrazisty czerwony)
     const material = new THREE.LineBasicMaterial({
         color: 0xff0000,
-        linewidth: 1 // Większość przeglądarek i tak wymusza 1px ze względu na specyfikację WebGL
+        linewidth: 1
     });
-
-    // 5. Budowanie obiektu linii (używamy THREE.Line dla ciągłej ścieżki)
     const debugLine = new THREE.Line(geometry, material);
-    
-    // 6. Dodanie linii bezpośrednio do Twojej globalnej grupy
     mainGroup.add(debugLine);
-
-    // 7. Pomocnicze logi w konsoli przeglądarki do weryfikacji współrzędnych krańcowych
-    console.log(`[DEBUG] Sukces! Narysowano surową linię z ${points.length} punktów.`);
-    console.log(`[DEBUG] Pierwszy punkt w pliku: X = ${points[0].x}, Z(y) = ${points[0].y}`);
-    console.log(`[DEBUG] Ostatni punkt w pliku:  X = ${points[points.length - 1].x}, Z(y) = ${points[points.length - 1].y}`);
+    console.log(`[DEBUG] Success! Line of ${points.length} points.`);
+    console.log(`[DEBUG] First: X = ${points[0].x}, Z(y) = ${points[0].y}`);
+    console.log(`[DEBUG] Last:  X = ${points[points.length - 1].x}, Z(y) = ${points[points.length - 1].y}`);
 }
 
-// ==========================================
-// RYSOWANIE ECHOGRAMU - ZWRACA OBIEKT IMAGE
-// ==========================================
+function thLine(pts,col) {
+    const points = [];
+debugger;
+    points.push(new THREE.Vector3(pts[0][0], pts[0][1], pts[0][2]));
+    points.push(new THREE.Vector3(pts[1][0], pts[1][1], pts[1][2]));
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({color: col,linewidth:1});
+    const line = new THREE.Line(geometry, material);
+    return line;
+}
+
+// --- Echogram generator ---
+
 // 64-kolorowa paleta z Twojego skryptu Perl
 const pal = [
     0,0,143,   0,0,159,     0,0,175,   0,0,191,   0,0,207,   0,0,223,     0,0,239,   0,0,255,
@@ -618,6 +564,84 @@ function generateEchogramImage(pingsData, th) {
         };
         img.src = offscreenCanvas.toDataURL();
     });
+}
+
+function processDGxLogic(buffer, targetCh, th) {
+    const dv = new DataView(buffer);
+    let offset = 0;
+    let pings = [];
+    const chStr = targetCh.toString();
+    let navStrCollection = []; 
+    const textDecoder = new TextDecoder("utf-8");
+
+    // W formacie .dg/.dgn nagłówek długości ma 4 bajty (UInt32)
+    while (offset + 4 <= dv.byteLength) {
+        const size = dv.getUint32(offset, true); // ZMIANA: getUint32 zamiast getUint16
+        const blockStart = offset + 4;            // ZMIANA: blockStart przesunięty o 4 bajty
+        
+        if (blockStart + size > dv.byteLength) {
+            console.warn("File error in block at offset:", offset);
+            break;
+        }
+        
+        if (size >= 2) {
+            const t1 = String.fromCharCode(dv.getUint8(blockStart));
+            const t2 = String.fromCharCode(dv.getUint8(blockStart + 1));
+            
+            // --- Telegram nawigacyjny 'GL' ---
+            if (t1 === 'G' && t2 === 'L') { 
+                const stringOffset = blockStart + 2;
+                const stringLength = size - 2;
+                if (stringLength > 0) {
+                    const stringBuffer = new Uint8Array(buffer, stringOffset, stringLength);
+                    const cleanString = textDecoder.decode(stringBuffer).trim();
+                    const parts = cleanString.split(",");
+                    let latDec = null, lonDec = null;
+                    
+                    const lonMatch = parts[4] ? parts[4].match(/^(\d{3})(\d{2}\.\d+)$/) : null;
+                    if (lonMatch) {
+                        const d = parseFloat(lonMatch[1]);
+                        const m = parseFloat(lonMatch[2]);
+                        lonDec = d + (m / 60);
+                        if (parts[5] === "W") lonDec = -lonDec;
+                    }
+                    const latMatch = parts[2] ? parts[2].match(/^(\d{2})(\d{2}\.\d+)$/) : null;
+                    if (latMatch) {
+                        const d = parseFloat(latMatch[1]);
+                        const m = parseFloat(latMatch[2]);
+                        latDec = d + (m / 60);
+                        if (parts[3] === "S") latDec = -latDec;
+                    }
+                    navStrCollection.push("" + lonDec + " " + latDec);
+                }
+            } 
+            // --- Telegram echogramu 'Q' + numer kanału ---
+            else if (t1 === 'Q' && t2 === chStr) {  
+                if (size >= 44) {
+                    const pelCo = dv.getUint32(blockStart + 24, true);
+                    let y = [];
+                    const maxSamplesInBlock = Math.floor((size - 44) / 2);
+                    const samplesToRead = Math.min(pelCo, maxSamplesInBlock);
+                    
+                    for (let i = 0; i < samplesToRead; i++) {
+                        const sampleOffset = blockStart + 44 + (i * 2);
+                        if (sampleOffset + 2 <= dv.byteLength) {
+                            const wVal = dv.getInt16(sampleOffset, true);
+                            const val = 3.0103 * wVal / 256;
+                            y.push(val > th ? val : th);
+                        }
+                    }
+                    if (y.length > 0) pings.push(y);
+                }
+            }
+        }
+        
+        // ZMIANA: Przesunięcie o 4 bajty nagłówka długości + rozmiar payloadu
+        offset += (4 + size);
+    }
+    
+    const navs = navStrCollection.join('\n');
+    return { pings, navs };
 }
 
 function processEK5Logic(buffer, targetCh, th) {
@@ -902,6 +926,7 @@ else if (typeStr === 'XML0') {  // with Regex
             }
             // --- RAW3 (EK80) ---
 else if (typeStr === 'RAW3') {
+debugger;
     const chIdBytes = new Uint8Array(buffer, datagramStart + 12, 128);
     let chId = textDecoder.decode(chIdBytes).replace(/\0/g, '').trim();
     let currentChannelNumber = ek80ChannelsOrdered.indexOf(chId) + 1;
@@ -996,8 +1021,12 @@ const FileParsers = {
                     const targetCh = 1;
                     const th = -120;
                     var  data = null;
+                    const dgx = /\.dg.$/i;
+debugger;
                     if (file.name.endsWith('.ek5')) {
                         data = processEK5Logic(arrayBuffer, targetCh, th);
+                    } else if (dgx.test(file.name)) {
+                        data = processDGxLogic(arrayBuffer, targetCh, th);
                     } else if (file.name.endsWith('.raw')) {
                         data = processEK60AndEK80Logic(arrayBuffer, targetCh, th);
                     } else {
@@ -1166,35 +1195,27 @@ function readString(bytes, start, length) {
 
 document.getElementById('imageLoader').addEventListener('change', async function(e) {
     if (!e.target.files || e.target.files.length === 0) return;
-
-    // Struktury przechowujące dane do parowania
-    const txtFiles = new Map();   // Klucz: rdzeń, Wartość: wyczyszczony string danych
-    const imageFiles = new Map(); // Klucz: rdzeń, Wartość: obiekt Blob (File lub Blob z TAR)
+    const txtFiles = new Map();
+    const imageFiles = new Map();
     const customFiles = [];
-    
-    // NOWOŚĆ: Struktura na przetworzone gotowe dane z plików .ek5 (Klucz: rdzeń)
     const ek5ProcessedData = new Map(); 
 
     function getNameCore(filepath) {
         const filename = filepath.split('/').pop();
         return filename.substring(0, filename.lastIndexOf('.')) || filename;
     }
-
     const isTarGz = e.target.files.length === 1 && 
-                    (e.target.files[0].name.endsWith('.tar.gz') || e.target.files[0].name.endsWith('.tgz'));
-
+                    (e.target.files[0].name.endsWith('.tar.gz') ||
+                     e.target.files[0].name.endsWith('.tgz'));
     try {
         if (isTarGz) {
             const archiveFile = e.target.files[0];
             const archiveBuffer = await archiveFile.arrayBuffer();
             const unzippedBuffer = await gunzip(archiveBuffer);
             const extractedFiles = untar(unzippedBuffer);
-
             const textDecoder = new TextDecoder("utf-8");
-
             for (const file of extractedFiles) {
-                const core = getNameCore(file.name);
-                
+                const core = getNameCore(file.name);               
                 if (file.name.endsWith('.txt')) {
                     const rawText = textDecoder.decode(file.arrayBuffer).trim();
                     const cleanStr = rawText.replace(/\r?\n/g, ";").replace(/ +/g, ",");
@@ -1208,14 +1229,15 @@ document.getElementById('imageLoader').addEventListener('change', async function
             const rawTxtDataMap = new Map();
             for (const file of e.target.files) {
                 const core = getNameCore(file.name);
-                if (file.name.endsWith('.ek5') || file.name.endsWith('.raw')) {
+		const dgx = /\.dg.$/i;
+                if (dgx.test(file.name) || file.name.endsWith('.ek5') || file.name.endsWith('.raw')) {
                     customFiles.push(file); // for async processing
                 } else if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
                     rawTxtDataMap.set(core, file);
                 } else if (file.type.startsWith('image/')) {
                     imageFiles.set(core, file);
                 } else {
-                    console.warn(`File not known: ${file.name}.`);
+                    console.warn(`File format not known: ${file.name}.`);
                 }
             }
             if (customFiles.length > 0) {             // async processing  (.ek5, .raw) 
@@ -1223,10 +1245,9 @@ document.getElementById('imageLoader').addEventListener('change', async function
                     const core = getNameCore(file.name);
                     try {
                         const result = await FileParsers.handleCustomFormat(file);
-                        // Zapisujemy sparsowany sparowany komplet (obraz + tekstowa krzywa)
                         ek5ProcessedData.set(core, result);
                     } catch (err) {
-                        console.error(`Error in parsing: (${file.name}):`, err);
+                        console.error(`Error parsing ${file.name}:`, err);
                     }
                 });
                 await Promise.all(ek5Promises);
@@ -1247,7 +1268,6 @@ document.getElementById('imageLoader').addEventListener('change', async function
             }
         }
         if (txtFiles.size === 0 && ek5ProcessedData.size === 0) return;
-
         let globalBounds = { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity };
         function updateBoundsFromCurve(cleanStr) {
             const points = parsePointsToObjects(cleanStr);
@@ -1270,9 +1290,9 @@ document.getElementById('imageLoader').addEventListener('change', async function
             if (matchingImageBlob) {
                 lastLoadedCurveString = scaledCurveString;
                 FileParsers.handleRasterImage(matchingImageBlob, scaledCurveString);
-                console.log(`[SUKCES] Sparowano i załadowano standardową parę: ${core}`);
+                console.log(`[SUCCESS] ${core}: image and track paired: `);
             } else {
-                console.log(`[INFO] Plik "${core}.txt" nie posiada pasującego obrazu. Rysowanie samej krzywej.`);
+                console.log(`[INFO] "${core}.txt" has no image.`);
                 if (typeof debugCurveStringAsLine === 'function') {
                     debugCurveStringAsLine(scaledCurveString);
                 }
@@ -1282,32 +1302,24 @@ document.getElementById('imageLoader').addEventListener('change', async function
             const scaledCurveString = mapCurveStringWithAspectRatio(data.curve, globalBounds);
             lastLoadedCurveString = scaledCurveString;
             applyNewData(data.img, scaledCurveString);
-            console.log(`[SUKCES] Loaded: ${core}`);
+            console.log(`[SUCCESS] ${core} loaded`);
         }
-
     } catch (error) {
-        console.error("Błąd podczas przetwarzania danych wejściowych loadera:", error);
+        console.error("Loader error:", error);
     }
 });
 
 async function loadTgzFromUrl(urlString) {
     if (!urlString) return;
-
     try {
         console.log(`[URL] Pobieranie archiwum: ${urlString}`);
         const response = await fetch(urlString);
         if (!response.ok) throw new Error(`HTTP Status: ${response.status}`);
-        
         const archiveBuffer = await response.arrayBuffer();
         const unzippedBuffer = await gunzip(archiveBuffer);
         const extractedFiles = untar(unzippedBuffer);
-
-        // 1. Tworzymy obiekt DataTransfer, który pozwala wygenerować sztuczną listę plików (FileList)
         const dataTransfer = new DataTransfer();
-
-        // 2. Mapujemy rozpakowane pliki (ArrayBuffer) na natywne obiekty File
         for (const extFile of extractedFiles) {
-            // Ustalamy prawidłowy typ MIME dla obrazów i plików tekstowych
             let mimeType = "application/octet-stream";
             if (extFile.name.endsWith('.txt')) {
                 mimeType = "text/plain";
@@ -1318,42 +1330,30 @@ async function loadTgzFromUrl(urlString) {
             } else {
             	mimeType = 'application/octet-stream';
             }
-
-            // Tworzymy prawdziwy obiekt File z binarnego bufora
             const fileObj = new File([extFile.arrayBuffer], extFile.name, { type: mimeType });
-            
-            // Dodajemy plik do kontenera transferu danych
             dataTransfer.items.add(fileObj);
         }
-
-        // 3. Sprawdzamy, czy w ogóle wyodrębniliśmy jakieś pliki
         if (dataTransfer.files.length === 0) {
-            console.warn("[URL] Archiwum jest puste.");
+            console.warn("[URL] Archive is empty.");
             return;
         }
-
-        // 4. Budujemy sztuczny obiekt zdarzenia (Mock Event), który idealnie udaje zachowanie 'change'
         const mockEvent = {
             target: {
-                files: dataTransfer.files // Tutaj znajduje się wygenerowany obiekt FileList
+                files: dataTransfer.files // FileList
             }
         };
-
-        console.log(`[URL] Sukces. Wyodrębniono ${dataTransfer.files.length} plików. Przekazywanie do lokalnego handlera...`);
-
-        // 5. Pobieramy Twój istniejący element input i ręcznie przypisujemy mu te pliki (opcjonalne, ale przydatne)
+        console.log(`[URL] Success. Extracted ${dataTransfer.files.length} files.`);
         const fileInput = document.getElementById('imageLoader');
         if (fileInput) {
             fileInput.files = dataTransfer.files; 
         }
-		fileInput.dispatchEvent(new Event('change'));
+	fileInput.dispatchEvent(new Event('change'));
     } catch (error) {
-        console.error("[URL BŁĄD] Nie udało się dostarczyć struktury plików do lokalnego handlera:", error);
+        console.error("[URL Error]:", error);
     }
 }
 window.loadTgzFromUrl = loadTgzFromUrl;
 
-// Dopasowanie do zmiany rozmiaru okna przeglądarki
 window.addEventListener('resize', onWindowResize, false);
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;

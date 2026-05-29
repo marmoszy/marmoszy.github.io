@@ -87,6 +87,10 @@ async function handleFile() {
                 var data = processEK5Logic(arrayBuffer, ch, th);
 				pingsData = data.pings;
 				navs = data.navs;
+            } else if (ext.startsWith('dg')) {
+                var data = processDGxLogic(arrayBuffer, ch, th);
+				pingsData = data.pings;
+				navs = data.navs;
             } else if (ext === 'dt4') {
                 pingsData = processDT4Logic(arrayBuffer, ch, th);
             } else if (ext === '01a' || ext === '01b') {
@@ -972,6 +976,84 @@ function processEK5Logic(buffer, targetCh, th) {
         }
         offset += (2 + size);
     }
+    const navs = navStrCollection.join('\n');
+    return { pings, navs };
+}
+
+function processDGxLogic(buffer, targetCh, th) {
+    const dv = new DataView(buffer);
+    let offset = 0;
+    let pings = [];
+    const chStr = targetCh.toString();
+    let navStrCollection = []; 
+    const textDecoder = new TextDecoder("utf-8");
+
+    // W formacie .dg/.dgn nagłówek długości ma 4 bajty (UInt32)
+    while (offset + 4 <= dv.byteLength) {
+        const size = dv.getUint32(offset, true); // ZMIANA: getUint32 zamiast getUint16
+        const blockStart = offset + 4;            // ZMIANA: blockStart przesunięty o 4 bajty
+        
+        if (blockStart + size > dv.byteLength) {
+            console.warn("File error in block at offset:", offset);
+            break;
+        }
+        
+        if (size >= 2) {
+            const t1 = String.fromCharCode(dv.getUint8(blockStart));
+            const t2 = String.fromCharCode(dv.getUint8(blockStart + 1));
+            
+            // --- Telegram nawigacyjny 'GL' ---
+            if (t1 === 'G' && t2 === 'L') { 
+                const stringOffset = blockStart + 2;
+                const stringLength = size - 2;
+                if (stringLength > 0) {
+                    const stringBuffer = new Uint8Array(buffer, stringOffset, stringLength);
+                    const cleanString = textDecoder.decode(stringBuffer).trim();
+                    const parts = cleanString.split(",");
+                    let latDec = null, lonDec = null;
+                    
+                    const lonMatch = parts[4] ? parts[4].match(/^(\d{3})(\d{2}\.\d+)$/) : null;
+                    if (lonMatch) {
+                        const d = parseFloat(lonMatch[1]);
+                        const m = parseFloat(lonMatch[2]);
+                        lonDec = d + (m / 60);
+                        if (parts[5] === "W") lonDec = -lonDec;
+                    }
+                    const latMatch = parts[2] ? parts[2].match(/^(\d{2})(\d{2}\.\d+)$/) : null;
+                    if (latMatch) {
+                        const d = parseFloat(latMatch[1]);
+                        const m = parseFloat(latMatch[2]);
+                        latDec = d + (m / 60);
+                        if (parts[3] === "S") latDec = -latDec;
+                    }
+                    navStrCollection.push("" + lonDec + " " + latDec);
+                }
+            } 
+            // --- Telegram echogramu 'Q' + numer kanału ---
+            else if (t1 === 'Q' && t2 === chStr) {  
+                if (size >= 44) {
+                    const pelCo = dv.getUint32(blockStart + 24, true);
+                    let y = [];
+                    const maxSamplesInBlock = Math.floor((size - 44) / 2);
+                    const samplesToRead = Math.min(pelCo, maxSamplesInBlock);
+                    
+                    for (let i = 0; i < samplesToRead; i++) {
+                        const sampleOffset = blockStart + 44 + (i * 2);
+                        if (sampleOffset + 2 <= dv.byteLength) {
+                            const wVal = dv.getInt16(sampleOffset, true);
+                            const val = 3.0103 * wVal / 256;
+                            y.push(val > th ? val : th);
+                        }
+                    }
+                    if (y.length > 0) pings.push(y);
+                }
+            }
+        }
+        
+        // ZMIANA: Przesunięcie o 4 bajty nagłówka długości + rozmiar payloadu
+        offset += (4 + size);
+    }
+    
     const navs = navStrCollection.join('\n');
     return { pings, navs };
 }
