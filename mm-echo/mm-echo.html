@@ -741,47 +741,7 @@ if (typeStr === 'NME0') {
         }
     }
 }
-/*
-            // --- XML0 (EK80) ---
-            else if (typeStr === 'XML0') {
-                const xmlOffset = datagramStart + 12;
-                const xmlLength = datagramLength - 12;
-                if (xmlLength > 0) {
-                    const xmlBuffer = new Uint8Array(buffer, xmlOffset, xmlLength);
-                    const xmlString = textDecoder.decode(xmlBuffer).trim();
-                    
-                    try {
-                        const parser = new DOMParser();
-                        const xmlDoc = parser.parseFromString(xmlString, "text/xml");
-                        const channels = xmlDoc.getElementsByTagName("Channel");
-                        for (let i = 0; i < channels.length; i++) {
-                            const chId = channels[i].getAttribute("ChannelID");
-                            if (chId && !ek80ChannelsOrdered.includes(chId)) {
-                                ek80ChannelsOrdered.push(chId);
-                            }
-                        }
-                    } catch (e) {
-                        console.warn("Error parsing XML0:", e);
-                    }
-                }
-            }
-else if (typeStr === 'XML0') {  // with Regex
-    const xmlOffset = datagramStart + 12;
-    const xmlLength = datagramLength - 12;
-    if (xmlLength > 0) {
-        const xmlBuffer = new Uint8Array(buffer, xmlOffset, xmlLength);
-        const xmlString = textDecoder.decode(xmlBuffer).trim();
-        const channelRegex = /<Channel\s+[^>]*ChannelID=["']([^"']+)["']/g;
-        let match;
-        while ((match = channelRegex.exec(xmlString)) !== null) {
-            const chId = match[1];
-            if (chId && !ek80ChannelsOrdered.includes(chId)) {
-                ek80ChannelsOrdered.push(chId);
-            }
-        }
-    }
-}
-*/
+
 else if (typeStr === 'XML0') {  // with Regex
     const xmlOffset = datagramStart + 20; 
     const xmlLength = datagramLength - 20;
@@ -853,7 +813,9 @@ else if (typeStr === 'RAW3') {
 if (currentChannelNumber === targetCh) {
     const dataType = dv.getUint16(datagramStart + 140, true); 
     const count = dv.getUint32(datagramStart + 148, true); 
-    const headerSize = 152; 
+    const headerSize = 152;
+    var depth = 1; 
+    var ss = 1490;
     if (count > 0 && count < 100000) { 
         let y = [];
         if (dataType === 1) { // CW: 4 bytes: 2B Int16 (power) + 2B (angles)
@@ -862,7 +824,9 @@ if (currentChannelNumber === targetCh) {
                 const sampleOffset = datagramStart + headerSize + (i * sampleStride);
                 if (sampleOffset + 2 <= dv.byteLength) {
                     const wVal = dv.getInt16(sampleOffset, true);
-                    const val = wVal * 0.01175893351; 
+                    const sampleInterval = ek80ChannelsSampleInterval[targetCh];
+                    const ri = depth + (i * sampleInterval * ss) / 2;
+                    const val = wVal * 0.01175893351 + 20 * Math.log10(ri);
                     y.push(val > th ? val : th);
                 }
             }
@@ -872,7 +836,6 @@ if (currentChannelNumber === targetCh) {
             const sectorBytes = 8;
             const sampleStride = numSectors * sectorBytes; 
             const realDepthSamples = Math.floor(count / numSectors);
-            const depth = 1; 
             for (let i = 0; i < realDepthSamples; i++) {
                 let sumI = 0;
                 let sumQ = 0;
@@ -886,7 +849,7 @@ if (currentChannelNumber === targetCh) {
                 }
                 const magnitude = Math.sqrt(sumI * sumI + sumQ * sumQ);
                 const sampleInterval = ek80ChannelsSampleInterval[targetCh];
-                const Ri = depth + (i * sampleInterval * 1490) / 2;
+                const Ri = depth + (i * sampleInterval * ss) / 2;
                 let val = th;
                 if (magnitude > 0) {
                     val = 20 * Math.log10(magnitude)+ 20 * Math.log10(Ri);
