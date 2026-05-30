@@ -92,7 +92,9 @@ async function handleFile() {
 				pingsData = data.pings;
 				navs = data.navs;
             } else if (ext === 'dt4') {
-                pingsData = processDT4Logic(arrayBuffer, ch, th);
+                var data = processDT4Logic(arrayBuffer, ch, th);
+				pingsData = data.pings;
+				navs = data.navs;
             } else if (ext === '01a' || ext === '01b') {
                 pingsData = processAZFPLogic(arrayBuffer, ch, th, azfpConfig);
             } else if (ext === 'xml') {
@@ -1064,6 +1066,7 @@ function processDT4Logic0(buffer, targetCh, th) {
     const dv = new DataView(buffer);
     let offset = 0;
     let pings = [];
+    var navs = ""; 
 
     // Stan globalny dekodera (zmienne współdzielone między blokami)
     let st = {
@@ -1151,7 +1154,7 @@ function processDT4Logic0(buffer, targetCh, th) {
         else if (type === 14) {
             const lat = dv.getUint32(dataStart, true);
             const lon = dv.getInt32(dataStart + 4, true);
-            // console.log(`Lat: ${lat}, Lon: ${lon}`);
+            navs += `${lon} ${lat}\n`;
         }
         // --- TYP 5/21/28/29: PING DATA ---
         else if ([5, 21, 28, 29].includes(type)) {
@@ -1203,13 +1206,14 @@ function processDT4Logic0(buffer, targetCh, th) {
         // Przesunięcie: 2 (size) + 2 (type) + size + 2 (extra) = size + 6
         offset += (size + 6);
     }
-    return pings;
+    return {pings,navs};
 }
 
 function processDT4Logic(buffer, targetCh, th) {
     const dv = new DataView(buffer);
     let offset = 0;
     let pings = [];
+    let navs = "";
     let st = {
         tm: 0, sa: 0, sv: 0, pw: 0, ch: 0, ib: 0, f: 0, sl: 0, rs: 0, sr: 1, ab: 0, sv0: 1480
     };
@@ -1263,6 +1267,18 @@ function processDT4Logic(buffer, targetCh, th) {
 		    st.sv2 = svel2(st.tm / 100, st.sa / 100);
 		    st.sv3 = getSvel(st.tm / 100, st.sa / 100);
 	      }
+        else if (type === 17) { // || type === 15 || type === 14) { // GPS NMEA DATA
+debugger;
+            let textStart = (type === 15) ? b + 10 : b;
+            let textLength = size - (textStart - b);          
+            let rawString = "";
+            for (let i = 0; i < textLength; i++) {
+                let charCode = dv.getUint8(textStart + i);
+                if (charCode === 0) break; 
+                rawString += String.fromCharCode(charCode);
+            }
+            navs += processNmeaText(rawString);
+        }
 	      else if ([5, 21, 28, 29].includes(type)) { // --- PING DATA (29-Split Beam) ---
 	          let ch, ping_no, w = [];
 	          let currentDataStart = dataStart;
@@ -1303,8 +1319,46 @@ function processDT4Logic(buffer, targetCh, th) {
 	      }
 		  offset += (size + 6);
     }
-    return pings;
+    return {pings,navs};
 }
+
+function parseNmeaCoord(coordStr, direction) {
+    if (!coordStr || !direction) return null;
+    const isLat = (direction === 'N' || direction === 'S');
+    const dotIdx = coordStr.indexOf('.');
+    if (dotIdx === -1) return null;
+    const degLen = isLat ? 2 : 3;
+    const degrees = parseFloat(coordStr.substring(0, degLen));
+    const minutes = parseFloat(coordStr.substring(degLen));
+    let decimal = degrees + (minutes / 60);
+    if (direction === 'S' || direction === 'W') {
+        decimal = -decimal;
+    }
+    return decimal;
+}
+    function processNmeaText(textBlock) {
+        var navs="";
+        const lines = textBlock.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+        for (const line of lines) {
+            if (line.includes('$GPGGA') || line.includes('$GPRMC')) {
+                const parts = line.split(',');
+                if (line.includes('GGA') && parts.length >= 6) {
+                    // Format: $GPGGA, time, lat, N, lon, E, ...
+                    var lat = parseNmeaCoord(parts[2], parts[3]).toFixed(8);
+                    var lon = parseNmeaCoord(parts[4], parts[5]).toFixed(8);
+		    navs += `${lon} ${lat}\n`
+                } 
+/*                else if (line.includes('RMC') && parts.length >= 7) {
+                    // Format: $GPRMC, time, status, lat, N, lon, E, ...
+                    var lat = parseNmeaCoord(parts[3], parts[4]).toFixed(8);
+                    var lon = parseNmeaCoord(parts[5], parts[6]).toFixed(8);
+		    navs += `${lon} ${lat}\n`
+                }
+*/
+            }
+        }
+        return navs;
+    }
 
 // --- RLE decoders ---
 

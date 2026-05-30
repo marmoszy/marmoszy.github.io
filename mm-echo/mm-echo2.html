@@ -13,7 +13,7 @@
 
 <div id="upload" style="">
     <b style="fonst-size:1.17em;">mm-echo2 - 3D echogram viewer:&nbsp;</b>
-    <input type="file" id="imageLoader" title="Select .dgx, .ek5, .raw file(s) or its tgz archive" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9"  multiple> or
+    <input type="file" id="imageLoader" title="Select .dgx, .ek5, .raw file(s) or its tgz archive" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9,.dt4"  multiple> or
 	<input type=button onclick="loadTgzFromUrl('dat/20020714.ek5.png.tgz');" value="Load example"/> or 
 	<span style="text-align:right" title="Download and then open">download it: <a href="dat/20020714.ek5.png.tgz">20020714.ek5.png.tgz</a></span>
 </div>
@@ -98,12 +98,14 @@ gridHelper.position.y = 0;
 gridHelper.material.transparent = true;
 gridHelper.material.opacity = 0.4; 
 
-// Parsowanie punktów do wyrysowania linii w JS
 function parsePointsToObjects(str) {
-    return str.split(';').map(pair => {
-        const [x, y] = pair.trim().split(',').map(Number);
-        return { x, y };
-    });
+    return str.split(';')
+        .map(pair => pair.trim())
+        .filter(pair => pair && !pair.startsWith('#')) 
+        .map(pair => {
+            const [x, y] = pair.split(',').map(Number);
+            return { x, y };
+        });
 }
 const punktyDlaLinii = parsePointsToObjects(goraPunktyString);
 
@@ -135,17 +137,13 @@ const vertexShader = `
     uniform sampler2D u_dataTexture;
     uniform float u_numPoints;
     uniform float u_botOffset;
+
     void main() {
         vUv = uv; 
-        // Obliczamy indeks punktu chronologicznie na podstawie liniowego uv.x
         float pointIndex = uv.x * (u_numPoints - 1.0);
-        // Zabezpieczenie przed wyjściem poza 201 punktów na prawym brzegu
         pointIndex = clamp(pointIndex, 0.0, u_numPoints - 1.0);
-        // Trafiamy idealnie w środek piksela danych
         float texelX = (pointIndex + 0.5) / u_numPoints;
-        // Pobieramy nienaruszone, chronologiczne współrzędne z pliku tekstowego
         vec4 dataSample = texture2D(u_dataTexture, vec2(texelX, 0.5));
-        // Karta graficzna buduje geometrię dokładnie po śladzie zapisanym w TXT
         float currentWorldX = dataSample.r;
         float topEdge = dataSample.g;
         float yPositionInMesh = uv.y; 
@@ -157,6 +155,16 @@ const vertexShader = `
 `;
 
 const fragmentShader = `
+    varying vec2 vUv;
+    uniform sampler2D u_imageTexture;
+    uniform float u_opacity;
+    void main() {
+        vec4 texColor = texture2D(u_imageTexture, vUv);
+        gl_FragColor = vec4(texColor.rgb, texColor.a * u_opacity);
+    }
+`;
+
+const fragmentShader0 = `
     varying vec2 vUv;
     uniform sampler2D u_imageTexture;
     void main() {
@@ -271,157 +279,26 @@ function updatePathLine(str) {
     lineGeometry.attributes.position.needsUpdate = true;
 }
 
-// ==========================================
-// UNIWERSALNY SYSTEM AKTUALIZACJI GEOMETRII I TEKSTURY
-// ==========================================
-function applyNewData0(imageSource, curveString) {
-    // 1. Aktualizacja czarnej linii wektorowej
-    updatePathLine(curveString);
-    
-    // 2. Aktualizacja DataTexture (punktów dla shaderów)
-    const points = parsePointsToObjects(curveString);
-    const numPoints = points.length;
-    const data = new Float32Array(numPoints * 4);
-    for (let i = 0; i < numPoints; i++) {
-        data[i * 4 + 0] = points[i].x; 
-        data[i * 4 + 1] = points[i].y; 
-        data[i * 4 + 2] = 0.0;
-        data[i * 4 + 3] = 1.0;
-    }
-    
-    // Tworzymy nową teksturę danych i podmieniamy w uniforms
-    const newBufferTexture = new THREE.DataTexture(data, numPoints, 1, THREE.RGBAFormat, THREE.FloatType);
-	// Filtrowanie tekstury w JS musi być ustawione na Linear, aby przejścia między pikselami były gładkie:
-	newBufferTexture.minFilter = THREE.LinearFilter;
-	newBufferTexture.magFilter = THREE.LinearFilter;
-    newBufferTexture.needsUpdate = true;
-    
-    customMaterial.uniforms.u_dataTexture.value = newBufferTexture;
-    customMaterial.uniforms.u_numPoints.value = numPoints;
-
-    // 3. Aktualizacja tekstury właściwego obrazu
-    const newImageTexture = new THREE.Texture(imageSource);
-    newImageTexture.needsUpdate = true;
-    customMaterial.uniforms.u_imageTexture.value = newImageTexture;
-		
-}
-
-function applyNewData00(imageElement, curveString) {
-    // 1. Parsowanie punktów z curveString dla shaderów
-    const points = parsePointsToObjects(curveString);
-    const numPoints = points.length;
-    const data = new Float32Array(numPoints * 4);
-    for (let i = 0; i < numPoints; i++) {
-        data[i * 4 + 0] = points[i].x; 
-        data[i * 4 + 1] = points[i].y; 
-        data[i * 4 + 2] = 0.0;
-        data[i * 4 + 3] = 1.0;
-    }
-    
-    const newBufferTexture = new THREE.DataTexture(data, numPoints, 1, THREE.RGBAFormat, THREE.FloatType);
-    newBufferTexture.needsUpdate = true;
-    
-    // 2. Tworzenie tekstury BEZPOŚREDNIO z obiektu HTMLImageElement
-    // Nie używamy THREE.TextureLoader, dzięki czemu unikamy błędu CORS pliku lokalnego
-    const newImageTexture = new THREE.Texture(imageElement); 
-    newImageTexture.needsUpdate = true; // Wymagane, aby Three.js przesłało piksele na kartę graficzną
-
-    // 3. Tworzenie świeżej instancji materiału dla tego wywołania
-    const instanceMaterial = new THREE.ShaderMaterial({
-        vertexShader: vertexShader,
-        fragmentShader: fragmentShader,
-        uniforms: {
-            u_imageTexture: { value: newImageTexture },
-            u_dataTexture: { value: newBufferTexture },
-            u_numPoints: { value: numPoints },
-            u_botOffset: { value: dolnyOffset }
-        },
-        side: THREE.DoubleSide, 
-        transparent: true
-    });
-
-    // 4. Tworzenie nowej geometrii oraz siatki (Mesh)
-    const geometry = new THREE.PlaneGeometry(meshWidth, 1.0, 200, 1);
-    const newMesh = new THREE.Mesh(geometry, instanceMaterial);
-    
-    // 5. Wrzucenie nowego mesha prosto do istniejącej grupy globalnej
-    mainGroup.add(newMesh);
-    
-    if (typeof createPathLine === 'function') {
-        const pathLine = createPathLine(curveString);
-        mainGroup.add(pathLine);
-    }
-}
-
-function applyNewData000(imageElement, curveString, maxPoints = 201) {
-    // 1. Parsowanie punktów z curveString dla shaderów
-    let points = parsePointsToObjects(curveString);
-    
-    // --- NOWA SEKCJA: DECJMACJA (Algorytm RDP lub prosty podpróbkowany) ---
-    if (points.length > maxPoints) {
-        points = reducePointsSample(points, maxPoints);
-    }
-    // ---------------------------------------------------------------------
-
-    const numPoints = points.length;
-    const data = new Float32Array(numPoints * 4);
-    for (let i = 0; i < numPoints; i++) {
-        data[i * 4 + 0] = points[i].x; 
-        data[i * 4 + 1] = points[i].y; 
-        data[i * 4 + 2] = 0.0;
-        data[i * 4 + 3] = 1.0;
-    }
-    
-    // Rozmiar DataTexture zmienia się dynamicznie na numPoints (np. 400 zamiast 1200)
-    const newBufferTexture = new THREE.DataTexture(data, numPoints, 1, THREE.RGBAFormat, THREE.FloatType);
-	newBufferTexture.minFilter = THREE.NearestFilter; // Brak rozmywania pikseli danych
-	newBufferTexture.magFilter = THREE.NearestFilter; // Precyzyjne czytanie 1:1
-	newBufferTexture.wrapS = THREE.ClampToEdgeWrapping; // Jeśli UV przekroczy 1.0, weź ostatni pixel zamiast 0
-	newBufferTexture.wrapT = THREE.ClampToEdgeWrapping;
-    newBufferTexture.needsUpdate = true;
-    
-    // 2. Tworzenie tekstury BEZPOŚREDNIO z obiektu HTMLImageElement
-    const newImageTexture = new THREE.Texture(imageElement); 
-    newImageTexture.needsUpdate = true; 
-
-    // 3. Tworzenie świeżej instancji materiału dla tego wywołania
-    const instanceMaterial = new THREE.ShaderMaterial({
-        vertexShader: vertexShader,
-        fragmentShader: fragmentShader,
-        uniforms: {
-            u_imageTexture: { value: newImageTexture },
-            u_dataTexture: { value: newBufferTexture },
-            u_numPoints: { value: numPoints }, // Uniform automatycznie dostanie mniejszą wartość (np. 400)
-            u_botOffset: { value: dolnyOffset }
-        },
-        side: THREE.DoubleSide, 
-        transparent: true
-    });
-
-    // 4. Tworzenie nowej geometrii oraz siatki (Mesh)
-    const geometry = new THREE.PlaneGeometry(meshWidth, 1.0, 200, 1);
-    const newMesh = new THREE.Mesh(geometry, instanceMaterial);
-    
-    // 5. Wrzucenie nowego mesha prosto do istniejącej grupy globalnej
-    mainGroup.add(newMesh);
-    
-    if (typeof createPathLine === 'function') {
-        // Jeśli linia pomocnicza również ma być odchudzona, przekaż przefiltrowane punkty, 
-        // ale ponieważ createPathLine przyjmuje string, wysyłamy oryginalny lub zmodyfikowany
-        const pathLine = createPathLine(curveString);
-        mainGroup.add(pathLine);
-    }
-}
+// --- insert gemetry and texture
 
 function applyNewData(imageElement, curveString) {
+debugger;
     let points = parsePointsToObjects(curveString);
     if (!points || points.length === 0) return;
     const targetCount = 201; // 200 segments -> 201 vertices
     const sampledPoints = [];
     const totalPoints = points.length;   
     for (let i = 0; i < targetCount; i++) {
-        const index = Math.floor((i * (totalPoints - 1)) / (targetCount - 1));
-        sampledPoints.push(points[index]);
+        //const index = Math.floor((i * (totalPoints - 1)) / (targetCount - 1));
+        //sampledPoints.push(points[index]);
+        const t = i / (targetCount - 1);
+        const rawIndex = t * (totalPoints - 1);
+        const index = Math.floor(rawIndex);
+        const nextIndex = Math.min(index + 1, totalPoints - 1);
+        const weight = rawIndex - index;
+        const interX = points[index].x + (points[nextIndex].x - points[index].x) * weight;
+        const interY = points[index].y + (points[nextIndex].y - points[index].y) * weight;
+        sampledPoints.push({x:interX,y:interY});
     }
     const data = new Float32Array(targetCount * 4);
     for (let i = 0; i < targetCount; i++) {
@@ -445,7 +322,8 @@ function applyNewData(imageElement, curveString) {
             u_imageTexture: { value: newImageTexture },
             u_dataTexture: { value: newBufferTexture },
             u_numPoints: { value: targetCount },
-            u_botOffset: { value: dolnyOffset }
+            u_botOffset: { value: dolnyOffset },
+            u_opacity: { value: 0.75}
         },
         side: THREE.DoubleSide, 
         transparent: true
@@ -498,7 +376,6 @@ function debugCurveStringAsLine(curveString) {
 
 function thLine(pts,col) {
     const points = [];
-debugger;
     points.push(new THREE.Vector3(pts[0][0], pts[0][1], pts[0][2]));
     points.push(new THREE.Vector3(pts[1][0], pts[1][1], pts[1][2]));
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
@@ -556,11 +433,9 @@ function generateEchogramImage(pingsData, th) {
             }
         }
         ctx.putImageData(imgData, 0, 0);
-
-        // Konwersja wyrenderowanego płótna na obiekt typu Image (wymagany przez applyNewData)
         const img = new Image();
         img.onload = () => {
-            resolve(img); // Zwracamy obiekt Image, gdy dane base64 zostaną załadowane
+            resolve(img);
         };
         img.src = offscreenCanvas.toDataURL();
     });
@@ -926,7 +801,6 @@ else if (typeStr === 'XML0') {  // with Regex
             }
             // --- RAW3 (EK80) ---
 else if (typeStr === 'RAW3') {
-debugger;
     const chIdBytes = new Uint8Array(buffer, datagramStart + 12, 128);
     let chId = textDecoder.decode(chIdBytes).replace(/\0/g, '').trim();
     let currentChannelNumber = ek80ChannelsOrdered.indexOf(chId) + 1;
@@ -992,21 +866,261 @@ if (currentChannelNumber === targetCh) {
     return { pings, navs  };
 }
 
+function processDT4Logic(buffer, targetCh, th) {
+    const dv = new DataView(buffer);
+    let offset = 0;
+    let pings = [];
+    let navs = "";
+    let st = {
+        tm: 0, sa: 0, sv: 0, pw: 0, ch: 0, ib: 0, f: 0, sl: 0, rs: 0, sr: 1, ab: 0, sv0: 1480
+    };
+    while (offset + 4 <= dv.byteLength) {
+        const size = dv.getUint16(offset, true);
+        const type = dv.getInt16(offset + 2, true);
+        const b = offset + 4; // Start danych bloku
+        const dataStart = offset + 4;
+        if (b + size + 2 > dv.byteLength) break;
+        if (type === 30) {         // --- TYP 30: HEADER ---
+            st.sv = dv.getUint16(b + 2, true);  // 1446
+            st.tm = dv.getInt16(b + 4, true);   // 1000
+            st.sa = dv.getUint16(b + 6, true);  // 0
+            st.pw = dv.getUint16(b + 8, true);  // 0
+        }
+		else if (type === 18) {    // --- TYP 18: CHANNEL DESCRIPTOR ---
+		    st.ch  = dv.getUint16(b + 0, true);   // [0] S
+		    st.pc  = dv.getInt32(b + 2, true);    // [1] l
+		    st.spp = dv.getUint16(b + 6, true);   // [2] S
+		    st.sp  = dv.getUint16(b + 8, true);   // [3] S
+		    st.et  = dv.getUint16(b + 10, true);  // [4] S
+		    st.pl  = dv.getUint16(b + 12, true);  // [5] S
+		    st.pr  = dv.getUint16(b + 14, true);  // [6] S
+		    st.ib  = dv.getUint16(b + 16, true);  // [7] S -> 55
+		    st.dl  = dv.getUint16(b + 18, true);  // [8] S
+		    st.th  = dv.getInt16(b + 20, true);   // [9] s
+		    let sn = "";
+		    for (let i = 0; i < 8; i++) sn += String.fromCharCode(dv.getUint8(b + 24 + i));
+		    st.sn = sn.trim(); // offset 24-31
+		    st.sl = dv.getInt16(b + 80, true); 
+		    st.rs = dv.getInt16(b + 86, true);
+		    st.wsl = dv.getInt16(b + 92, true);
+		    st.wrs = dv.getInt16(b + 98, true);
+		    st.tt   = dv.getUint16(b + 98, true);  // [30] S -> 4
+		    st.f    = dv.getUint32(b + 100, true); // [31] L -> 208000
+		    st.alcs = dv.getUint16(b + 104, true); // [32] S
+		    st.atcs = dv.getUint16(b + 106, true); // [33] S
+		    st.alpo = dv.getInt8(b + 108);         // [34] c
+		    st.atpo = dv.getInt8(b + 109);         // [35] c
+		    st.alao = dv.getUint16(b + 110, true); // [36] S
+		    st.atao = dv.getUint16(b + 112, true); // [37] S
+		    st.bwj  = dv.getUint8(b + 114);        // [38] C -> 62
+		    st.bwn  = dv.getUint8(b + 115);        // [39] C -> 62
+		    st.sr   = dv.getUint32(b + 116, true); // [40] L -> 41667
+		    st.wbwj = dv.getUint8(b + 120);        // [41] C
+		    st.wbwn = dv.getUint8(b + 121);        // [42] C
+		    st.ab = getAbsorp(st.tm / 100, st.sa / 100, st.f / 1000);
+		    st.bpf = bp_factor(st.bwj / 10, st.bwn / 10);
+		    st.sv0 = 1400 + st.sv / 400;
+		    st.sv1 = 1410 + 4.21 * (st.tm / 100) - 0.037 * Math.pow(st.tm / 100, 2) + 1.1 * (st.sa / 100);
+		    st.sv2 = svel2(st.tm / 100, st.sa / 100);
+		    st.sv3 = getSvel(st.tm / 100, st.sa / 100);
+	      }
+        else if (type === 17) { // || type === 15 || type === 14) { // GPS NMEA DATA
+            let textStart = (type === 15) ? b + 10 : b;
+            let textLength = size - (textStart - b);          
+            let rawString = "";
+            for (let i = 0; i < textLength; i++) {
+                let charCode = dv.getUint8(textStart + i);
+                if (charCode === 0) break; 
+                rawString += String.fromCharCode(charCode);
+            }
+            navs += processNmeaText(rawString);
+        }
+	      else if ([5, 21, 28, 29].includes(type)) { // --- PING DATA (29-Split Beam) ---
+	          let ch, ping_no, w = [];
+	          let currentDataStart = dataStart;
+	          if (type === 5) {
+	              ch = 1;
+	              ping_no = dv.getUint32(currentDataStart, true);
+	              for (let i = currentDataStart + 4; i < currentDataStart + size + 2; i += 2) {
+	                  w.push(dv.getUint16(i, true));
+	              }
+	          } else {
+	              ch = dv.getUint16(currentDataStart, true);
+	              ping_no = dv.getUint32(currentDataStart + 2, true);
+	              //ptime = dv.getUint32(currentDataStart + 6, true);
+	              //N = dv.getUint16(currentDataStart + 10, true);
+	              for (let i = currentDataStart + 12; i < currentDataStart + size + 2; i += 2) {
+	                  w.push(dv.getUint16(i, true));
+	              }
+	          }
+	          if (ch === targetCh) {
+	              let decoded = [];
+	              if (type < 28) decoded = RleWords(w);
+	              else if (type === 28) decoded = RleWords2(w);
+	              else if (type === 29) decoded = RleWords3(w);
+	              let y = [];
+	              // Przetwarzanie próbek na wartości dB (zgodnie z krokiem pętli w Perlu)
+	              let step = (type === 28 || type === 29) ? 2 : 1;          
+	              for (let i = 0; i < decoded.length; i += step) {
+	                  let sampleIdx = i / step;
+	                  let depth = (sampleIdx + st.ib) * st.sv0 / 2 / st.sr;
+	                  let amplitude = decoded[i];              
+	                  let val = 20 * Math.log10(amplitude * depth * depth + 1e-10) 
+	                            + 2 * st.ab * depth - st.sl/10 - st.rs/10 - st.pw/10;
+	                  if (val < th) val = th;
+	                  y.push(val);
+	              }
+	              if (y.length > 0) pings.push(y);
+	          }
+	      }
+		  offset += (size + 6);
+    }
+    return {pings,navs};
+}
+
+function parseNmeaCoord(coordStr, dir) {
+    if (!coordStr || !dir) return null;
+    const dotIdx = coordStr.indexOf('.');
+    if (dotIdx === -1) return null;
+    const degLen = (dir === 'N' || dir === 'S') ? 2 : 3;
+    const d = parseFloat(coordStr.substring(0, degLen));
+    const m = parseFloat(coordStr.substring(degLen));
+    let l = d + (m / 60);
+    if (dir === 'S' || dir === 'W') {
+        l = -l;
+    }
+    return l;
+}
+    function processNmeaText(textBlock) {
+	var navs="";
+        const lines = textBlock.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+        for (const line of lines) {
+            if (line.includes('$GPGGA') || line.includes('$GPRMC')) {
+                const parts = line.split(',');
+                if (line.includes('GGA') && parts.length >= 6) {
+                    // Format: $GPGGA, time, lat, N, lon, E, ...
+                    var lat = parseNmeaCoord(parts[2], parts[3]).toFixed(8);
+                    var lon = parseNmeaCoord(parts[4], parts[5]).toFixed(8);
+		    navs += `${lon} ${lat}\n`
+                } 
+/*                else if (line.includes('RMC') && parts.length >= 7) {
+                    // Format: $GPRMC, time, status, lat, N, lon, E, ...
+                    var lat = parseNmeaCoord(parts[3], parts[4]).toFixed(8);
+                    var lon = parseNmeaCoord(parts[5], parts[6]).toFixed(8);
+		    navs += `${lon} ${lat}\n`
+                }
+*/            }
+        }
+        return navs;
+    }
+
+// --- RLE decoders ---
+
+function RleWords(w) {
+    let f = [];
+    for (let i = 0; i < w.length; i++) {
+        if ((w[i] & 0xF000) === 0xF000) {
+            let l = (w[i] & 0xFF) + 2;
+            while (l--) f.push(0);
+        } else {
+            let m = w[i] & 0x0FFF;
+            let e = (w[i] & 0xF000) >> 12;
+            f.push(e === 0 ? m : (m + 4096) << (e - 1));
+        }
+    }
+    return f;
+}
+function RleWords2(w) {
+    let f = [];
+    for (let i = 0; i < w.length; i++) {
+        if ((w[i] & 0xF000) === 0xF000) {
+            let l = 2 * ((w[i] & 0xFF) + 2);
+            while (l--) f.push(0);
+            i++; 
+        } else {
+            let m = w[i] & 0x0FFF;
+            let e = (w[i] & 0xF000) >> 12;
+            f.push(e === 0 ? m : (m + 4096) << (e - 1));
+        }
+    }
+    return f;
+}
+function RleWords3(w) {
+    // Identyczna jak RleWords2, ale zachowuje kąty (co drugi element)
+    let f = [];
+    for (let i = 0; i < w.length; i++) {
+        if ((w[i] & 0xF000) === 0xF000) {
+            let l = 2 * ((w[i] & 0xFF) + 2);
+            while (l--) f.push(0);
+            i++; 
+        } else {
+            let m = w[i] & 0x0FFF;
+            let e = (w[i] & 0xF000) >> 12;
+            f.push(e === 0 ? m : (m + 4096) << (e - 1));
+            f.push(w[++i]); // Along/Athwart
+        }
+    }
+    return f;
+}
+
+// --- Utils ---
+
+function bp_factor(bwj, bwn) {
+    return 0.00011010832 * bwj / 2 * bwn / 2; // 10^(-3.16)/2pi
+}
+function getAbsorp(tm, sa, f) {
+    // Perlowe log(10) to logarytm naturalny z 10
+    const ft = 21.9 * Math.exp(Math.log(10) * (6 - 1520 / (tm + 273)));
+    return (0.0186 * f * f * ft * sa / (ft * ft + f * f) + 0.0268 * f * f / ft) / 914.4;
+}
+function getSvel(tm, sa) {
+    return 1449.2 + (4.6 + (-0.055 + 0.00029 * tm) * tm) * tm + (1.34 - 0.010 * tm) * (sa - 35) + 0.016 * 1;
+}
+function svel2(tm, sa) {
+    let tmp = tm - 10;
+    let ss = 1492.9 + 3 * tmp - 0.006 * tmp * tmp;
+    tmp -= 8;
+    ss += (-0.04 * tmp * tmp + 1 / 61);
+    let sal = sa - 35;
+    if (sa !== 0) {
+        ss += 1.2 * sal - 0.01 * tmp * sal;
+    }
+    return ss;
+}
+function svel4(t, s, p) {
+    p = p / 10.0;
+    const sr = Math.sqrt(s);    
+    let d = 1.727E-3 - 7.9836E-6 * p;
+    let a1 = 7.3637E-5 + 1.7945E-7 * t;
+    let a0 = -1.922E-2 - 4.42E-5 * t;
+    let b = a0 + a1 * p;    
+    let a3 = (-3.389E-13 * t + 6.649E-12) * t + 1.100E-10;
+    let a2 = ((7.988E-12 * t - 1.6002E-10) * t + 9.1041E-9) * t - 3.9064E-7;
+    a1 = (((-2.0122E-10 * t + 1.0507E-8) * t - 6.4885E-8) * t - 1.2580E-5) * t + 9.4742E-5;
+    a0 = (((-3.21E-8 * t + 2.006E-6) * t + 7.164E-5) * t - 1.262E-2) * t + 1.389;
+    let a = ((a3 * p + a2) * p + a1) * p + a0;    
+    a3 = (-2.3643E-12 * t + 3.8504E-10) * t - 9.7729E-9;
+    a2 = (((1.0405E-12 * t - 2.5335E-10) * t + 2.5974E-8) * t - 1.7107E-6) * t + 3.1260E-5;
+    a1 = (((-6.1185E-10 * t + 1.3621E-7) * t - 8.1788E-6) * t + 6.8982E-4) * t + 0.153563;
+    a0 = ((((3.1464E-9 * t - 1.47800E-6) * t + 3.3420E-4) * t - 5.80852E-2) * t + 5.03711) * t + 1402.388;
+    let c = ((a3 * p + a2) * p + a1) * p + a0;    
+    return c + (a + b * sr + d * s) * s;
+}
 
 
-// ==========================================
-// ARCHITEKTURA PARSERÓW DLA RÓŻNYCH FORMATÓW PLIKÓW
-// ==========================================
+// ---  parsers ----
+
 var img_z = -2;
 
 const FileParsers = {
     handleRasterImage: function(file, curve) {
         const reader = new FileReader();
         reader.onload = function(event) {
+debugger;
             const img = new Image();
             img.onload = function() {
-                applyNewData(img, curve ? curve : "-2," + img_z + "; 2," + img_z);
-                img_z += 0.4;
+                applyNewData(img, curve ? curve : "-2," + (img_z) + "; 2," + (img_z));
+                img_z += 0.2;
             }
             img.src = event.target.result;
         }
@@ -1022,20 +1136,22 @@ const FileParsers = {
                     const th = -120;
                     var  data = null;
                     const dgx = /\.dg.$/i;
-debugger;
                     if (file.name.endsWith('.ek5')) {
                         data = processEK5Logic(arrayBuffer, targetCh, th);
                     } else if (dgx.test(file.name)) {
                         data = processDGxLogic(arrayBuffer, targetCh, th);
                     } else if (file.name.endsWith('.raw')) {
                         data = processEK60AndEK80Logic(arrayBuffer, targetCh, th);
+                    } else if (file.name.toLowerCase().endsWith('.dt4')) {
+                        data = processDT4Logic(arrayBuffer, targetCh, th);
                     } else {
                         console.log(`File format not supported: ${file.name}`);
                     }
                     if(data) {
-                        const cleanStr = data.navs.replace(/\r?\n/g, ";").replace(/ +/g, ",");
+                        var curve = data.navs.replace(/\r?\n/g, ";").replace(/ +/g, ",");
+                        if(!curve || curve.length==0) {curve = "-2," + (-img_z) + "; 2," + (-img_z); img_z += 0.2;} 
                         const img = await generateEchogramImage(data.pings, th);
-                        resolve({ img, curve: cleanStr });
+                        resolve({ img, curve });
                     }
                 } catch (err) {
                     reject(err);
@@ -1047,62 +1163,8 @@ debugger;
     }
 };
 
-// ==========================================
-// GŁÓWNY MENEDŻER WYBORU PLIKU
-// ==========================================
+
 var lastLoadedCurveString=null;
-
-function mapCurveStringWithAspectRatio0(cleanString) {
-    // 1. Parsowanie do płaskiej tablicy liczb
-    const values = cleanString
-        .split(/[;,]/)
-        .filter(val => val !== "")
-        .map(Number);
-
-    // 2. Grupowanie w pary [x, z] z zachowaniem 100% oryginalnej kolejności
-    const points = [];
-    for (let i = 0; i < values.length; i += 2) {
-        if (!isNaN(values[i]) && !isNaN(values[i+1])) {
-            points.push({ x: values[i], z: values[i+1] });
-        }
-    }
-
-    if (points.length === 0) return "";
-
-    // 3. Znalezienie absolutnych granic min/max dla całego kształtu
-    let minX = Infinity, maxX = -Infinity;
-    let minZ = Infinity, maxZ = -Infinity;
-
-    for (const p of points) {
-        if (p.x < minX) minX = p.x;
-        if (p.x > maxX) maxX = p.x;
-        if (p.z < minZ) minZ = p.z;
-        if (p.z > maxZ) maxZ = p.z;
-    }
-
-    // 4. Obliczenie rzeczywistych zakresów przestrzennych fali
-    const rangeX = maxX - minX || 1;
-    const rangeZ = maxZ - minZ || 1;
-
-    // 5. Zachowanie proporcji: większy zakres jest naszą bazą
-    const maxRange = Math.max(rangeX, rangeZ) || 1;
-
-    // Wyśrodkowanie obiektu w przestrzeni wokół środka układu współrzędnych
-    const offsetX = (maxRange - rangeX) / 2;
-    const offsetZ = (maxRange - rangeZ) / 2;
-
-    // 6. Mapowanie do zakresu -2 do 2 (szerokość 4) z zachowaniem proporcji i kolejności punktów
-    const mappedPairs = points.map(p => {
-        const mappedX = -2 + (((p.x - minX) + offsetX) / maxRange) * 4;
-        const mappedZ = -(-2 + (((p.z - minZ) + offsetZ) / maxRange) * 4); // Z -> -Z
-        
-        // Formatowanie do 5 miejsc po przecinku
-        return `${mappedX.toFixed(5)},${mappedZ.toFixed(5)}`;
-    });
-
-    // 7. Złączenie przetworzonych punktów w identyczny ciąg tekstowy
-    return mappedPairs.join(";");
-}
 
 function handleTextCurveFile(file) {
     const reader = new FileReader();
@@ -1115,8 +1177,8 @@ function handleTextCurveFile(file) {
     reader.readAsText(file);
 }
 
-// Zmiana: dodajemy opcjonalny parametr globalBounds
 function mapCurveStringWithAspectRatio(cleanString, globalBounds = null) {
+debugger;
     const values = cleanString.split(/[;,]/).filter(val => val !== "").map(Number);
     const points = [];
     for (let i = 0; i < values.length; i += 2) {
@@ -1125,8 +1187,6 @@ function mapCurveStringWithAspectRatio(cleanString, globalBounds = null) {
         }
     }
     if (points.length === 0) return "";
-
-    // Jeśli przekazano globalBounds, używamy go. Jeśli nie, liczymy lokalnie (stara logika)
     let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
     if (globalBounds) {
         minX = globalBounds.minX;
@@ -1141,21 +1201,22 @@ function mapCurveStringWithAspectRatio(cleanString, globalBounds = null) {
             if (p.z > maxZ) maxZ = p.z;
         }
     }
-
-    const rangeX = maxX - minX || 1;
-    const rangeZ = maxZ - minZ || 1;
+    const rangeX = maxX - minX;
+    const rangeZ = maxZ - minZ;
     const maxRange = Math.max(rangeX, rangeZ) || 1;
-
     const offsetX = (maxRange - rangeX) / 2;
     const offsetZ = (maxRange - rangeZ) / 2;
-
     const mappedPairs = points.map(p => {
-        const mappedX = -2 + (((p.x - minX) + offsetX) / maxRange) * 4;
-        // Zachowujemy Twoją konwencję -Z z poprzedniego kroku
-        const mappedZ = -(-2 + (((p.z - minZ) + offsetZ) / maxRange) * 4);
-        return `${mappedX.toFixed(5)},${mappedZ.toFixed(5)}`;
+        //const mappedX =   -2 + (((p.x - minX) + offsetX) / maxRange) * 4;
+        //const mappedZ = -(-2 + (((p.z - minZ) + offsetZ) / maxRange) * 4);
+        const mappedX = (rangeX === 0) 
+            ? p.x 
+            : -2 + (((p.x - minX) + offsetX) / maxRange) * 4;
+        const mappedZ = (rangeZ === 0)
+            ? -p.z
+            : -(-2 + (((p.z - minZ) + offsetZ) / maxRange) * 4);
+        return `${mappedX.toFixed(8)},${mappedZ.toFixed(8)}`;
     });
-
     return mappedPairs.join(";");
 }
 
@@ -1220,7 +1281,7 @@ document.getElementById('imageLoader').addEventListener('change', async function
                     const rawText = textDecoder.decode(file.arrayBuffer).trim();
                     const cleanStr = rawText.replace(/\r?\n/g, ";").replace(/ +/g, ",");
                     txtFiles.set(core, cleanStr);
-                } else if (file.name.endsWith('.png') || file.name.endsWith('.jpg') || file.name.endsWith('.jpeg')) {
+                } else { //if (file.name.endsWith('.png') || file.name.endsWith('.jpg') || file.name.endsWith('.jpeg')) {
                     const imgBlob = new Blob([file.arrayBuffer], { type: "image/png" });
                     imageFiles.set(core, imgBlob);
                 }
@@ -1230,7 +1291,7 @@ document.getElementById('imageLoader').addEventListener('change', async function
             for (const file of e.target.files) {
                 const core = getNameCore(file.name);
 		const dgx = /\.dg.$/i;
-                if (dgx.test(file.name) || file.name.endsWith('.ek5') || file.name.endsWith('.raw')) {
+                if (dgx.test(file.name) || file.name.endsWith('.ek5') || file.name.endsWith('.raw')||file.name.toLowerCase().endsWith('.dt4')) {
                     customFiles.push(file); // for async processing
                 } else if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
                     rawTxtDataMap.set(core, file);
@@ -1267,7 +1328,7 @@ document.getElementById('imageLoader').addEventListener('change', async function
                 await Promise.all(txtPromises);
             }
         }
-        if (txtFiles.size === 0 && ek5ProcessedData.size === 0) return;
+        if (txtFiles.size === 0 && imageFiles.size === 0 && ek5ProcessedData.size === 0) return;
         let globalBounds = { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity };
         function updateBoundsFromCurve(cleanStr) {
             const points = parsePointsToObjects(cleanStr);
@@ -1304,6 +1365,17 @@ document.getElementById('imageLoader').addEventListener('change', async function
             applyNewData(data.img, scaledCurveString);
             console.log(`[SUCCESS] ${core} loaded`);
         }
+        // --- when no pairs ---
+        for (const [core, imgBlob] of imageFiles.entries()) {
+            if (!txtFiles.has(core) && !ek5ProcessedData.has(core)) {
+                const defaultStr = "-2," + img_z + ";2," + img_z;
+                img_z += 0.2;
+                lastLoadedCurveString = defaultStr;
+                FileParsers.handleRasterImage(imgBlob, defaultStr);
+                console.log(`[DEFAULT] ${core}: placed at Z: ${img_z - 0.2}`);
+            }
+        }
+
     } catch (error) {
         console.error("Loader error:", error);
     }
