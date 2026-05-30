@@ -7,15 +7,20 @@
     <style>
         body { margin: 0; background: #fff; overflow: hidden; font-family: sans-serif; }
         #upload { position: absolute; top: 20px; left: 20px; z-index: 10; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 5px; }
+        input[type="button"]{font-size: 1.05em; cursor: pointer;}
+        input[type="file"] {font-size: 1.05em;}
+        input[type="file"]::file-selector-button {font-size: 1.05em; cursor: pointer;}
+        textarea {font-size: 1.05em;font-family: sans-serif; }
     </style>
 </head>
 <body>
 
 <div id="upload" style="">
-    <b style="fonst-size:1.17em;">mm-echo2 - 3D echogram viewer:&nbsp;</b>
+    <b style="font-size:1.15em;">mm-echo2 - 3D echogram viewer:&nbsp;</b>
     <input type="file" id="imageLoader" title="Select .dgx, .ek5, .raw file(s) or its tgz archive" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9,.dt4"  multiple> or
-	<input type=button onclick="loadTgzFromUrl('dat/20020714.ek5.png.tgz');" value="Load example"/> or 
-	<span style="text-align:right" title="Download and then open">download it: <a href="dat/20020714.ek5.png.tgz">20020714.ek5.png.tgz</a></span>
+	<input type=button onclick="loadTgzFromUrl('dat/20020714.ek5.png.tgz');" value="Load example"/>
+<!-- or 
+	<span style="text-align:right" title="Download and then open">download it: <a href="dat/20020714.ek5.png.tgz">20020714.ek5.png.tgz</a></span> -->
 </div>
 
 <script type="module">
@@ -685,7 +690,7 @@ function processEK60AndEK80Logic(buffer, targetCh, th) {
     let navsCollection = []; 
     const textDecoder = new TextDecoder("utf-8");
     let ek80ChannelsOrdered = []; 
-
+    let ek80ChannelsSampleInterval = [];
     while (offset + 4 <= dv.byteLength) {
         const datagramLength = dv.getUint32(offset, true);  // (4 bytes, UInt32)
         const datagramStart = offset + 4;        
@@ -757,17 +762,32 @@ if (typeStr === 'NME0') {
     }
 }
 else if (typeStr === 'XML0') {  // with Regex
-    const xmlOffset = datagramStart + 12;
-    const xmlLength = datagramLength - 12;
+    const xmlOffset = datagramStart + 20; 
+    const xmlLength = datagramLength - 20;
     if (xmlLength > 0) {
         const xmlBuffer = new Uint8Array(buffer, xmlOffset, xmlLength);
-        const xmlString = textDecoder.decode(xmlBuffer).trim();
-        const channelRegex = /<Channel\s+[^>]*ChannelID=["']([^"']+)["']/g;
+        let xmlString = textDecoder.decode(xmlBuffer).trim();
+        const startTagIdx = xmlString.indexOf('<');
+        if (startTagIdx !== -1) {
+            xmlString = xmlString.substring(startTagIdx);
+        }
+        const channelRegex = /<Channel\s+([^>]+)/g;
         let match;
         while ((match = channelRegex.exec(xmlString)) !== null) {
-            const chId = match[1];
-            if (chId && !ek80ChannelsOrdered.includes(chId)) {
+            const channelAttributes = match[1]; 
+            const idMatch = /ChannelID=["']([^"']+)["']/.exec(channelAttributes);
+            if (!idMatch) continue;
+            const chId = idMatch[1];
+            let channelIndex = ek80ChannelsOrdered.indexOf(chId);
+            if (channelIndex === -1) {
                 ek80ChannelsOrdered.push(chId);
+                ek80ChannelsSampleInterval.push(0);
+                channelIndex = ek80ChannelsOrdered.length - 1;
+            }
+            const intervalMatch = /SampleInterval=["']([^"']+)["']/.exec(channelAttributes);
+            if (intervalMatch) {
+                const parsedValue = parseFloat(intervalMatch[1]);
+                ek80ChannelsSampleInterval[channelIndex] = parsedValue;
             }
         }
     }
@@ -830,7 +850,8 @@ if (currentChannelNumber === targetCh) {
             const numSectors = 4; 
             const sectorBytes = 8;
             const sampleStride = numSectors * sectorBytes; 
-            const realDepthSamples = Math.floor(count / numSectors); 
+            const realDepthSamples = Math.floor(count / numSectors);
+            const depth = 1; 
             for (let i = 0; i < realDepthSamples; i++) {
                 let sumI = 0;
                 let sumQ = 0;
@@ -843,9 +864,11 @@ if (currentChannelNumber === targetCh) {
                     }
                 }
                 const magnitude = Math.sqrt(sumI * sumI + sumQ * sumQ);
+                const sampleInterval = ek80ChannelsSampleInterval[targetCh];
+                const Ri = depth + (i * sampleInterval * 1490) / 2;
                 let val = th;
                 if (magnitude > 0) {
-                    val = 20 * Math.log10(magnitude);
+                    val = 20 * Math.log10(magnitude)+ 20 * Math.log10(Ri);
                 }
                 y.push(val > th ? val : th);
             }

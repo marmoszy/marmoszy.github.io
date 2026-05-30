@@ -10,17 +10,22 @@
         #canvasContainer { overflow-x: auto; }
         canvas { display: block; }
         .status { margin-top: 10px; font-family: monospace; }
+        button,input[type="button"]{font-size: 1.05em; cursor: pointer;}
+        input[type="file"],input[type="text"],input[type="number"] {font-size: 1.05em;}
+        input[type="file"]::file-selector-button {font-size: 1.05em; cursor: pointer;}
+        textarea {font-size: 1.05em;font-family: sans-serif; }
     </style>
 </head>
 <body>
 
 <div class="controls">
     <h3>mm-echo - minimalistic echograms viewer <span style="font-weight: normal;"> (see also 3D viewer: <a href="mm-echo2.html">mm-echo2</a>)</span></h3>
-    Channel: <input type="text" id="chInput" value="1" style="width:32px">
+    Channel: <input type="number" id="chInput" value="1" min="1" max="8" style="width:32px">
     Threshold: <input type="number" id="thInput" value="-120" style="width:56px">
     Sounder raw file: <input type="file" id="fileInput" onchange="handleFile()" multiple>
     <button onclick="handleFile()">Process</button>
-	<br><input type=button value="Load example" onclick="loadTgzFromUrl('dat/08241502.dt4.tgz')"> or <span style="text-align:right" title="Download and then open"> download it: <a href="dat/08241502.dt4.tgz">08241502.dt4.tgz</a></span>
+	<br><input type=button value="Load example" onclick="loadTgzFromUrl('dat/08241502.dt4.tgz')">
+<!-- or <span style="text-align:right" title="Download and then open"> download it: <a href="dat/08241502.dt4.tgz">08241502.dt4.tgz</a></span> -->
 	
     <div id="status" class="status"></div>
 </div>
@@ -664,6 +669,7 @@ function processEK60AndEK80Logic(buffer, targetCh, th) {
     let navsCollection = []; 
     const textDecoder = new TextDecoder("utf-8");
     let ek80ChannelsOrdered = []; 
+    let ek80ChannelsSampleInterval = []; 
 
     while (offset + 4 <= dv.byteLength) {
         const datagramLength = dv.getUint32(offset, true);  // (4 bytes, UInt32)
@@ -759,7 +765,6 @@ if (typeStr === 'NME0') {
                     }
                 }
             }
-*/
 else if (typeStr === 'XML0') {  // with Regex
     const xmlOffset = datagramStart + 12;
     const xmlLength = datagramLength - 12;
@@ -776,9 +781,39 @@ else if (typeStr === 'XML0') {  // with Regex
         }
     }
 }
-
-
-            // --- RAW0 (EK60) ---
+*/
+else if (typeStr === 'XML0') {  // with Regex
+    const xmlOffset = datagramStart + 20; 
+    const xmlLength = datagramLength - 20;
+    if (xmlLength > 0) {
+        const xmlBuffer = new Uint8Array(buffer, xmlOffset, xmlLength);
+        let xmlString = textDecoder.decode(xmlBuffer).trim();
+        const startTagIdx = xmlString.indexOf('<');
+        if (startTagIdx !== -1) {
+            xmlString = xmlString.substring(startTagIdx);
+        }
+        const channelRegex = /<Channel\s+([^>]+)/g;
+        let match;
+        while ((match = channelRegex.exec(xmlString)) !== null) {
+            const channelAttributes = match[1]; 
+            const idMatch = /ChannelID=["']([^"']+)["']/.exec(channelAttributes);
+            if (!idMatch) continue;
+            const chId = idMatch[1];
+            let channelIndex = ek80ChannelsOrdered.indexOf(chId);
+            if (channelIndex === -1) {
+                ek80ChannelsOrdered.push(chId);
+                ek80ChannelsSampleInterval.push(0);
+                channelIndex = ek80ChannelsOrdered.length - 1;
+            }
+            const intervalMatch = /SampleInterval=["']([^"']+)["']/.exec(channelAttributes);
+            if (intervalMatch) {
+                const parsedValue = parseFloat(intervalMatch[1]);
+                ek80ChannelsSampleInterval[channelIndex] = parsedValue;
+            }
+        }
+    }
+}
+           // --- RAW0 (EK60) ---
             else if (typeStr === 'RAW0') {
                 const channel = dv.getUint16(datagramStart + 12, true);
                 if (channel === targetCh) {
@@ -836,7 +871,8 @@ if (currentChannelNumber === targetCh) {
             const numSectors = 4; 
             const sectorBytes = 8;
             const sampleStride = numSectors * sectorBytes; 
-            const realDepthSamples = Math.floor(count / numSectors); 
+            const realDepthSamples = Math.floor(count / numSectors);
+            const depth = 1; 
             for (let i = 0; i < realDepthSamples; i++) {
                 let sumI = 0;
                 let sumQ = 0;
@@ -849,9 +885,11 @@ if (currentChannelNumber === targetCh) {
                     }
                 }
                 const magnitude = Math.sqrt(sumI * sumI + sumQ * sumQ);
+                const sampleInterval = ek80ChannelsSampleInterval[targetCh];
+                const Ri = depth + (i * sampleInterval * 1490) / 2;
                 let val = th;
                 if (magnitude > 0) {
-                    val = 20 * Math.log10(magnitude);
+                    val = 20 * Math.log10(magnitude)+ 20 * Math.log10(Ri);
                 }
                 y.push(val > th ? val : th);
             }
