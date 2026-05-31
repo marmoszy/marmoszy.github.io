@@ -42,9 +42,9 @@
 <div id="echogramContainer">
    
 </div>
-<div>
-   <input type=button id='exportBtn' value='Save as tgz' hidden />
-   <a href="mm-echo2.html?loadBlob=1"><input type=button id='open2Btn' value='Open in 3D' hidden/></a>
+<div id="export" hidden>
+   <input type=button id='exportBtn' value='Save as tgz' />
+   <a href="mm-echo2.html?loadBlob=1"><input type=button id='open2Btn' value='Open in 3D'/></a>
 </div>
 
 <script>
@@ -60,9 +60,9 @@ const pal = [
     255,0,0,   239,0,0,     223,0,0,   207,0,0,   191,0,0,   175,0,0,     159,0,0,   143,0,0
 ];
 
+var EchoBlob = null;
 
 // file procesing
-
 async function handleFile() {
     const fileList = document.getElementById('fileInput').files;
     const container = document.getElementById('echogramContainer');
@@ -134,14 +134,14 @@ async function handleFile() {
                 container.appendChild(label);
                 container.appendChild(canvas);
                 drawEchogram(pingsData, th, canvas);
-				if(navs) {
-					const ta = document.createElement('textarea');
+		if(navs) {
+                    const ta = document.createElement('textarea');
                     ta.id = "T_"+file.name;
-				    ta.value = navs;
-				    ta.style.width = "400px";
+		    ta.value = navs;
+		    ta.style.width = "400px";
                     container.appendChild(ta);
-					navs = "";
-				}
+           	    navs = "";
+		}
             } else {
                 console.warn(`${file.name} no channel data ${ch}`);
             }
@@ -149,7 +149,8 @@ async function handleFile() {
             console.error(`File ${file.name} error:`, e);
         }
     }
-    document.getElementById("exportBtn").removeAttribute("hidden");
+    EchoBlob = await createBlob();
+    document.getElementById("export").removeAttribute("hidden");
     status.innerText = "";
 }
 
@@ -301,6 +302,7 @@ function createTarHeader(filename, size) {
     for (let i = 0; i < chkBytes.length; i++) {view[148 + i] = chkBytes[i];}
     return buffer;
 }
+/*
 async function createPackAndDownload(canvasElement, textData, outputFilename = "paczka.tgz") {
     const tarBlocks = [];
     const encoder = new TextEncoder();
@@ -329,13 +331,13 @@ async function createPackAndDownload(canvasElement, textData, outputFilename = "
     document.body.removeChild(downloadLink);
     URL.revokeObjectURL(downloadLink.href);
 }
-/*document.getElementById('exportBtn').addEventListener('click', async () => {
+document.getElementById('exportBtn').addEventListener('click', async () => {
     const canvas = document.getElementById('canvas1');
     const text = document.getElementById('textarea1').value;
     await createPackAndDownload(canvas, text, "export.tgz");
 });
 */
-async function exportAllToTgz(outputFilename = "mm-echo.tgz") {
+async function createBlob() {
     const tarBlocks = [];
     const encoder = new TextEncoder();
     const allCanvases = Array.from(document.querySelectorAll('canvas'));
@@ -387,21 +389,22 @@ async function exportAllToTgz(outputFilename = "mm-echo.tgz") {
     const uncompressedTarBlob = new Blob(tarBlocks, { type: "application/x-tar" });
     const finalGzippedBlob = await gzipWholeTar(uncompressedTarBlob);
     saveBlob(finalGzippedBlob);
-    const finalName = outputFilename.endsWith('.tgz') || outputFilename.endsWith('.tar.gz') 
-                      ? outputFilename 
-                      : outputFilename + '.tgz';
+    return (finalGzippedBlob);
+}
+function blobToTgz(blob, fname) {
     const downloadLink = document.createElement("a");
-    downloadLink.href = URL.createObjectURL(finalGzippedBlob);
-    downloadLink.download = finalName;
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = fname;
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);   
     URL.revokeObjectURL(downloadLink.href);
-    //console.log(`[Eksport SUKCES] ${finalName}`);
+    //console.log(`[Eksport SUKCES] ${fname}`);
 }
 document.getElementById('exportBtn').addEventListener('click', async () => {
-    await exportAllToTgz("mm-echo.png.tgz");     // with finding C_filename  T_filename
-    document.getElementById("open2Btn").removeAttribute("hidden");
+    //await exportAllToTgz("mm-echo.png.tgz");     // with finding C_filename  T_filename
+    if(EchoBlob) blobToTgz(EchoBlob,"mm-echo.png.tgz");
+    //document.getElementById("open2Btn").removeAttribute("hidden");
 });
 
 function saveBlob(myBlob) {
@@ -426,6 +429,7 @@ function saveBlob(myBlob) {
         store.put({ id: "shared-file", blob: blob, name: "mm-echo.tgz" });
     };
 }
+/*
 function openBlob() {
     const request = indexedDB.open("FileStorageDB", 1);
     request.onsuccess = (event) => {
@@ -447,6 +451,7 @@ function openBlob() {
    };
 }
 window.openBlob=openBlob;
+*/
 
 function parseAZFPXml(xmlText) {
     const parser = new DOMParser();
