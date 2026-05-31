@@ -14,7 +14,21 @@
     </style>
 </head>
 
-<body onload="openBlob()">
+<script>
+var loadBlob = 0;
+function url_params() { // overwrite globals from url params
+    var s = window.location.search.substring(1);
+    var ss = s.split('&');
+    for (var i = 0; i < ss.length; i++) {
+        var sss = ss[i].split('=');
+		window[sss[0]] = sss.length>1?sss[1]:"";
+    }
+}
+url_params();
+
+</script>
+
+<body onload="if(loadBlob)openBlob();">
 
 <div id="upload" style="">
     <b style="font-size:1.15em;">mm-echo2 - 3D echogram viewer:&nbsp;</b>
@@ -25,6 +39,7 @@ or
 	<span style="text-align:right" title="Download and then open">download it: <a href="dat/20020714.ek5.png.tgz">20020714.ek5.png.tgz</a></span> 
 -->
 </div>
+
 
 <script type="module">
 
