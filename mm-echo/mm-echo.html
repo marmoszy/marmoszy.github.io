@@ -21,8 +21,8 @@
 <div class="controls">
   <h3 style="text-align:center">mm-echo - minimalistic echogram viewer <span style="font-weight: normal;"> <br>(see also 3D viewer: <a href="mm-echo2.html">mm-echo2</a>)</span></h3>
   <div style="text-align:center">
-    Select echosounder file(s): 
-<input type="file" id="fileInput" onchange="handleFile()" multiple>
+    <span title="Select .dgx, .ek5, .raw .dt4 file(s) or its tgz archive">Select echosounder file(s):</span> 
+<input type="file" id="fileInput" onchange="handleFile()" multiple  accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9,.dt4">
 
 <!--    <button onclick="handleFile()">Process</button> -->
 
