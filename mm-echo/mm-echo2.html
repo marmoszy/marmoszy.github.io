@@ -13,7 +13,8 @@
         textarea {font-size: 1.05em;font-family: sans-serif; }
     </style>
 </head>
-<body>
+
+<body onload="openBlob()">
 
 <div id="upload" style="">
     <b style="font-size:1.15em;">mm-echo2 - 3D echogram viewer:&nbsp;</b>
@@ -24,6 +25,29 @@
 </div>
 
 <script type="module">
+
+function openBlob() {
+    const request = indexedDB.open("FileStorageDB", 1);
+    request.onsuccess = (event) => {
+        const db = event.target.result;
+        const transaction = db.transaction("files", "readonly");
+        const store = transaction.objectStore("files");
+        const getRequest = store.get("shared-file");
+        getRequest.onsuccess = () => {
+          const data = getRequest.result;
+          if (!data) return console.error("File not found in IndexedDB");
+          const file = new File([data.blob], data.name, { type: data.blob.type });
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(file);
+          const fileInput = document.getElementById("imageLoader");
+          fileInput.files = dataTransfer.files;
+          fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+          console.log("File successfully injected into input element!");
+        };
+   };
+}
+window.openBlob=openBlob;
+
 import * as THREE from 'https://unpkg.com/three@0.160.1/build/three.module.js';
 
 const dolnyOffset = 2; 
