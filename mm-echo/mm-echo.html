@@ -26,7 +26,7 @@
 
 <!--    <button onclick="handleFile()">Process</button> -->
 
-	or <input type=button value="Load example" onclick="loadTgzFromUrl('dat/BIAS_2010.raw.tgz')">
+	or <input type=button id="loadExample" value="Load example" onclick="loadTgzFromUrl('dat/BIAS_2010.raw.tgz')">
 <!-- or <span style="text-align:right" title="Download and then open"> download it: <a href="dat/BIAS_2010.raw.tgz">BIAS_2010.raw.tgz</a></span> -->
     <br>
     Channel: 
@@ -222,6 +222,8 @@ function readString(bytes, start, length) {
 }
 async function loadTgzFromUrl(urlString) {
     if (!urlString) return;
+    var oldValue = document.getElementById("loadExample").value;
+    document.getElementById("loadExample").value = "Loading ...";
     try {
         console.log(`[URL] Pobieranie archiwum: ${urlString}`);
         const response = await fetch(urlString);
@@ -258,10 +260,11 @@ async function loadTgzFromUrl(urlString) {
         if (fileInput) {
             fileInput.files = dataTransfer.files; 
         }
-		handleFile(); //fileInput.dispatchEvent(new Event('change'));
+	handleFile(); //fileInput.dispatchEvent(new Event('change'));
     } catch (error) {
         console.error("[URL BŁĄD] Nie udało się dostarczyć struktury plików do lokalnego handlera:", error);
     }
+    document.getElementById("loadExample").value=oldValue;
 }
 //window.loadTgzFromUrl = loadTgzFromUrl; // when module
 
