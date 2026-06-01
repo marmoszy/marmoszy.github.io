@@ -33,7 +33,7 @@ url_params();
 <div id="upload" style="">
     <b style="font-size:1.15em;">mm-echo2 - <span title="Select .dgx, .ek5, .raw, .dt4, .png+.txt file(s) or its tgz archive">3D echogram viewer:</span>&nbsp;</b>
     <input type="file" id="imageLoader" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9,.dt4"  multiple> or
-	<input type=button onclick="loadTgzFromUrl('dat/20020714.ek5.png.tgz');" value="Load example"/>
+	<input type=button id="loadExample" onclick="loadTgzFromUrl('dat/20020714.ek5.png.tgz');" value="Load example"/>
 <!-- 
 or 
 	<span style="text-align:right" title="Download and then open">download it: <a href="dat/20020714.ek5.png.tgz">20020714.ek5.png.tgz</a></span> 
@@ -1449,6 +1449,8 @@ document.getElementById('imageLoader').addEventListener('change', async function
 
 async function loadTgzFromUrl(urlString) {
     if (!urlString) return;
+    var oldValue = document.getElementById("loadExample").value;
+    document.getElementById("loadExample").value = "Loading ...";
     try {
         console.log(`[URL] Pobieranie archiwum: ${urlString}`);
         const response = await fetch(urlString);
@@ -1489,6 +1491,7 @@ async function loadTgzFromUrl(urlString) {
     } catch (error) {
         console.error("[URL Error]:", error);
     }
+    document.getElementById("loadExample").value=oldValue;
 }
 window.loadTgzFromUrl = loadTgzFromUrl;
 
