@@ -23,17 +23,17 @@ function read_data(str) { // building list of lists from string containing xy re
 	return(XY);
 }
 
-function create_graticule(dx,dy) { // cartographic grid every dx in longitude and dy in latitude
+function create_graticule(dx,dy,l1=-180,l2=180,l3=-90,l4=90) { // cartographic grid every dx in longitude and dy in latitude
 	var xy=[],XY=[],i,j;
-	for(i=-180;i<=180;i+=dx) {
-		for(j=-90;j<=90;j+=1) {
+	for(i=l1;i<=l2;i+=dx) {
+		for(j=l3;j<=l4;j+=1) {
 			xy.push([i,j]);
 		}
 		XY.push(xy);
 		xy=[];
 	}
-	for(j=-90;j<=90;j+=dy) {
-		for(i=-180;i<=180;i+=1) {
+	for(j=l3;j<=l4;j+=dy) {
+		for(i=l1;i<=l2;i+=1) {
 			xy.push([i,j]);
 		}
 		XY.push(xy);
@@ -104,12 +104,12 @@ function svg_plot(svg,id,color, xy, xmin,xmax,ymin,ymax,w,h, fun) {  // ploting 
 	for(i=0;i<xy.length;i++) {  // building string of points 
 		var s=''
 		for(j=0;j<xy[i].length;j++) {
-			var xo=xy[i][j][0],yo=xy[i][j][1]; 
+			var xo=xy[i][j][0], yo=xy[i][j][1]; 
 			if(fun) { 
-				xyo=fun(xo,yo);     // calling function fun passed in calling args!
-				xo=xyo[0];yo=xyo[1];
+				xyo=fun(xo,yo); // calling fun passed in args!
+				xo=xyo[0]; yo=xyo[1];
 			}  
-			var x=(xo-xmin)/dx*w,y=(ymax-yo)/dy*h;
+			var x=(xo-xmin)/dx*w, y=(ymax-yo)/dy*h;
 			if(isFinite(y)) s+='' + x + ',' + y +' ';
 		}
 		if(id.includes("points")) {  // as points when "points" in the dataname!
@@ -155,15 +155,159 @@ function albersmapproj(phi,lam, phi0,lam0,phi1,phi2) { // phi,lam -> x,y
   }
 }
 
+// --- spilhausmapproj ---
+function cmul(z0, z) { 
+	return {re:z0.re*z.re-z0.im*z.im, im:z0.re*z.im+z0.im*z.re}; 
+}
+function cdiv(z0, z) {
+        const d = z.re * z.re + z.im * z.im;
+        return {re:(z0.re*z.re+z0.im*z.im)/d, im:(z0.im*z.re-z0.re*z.im)/d};
+}
+function ellipj(u, m) { // u - elliptic distance, m - shape param
+    if (m === 0) {
+        return {sn:Math.sin(u), cn:Math.cos(u), dn:1.0, am:u};
+    }
+    if (m === 1) {
+        const cn = 1/Math.cosh(u);
+        return { sn:Math.tanh(u), cn, dn:cn, am:2*Math.atan(Math.exp(u))-Math.PI/2 };
+    }
+    const a = [1.0], b = [Math.sqrt(1.0 - m)], c = [Math.sqrt(m)];
+    let n = 0;
+    for (; Math.abs(c[n]) > 1e-15 && n < 30; n++) {
+        a.push((a[n] + b[n]) / 2.0);
+        b.push(Math.sqrt(a[n] * b[n]));
+        c.push((a[n] - b[n]) / 2.0);
+    }
+    const phi = new Array(n + 1);
+    phi[n] = Math.pow(2, n) * a[n] * u;
+    for (let i = n; i > 0; i--) {
+        phi[i-1] = 0.5 * (phi[i] + Math.asin((c[i] / a[i]) * Math.sin(phi[i])));
+    }
+    const am = phi[0], sn = Math.sin(am);
+    return { sn, cn:Math.cos(am), dn:Math.sqrt(1-m*(sn*sn)), am };
+}
+function cellipj(u_re, u_im, m) {
+    const {sn:sx, cn:cx, dn:dx} = ellipj(u_re, m);
+    const {sn:sy, cn:cy, dn:dy} = ellipj(u_im, 1-m);
+    const t_y = sy / cy, n_y = 1.0 / cy, d_y = dy / cy; 
+    const D = 1.0 - m * (sx*sx) * (t_y*t_y);
+    const sn = {re:(sx * d_y) / D, im:(cx * dx * t_y) / D};
+    const cn = {re:(cx * n_y) / D, im:(-sx * dx * t_y * n_y) / D};
+    const dn = {re:(dx * d_y) / D, im:(-m * sx * cx * t_y) / D};
+    return { sn, cn, dn };
+}
+function sd(u_re, u_im, m) {
+    const {sn, dn} = cellipj(u_re, u_im, m);
+    return cdiv(sn, dn);
+}
+function arcsd(w_re, w_im, m) { // sd^(-1)
+    let u_re = w_re;
+    let u_im = w_im;    
+    const w = {re:w_re, im:w_im};
+    for (let i = 0; i < 50; i++) {
+        const { sn, cn, dn } = cellipj(u_re, u_im, m );
+        const sd_val = cdiv(sn, dn); // sd = sn / dn
+        const err_re = sd_val.re - w.re; // f(u) = sd(u) - w
+        const err_im = sd_val.im - w.im;
+        if (Math.sqrt(err_re**2 + err_im**2) < 1e-12) {
+            return {re:u_re, im:u_im};
+        }
+        const del = cdiv({re:err_re, im:err_im}, cdiv(cn, cmul(dn, dn)));
+        u_re -= del.re;
+        u_im -= del.im;
+    }
+    return {re:u_re, im:u_im}; // u
+}
+
+function arcsd_m05(w_re, w_im) {
+    const w2 = w_re * w_re + w_im * w_im;
+    const K = 1.8540746773013719;
+    if (w2 > 1.0) {
+        const z = arcsd_m05_series(w_re/w2, -w_im/w2);
+        return {re: (w_re>=0?K:-K)-z.re, im: -z.im };
+    }
+    return arcsd_m05_series(w_re, w_im);
+}
+
+function arcsd_m05_series(w_re, w_im) {
+    let u_re = w_re;
+    let u_im = w_im;
+    const coeffs = [1, 1/40, 1/384, 5/13312, 35/557056, 3/262144, 231/104857600];
+    const w2_re = w_re * w_re - w_im * w_im;
+    const w2_im = 2.0 * w_re * w_im;
+    const w4_re = w2_re * w2_re - w2_im * w2_im;
+    const w4_im = 2.0 * w2_re * w2_im;
+    let cur_re = w_re;
+    let cur_im = w_im;
+    for (let i = 1; i < coeffs.length; i++) {
+        const nextPowerRe = cur_re * w4_re - cur_im * w4_im;
+        const nextPowerIm = cur_re * w4_im + cur_im * w4_re;
+        cur_re = nextPowerRe;
+        cur_im = nextPowerIm;
+        u_re += cur_re * coeffs[i];
+        u_im += cur_im * coeffs[i];
+    }
+    return { re: u_re, im: u_im };
+}
+function adamsws2mapproj(phi_deg, lam_deg) {
+    const deg = 180.0 / Math.PI;
+    const phi = Math.max(-89.9999999, Math.min(89.9999999, phi_deg)) /deg;
+    const lam = Math.max(-179.9999999, Math.min(179.9999999, lam_deg)) /deg;
+    const psi = Math.log(Math.tan(Math.PI / 4.0 + phi / 2.0));
+    const cr = psi / 2.0;
+    const ci = lam / 2.0;
+    const d = Math.cosh(cr) + Math.cos(ci);
+    if (Math.abs(d) < 1e-10) d=1e-10;
+    const w_re = Math.sin(ci) / d;
+    const w_im = Math.sinh(cr) / d;
+    const z = arcsd_m05(w_re, w_im);
+    return [z.re * deg, z.im * deg];
+}
+
+function adamsws2mapproj0(phi, lam) {
+    const { sin, cos, PI } = Math;
+    const deg = 180.0 / PI;
+    const lat = phi / deg, lon = lam / deg;
+    const d = 1.0 + cos(lat) * cos(lon);
+    const z = arcsd_m05(cos(lat) * sin(lon) / d,  sin(lat) / d);
+    return [z.re * deg, z.im * deg];
+}
+
+function spilhausmapproj(phi, lam) {
+    const { sin, cos, asin, atan2, PI } = Math;
+    const deg = 180.0 / PI;
+    const lat = phi / deg, lon = lam / deg;
+    const lat0 = -49.56371678 / deg, lon0 = 66.94970198 / deg;
+    const alpha = 40.17823482 / deg, gamma = 45.0 / deg;
+    const x = cos(lat) * cos(lon);
+    const y = cos(lat) * sin(lon);
+    const z = sin(lat);
+    const xA =   x * cos(-lon0)  -  y * sin(-lon0);
+    const yA =   x * sin(-lon0)  +  y * cos(-lon0);
+    const xB =  xA * cos(lat0)   +  z * sin(lat0);
+    const zB = -xA * sin(lat0)   +  z * cos(lat0);
+    const yC =  yA * cos(-alpha) - zB * sin(-alpha);
+    const zC =  yA * sin(-alpha) + zB * cos(-alpha);
+    const p1 = asin(zC);
+    const l1 = atan2(yC, xB);
+    const d = 1.0 + cos(p1) * cos(l1);
+    const zz = arcsd(cos(p1) * sin(l1) / d, sin(p1) / d, 0.5);
+    const xx = (zz.re * cos(gamma) - zz.im * sin(gamma));
+    const yy = (zz.re * sin(gamma) + zz.im * cos(gamma));
+    return [xx * deg, yy * deg];
+}
+
 /* ------ main -------- */
 
 function main() {
 	var phi0=54.4,lam0=18.6;                   // Gdansk lat,lon
+	var phi1=30,lam1=-90;                     // New Orlean
 	var lonlat = read_data(world_data_string); // world coastlines
 	var grid = create_graticule(30,30);        // every 30 degrees
+	var grid2 = create_graticule(30,30,-180,180,-90,90);        // every 30 degrees
 	var rect = create_rect([[-45,-45],[45,-45],[45,45],[-45,45],[-45,-45]]);
 	var circ = create_circle(0,60,10);         // at 60 N, 0 E with radius of 10 degrees
-	var points=[[[lam0,phi0]]];
+	var points=[[[lam0,phi0]],[[lam1,phi1]]];
 //1	plate care
 	var id='pcare';
 	var proj=null;
@@ -184,7 +328,7 @@ function main() {
 	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h,  proj);
 	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
-//3	sinusoelal
+//3	sinusoidal
 	var id='sin';
 	var proj=function(lon,lat){return(sinmapproj(lat,lon,0)); }
 	var xmin=-180,xmax=180,ymin=-90,ymax=90,w=900,h=450;
@@ -200,6 +344,16 @@ function main() {
 	var xmin=-180,xmax=180,ymin=-35,ymax=145,w=900,h=450;
 	var el=document.getElementById('gt4');
 	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
+//5	adamsws2mapproj // spilhaus
+	var id='adamsws2';
+	var proj=function(lon,lat){return(adamsws2mapproj(lat,lon,-49.56371678,66.94970198, 40.17823482,45)); }
+	var xmin=-63,xmax=63,ymin=-63,ymax=63,w=450,h=450;
+	var el=document.getElementById('gt5');
+	svg_plot(el,id+'grid','lightgrey', grid2, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
@@ -249,7 +403,16 @@ function main() {
 </p>	
 
 <p>
-MM 16.12.2023
+5. <a href="https://en.wikipedia.org/wiki/Adams_projection">Adams projection</a><br>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="535" font-family="Times" font-size=14>
+ <g id="gt5" transform="translate(30,30)">
+  <rect width=450 height=450 style="fill:none;stroke:lightgray;stroke-width:1" />
+ </g>
+</svg>
+</p>	
+
+<p>
+<span title="marek.moszynski@pg.edu.pl">MM 5.6.2026</span>
 </p>
 
 <!--<script src="world_110.js"></script> -->
