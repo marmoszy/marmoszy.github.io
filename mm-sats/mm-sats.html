@@ -61,6 +61,7 @@ var tle_id=-1; // last centered satellite
 var lat=-999,lon=-999;
 //var gnss=0,tdrss=0,ss=0,weather=0,earthres=0,geosync=0,iridium=0,oneweb=0,starlink=0,cosmos2251debris=0,planet=0;
 var celestrack=1;
+var group=0;
 
 // init vars
 var utc = new Date();  // utc.setMonth(5);
@@ -1500,6 +1501,13 @@ function demo_tle_update(s) {
 		//tt=read_tle(tle_tab[tle_idx]); 
 		tt=read_tle(window[tle_names[tle_idx]+"_tle"]);
 	}
+    if(group!=0) {
+  	  var select = document.getElementById("ssform");
+  	  select.value=group;
+	  ss_change(group);
+  	  //const event = new Event('change', { bubbles: true });
+  	  //select.dispatchEvent(event);
+    }
 	return(s0);
 }
 
