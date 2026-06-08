@@ -70,19 +70,18 @@ function create_circle(lon0,lat0,r) { // cartographic circle centered in lat0,lo
 
 /* --------svg functions ------ */
 
-function svg_createpolyline(svg,id,s,color) { // building svg polyline with coords in a string s
+function svg_createpath(svg,id,s,color,color2) { // building svg path with coords in a string s
 	var el=document.getElementById(id);
 	if(!el) {
-		el = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+		el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 		el.setAttribute('stroke',color);
-		el.setAttribute('fill','none');
+		el.setAttribute('fill',color2);
 		el.setAttribute('stroke-width',1);
 		el.setAttribute('id',id);			
 		svg.appendChild(el);
 	}
-	el.setAttribute("points",s);				
+	el.setAttribute("d",s);
 }
-
 function svg_createpoint(svg,id,s,color) { // building svg circle with coords in a string s
 	var el=document.getElementById(id);
 	if(!el) {
@@ -99,26 +98,28 @@ function svg_createpoint(svg,id,s,color) { // building svg circle with coords in
 	el.setAttribute("cy",ss[1]);				
 }
 
-function svg_plot(svg,id,color, xy, xmin,xmax,ymin,ymax,w,h, fun) {  // ploting xy data
+function svg_plot(svg,id,color, xy, xmin,xmax,ymin,ymax,w,h, fun, color2='none') {  // ploting xy data
 	var dx=xmax-xmin,dy=ymax-ymin;
 	for(i=0;i<xy.length;i++) {  // building string of points 
-		var s=''
+		var s='', px, py;
 		for(j=0;j<xy[i].length;j++) {
 			var xo=xy[i][j][0], yo=xy[i][j][1]; 
 			if(fun) { 
-				xyo=fun(xo,yo); // calling fun passed in args!
+				xyo=fun(xo,yo); // calling fun!
 				xo=xyo[0]; yo=xyo[1];
 			}  
-			var x=(xo-xmin)/dx*w, y=(ymax-yo)/dy*h;
-			if(isFinite(y)) s+='' + x + ',' + y +' ';
+			var x = (xo-xmin)/dx*w, y=(ymax-yo)/dy*h;
+                        var d = j>0 ? Math.sqrt((x-px)**2+(y-py)**2): 0;
+			if(isFinite(y)) s+= (s.length==0||d>100?'M':'L') + x + ',' + y +' ';
+                        px = x; py = y;
 		}
 		if(id.includes("points")) {  // as points when "points" in the dataname!
-			var ss=s.split(' ');
+			var ss=s.replaceAll('M','').replaceAll('L','').split(' ');
 			for(j=0;j<ss.length;j++) {
 				if(ss[j].length>0) svg_createpoint(svg,id+i+'_'+j,ss[j],color);
 			}
 		} else { // as line
-			svg_createpolyline(svg,id+i,s,color);
+			svg_createpath(svg,id+"_"+i,s.replaceAll(',',' '),color,color2);
 		}
 	}
 }
@@ -135,90 +136,48 @@ function mercmapproj(phi,lam, lam0) { // phi,lam -> x,y (cartographic param: lam
 }
 
 function sinmapproj(phi,lam, lam0) { // phi,lam -> x,y (cartographic param: lam0 )
-  with(Math) {
+    const {cos, PI} = Math;
     var deg=180/PI;              
     var l = lam/deg, p = phi/deg, l0 = lam0/deg;
-	var x = (l-l0)*cos(p), y=p;
- 	return([x*deg,y*deg]);	
-  }
+    var x = (l-l0)*cos(p), y=p;
+    return([x*deg, y*deg]);	
 }
 
 function albersmapproj(phi,lam, phi0,lam0,phi1,phi2) { // phi,lam -> x,y 
-  with(Math) {
-    var deg=180/PI;              
+    const {sin, cos, sqrt, PI} = Math;
+    const deg=180/PI;              
     var l = lam/deg, p = phi/deg, l0 = lam0/deg, p0=phi0/deg, p1=phi1/deg, p2=phi2/deg;
-	var n = (sin(p1)+sin(p2))/2;
-	var C = cos(p1)*cos(p1)+2*n*sin(p1), th = n*(l-l0);
-	var r0 = sqrt(C-2*n*sin(p0))/n, r = sqrt(C-2*n*sin(p))/n;
-	var x = r*sin(th), y=r0-r*cos(th);
- 	return([x*deg,y*deg]);	
-  }
+    var n = (sin(p1)+sin(p2))/2;
+    var C = cos(p1)*cos(p1)+2*n*sin(p1), th = n*(l-l0);
+    var r0 = sqrt(C-2*n*sin(p0))/n, r = sqrt(C-2*n*sin(p))/n;
+    var x = r*sin(th), y=r0-r*cos(th);
+    return([x*deg, y*deg]);	
+}
+
+function bonnemapproj(phi, lam, phi0=45, lam0=0) { // phi,lam -> x,y
+    const {sin, cos, tan, PI} = Math;
+    const deg = 180/PI;              
+    var l = lam/deg, p = phi/deg, l0 = lam0/deg, p0 = phi0/deg;
+    var cot = (p0===0) ? 0 : 1/tan(p0); 
+    var r0 = cot+p0-p;
+    var E = (r0===0) ? 0 : (l-l0)*cos(p)/r0;
+    var x = r0*sin(E), y = cot-r0*cos(E);
+    return [x*deg, y*deg];	
+}
+function wernermapproj(phi, lam, lam0=0) { // Heart-shaped projection
+    return bonnemapproj(phi, lam, 90, lam0);
+}
+function naturalearthmapproj(phi, lam, lam0=0) {
+    const { PI } = Math;
+    var deg = 180/PI;              
+    var l = lam/deg, p = phi/deg, l0 = lam0/deg;
+    var p2 = p * p, p4 = p2 * p2, p8 = p4 * p4, p10 = p8*p2, p12 = p10*p2;
+    var l_phi = 0.870700 - 0.131979*p2 - 0.013723*p4 + 0.003971*p10 - 0.001529*p12;
+    var d_phi = p * (1.007226 + 0.015085*p2 - 0.044475*p4 + 0.028874*p8 - 0.005916*p10);
+    return ([(l-l0)*l_phi * deg, d_phi * deg]); 
 }
 
 // --- spilhausmapproj ---
-function cmul(z0, z) { 
-	return {re:z0.re*z.re-z0.im*z.im, im:z0.re*z.im+z0.im*z.re}; 
-}
-function cdiv(z0, z) {
-        const d = z.re * z.re + z.im * z.im;
-        return {re:(z0.re*z.re+z0.im*z.im)/d, im:(z0.im*z.re-z0.re*z.im)/d};
-}
-function ellipj(u, m) { // u - elliptic distance, m - shape param
-    if (m === 0) {
-        return {sn:Math.sin(u), cn:Math.cos(u), dn:1.0, am:u};
-    }
-    if (m === 1) {
-        const cn = 1/Math.cosh(u);
-        return { sn:Math.tanh(u), cn, dn:cn, am:2*Math.atan(Math.exp(u))-Math.PI/2 };
-    }
-    const a = [1.0], b = [Math.sqrt(1.0 - m)], c = [Math.sqrt(m)];
-    let n = 0;
-    for (; Math.abs(c[n]) > 1e-15 && n < 30; n++) {
-        a.push((a[n] + b[n]) / 2.0);
-        b.push(Math.sqrt(a[n] * b[n]));
-        c.push((a[n] - b[n]) / 2.0);
-    }
-    const phi = new Array(n + 1);
-    phi[n] = Math.pow(2, n) * a[n] * u;
-    for (let i = n; i > 0; i--) {
-        phi[i-1] = 0.5 * (phi[i] + Math.asin((c[i] / a[i]) * Math.sin(phi[i])));
-    }
-    const am = phi[0], sn = Math.sin(am);
-    return { sn, cn:Math.cos(am), dn:Math.sqrt(1-m*(sn*sn)), am };
-}
-function cellipj(u_re, u_im, m) {
-    const {sn:sx, cn:cx, dn:dx} = ellipj(u_re, m);
-    const {sn:sy, cn:cy, dn:dy} = ellipj(u_im, 1-m);
-    const t_y = sy / cy, n_y = 1.0 / cy, d_y = dy / cy; 
-    const D = 1.0 - m * (sx*sx) * (t_y*t_y);
-    const sn = {re:(sx * d_y) / D, im:(cx * dx * t_y) / D};
-    const cn = {re:(cx * n_y) / D, im:(-sx * dx * t_y * n_y) / D};
-    const dn = {re:(dx * d_y) / D, im:(-m * sx * cx * t_y) / D};
-    return { sn, cn, dn };
-}
-function sd(u_re, u_im, m) {
-    const {sn, dn} = cellipj(u_re, u_im, m);
-    return cdiv(sn, dn);
-}
-function arcsd(w_re, w_im, m) { // sd^(-1)
-    let u_re = w_re;
-    let u_im = w_im;    
-    const w = {re:w_re, im:w_im};
-    for (let i = 0; i < 50; i++) {
-        const { sn, cn, dn } = cellipj(u_re, u_im, m );
-        const sd_val = cdiv(sn, dn); // sd = sn / dn
-        const err_re = sd_val.re - w.re; // f(u) = sd(u) - w
-        const err_im = sd_val.im - w.im;
-        if (Math.sqrt(err_re**2 + err_im**2) < 1e-12) {
-            return {re:u_re, im:u_im};
-        }
-        const del = cdiv({re:err_re, im:err_im}, cdiv(cn, cmul(dn, dn)));
-        u_re -= del.re;
-        u_im -= del.im;
-    }
-    return {re:u_re, im:u_im}; // u
-}
-
 function arcsd_m05(w_re, w_im) {
     const w2 = w_re * w_re + w_im * w_im;
     const K = 1.8540746773013719;
@@ -228,73 +187,46 @@ function arcsd_m05(w_re, w_im) {
     }
     return arcsd_m05_series(w_re, w_im);
 }
-
 function arcsd_m05_series(w_re, w_im) {
     let u_re = w_re;
     let u_im = w_im;
     const coeffs = [1, 1/40, 1/384, 5/13312, 35/557056, 3/262144, 231/104857600];
-    const w2_re = w_re * w_re - w_im * w_im;
-    const w2_im = 2.0 * w_re * w_im;
-    const w4_re = w2_re * w2_re - w2_im * w2_im;
-    const w4_im = 2.0 * w2_re * w2_im;
-    let cur_re = w_re;
-    let cur_im = w_im;
+    const w2_re = w_re**2 - w_im**2, w2_im = 2.0 * w_re * w_im;
+    const w4_re = w2_re**2 - w2_im**2, w4_im = 2.0 * w2_re * w2_im;
+    let cur_re = w_re, cur_im = w_im;
     for (let i = 1; i < coeffs.length; i++) {
-        const nextPowerRe = cur_re * w4_re - cur_im * w4_im;
-        const nextPowerIm = cur_re * w4_im + cur_im * w4_re;
-        cur_re = nextPowerRe;
-        cur_im = nextPowerIm;
-        u_re += cur_re * coeffs[i];
-        u_im += cur_im * coeffs[i];
+        const re = cur_re*w4_re-cur_im*w4_im, im = cur_re*w4_im+cur_im*w4_re;
+        cur_re = re; cur_im = im;
+        u_re += cur_re * coeffs[i], u_im += cur_im * coeffs[i];
     }
     return { re: u_re, im: u_im };
 }
 function adamsws2mapproj(phi_deg, lam_deg) {
-    const deg = 180.0 / Math.PI;
-    const phi = Math.max(-89.9999999, Math.min(89.9999999, phi_deg)) /deg;
-    const lam = Math.max(-179.9999999, Math.min(179.9999999, lam_deg)) /deg;
-    const psi = Math.log(Math.tan(Math.PI / 4.0 + phi / 2.0));
-    const cr = psi / 2.0;
-    const ci = lam / 2.0;
-    const d = Math.cosh(cr) + Math.cos(ci);
-    if (Math.abs(d) < 1e-10) d=1e-10;
-    const w_re = Math.sin(ci) / d;
-    const w_im = Math.sinh(cr) / d;
-    const z = arcsd_m05(w_re, w_im);
+    const { sin, cos, log, tan, sinh, cosh, PI, max, min } = Math;
+    const deg = 180/PI;
+    const phi = max(-89.9999999, min(89.9999999, phi_deg)) /deg;
+    const lam = max(-179.9999999, min(179.9999999, lam_deg)) /deg;
+    const psi = log(tan(PI/4 + phi/2));
+    const cr = psi/2, ci = lam/2;
+    const d = cosh(cr) + cos(ci);
+    const z = arcsd_m05(sin(ci)/d, sinh(cr)/d);
     return [z.re * deg, z.im * deg];
 }
-
-function adamsws2mapproj0(phi, lam) {
-    const { sin, cos, PI } = Math;
-    const deg = 180.0 / PI;
-    const lat = phi / deg, lon = lam / deg;
-    const d = 1.0 + cos(lat) * cos(lon);
-    const z = arcsd_m05(cos(lat) * sin(lon) / d,  sin(lat) / d);
-    return [z.re * deg, z.im * deg];
-}
-
-function spilhausmapproj(phi, lam) {
-    const { sin, cos, asin, atan2, PI } = Math;
-    const deg = 180.0 / PI;
-    const lat = phi / deg, lon = lam / deg;
-    const lat0 = -49.56371678 / deg, lon0 = 66.94970198 / deg;
-    const alpha = 40.17823482 / deg, gamma = 45.0 / deg;
-    const x = cos(lat) * cos(lon);
-    const y = cos(lat) * sin(lon);
-    const z = sin(lat);
-    const xA =   x * cos(-lon0)  -  y * sin(-lon0);
-    const yA =   x * sin(-lon0)  +  y * cos(-lon0);
-    const xB =  xA * cos(lat0)   +  z * sin(lat0);
-    const zB = -xA * sin(lat0)   +  z * cos(lat0);
-    const yC =  yA * cos(-alpha) - zB * sin(-alpha);
-    const zC =  yA * sin(-alpha) + zB * cos(-alpha);
-    const p1 = asin(zC);
-    const l1 = atan2(yC, xB);
-    const d = 1.0 + cos(p1) * cos(l1);
-    const zz = arcsd(cos(p1) * sin(l1) / d, sin(p1) / d, 0.5);
-    const xx = (zz.re * cos(gamma) - zz.im * sin(gamma));
-    const yy = (zz.re * sin(gamma) + zz.im * cos(gamma));
-    return [xx * deg, yy * deg];
+function spilhausmapproj(phi_deg, lam_deg, lam0_deg=66.94970198, aph0_deg=-49.56371678, bet0_deg=40.17823482) {
+    const { sin, cos, atan2, asin, log, tan, sinh, cosh, PI, abs, max, min } = Math;
+    const deg = 180/PI;
+    const phi = phi_deg/deg, lam = lam_deg/deg;
+    const lam0 = lam0_deg/deg, aph0 = (90 - (aph0_deg))/deg, bet0 = bet0_deg/deg;
+    const sinaph = sin(aph0), cosaph = cos(aph0);
+    const coslam = cos(lam-lam0), sinlam = sin(lam-lam0);
+    let aphi = asin(max(-1.0,min(1.0,sinaph*sin(phi)-cosaph*cos(phi)* coslam)));
+    let alam = atan2(cos(phi)*sinlam,(sinaph*cos(phi)*coslam+cosaph*sin(phi)))+bet0;
+    while (alam> PI) alam -= 2*PI;
+    while (alam<-PI) alam += 2*PI;
+    const z = adamsws2mapproj(aphi*deg, alam*deg);
+    const rot0 = 45.0/deg;
+    const cosrot = cos(rot0), sinrot = sin(rot0);
+    return [z[0]*cosrot+z[1]*sinrot, -z[0]*sinrot+z[1]*cosrot ];
 }
 
 /* ------ main -------- */
@@ -308,33 +240,43 @@ function main() {
 	var rect = create_rect([[-45,-45],[45,-45],[45,45],[-45,45],[-45,-45]]);
 	var circ = create_circle(0,60,10);         // at 60 N, 0 E with radius of 10 degrees
 	var points=[[[lam0,phi0]],[[lam1,phi1]]];
+        var objs=['grid', 'lonlat', 'rect', 'circ', 'points'];
+        var colors=['lightgrey', 'green', 'red', 'blue', 'purple'];
 //1	plate care
 	var id='pcare';
 	var proj=null;
 	var xmin=-180,xmax=180,ymin=-90,ymax=90,w=900,h=450;
 	var el=document.getElementById('gt1');
-	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'lonlat','green', lonlat, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
+        for (let i=0; i<objs.length; i++) {
+ 	    svg_plot(el, id+'_'+objs[i], colors[i], eval(objs[i]), 
+                  xmin,xmax,ymin,ymax,w,h, proj, i==1?'#00800040':'none');
+        }
+	//svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
+	//svg_plot(el,id+'lonlat','green', lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#00800040');
+	//svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
+	//svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
+	//svg_plot(el,id+'points','purple',points, xmin,xmax,ymin,ymax,w,h, proj);
 //2	mercator
 	var id='merc';
-	var proj=function(lon,lat) {return(mercmapproj(lat,lon,0));}
+	var proj = (lon,lat) => mercmapproj(lat,lon,0);
 	var xmin=-180,xmax=180,ymin=-180,ymax=180,w=450,h=450;
 	var el=document.getElementById('gt2');
-	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'lonlat','orange',lonlat, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h,  proj);
-	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
+        for (let i=0; i<objs.length; i++) {
+ 	    svg_plot(el, id+'_'+objs[i], i==1?'orange':colors[i], eval(objs[i]), 
+                  xmin,xmax,ymin,ymax,w,h, proj, i==1?'#FFa50040':'none');
+        }
+	//svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
+	//svg_plot(el,id+'lonlat','orange',lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#FFa50040');
+	//svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h,  proj);
+	//svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
+	//svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
 //3	sinusoidal
 	var id='sin';
 	var proj=function(lon,lat){return(sinmapproj(lat,lon,0)); }
 	var xmin=-180,xmax=180,ymin=-90,ymax=90,w=900,h=450;
 	var el=document.getElementById('gt3');
 	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'lonlat','limegreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'lonlat','limegreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#00800040');
 	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
@@ -344,20 +286,59 @@ function main() {
 	var xmin=-180,xmax=180,ymin=-35,ymax=145,w=900,h=450;
 	var el=document.getElementById('gt4');
 	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, 'none');
 	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
 //5	adamsws2mapproj // spilhaus
 	var id='adamsws2';
-	var proj=function(lon,lat){return(adamsws2mapproj(lat,lon,-49.56371678,66.94970198, 40.17823482,45)); }
+	var proj=function(lon,lat){return(adamsws2mapproj(lat,lon)); }
 	var xmin=-63,xmax=63,ymin=-63,ymax=63,w=450,h=450;
 	var el=document.getElementById('gt5');
 	svg_plot(el,id+'grid','lightgrey', grid2, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#00800060');
 	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
+//6	spilhaus
+	var id='spilhaus';
+	var proj=function(lon,lat){return(spilhausmapproj(lat,lon)); }
+	var xmin=-63,xmax=63,ymin=-63,ymax=63,w=450,h=450;
+	var el=document.getElementById('gt6');
+	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, 'none');
+	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
+//7	bonne
+	var id='bonne';
+	var proj=function(lon,lat){return(bonnemapproj(lat,lon,45,0)); }
+	var xmin=-135,xmax=135,ymin=-150,ymax=120,w=450,h=450;
+	var el=document.getElementById('gt7');
+	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#00800060');
+	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
+//8	werner
+	var id='werner';
+	var proj=function(lon,lat){return(wernermapproj(lat,lon)); }
+	var xmin=-135,xmax=135,ymin=-200,ymax=70,w=450,h=450;
+	var el=document.getElementById('gt8');
+	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#00800060');
+	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
+	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
+//9	natural earth
+	var id='naturalearth';
+	var proj=function(lon,lat){return(naturalearthmapproj(lat,lon)); }
+	var xmin=-180,xmax=180,ymin=-120,ymax=120,w=900,h=450;
+	var el=document.getElementById('gt9');
+        for (let i=0; i<objs.length; i++) {
+ 	    svg_plot(el, id+'_'+objs[i], colors[i], eval(objs[i]), 
+                  xmin,xmax,ymin,ymax,w,h, proj, i==1?'#00800040':'none');
+        }
 }
 </script>
 </head>
@@ -409,9 +390,45 @@ function main() {
   <rect width=450 height=450 style="fill:none;stroke:lightgray;stroke-width:1" />
  </g>
 </svg>
+</p>
+
+<p>
+6. <a href="https://en.wikipedia.org/wiki/Spilhaus_projection">Spilhaus projection</a><br>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="535" font-family="Times" font-size=14>
+ <g id="gt6" transform="translate(30,30)">
+  <rect width=450 height=450 style="fill:none;stroke:lightgray;stroke-width:1" />
+ </g>
+</svg>
 </p>	
 
 <p>
+7. <a href="https://en.wikipedia.org/wiki/Bonne_projection">Bonne projection</a><br>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="535" font-family="Times" font-size=14>
+ <g id="gt7" transform="translate(30,30)">
+  <rect width=450 height=450 style="fill:none;stroke:lightgray;stroke-width:1" />
+ </g>
+</svg>
+</p>	
+
+<p>
+8. <a href="https://en.wikipedia.org/wiki/Werner_projection">Werner projection</a><br>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="535" font-family="Times" font-size=14>
+ <g id="gt8" transform="translate(30,30)">
+  <rect width=450 height=450 style="fill:none;stroke:lightgray;stroke-width:1" />
+ </g>
+</svg>
+</p>
+
+<p>
+9. <a href="https://en.wikipedia.org/wiki/Natural_Earth_projection">Natural Earth projection</a><br>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="535" font-family="Times" font-size=14>
+ <g id="gt9" transform="translate(30,30)">
+  <rect width=900 height=450 style="fill:none;stroke:lightgray;stroke-width:1" />
+ </g>
+</svg>
+</p>
+<p>
+
 <span title="marek.moszynski@pg.edu.pl">MM 5.6.2026</span>
 </p>
 
