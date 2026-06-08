@@ -31,8 +31,8 @@ url_params();
 <body onload="if(loadBlob)openBlob();">
 
 <div id="upload" style="">
-    <b style="font-size:1.15em;">mm-echo2 - <span title="Select .dgx, .ek5, .raw, .dt4, .png+.txt file(s) or its tgz archive">3D echogram viewer:</span>&nbsp;</b>
-    <input type="file" id="imageLoader" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9,.dt4"  multiple> or
+    <b style="font-size:1.15em;">mm-echo2 - <span title="Select .dgx, .ek5, .raw, .all, .dt4, .png+.txt file(s) or its tgz archive">3D echogram viewer:</span>&nbsp;</b>
+    <input type="file" id="imageLoader" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw, .all, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9,.dt4"  multiple> or
 	<input type=button id="loadExample" onclick="loadTgzFromUrl('dat/20020714.ek5.png.tgz');" value="Load example"/>
 <!-- 
 or 
@@ -42,6 +42,16 @@ or
 
 
 <script type="module">
+
+function latLonToMeters(lat, lon) {
+    const R = 6378137;
+    const x = R * (lon * Math.PI / 180);
+    const maxLat = 85.05112878;
+    const clampedLat = Math.max(-maxLat, Math.min(maxLat, lat));
+    const latRad = clampedLat * Math.PI / 180;
+    const y = R * Math.log(Math.tan((Math.PI / 4) + (latRad / 2)));
+    return { x: x, y: y };
+}
 
 function openBlob() {
     const request = indexedDB.open("FileStorageDB", 1);
@@ -145,12 +155,13 @@ gridHelper.material.transparent = true;
 gridHelper.material.opacity = 0.4; 
 
 function parsePointsToObjects(str) {
+debugger;
     return str.split(';')
         .map(pair => pair.trim())
         .filter(pair => pair && !pair.startsWith('#')) 
         .map(pair => {
-            const [x, y] = pair.split(',').map(Number);
-            return { x, y };
+            var [x, y] = pair.split(',').map(Number);
+            return {x, y};
         });
 }
 const punktyDlaLinii = parsePointsToObjects(goraPunktyString);
@@ -328,7 +339,6 @@ function updatePathLine(str) {
 // --- insert gemetry and texture
 
 function applyNewData(imageElement, curveString) {
-debugger;
     let points = parsePointsToObjects(curveString);
     if (!points || points.length === 0) return;
     const targetCount = 201; // 200 segments -> 201 vertices
@@ -561,6 +571,48 @@ function processDGxLogic(buffer, targetCh, th) {
         offset += (4 + size);
     }
     
+    const navs = navStrCollection.join('\n');
+    return { pings, navs };
+}
+
+function processAllLogic(buffer, targetCh, th) {
+    const dv = new DataView(buffer);
+    let offset = 0;
+    let pings = [];
+    let navStrCollection = [];
+    let Lat = -99, Lon = -99;
+    let endian = 0; // 0 = Big Endian (default), 1 = Little Endian
+    let littleEndian = false;
+    while (offset + 4 <= dv.byteLength) {
+        let size = dv.getUint32(offset, littleEndian);
+        if (size > 0x10000 || endian === 1) {
+            endian = 1;
+            littleEndian = true;
+            size = dv.getUint32(offset, littleEndian); // Re-read with correct endianness
+        }
+        const totalBlockSize = 4 + 16 + (size - 16);
+        if (offset + totalBlockSize > dv.byteLength) {
+            console.warn("File error: Block exceeds buffer size at offset:", offset);
+            break;
+        }
+        const headOffset = offset + 4;        
+        const type0 = dv.getUint8(headOffset + 1);
+        const type = String.fromCharCode(type0);
+        const bufOffset = headOffset + 16;
+        if (type === 'P') { // Position Block
+            if (bufOffset + 16 <= dv.byteLength) {
+                // Read Lat (4 bytes) and Lon (4 bytes)
+                let rawLat = dv.getUint32(bufOffset, littleEndian);
+                let rawLon = dv.getUint32(bufOffset + 4, littleEndian);
+                rawLat = dv.getInt32(bufOffset, littleEndian);
+                rawLon = dv.getInt32(bufOffset + 4, littleEndian);
+                Lat = rawLat / 20000000;
+                Lon = rawLon / 10000000;
+                navStrCollection.push(`${Lon} ${Lat}`);
+            }
+        }
+        offset += totalBlockSize;
+    }
     const navs = navStrCollection.join('\n');
     return { pings, navs };
 }
@@ -1182,7 +1234,6 @@ const FileParsers = {
     handleRasterImage: function(file, curve) {
         const reader = new FileReader();
         reader.onload = function(event) {
-debugger;
             const img = new Image();
             img.onload = function() {
                 applyNewData(img, curve ? curve : "-2," + (img_z) + "; 2," + (img_z));
@@ -1208,6 +1259,8 @@ debugger;
                         data = processDGxLogic(arrayBuffer, targetCh, th);
                     } else if (file.name.endsWith('.raw')) {
                         data = processEK60AndEK80Logic(arrayBuffer, targetCh, th);
+                    } else if (file.name.endsWith('.all')) {
+                        data = processAllLogic(arrayBuffer, targetCh, th);
                     } else if (file.name.toLowerCase().endsWith('.dt4')) {
                         data = processDT4Logic(arrayBuffer, targetCh, th);
                     } else {
@@ -1244,7 +1297,6 @@ function handleTextCurveFile(file) {
 }
 
 function mapCurveStringWithAspectRatio(cleanString, globalBounds = null) {
-debugger;
     const values = cleanString.split(/[;,]/).filter(val => val !== "").map(Number);
     const points = [];
     for (let i = 0; i < values.length; i += 2) {
@@ -1357,7 +1409,9 @@ document.getElementById('imageLoader').addEventListener('change', async function
             for (const file of e.target.files) {
                 const core = getNameCore(file.name);
 		const dgx = /\.dg.$/i;
-                if (dgx.test(file.name) || file.name.endsWith('.ek5') || file.name.endsWith('.raw')||file.name.toLowerCase().endsWith('.dt4')) {
+                if (dgx.test(file.name) || file.name.endsWith('.ek5') ||
+                  file.name.endsWith('.raw')||file.name.toLowerCase().endsWith('.all')||
+                  file.name.toLowerCase().endsWith('.dt4')) {
                     customFiles.push(file); // for async processing
                 } else if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
                     rawTxtDataMap.set(core, file);
@@ -1367,7 +1421,7 @@ document.getElementById('imageLoader').addEventListener('change', async function
                     console.warn(`File format not known: ${file.name}.`);
                 }
             }
-            if (customFiles.length > 0) {             // async processing  (.ek5, .raw) 
+            if (customFiles.length > 0) {             // async processing  (.ek5, .raw,) 
                 const ek5Promises = customFiles.map(async (file) => {
                     const core = getNameCore(file.name);
                     try {
