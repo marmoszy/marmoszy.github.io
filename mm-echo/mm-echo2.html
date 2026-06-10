@@ -14,6 +14,7 @@
     </style>
 </head>
 
+<script src="ll2utm.js" defer></script> 
 <script>
 var loadBlob = 0;
 function url_params() { // overwrite globals from url params
@@ -31,8 +32,8 @@ url_params();
 <body onload="if(loadBlob)openBlob();">
 
 <div id="upload" style="">
-    <b style="font-size:1.15em;">mm-echo2 - <span title="Select .dgx, .ek5, .raw, .all, .dt4, .png+.txt file(s) or its tgz archive">3D echogram viewer:</span>&nbsp;</b>
-    <input type="file" id="imageLoader" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw, .all, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9,.dt4"  multiple> or
+    <b style="font-size:1.15em;">mm-echo2 - <span title="Select .dgx, .ek5, .raw, .all, .dt4, .s7k, .png+.txt file(s) or its tgz archive">3D echogram viewer:</span>&nbsp;</b>
+    <input type="file" id="imageLoader" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw, .all, .s7k, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9,.dt4"  multiple> or
 	<input type=button id="loadExample" onclick="loadTgzFromUrl('dat/20020714.ek5.png.tgz');" value="Load example"/>
 <!-- 
 or 
@@ -505,22 +506,17 @@ function processDGxLogic(buffer, targetCh, th) {
     let navStrCollection = []; 
     const textDecoder = new TextDecoder("utf-8");
 
-    // W formacie .dg/.dgn nagłówek długości ma 4 bajty (UInt32)
-    while (offset + 4 <= dv.byteLength) {
-        const size = dv.getUint32(offset, true); // ZMIANA: getUint32 zamiast getUint16
-        const blockStart = offset + 4;            // ZMIANA: blockStart przesunięty o 4 bajty
-        
+    while (offset + 4 <= dv.byteLength) { // .dg/.dgn header: 4 bytes (UInt32)
+        const size = dv.getUint32(offset, true);
+        const blockStart = offset + 4;        
         if (blockStart + size > dv.byteLength) {
             console.warn("File error in block at offset:", offset);
             break;
         }
-        
         if (size >= 2) {
             const t1 = String.fromCharCode(dv.getUint8(blockStart));
-            const t2 = String.fromCharCode(dv.getUint8(blockStart + 1));
-            
-            // --- Telegram nawigacyjny 'GL' ---
-            if (t1 === 'G' && t2 === 'L') { 
+            const t2 = String.fromCharCode(dv.getUint8(blockStart + 1));           
+            if (t1 === 'G' && t2 === 'L') {  // --- Navigation 'GL' ---
                 const stringOffset = blockStart + 2;
                 const stringLength = size - 2;
                 if (stringLength > 0) {
@@ -528,32 +524,25 @@ function processDGxLogic(buffer, targetCh, th) {
                     const cleanString = textDecoder.decode(stringBuffer).trim();
                     const parts = cleanString.split(",");
                     let latDec = null, lonDec = null;
-                    
                     const lonMatch = parts[4] ? parts[4].match(/^(\d{3})(\d{2}\.\d+)$/) : null;
                     if (lonMatch) {
-                        const d = parseFloat(lonMatch[1]);
-                        const m = parseFloat(lonMatch[2]);
-                        lonDec = d + (m / 60);
+                        lonDec = parseFloat(lonMatch[1]) + parseFloat(lonMatch[2])/60;
                         if (parts[5] === "W") lonDec = -lonDec;
                     }
                     const latMatch = parts[2] ? parts[2].match(/^(\d{2})(\d{2}\.\d+)$/) : null;
                     if (latMatch) {
-                        const d = parseFloat(latMatch[1]);
-                        const m = parseFloat(latMatch[2]);
-                        latDec = d + (m / 60);
+                        latDec = parseFloat(latMatch[1])+ parseFloat(latMatch[2])/60;
                         if (parts[3] === "S") latDec = -latDec;
                     }
                     navStrCollection.push("" + lonDec + " " + latDec);
                 }
             } 
-            // --- Telegram echogramu 'Q' + numer kanału ---
-            else if (t1 === 'Q' && t2 === chStr) {  
+            else if (t1 === 'Q' && t2 === chStr) { // --- 'Q' + channel number ---
                 if (size >= 44) {
                     const pelCo = dv.getUint32(blockStart + 24, true);
                     let y = [];
                     const maxSamplesInBlock = Math.floor((size - 44) / 2);
-                    const samplesToRead = Math.min(pelCo, maxSamplesInBlock);
-                    
+                    const samplesToRead = Math.min(pelCo, maxSamplesInBlock);                    
                     for (let i = 0; i < samplesToRead; i++) {
                         const sampleOffset = blockStart + 44 + (i * 2);
                         if (sampleOffset + 2 <= dv.byteLength) {
@@ -566,21 +555,21 @@ function processDGxLogic(buffer, targetCh, th) {
                 }
             }
         }
-        
-        // ZMIANA: Przesunięcie o 4 bajty nagłówka długości + rozmiar payloadu
         offset += (4 + size);
-    }
-    
+    }    
     const navs = navStrCollection.join('\n');
     return { pings, navs };
 }
 
 function processAllLogic(buffer, targetCh, th) {
+    const {sin, cos, PI} = Math;
     const dv = new DataView(buffer);
     let offset = 0;
     let pings = [];
+    let depths = [];
     let navStrCollection = [];
     let Lat = -99, Lon = -99;
+    let ux, uy, uz, uh, lltm=0, sv=0, cv=0, hd=0;
     let endian = 0; // 0 = Big Endian (default), 1 = Little Endian
     let littleEndian = false;
     while (offset + 4 <= dv.byteLength) {
@@ -598,24 +587,228 @@ function processAllLogic(buffer, targetCh, th) {
         const headOffset = offset + 4;        
         const type0 = dv.getUint8(headOffset + 1);
         const type = String.fromCharCode(type0);
+        const model = dv.getUint16(headOffset + 2, littleEndian); // echosounder model
+        const date  = dv.getUint32(headOffset + 4, littleEndian); // date RRRRMMDD
+        const tm    = dv.getUint32(headOffset + 8, littleEndian); // time ms       
+        const pc    = dv.getUint16(headOffset + 12, littleEndian); // Ping counter 
+        const sn    = dv.getUint16(headOffset + 14, littleEndian); // Serial number
+
         const bufOffset = headOffset + 16;
-        if (type === 'P') { // Position Block
+        if (type === 'P') { // 1. Position Block
             if (bufOffset + 16 <= dv.byteLength) {
                 // Read Lat (4 bytes) and Lon (4 bytes)
-                let rawLat = dv.getUint32(bufOffset, littleEndian);
-                let rawLon = dv.getUint32(bufOffset + 4, littleEndian);
-                rawLat = dv.getInt32(bufOffset, littleEndian);
-                rawLon = dv.getInt32(bufOffset + 4, littleEndian);
+                let rawLat = dv.getInt32(bufOffset, littleEndian);
+                let rawLon = dv.getInt32(bufOffset + 4, littleEndian);
                 Lat = rawLat / 20000000;
                 Lon = rawLon / 10000000;
-                navStrCollection.push(`${Lon} ${Lat}`);
+                const pq   = dv.getUint16(bufOffset + 8, littleEndian);  // Position quality
+                sv     = dv.getUint16(bufOffset + 10, littleEndian); // Speed over ground
+                cv     = dv.getUint16(bufOffset + 12, littleEndian); // Course over ground
+                hd     = dv.getUint16(bufOffset + 14, littleEndian); // Heading 
+                const ps   = dv.getUint8(bufOffset + 16);   // Position system descriptor
+                const n    = dv.getUint8(bufOffset + 17);   // position string length
+                sv  = sv / 100; // Speed in m/s
+                cv  = cv / 100; // 
+                hd  = hd / 100; // Heading
+                lltm = tm;
+                //navStrCollection.push(`${Lon} ${Lat}`);
+                [ux, uy, uz, uh] = ll2utm(Lat,Lon);
+                navStrCollection.push(`${ux} ${uy}`);
             }
         }
+        else if (type === 'D') { // 2. Depth (Typ 'D')      
+            let currentOffset = bufOffset;
+            // unpack('S3 c4 S') lub ('n3 c4 n')
+            // bytes: (3 * 2) + (4 * 1) + (1 * 2) = 12 bajtów
+            if (currentOffset + 12 <= dv.byteLength) {
+                let hd      = dv.getUint16(currentOffset, littleEndian);     // Heading
+                const ss    = dv.getUint16(currentOffset + 2, littleEndian); // Sound speed
+                const dp    = dv.getUint16(currentOffset + 4, littleEndian); // Transducer depth
+                let nb      = dv.getInt8(currentOffset + 6);         // Max number of beams
+                let N       = dv.getUint8(currentOffset + 7);        // Number of valid beams
+                const dz    = dv.getInt8(currentOffset + 8);
+                const dxy   = dv.getInt8(currentOffset + 9);
+                const samplingRate = dv.getUint16(currentOffset + 10, littleEndian);
+                if (N < 0) N += 256;
+                if (nb < 0) nb += 256;                
+                hd /= 100; // Konwersja na stopnie
+                // Różnica czasu między pozycją a pingiem ($dt) w sekundach
+                const dt = (tm - lltm) / 1000;
+                currentOffset += 12;
+                let depthBeams = [];
+                // Perl: 's4 S2 C2 c C' -> (4 * 2) + (2 * 2) + (2 * 1) + (1 * 1) + (1 * 1) = 16
+                // Dla Big Endian w Perlu użyto 'n6 c2 c C' co też daje 16 bajtów, ale błędnie wymuszało brak znaku na 'n'. 
+                for (let i = 0; i < N; i++) {
+                    if (currentOffset + 16 <= dv.byteLength) {
+                        let z    = dv.getInt16(currentOffset, littleEndian);     //  (z)
+                        let y    = dv.getInt16(currentOffset + 2, littleEndian); //  (y)
+                        let x    = dv.getInt16(currentOffset + 4, littleEndian); //  (x)
+                        let bda  = dv.getInt16(currentOffset + 6, littleEndian); // Beam depression angle
+                        let baa  = dv.getUint16(currentOffset + 8, littleEndian); // Beam azimuth angle
+                        let rg   = dv.getUint16(currentOffset + 10, littleEndian); // Range
+                        const qf = dv.getUint8(currentOffset + 12);  // Quality factor
+                        const dw = dv.getUint8(currentOffset + 13);  // Detection window
+                        let bs   = dv.getInt8(currentOffset + 14);   // Reflectivity (BS)
+                        const bn = dv.getUint8(currentOffset + 15);  // Beam number
+                        z += dp; // transducer depth
+                        x /= 100;
+                        y /= 100;
+                        z /= 100;
+                        bda /= 100;
+                        baa /= 100;
+                        bs = bs / 2; //  dB (in 0.5 dB)
+                        rg = rg / 100; 
+                        const bda1 = bda * PI / 180;
+                        const baa1 = baa * PI / 180;
+                        let x1 = x; //rg * cos(bda1) * cos(baa1); 
+                        let y1 = y; //rg * cos(bda1) * sin(baa1); 
+                        let z1 = z + (dp/100); //rg * sin(bda1) + (dp / 100);
+                        if (Lat !== -99 && lltm!=0 && sv!=0) {
+                            const th = (90-hd) * PI / 180; // Heading in rads (negative)
+                            //cX = y*cos(th) - x*sin(th) + dt*sv*cos(th)) + ux;
+                            //cY = y*sin(th) + x*cos(th) + dt*sv*sin(th)) + uy;
+                            const cX1 = x1*cos(th) - y1*sin(th) + dt*sv*cos(th) + ux;
+                            const cY1 = x1*sin(th) + y1*cos(th) + dt*sv*sin(th) + uy;
+                            //cX = -x*sin(th) + y*cos(th) + dt*sv*cos(th) + ux;
+                            //cY =  x*cos(th) + y*sin(th) + dt*sv*sin(th) + uy;
+                            depths.push([cX1, cY1, -z1]);
+                        }
+/*
+                        depthBeams.push({
+                            beamNumber: bn,
+                            x_local: x,
+                            y_local: y,
+                            depth: z,
+                            bda,
+                            baa,
+                            range: rg,
+                            quality: qf,
+                            backscatter: bs,
+                            globalX: calculatedX,
+                            globalY: calculatedY,
+                            globalZ: -z // W hydrografii głębokość (Z) na mapie podaje się zazwyczaj jako wartość ujemną
+                        });
+*/
+                        currentOffset += 16;
+                    } else {
+                        break;
+                    }
+                }
+/*
+                // Zapisujemy sparsowany rekord głębokości do tablicy pings
+                pings.push({
+                    type: 'Depth',
+                    header: { heading: hd, soundSpeed: ss, transducerDepth: dp, maxBeams: nb, validBeams: N, samplingRate },
+                    beams: depthBeams,
+                    lat: Lat,
+                    lon: Lon
+                });
+*/ 
+           }
+        }
+        else if (type === 'S') { // 2. Seabed Image (Type 'S')
+            let currentOffset = bufOffset;
+            // 'S' - unpack('S5 c2 S C2') or ('n5 c2 n C2')
+            //  (5 * 2) + (2 * 1) + (1 * 2) + (2 * 1) = 16 bytes
+            if (currentOffset + 16 <= dv.byteLength) {
+                const ab     = dv.getInt16(currentOffset, littleEndian);
+                const pl     = dv.getUint16(currentOffset + 2, littleEndian);
+                const rg     = dv.getUint16(currentOffset + 4, littleEndian);
+                const rg1    = dv.getUint16(currentOffset + 6, littleEndian);
+                const rg2    = dv.getUint16(currentOffset + 8, littleEndian);
+                const nbs    = dv.getInt8(currentOffset + 10);
+                const obs    = dv.getInt8(currentOffset + 11);
+                const tbw    = dv.getUint16(currentOffset + 12, littleEndian);
+                const tvg_ca = dv.getUint8(currentOffset + 14);
+                let N        = dv.getUint8(currentOffset + 15); // nbeams
+                if (N < 0) N += 256; 
+                currentOffset += 16;
+                let beams = [];
+                let totalSamplesNS = 0;
+                for (let i = 0; i < N; i++) {
+                    if (currentOffset + 6 <= dv.byteLength) {
+                        let bin    = dv.getUint8(currentOffset);
+                        const si   = dv.getInt8(currentOffset + 1);
+                        const Ns   = dv.getUint16(currentOffset + 2, littleEndian); 
+                        const csn  = dv.getUint16(currentOffset + 4, littleEndian);
+                        if (bin < 0) bin += 256;
+                        totalSamplesNS += Ns;
+                        beams.push({ bin, si, Ns, csn });
+                        currentOffset += 6;
+                    } else {
+                        break;
+                    }
+                }
+                let samples = [];
+                if (currentOffset + totalSamplesNS <= dv.byteLength) {
+                    for (let j = 0; j < totalSamplesNS; j++) {
+                        samples.push(dv.getInt8(currentOffset + j)/2-obs/10);
+                    }
+                }
+                pings.push(samples);
+/*                pings.push({
+                    header: { ab, pl, rg, rg1, rg2, nbs, obs, tbw, tvg_ca, N },
+                    beams: beams,
+                    totalSamples: totalSamplesNS,
+                    amplitudeData: samples,
+                });
+*/
+            }
+        }
+
         offset += totalBlockSize;
     }
     const navs = navStrCollection.join('\n');
+    return { pings, navs, depths };
+}
+
+function processS7kLogic(arrayBuffer, targetCh, th) {
+    const dv = new DataView(arrayBuffer);
+    let offset = 0;
+    let pings = []; // Maintained to preserve template signature
+    let navStrCollection = [];
+
+    // Conversion factor from Radians to Degrees
+    const RAD_TO_DEG = 180 / Math.PI;
+
+    while (offset + 64 <= dv.byteLength) {
+        // --- PARSE 64-BYTE S7K SYSTEM DATA HEADER ---
+        // offset + 0: Protocol Version (2 bytes)
+        // offset + 2: Offset to data (2 bytes)
+        // offset + 4: Sync Pattern (4 bytes)
+        const size = dv.getUint32(offset + 8, true);   // Total size of the record in bytes
+        const recordId = dv.getUint32(offset + 16, true); // Record Type ID (e.g. 7000, 7008, 1003)
+        if (size === 0) {
+            console.warn("Invalid record size encountered at offset:", offset);
+            break;
+        }
+        if (offset + size > dv.byteLength) {
+            console.warn("File error: Record block exceeds buffer size at offset:", offset);
+            break;
+        }
+        const dataOffset = offset + 64;
+        if (recordId === 1003) { //Position Data Block containing Latitude and Longitude
+            if (dataOffset + 24 <= dv.byteLength) {
+                // offset + 64: Datum ID (4 bytes)
+                // offset + 68: Latency / Time delay (4 bytes)
+                // offset + 72: Latitude in Radians (8 bytes, Double Float)
+                // offset + 80: Longitude in Radians (8 bytes, Double Float)
+                const latRadians = dv.getFloat64(dataOffset + 8, true);
+                const lonRadians = dv.getFloat64(dataOffset + 16, true);
+                const Lat = latRadians * RAD_TO_DEG;
+                const Lon = lonRadians * RAD_TO_DEG;
+                if (Lat >= -90 && Lat <= 90 && Lon >= -180 && Lon <= 180) {
+                    navStrCollection.push(`${Lon.toFixed(7)} ${Lat.toFixed(7)}`);
+                }
+            }
+        }
+        offset += size;
+    }
+
+    const navs = navStrCollection.join('\n');
     return { pings, navs };
 }
+
 
 function processEK5Logic(buffer, targetCh, th) {
     const dv = new DataView(buffer);
@@ -1261,6 +1454,8 @@ const FileParsers = {
                         data = processEK60AndEK80Logic(arrayBuffer, targetCh, th);
                     } else if (file.name.endsWith('.all')) {
                         data = processAllLogic(arrayBuffer, targetCh, th);
+                    } else if (file.name.endsWith('.s7k')) {
+                        data = processS7kLogic(arrayBuffer, targetCh, th);
                     } else if (file.name.toLowerCase().endsWith('.dt4')) {
                         data = processDT4Logic(arrayBuffer, targetCh, th);
                     } else {
@@ -1270,7 +1465,11 @@ const FileParsers = {
                         var curve = data.navs.replace(/\r?\n/g, ";").replace(/ +/g, ",");
                         if(!curve || curve.length==0) {curve = "-2," + (-img_z) + "; 2," + (-img_z); img_z += 0.2;} 
                         const img = await generateEchogramImage(data.pings, th);
-                        resolve({ img, curve });
+			if(data.depths) {
+			    var xyz = data.depths;
+			    console.log(`${xyz[0][0]}, ${xyz[0][1]}, ${xyz[0][2]}`);
+			}
+                        resolve({ img, curve, depths: data.depths });
                     }
                 } catch (err) {
                     reject(err);
@@ -1338,6 +1537,71 @@ function mapCurveStringWithAspectRatio(cleanString, globalBounds = null) {
     return mappedPairs.join(";");
 }
 
+function drawScaledBathymetry(depthsArray, bounds) {
+    if (!depthsArray || depthsArray.length === 0 || !bounds) return;
+
+    // 1. Wyliczamy zakresy dokładnie tak samo jak w Twojej funkcji mapCurve
+    const rangeX = bounds.maxX - bounds.minX;
+    const rangeZ = bounds.maxZ - bounds.minZ;
+    const maxRange = Math.max(rangeX, rangeZ) || 1;
+
+    // 2. Wyliczamy wyrównanie osi (centrowanie w kwadracie)
+    const offsetX = (maxRange - rangeX) / 2;
+    const offsetZ = (maxRange - rangeZ) / 2;
+
+    // 3. Mnożnik skali dla osi pionowej (Y) - musi być identyczny jak dla osi płaskich (4 / maxRange),
+    // aby zachować rzeczywiste, niezniekształcone proporcje głębokości rzeki/morza.
+    // const scaleY = 4 / maxRange;
+    const rangeY = 20; // bounds.maxY - bounds.minY;
+    const scaleY = rangeY > 0 ? (2.0 / rangeY) : 1.0;
+
+    const numPoints = depthsArray.length;
+    const positions = new Float32Array(numPoints * 3);
+
+    for (let i = 0; i < numPoints; i++) {
+        const p = depthsArray[i]; // p[0] = UTM X, p[1] = UTM Y, p[2] = Głębokość (Z_all)
+
+        // Odwzorowanie osi X (Wschód -> Graficzne X)
+        let mappedX = p[0];
+        if (rangeX !== 0) {
+            mappedX = -2 + (((p[0] - bounds.minX) + offsetX) / maxRange) * 4;
+        }
+
+        // Odwzorowanie osi Z (Północ -> Graficzne Z) - Z UWZGLEDNIENIEM ODWRÓCENIA ZNAKU Z MAPCURVE
+        let mappedZ = -p[1];
+        if (rangeZ !== 0) {
+            mappedZ = -(-2 + (((p[1] - bounds.minZ) + offsetZ) / maxRange) * 4);
+        }
+
+        // Odwzorowanie osi Y (Głębokość -> Graficzne Y)
+        // Mnożymy surową głębokość (która w p[2] jest wartością ujemną i ma maxY = 0) przez tę samą skalę.
+        const mappedY = p[2] * scaleY;
+
+        // Zapis do płaskiego bufora Three.js
+        positions[i * 3]     = mappedX; 
+        positions[i * 3 + 1] = mappedY; 
+        positions[i * 3 + 2] = mappedZ; 
+    }
+
+    // Tworzenie geometrii w Three.js
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+    // Tworzenie materiału punktów
+    const material = new THREE.PointsMaterial({
+        color: 0x00aaff,       // Kolor jasnoniebieski dla batymetrii
+        size: 2.0,             // Rozmiar punktu w pikselach
+        sizeAttenuation: false // Zachowaj stały rozmiar niezależnie od pozycji kamery
+    });
+
+    // Dodanie do sceny
+    const pointCloud = new THREE.Points(geometry, material);
+    mainGroup.add(pointCloud);
+
+    console.log(`[3D] Pomyślnie dodano zsynchronizowaną chmurę punktów: ${numPoints} szt.`);
+}
+
+
 async function gunzip(arrayBuffer) {
     const ds = new DecompressionStream("gzip");
     const decompressed = new Response(
@@ -1371,6 +1635,7 @@ function readString(bytes, start, length) {
     }
     return out;
 }
+
 
 document.getElementById('imageLoader').addEventListener('change', async function(e) {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -1410,7 +1675,9 @@ document.getElementById('imageLoader').addEventListener('change', async function
                 const core = getNameCore(file.name);
 		const dgx = /\.dg.$/i;
                 if (dgx.test(file.name) || file.name.endsWith('.ek5') ||
-                  file.name.endsWith('.raw')||file.name.toLowerCase().endsWith('.all')||
+                  file.name.endsWith('.raw')||
+                  file.name.toLowerCase().endsWith('.all')||
+                  file.name.toLowerCase().endsWith('.s7k')||
                   file.name.toLowerCase().endsWith('.dt4')) {
                     customFiles.push(file); // for async processing
                 } else if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
@@ -1449,7 +1716,11 @@ document.getElementById('imageLoader').addEventListener('change', async function
             }
         }
         if (txtFiles.size === 0 && imageFiles.size === 0 && ek5ProcessedData.size === 0) return;
-        let globalBounds = { minX: Infinity, maxX: -Infinity, minZ: Infinity, maxZ: -Infinity };
+        let globalBounds = { 
+		minX: Infinity, maxX: -Infinity, 
+		minZ: Infinity, maxZ: -Infinity, 
+		minY: Infinity, maxY: 0 //-Infinity 
+	};
         function updateBoundsFromCurve(cleanStr) {
             const points = parsePointsToObjects(cleanStr);
             for (const p of points) {
@@ -1459,11 +1730,28 @@ document.getElementById('imageLoader').addEventListener('change', async function
                 if (p.y > globalBounds.maxZ) globalBounds.maxZ = p.y;
             }
         }
+        function updateBoundsFromDepths(depthsArray) {
+            if (!depthsArray || depthsArray.length === 0) return;
+            for (const p of depthsArray) {
+                // p[0] = UTM X (E), p[1] = UTM Y (N), p[2] = Depth
+                if (p[0] < globalBounds.minX) globalBounds.minX = p[0];
+                if (p[0] > globalBounds.maxX) globalBounds.maxX = p[0];
+                if (p[2] < globalBounds.minY) globalBounds.minY = p[2];
+                // if (p[2] > globalBounds.maxY) globalBounds.maxY = p[2];
+                if (p[1] < globalBounds.minZ) globalBounds.minZ = p[1];
+                if (p[1] > globalBounds.maxZ) globalBounds.maxZ = p[1];
+            }
+        }
         for (const [core, cleanStr] of txtFiles.entries()) {
             updateBoundsFromCurve(cleanStr);
         }
         for (const [core, data] of ek5ProcessedData.entries()) {
             updateBoundsFromCurve(data.curve);
+            if(data.depths) {
+                console.log('1',globalBounds.minZ,globalBounds.maxZ);
+                //updateBoundsFromDepths(data.depths);
+                console.log('2',globalBounds.minZ,globalBounds.mazZ);
+            }
         }
         for (const [core, cleanStr] of txtFiles.entries()) {
             const scaledCurveString = mapCurveStringWithAspectRatio(cleanStr, globalBounds);
@@ -1483,6 +1771,9 @@ document.getElementById('imageLoader').addEventListener('change', async function
             const scaledCurveString = mapCurveStringWithAspectRatio(data.curve, globalBounds);
             lastLoadedCurveString = scaledCurveString;
             applyNewData(data.img, scaledCurveString);
+            if (data.depths) {
+                drawScaledBathymetry(data.depths, globalBounds);
+            }
             console.log(`[SUCCESS] ${core} loaded`);
         }
         // --- when no pairs ---
