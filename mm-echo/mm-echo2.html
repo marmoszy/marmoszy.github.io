@@ -1798,7 +1798,7 @@ document.getElementById('imageLoader').addEventListener('change', async function
                     (e.target.files[0].name.endsWith('.tar.gz') ||
                      e.target.files[0].name.endsWith('.tgz'));
     try {
-        if (isTarGz) {
+        if (false) { // isTarGz) {
             const archiveFile = e.target.files[0];
             const archiveBuffer = await archiveFile.arrayBuffer();
             const unzippedBuffer = await gunzip(archiveBuffer);
@@ -1817,9 +1817,32 @@ document.getElementById('imageLoader').addEventListener('change', async function
             }
         } else {
             const rawTxtDataMap = new Map();
-            for (const file of e.target.files) {
+            //for (const file of e.target.files) {
+
+            const filesToProcess = Array.from(e.target.files);
+             for (let i = 0; i < filesToProcess.length; i++) {
+                 const file = filesToProcess[i];
                 const core = getNameCore(file.name);
-		   const dgx = /\.dg.$/i;
+
+                if (file.name.toLowerCase().endsWith('.tgz') || file.name.toLowerCase().endsWith('.tar.gz')) {
+                    console.log(`Decompressing ${file.name}...`);        
+                    try {
+                        const arrayBuffer = await file.arrayBuffer(); 
+                        const unzippedBuffer = await gunzip(arrayBuffer);
+                        const extractedFiles = untar(unzippedBuffer);
+                        const decodedFiles = extractedFiles.map(extFile => {
+                            return new File([extFile.arrayBuffer], extFile.name);
+                        });
+                        filesToProcess.splice(i + 1, 0, ...decodedFiles);
+                    } catch (error) {
+                        console.error(`Error decompressing ${file.name}:`, error);
+                    }
+                    continue;
+                }
+
+                //const core = getNameCore(file.name);
+		
+                const dgx = /\.dg.$/i;
                 const isWorldFile = /\.(jgw|pgw)$/i.test(file.name);
                 if (dgx.test(file.name) || file.name.endsWith('.ek5') ||
                   file.name.endsWith('.raw')||
@@ -1831,7 +1854,7 @@ document.getElementById('imageLoader').addEventListener('change', async function
                     worldFiles.set(core, file);
                 } else if (file.type==='text/plain'||file.name.endsWith('.txt')){
                     rawTxtDataMap.set(core, file);
-                } else if (file.type.startsWith('image/')) {
+                } else if (file.type.startsWith('image/')||file.name.endsWith('.jpg')||file.name.endsWith('.png')) {
                     imageFiles.set(core, file);
                 } else {
                     console.warn(`File format not known: ${file.name}.`);
