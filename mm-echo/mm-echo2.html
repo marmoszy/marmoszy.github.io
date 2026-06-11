@@ -33,8 +33,8 @@ url_params();
 
 <div id="upload" style="">
     <b style="font-size:1.15em;">mm-echo2 - <span title="Select .dgx, .ek5, .raw, .all, .dt4, .s7k, .png+.txt file(s) or its tgz archive">3D echogram viewer:</span>&nbsp;</b>
-    <input type="file" id="imageLoader" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw, .all, .s7k, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9,.dt4"  multiple> or
-	<input type=button id="loadExample" onclick="loadTgzFromUrl('dat/20020714.ek5.png.tgz');" value="Load example"/>
+    <input type="file" id="imageLoader" accept="image/*, .jgw, .pgw, text/plain, .tar.gz, .tgz, .ek5, .raw, .all, .s7k, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9,.dt4"  multiple> or
+	<input type=button id="loadExample" onclick="loadTgzFromUrl('dat/20070525_145116.dt4.tgz');" value="Load example"/>
 <!-- 
 or 
 	<span style="text-align:right" title="Download and then open">download it: <a href="dat/20020714.ek5.png.tgz">20020714.ek5.png.tgz</a></span> 
@@ -156,13 +156,12 @@ gridHelper.material.transparent = true;
 gridHelper.material.opacity = 0.4; 
 
 function parsePointsToObjects(str) {
-debugger;
     return str.split(';')
         .map(pair => pair.trim())
         .filter(pair => pair && !pair.startsWith('#')) 
         .map(pair => {
-            var [x, y] = pair.split(',').map(Number);
-            return {x, y};
+            var [x, y, z] = pair.split(',').map(Number);
+            return {x, y, z};
         });
 }
 const punktyDlaLinii = parsePointsToObjects(goraPunktyString);
@@ -409,6 +408,35 @@ function reducePointsSample(points, targetCount) { // decimation
 }
 
 function debugCurveStringAsLine(curveString) {
+    const curves = curveString.split('|');
+    let totalLinesCreated = 0;
+    for (let c = 0; c < curves.length; c++) {
+        const currentCurveStr = curves[c];
+        if (!currentCurveStr) continue;
+        const points = parsePointsToObjects(currentCurveStr);
+        if (!points || points.length === 0) {
+            console.warn(`[DEBUG] Curve index ${c} has no valid points. Skipping.`);
+            continue;
+        }
+        const vertices = [];
+        for (let i = 0; i < points.length; i++) {
+            const p = points[i];
+            //vertices.push(new THREE.Vector3(p.x, 0.0, p.y));
+            vertices.push(new THREE.Vector3(p.x, p.z, p.y));
+        }
+        const geometry = new THREE.BufferGeometry().setFromPoints(vertices);
+        const material = new THREE.LineBasicMaterial({
+            color: 0xff0000,
+            linewidth: 1
+        });
+        const debugLine = new THREE.Line(geometry, material);
+        mainGroup.add(debugLine);
+        totalLinesCreated++;
+    }
+    console.log(`[DEBUG] Lines: ${totalLinesCreated}.`);
+}
+
+function debugCurveStringAsLine0(curveString) {
     const points = parsePointsToObjects(curveString);
     if (!points || points.length === 0) {
         console.error("[DEBUG] No points.");
@@ -429,6 +457,24 @@ function debugCurveStringAsLine(curveString) {
     console.log(`[DEBUG] Success! Line of ${points.length} points.`);
     console.log(`[DEBUG] First: X = ${points[0].x}, Z(y) = ${points[0].y}`);
     console.log(`[DEBUG] Last:  X = ${points[points.length - 1].x}, Z(y) = ${points[points.length - 1].y}`);
+}
+function debugWorldFileBoundsAsLine(params, bounds) {
+    const [A, D, B, E, C, F] = params;
+    const geoCorners = [
+        { x: C,         y: F },             // (Top-Left)
+        { x: A + C,     y: D + F },         // (Top-Right)
+        { x: A + B + C, y: D + E + F },     // (Bottom-Right)
+        { x: B + C,     y: E + F }          // (Bottom-Left)
+    ];
+    const points = geoCorners.map(p => new THREE.Vector3(p.x, 0, -p.y));
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({ 
+        color: 0xff0000, 
+        linewidth: 2
+    });
+    const wireframeBox = new THREE.LineLoop(geometry, material);
+    scene.add(wireframeBox);
+    console.log(`[DEBUG] Image bb corner: X=${C}, Y=${F}`);
 }
 
 function thLine(pts,col) {
@@ -1478,32 +1524,112 @@ const FileParsers = {
             reader.onerror = () => reject(reader.error);
             reader.readAsArrayBuffer(file);
         });
+    },
+    handleWorldFileRaster: function(imageBlob, params, imgWidthPx, imgHeightPx, bounds) {
+        //if (!bounds) return;
+        const [A, D, B, E, C, F] = params;
+        const imgUrl = URL.createObjectURL(imageBlob);
+        const rangeX = bounds.maxX - bounds.minX;
+        const rangeZ = bounds.maxZ - bounds.minZ;
+        const maxRange = Math.max(rangeX, rangeZ) || 1;
+        const offsetX = (maxRange - rangeX) / 2;
+        const offsetZ = (maxRange - rangeZ) / 2;
+        const geoMinX = C - (A / 2);
+        const geoMaxX = geoMinX + (imgWidthPx * Math.abs(A));
+        const geoMaxY = F - (E / 2); 
+        const geoMinY = geoMaxY - (imgHeightPx * Math.abs(E));
+        const mappedMinX = -2 + (((geoMinX - bounds.minX) + offsetX) / maxRange) * 4;
+        const mappedMaxX = -2 + (((geoMaxX - bounds.minX) + offsetX) / maxRange) * 4;
+        const mappedMinZ = -(-2 + (((geoMinY - bounds.minZ) + offsetZ) / maxRange) * 4);
+        const mappedMaxZ = -(-2 + (((geoMaxY - bounds.minZ) + offsetZ) / maxRange) * 4);
+        const planeWidth = Math.abs(mappedMaxX - mappedMinX);
+        const planeHeight = Math.abs(mappedMaxZ - mappedMinZ);
+        const centerX = (mappedMinX + mappedMaxX) / 2;
+        const centerZ = (mappedMinZ + mappedMaxZ) / 2;
+        const textureLoader = new THREE.TextureLoader();
+        textureLoader.load(imgUrl, function(texture) {
+            // Tworzymy płaszczyznę o zwymiarowanej wielkości w skali -2..2
+            const planeGeometry = new THREE.PlaneGeometry(planeWidth, planeHeight);
+            texture.minFilter = THREE.NearestFilter;
+            texture.magFilter = THREE.NearestFilter;
+            texture.colorSpace = THREE.SRGBColorSpace; 
+            const material = new THREE.MeshBasicMaterial({
+                map: texture,
+                blending: THREE.MultiplyBlending, 
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.9,
+                depthWrite: true,
+            });
+const material2 = new THREE.ShaderMaterial({
+    uniforms: {
+        uTexture: { value: texture },
+        uOpacity: { value: 0.95 }, 
+        uContrast: { value: 1.2 },
+        uDarkness: { value: 0.8 }
+    },
+    vertexShader: `
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `,
+    fragmentShader: `
+        uniform sampler2D uTexture;
+        uniform float uOpacity;
+        uniform float uContrast;
+        uniform float uDarkness;
+        varying vec2 vUv;
+        void main() {
+            vec4 texColor = texture2D(uTexture, vUv);
+            vec3 rgb = texColor.rgb * uDarkness;
+            rgb = mix(vec3(0.5), rgb, uContrast); 
+            float brightness = (texColor.r + texColor.g + texColor.b) / 3.0;
+            float alpha = uOpacity; // * (1.0 - pow(brightness, 2.0)); 
+            gl_FragColor = vec4(rgb, alpha);
+        }
+    `,
+    transparent: true,
+    depthWrite: false,
+    side: THREE.DoubleSide
+});
+            const backgroundPlane = new THREE.Mesh(planeGeometry, material);
+            backgroundPlane.rotation.x = -Math.PI / 2; 
+            backgroundPlane.position.set(centerX, 0, centerZ);
+            mainGroup.add(backgroundPlane);
+            console.log(`[RASTER]: ${planeWidth.toFixed(4)}`);
+        });
     }
 };
 
-
 var lastLoadedCurveString=null;
 
-function handleTextCurveFile(file) {
-    const reader = new FileReader();
-    reader.onload = function(event) {
-        var str = event.target.result.trim().replace(/\n/g, ";").replace(/ +/g, ",");
-        lastLoadedCurveString = mapCurveStringWithAspectRatio(str);
-        window.str=lastLoadedCurveString;
-		debugCurveStringAsLine(lastLoadedCurveString);
-    };
-    reader.readAsText(file);
-}
-
 function mapCurveStringWithAspectRatio(cleanString, globalBounds = null) {
-    const values = cleanString.split(/[;,]/).filter(val => val !== "").map(Number);
-    const points = [];
-    for (let i = 0; i < values.length; i += 2) {
-        if (!isNaN(values[i]) && !isNaN(values[i+1])) {
-            points.push({ x: values[i], z: values[i+1] });
+    if (!cleanString) return "";
+    const rawCurves = cleanString.split(';;');
+    const allCurves = [];
+    for (let rawCurve of rawCurves) {
+        const elements = rawCurve.split(';').filter(el => el.trim() !== "");
+        const currentCurvePoints = [];
+
+        for (const element of elements) {
+            const trimmed = element.trim();
+            if (trimmed.startsWith('#') || trimmed === "") {
+                continue;
+            }
+            const coords = trimmed.split(/[\s,]+/).filter(val => val !== "").map(Number);
+            if (coords.length >= 3) {
+                currentCurvePoints.push({ x: coords[0], y: coords[2], z: coords[1] });
+            } else if (coords.length === 2) {
+                currentCurvePoints.push({ x: coords[0], y: 0, z: coords[1] });
+            }
+        }
+        if (currentCurvePoints.length > 0) {
+            allCurves.push(currentCurvePoints);
         }
     }
-    if (points.length === 0) return "";
+    if (allCurves.length === 0) return "";
     let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
     if (globalBounds) {
         minX = globalBounds.minX;
@@ -1511,11 +1637,13 @@ function mapCurveStringWithAspectRatio(cleanString, globalBounds = null) {
         minZ = globalBounds.minZ;
         maxZ = globalBounds.maxZ;
     } else {
-        for (const p of points) {
-            if (p.x < minX) minX = p.x;
-            if (p.x > maxX) maxX = p.x;
-            if (p.z < minZ) minZ = p.z;
-            if (p.z > maxZ) maxZ = p.z;
+        for (const curve of allCurves) {
+            for (const p of curve) {
+                if (p.x < minX) minX = p.x;
+                if (p.x > maxX) maxX = p.x;
+                if (p.z < minZ) minZ = p.z;
+                if (p.z > maxZ) maxZ = p.z;
+            }
         }
     }
     const rangeX = maxX - minX;
@@ -1523,18 +1651,19 @@ function mapCurveStringWithAspectRatio(cleanString, globalBounds = null) {
     const maxRange = Math.max(rangeX, rangeZ) || 1;
     const offsetX = (maxRange - rangeX) / 2;
     const offsetZ = (maxRange - rangeZ) / 2;
-    const mappedPairs = points.map(p => {
-        //const mappedX =   -2 + (((p.x - minX) + offsetX) / maxRange) * 4;
-        //const mappedZ = -(-2 + (((p.z - minZ) + offsetZ) / maxRange) * 4);
-        const mappedX = (rangeX === 0) 
-            ? p.x 
-            : -2 + (((p.x - minX) + offsetX) / maxRange) * 4;
-        const mappedZ = (rangeZ === 0)
-            ? -p.z
-            : -(-2 + (((p.z - minZ) + offsetZ) / maxRange) * 4);
-        return `${mappedX.toFixed(8)},${mappedZ.toFixed(8)}`;
+    const mappedCurvesStrings = allCurves.map(curve => {
+        const mappedPairs = curve.map(p => {
+            const mappedX = (rangeX === 0) 
+                ? p.x 
+                : -2 + (((p.x - minX) + offsetX) / maxRange) * 4;
+            const mappedZ = (rangeZ === 0)
+                ? -p.z
+                : -(-2 + (((p.z - minZ) + offsetZ) / maxRange) * 4);
+            return `${mappedX.toFixed(8)},${mappedZ.toFixed(8)},${p.y}`;
+        });
+        return mappedPairs.join(";"); 
     });
-    return mappedPairs.join(";");
+    return mappedCurvesStrings.join("|");
 }
 
 function drawScaledBathymetry(depthsArray, bounds) {
@@ -1636,11 +1765,28 @@ function readString(bytes, start, length) {
     return out;
 }
 
+function getImageDimensions(file) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = function() {
+            const w = img.width;
+            const h = img.height;
+            URL.revokeObjectURL(url); // Czyszczenie pamięci
+            resolve({ w, h });
+        };
+        img.onerror = function() {
+            resolve({ w: 0, h: 0 }); // Zabezpieczenie przed uszkodzonym plikiem
+        };
+        img.src = url;
+    });
+}
 
 document.getElementById('imageLoader').addEventListener('change', async function(e) {
     if (!e.target.files || e.target.files.length === 0) return;
     const txtFiles = new Map();
     const imageFiles = new Map();
+    const worldFiles = new Map();
     const customFiles = [];
     const ek5ProcessedData = new Map(); 
 
@@ -1673,14 +1819,17 @@ document.getElementById('imageLoader').addEventListener('change', async function
             const rawTxtDataMap = new Map();
             for (const file of e.target.files) {
                 const core = getNameCore(file.name);
-		const dgx = /\.dg.$/i;
+		   const dgx = /\.dg.$/i;
+                const isWorldFile = /\.(jgw|pgw)$/i.test(file.name);
                 if (dgx.test(file.name) || file.name.endsWith('.ek5') ||
                   file.name.endsWith('.raw')||
                   file.name.toLowerCase().endsWith('.all')||
                   file.name.toLowerCase().endsWith('.s7k')||
                   file.name.toLowerCase().endsWith('.dt4')) {
                     customFiles.push(file); // for async processing
-                } else if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+                } else if (isWorldFile) {
+                    worldFiles.set(core, file);
+                } else if (file.type==='text/plain'||file.name.endsWith('.txt')){
                     rawTxtDataMap.set(core, file);
                 } else if (file.type.startsWith('image/')) {
                     imageFiles.set(core, file);
@@ -1688,7 +1837,7 @@ document.getElementById('imageLoader').addEventListener('change', async function
                     console.warn(`File format not known: ${file.name}.`);
                 }
             }
-            if (customFiles.length > 0) {             // async processing  (.ek5, .raw,) 
+            if (customFiles.length > 0) { // async processing  (.ek5, .raw,) 
                 const ek5Promises = customFiles.map(async (file) => {
                     const core = getNameCore(file.name);
                     try {
@@ -1714,13 +1863,52 @@ document.getElementById('imageLoader').addEventListener('change', async function
                 });
                 await Promise.all(txtPromises);
             }
+            if (worldFiles.size > 0) {
+                const worldPromises = Array.from(worldFiles.entries()).map(([core, file])=>{
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = function(event) {
+                            const params = event.target.result.trim().split(/\s+/).map(Number);
+                            if (params.length === 6) {
+                                const matchingImageFile = imageFiles.get(core);
+                                if (matchingImageFile) {
+                                    const img = new Image();
+                                    const imgUrl = URL.createObjectURL(matchingImageFile);
+                                    img.onload = function() {
+                                        worldFiles.set(core, {
+                                            params: params,
+                                            w: img.width,
+                                            h: img.height
+                                        });
+                                        URL.revokeObjectURL(imgUrl); // Zwalniamy pamięć ram
+                                        resolve();
+                                    };
+                                    img.onerror = function() {
+                                        worldFiles.set(core, { params: params, w: 400, h: 400});
+                                        URL.revokeObjectURL(imgUrl);
+                                        resolve();
+                                    };
+                                    img.src = imgUrl;
+                                } else {
+                                    worldFiles.set(core, { params: params, w: 400, h: 400 });
+                                    resolve();
+                                }
+                            } else {
+                                resolve();
+                            }
+                        };
+                        reader.readAsText(file);
+                    });
+                });
+                await Promise.all(worldPromises);
+            }
         }
         if (txtFiles.size === 0 && imageFiles.size === 0 && ek5ProcessedData.size === 0) return;
         let globalBounds = { 
 		minX: Infinity, maxX: -Infinity, 
 		minZ: Infinity, maxZ: -Infinity, 
 		minY: Infinity, maxY: 0 //-Infinity 
-	};
+        };
         function updateBoundsFromCurve(cleanStr) {
             const points = parsePointsToObjects(cleanStr);
             for (const p of points) {
@@ -1742,15 +1930,31 @@ document.getElementById('imageLoader').addEventListener('change', async function
                 if (p[1] > globalBounds.maxZ) globalBounds.maxZ = p[1];
             }
         }
+        function updateBoundsFromWorldFile(worldFileValues, w, h) {
+            const [A, D, B, E, C, F] = worldFileValues.map(Number);
+            const corners = [
+                { x: C,                 y: F },                  // top-left (0, 0)
+                { x: A * w + C,         y: D * w + F },          // top-right (w, 0)
+                { x: A * w + B * h + C, y: D * w + E * h + F },  // bottom right (w, h)
+                { x: B * h + C,         y: E * h + F }           // bottom-left (0, h)
+            ];
+            for (const p of corners) {
+                if (p.x < globalBounds.minX) globalBounds.minX = p.x;
+                if (p.x > globalBounds.maxX) globalBounds.maxX = p.x;
+                if (p.y < globalBounds.minZ) globalBounds.minZ = p.y;
+                if (p.y > globalBounds.maxZ) globalBounds.maxZ = p.y;
+            }
+        }
         for (const [core, cleanStr] of txtFiles.entries()) {
             updateBoundsFromCurve(cleanStr);
+        }
+        for (const [core, params] of worldFiles.entries()) {
+            updateBoundsFromWorldFile(params.params,params.w,params.h);
         }
         for (const [core, data] of ek5ProcessedData.entries()) {
             updateBoundsFromCurve(data.curve);
             if(data.depths) {
-                console.log('1',globalBounds.minZ,globalBounds.maxZ);
                 //updateBoundsFromDepths(data.depths);
-                console.log('2',globalBounds.minZ,globalBounds.mazZ);
             }
         }
         for (const [core, cleanStr] of txtFiles.entries()) {
@@ -1767,6 +1971,18 @@ document.getElementById('imageLoader').addEventListener('change', async function
                 }
             }
         }
+        for (const [core, params] of worldFiles.entries()) {
+            const matchingImageBlob = imageFiles.get(core);
+            if (matchingImageBlob) {
+                FileParsers.handleWorldFileRaster(matchingImageBlob, params.params, params.w, params.h, globalBounds);
+                console.log(`[SUCCESS] ${core}: image and world file paired.`);
+            } else {
+                console.log(`[INFO] "${core}" world file has no image.`);
+                if (typeof debugWorldFileBoundsAsLine === 'function') {
+                    debugWorldFileBoundsAsLine(params.params, globalBounds);
+                }
+            }
+        }
         for (const [core, data] of ek5ProcessedData.entries()) {
             const scaledCurveString = mapCurveStringWithAspectRatio(data.curve, globalBounds);
             lastLoadedCurveString = scaledCurveString;
@@ -1778,7 +1994,7 @@ document.getElementById('imageLoader').addEventListener('change', async function
         }
         // --- when no pairs ---
         for (const [core, imgBlob] of imageFiles.entries()) {
-            if (!txtFiles.has(core) && !ek5ProcessedData.has(core)) {
+            if (!txtFiles.has(core) && !ek5ProcessedData.has(core) && !worldFiles.has(core)) {
                 const defaultStr = "-2," + img_z + ";2," + img_z;
                 img_z += 0.2;
                 lastLoadedCurveString = defaultStr;
