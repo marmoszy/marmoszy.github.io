@@ -32,8 +32,8 @@ url_params();
 <body onload="if(loadBlob)openBlob();">
 
 <div id="upload" style="">
-    <b style="font-size:1.15em;">mm-echo2 - <span title="Select .dgx, .ek5, .raw, .all, .dt4, .s7k, .png+.txt .jpg+.jgw .asc file(s) or its tgz archive">3D echogram viewer:</span>&nbsp;</b>
-    <input type="file" id="imageLoader" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw, .all, .s7k, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9, .dt4, .jgw, .pgw, .asc"  multiple> or
+    <b style="font-size:1.15em;">mm-echo2 - <span title="Select .dgx, .ek5, .raw, .all, .dt4, .s7k, .png+.txt .jpg+.jgw .asc .msh file(s) or its tgz archive">3D echogram viewer:</span>&nbsp;</b>
+    <input type="file" id="imageLoader" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw, .all, .s7k, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9, .dt4, .jgw, .pgw, .asc, .msh"  multiple> or
 	<input type=button id="loadExample" onclick="loadTgzFromUrl('dat/20070525_145116.dt4.tgz');" value="Load example"/>
 <!-- 
 or 
@@ -863,9 +863,7 @@ function processEK5Logic(buffer, targetCh, th) {
     let pings = [];
     const chStr = targetCh.toString();
     let navStrCollection = []; 
-    // Poprawiono dekoder na "windows-1252" lub "ascii", EK500 nie używa natywnie wielobajtowego UTF-8
-    const textDecoder = new TextDecoder("windows-1252");
-
+    const textDecoder = new TextDecoder("ascii");
     while (offset + 2 <= dv.byteLength) {
         const size = dv.getUint16(offset, true);
         const blockStart = offset + 2;
@@ -1783,6 +1781,91 @@ function getImageDimensions(file) {
     });
 }
 
+// --- GMSH mesh (.msh) ---
+
+function parseGmshMsh(s) {
+    var lines = s.split('\n');
+    const n = parseInt(lines[4]);
+    const v = lines.slice(5, 5 + n).map(line => line.trim().split(/\s+/).slice(1, 4).map(parseFloat));
+    const m = parseInt(lines[n + 7]);
+    const e = lines.slice(n + 8, n + 8 + m).map(line => line.trim().split(/\s+/).slice(5, 9).map(x => parseInt(x) - 1));
+    return { type: 'Mesh', vx: v, fx: e };
+}
+function updateBoundsFromMesh(data, bounds) {
+    const vx = data.vx;
+    if (!vx || vx.length === 0) return;
+    for (let i = 0; i < vx.length; i++) {
+        const p = vx[i];
+        if (p[0] < bounds.minX) bounds.minX = p[0];
+        if (p[0] > bounds.maxX) bounds.maxX = p[0];
+        if (p[1] < bounds.minZ) bounds.minZ = p[1];
+        if (p[1] > bounds.maxZ) bounds.maxZ = p[1];
+        if (p[2] < bounds.minY) bounds.minY = p[2];
+        if (p[2] > bounds.maxY) bounds.maxY = p[2];
+    }
+}
+function drawMesh(vx, fx, bounds) {
+    if (!vx || vx.length === 0 || !fx || fx.length === 0) return;
+
+    const rangeX = bounds.maxX - bounds.minX;
+    const rangeZ = bounds.maxZ - bounds.minZ;
+    //const maxRange = Math.max(rangeX, rangeZ) || 1;
+    const rangeY = bounds.maxY - bounds.minY;
+    const maxRange = Math.max(rangeX, rangeZ, rangeY * 2.0) || 1;
+
+    const offsetX = (maxRange - rangeX) / 2;
+    const offsetZ = (maxRange - rangeZ) / 2;
+    //const rangeY = bounds.maxY - bounds.minY;
+    //const scaleY = rangeY > 0 ? (2.0 / Math.abs(bounds.minY)) : 1.0;
+    //const rangeY = bounds.maxY - bounds.minY;
+    const scaleY = rangeY > 0 ? (2.0 / rangeY) : 1.0;
+
+    const globalScale = 4.0 / maxRange;
+
+    const positions = new Float32Array(vx.length * 3);
+    for (let i = 0; i < vx.length; i++) {
+        const p = vx[i]; // [X, Y_geodezyjne, Z_głębokość]
+        let mappedX = p[0];
+        if (rangeX !== 0) {
+            mappedX = -2 + (((p[0] - bounds.minX) + offsetX) / maxRange) * 4;
+        }
+        let mappedZ = -p[1];
+        if (rangeZ !== 0) {
+            mappedZ = -(-2 + (((p[1] - bounds.minZ) + offsetZ) / maxRange) * 4);
+        }
+        //const zGeo = p[2] > 0 ? -p[2] : p[2];
+        //const mappedY = zGeo * scaleY;
+        
+        //const mappedY = (p[2] - bounds.maxY) * scaleY;
+        const mappedY = (p[2] - bounds.maxY) * globalScale;
+        
+        positions[i * 3]     = mappedX;
+        positions[i * 3 + 1] = mappedY;
+        positions[i * 3 + 2] = mappedZ;
+    }
+    const indices = [];
+    for (let i = 0; i < fx.length; i++) {
+        const face = fx[i];
+        if (face.length >= 3) {
+            indices.push(face[0], face[1], face[2]);
+        }
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+    const meshMaterial = new THREE.MeshBasicMaterial({
+        color: 0x000080,
+        side: THREE.DoubleSide,
+        wireframe: true
+    });
+    const mesh = new THREE.Mesh(geometry, meshMaterial);
+    mainGroup.add(mesh);
+    console.log(`[GMSH SUCCESS] ${vx.length} x ${fx.length}`);
+}
+
+// --- ESRI Ascii Grid (.asc) ---
+
 function parseEsriAsciiGrid(asciiString) {
     const lines = asciiString.split(/\r?\n/);
     if (lines.length < 6) {
@@ -1819,48 +1902,6 @@ function parseEsriAsciiGrid(asciiString) {
         metadata: { ncols, nrows, xllcorner, yllcorner, cellsize, nodata },
         matrix: gridMatrix
     };
-}
-function drawEsriTerrainMesh0(gridData, bounds) {
-    const meta = gridData.metadata;
-    const matrix = gridData.matrix;
-    const rangeX = bounds.maxX - bounds.minX;
-    const rangeZ = bounds.maxZ - bounds.minZ;
-    const maxRange = Math.max(rangeX, rangeZ) || 1;
-    const offsetX = (maxRange - rangeX) / 2;
-    const offsetZ = (maxRange - rangeZ) / 2;
-    const rangeY = bounds.maxY - bounds.minY;
-    const scaleY = rangeY > 0 ? (2.0 / Math.abs(bounds.minY)) : 1.0;
-    const geometry = new THREE.PlaneGeometry(1, 1, meta.ncols - 1, meta.nrows - 1);
-    const positionAttribute = geometry.attributes.position;
-    let vertexIndex = 0;
-    for (let r = 0; r < meta.nrows; r++) {
-        for (let c = 0; c < meta.ncols; c++) {
-            const xGeo = meta.xllcorner + (c * meta.cellsize);
-            const yGeo = meta.yllcorner + ((meta.nrows - 1 - r) * meta.cellsize);
-            let rawZ = matrix[r][c];
-            if (rawZ === meta.nodata || isNaN(rawZ) || rawZ>0) {
-                rawZ = 0; 
-            }
-            const zGeo = rawZ; // > 0 ? -rawZ : rawZ; 
-            const mappedX = -2 + (((xGeo - bounds.minX) + offsetX) / maxRange) * 4;
-            const mappedZ = -(-2 + (((yGeo - bounds.minZ) + offsetZ) / maxRange) * 4);
-            const mappedY = zGeo * scaleY; // Skalowanie wysokości do bazy -2
-            positionAttribute.setXYZ(vertexIndex, mappedX, mappedY, mappedZ);
-            vertexIndex++;
-        }
-    }
-    positionAttribute.needsUpdate = true;
-    geometry.computeVertexNormals(); 
-    const terrainMaterial = new THREE.MeshBasicMaterial({
-        color: 0x00aaff,          
-        wireframe: true,
-        side: THREE.DoubleSide,
-        //roughness: 0.8,
-        //metalness: 0.9
-    });
-    const terrainMesh = new THREE.Mesh(geometry, terrainMaterial);
-    //terrainMesh.renderOrder = 0; // as background
-    mainGroup.add(terrainMesh);
 }
 
 function drawEsriTerrainMesh(gridData, bounds) {
@@ -1914,7 +1955,7 @@ function drawEsriTerrainMesh(gridData, bounds) {
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
     geometry.computeVertexNormals(); 
     const terrainMaterial = new THREE.MeshBasicMaterial({
-        color: 0x00aaff, 
+        color: 0xaaccee, 
         wireframe: true,         
         side: THREE.DoubleSide
     });
@@ -1922,6 +1963,8 @@ function drawEsriTerrainMesh(gridData, bounds) {
     mainGroup.add(terrainMesh);
     console.log(`[3D SUCCESS] Grid rendered without Z>=0.`);
 }
+
+// ------- File Loader ---------
 
 document.getElementById('imageLoader').addEventListener('change', async function(e) {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -1939,7 +1982,7 @@ document.getElementById('imageLoader').addEventListener('change', async function
                     (e.target.files[0].name.endsWith('.tar.gz') ||
                      e.target.files[0].name.endsWith('.tgz'));
     try {
-        if (isTarGz) {
+        if (false) { // isTarGz) {
             const archiveFile = e.target.files[0];
             const archiveBuffer = await archiveFile.arrayBuffer();
             const unzippedBuffer = await gunzip(archiveBuffer);
@@ -1958,15 +2001,38 @@ document.getElementById('imageLoader').addEventListener('change', async function
             }
         } else {
             const rawTxtDataMap = new Map();
-            for (const file of e.target.files) {
+            //for (const file of e.target.files) {
+            const filesToProcess = Array.from(e.target.files);
+             for (let i = 0; i < filesToProcess.length; i++) {
+                 const file = filesToProcess[i];
                 const core = getNameCore(file.name);
-		   const dgx = /\.dg.$/i;
+
+                if (file.name.toLowerCase().endsWith('.tgz') ||
+                    file.name.toLowerCase().endsWith('.tar.gz')) {
+                    console.log(`Decompressing ${file.name}...`);        
+                    try {
+                        const arrayBuffer = await file.arrayBuffer(); 
+                        const unzippedBuffer = await gunzip(arrayBuffer);
+                        const extractedFiles = untar(unzippedBuffer);
+                        const decodedFiles = extractedFiles.map(extFile => {
+                            return new File([extFile.arrayBuffer], extFile.name);
+                        });
+                        filesToProcess.splice(i + 1, 0, ...decodedFiles);
+                    } catch (error) {
+                        console.error(`Error decompressing ${file.name}:`, error);
+                    }
+                    continue;
+                }
+                //const core = getNameCore(file.name);
+		
+                const dgx = /\.dg.$/i;
                 const isWorldFile = /\.(jgw|pgw)$/i.test(file.name);
                 if (dgx.test(file.name) || file.name.endsWith('.ek5') ||
                   file.name.endsWith('.raw')||
                   file.name.toLowerCase().endsWith('.all')||
                   file.name.toLowerCase().endsWith('.s7k')||
                   file.name.toLowerCase().endsWith('.dt4')||
+                  file.name.toLowerCase().endsWith('.msh')||
                   file.name.toLowerCase().endsWith('.asc')){
                     customFiles.push(file); // for async processing
                 } else if (isWorldFile) {
@@ -1979,7 +2045,7 @@ document.getElementById('imageLoader').addEventListener('change', async function
                     console.warn(`File format not known: ${file.name}.`);
                 }
             }
-            if (customFiles.length > 0) { // async processing  (.ek5, .raw,) 
+            if (customFiles.length > 0) { // async processing  (.ek5, .raw, ...) 
                 const ek5Promises = customFiles.map(async (file) => {
                     const core = getNameCore(file.name);
                     try {
@@ -1987,6 +2053,9 @@ document.getElementById('imageLoader').addEventListener('change', async function
                         if (file.name.toLowerCase().endsWith('.asc')) {
                             const textContent = await file.text();
                             result = parseEsriAsciiGrid(textContent);
+                        } else if (file.name.toLowerCase().endsWith('.msh')) {
+                            const textContent = await file.text();
+                            result = parseGmshMsh(textContent);
                         } else {
                             result = await FileParsers.handleCustomFormat(file);
                         }
@@ -2028,7 +2097,7 @@ document.getElementById('imageLoader').addEventListener('change', async function
                                             w: img.width,
                                             h: img.height
                                         });
-                                        URL.revokeObjectURL(imgUrl); // Zwalniamy pamięć ram
+                                        URL.revokeObjectURL(imgUrl);
                                         resolve();
                                     };
                                     img.onerror = function() {
@@ -2093,15 +2162,8 @@ document.getElementById('imageLoader').addEventListener('change', async function
                 if (p.y > globalBounds.maxZ) globalBounds.maxZ = p.y;
             }
         }
-        for (const [core, cleanStr] of txtFiles.entries()) {
-            updateBoundsFromCurve(cleanStr);
-        }
-        for (const [core, params] of worldFiles.entries()) {
-            updateBoundsFromWorldFile(params.params,params.w,params.h);
-        }
-        for (const [core, data] of ek5ProcessedData.entries()) {
-            if (data.type === 'Grid3D') {
-                const meta = data.metadata;
+        function updateBoundsFromGrid(data) {
+               const meta = data.metadata;
                 const gridMaxX = meta.xllcorner + (meta.ncols * meta.cellsize);
                 const gridMaxZ = meta.yllcorner + (meta.nrows * meta.cellsize); 
                 if (meta.xllcorner < globalBounds.minX) globalBounds.minX = meta.xllcorner;
@@ -2117,6 +2179,18 @@ document.getElementById('imageLoader').addEventListener('change', async function
                         }
                     }
                 }
+        }
+        for (const [core, cleanStr] of txtFiles.entries()) {
+            updateBoundsFromCurve(cleanStr);
+        }
+        for (const [core, params] of worldFiles.entries()) {
+            updateBoundsFromWorldFile(params.params,params.w,params.h);
+        }
+        for (const [core, data] of ek5ProcessedData.entries()) {
+            if (data.type === 'Grid3D') {
+                updateBoundsFromGrid(data)
+            } else if (data.type === 'Mesh') {
+                updateBoundsFromMesh(data, globalBounds);
             } else {
                 updateBoundsFromCurve(data.curve);
                 if(data.depths) {
@@ -2153,6 +2227,8 @@ document.getElementById('imageLoader').addEventListener('change', async function
         for (const [core, data] of ek5ProcessedData.entries()) {
             if(data.type==='Grid3D') {
                 drawEsriTerrainMesh(data, globalBounds) 
+            } else if(data.type==='Mesh') {
+                drawMesh(data.vx, data.fx, globalBounds) 
             } else {
                 const scaledCurveString=mapCurveStringWithAspectRatio(data.curve,globalBounds);
                 lastLoadedCurveString = scaledCurveString;
@@ -2178,6 +2254,8 @@ document.getElementById('imageLoader').addEventListener('change', async function
         console.error("Loader error:", error);
     }
 });
+
+// --- Decompressing, untaring from URL and sending to file input (.tgz) ---
 
 async function loadTgzFromUrl(urlString) {
     if (!urlString) return;
@@ -2214,7 +2292,7 @@ async function loadTgzFromUrl(urlString) {
                 files: dataTransfer.files // FileList
             }
         };
-        console.log(`[URL] Success. Extracted ${dataTransfer.files.length} files.`);
+        console.log(`[URL] Extracted ${dataTransfer.files.length} files.`);
         const fileInput = document.getElementById('imageLoader');
         if (fileInput) {
             fileInput.files = dataTransfer.files; 
@@ -2223,9 +2301,11 @@ async function loadTgzFromUrl(urlString) {
     } catch (error) {
         console.error("[URL Error]:", error);
     }
-    document.getElementById("loadExample").value=oldValue;
+    document.getElementById("loadExample").value = oldValue;
 }
 window.loadTgzFromUrl = loadTgzFromUrl;
+
+// --- Resize handler ---
 
 window.addEventListener('resize', onWindowResize, false);
 function onWindowResize() {
