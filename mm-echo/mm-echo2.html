@@ -14,7 +14,10 @@
     </style>
 </head>
 
+<script src="https://unpkg.com/three@0.160.1/build/three.min.js"></script>
+<script src="three.min.js"></script>
 <script src="ll2utm.js" defer></script> 
+
 <script>
 var loadBlob = 0;
 function url_params() { // overwrite globals from url params
@@ -42,7 +45,7 @@ or
 </div>
 
 
-<script type="module">
+<script>
 
 function latLonToMeters(lat, lon) {
     const R = 6378137;
@@ -77,7 +80,7 @@ function openBlob() {
 window.openBlob=openBlob;
 
 //import * as THREE from './three.module.js';
-import * as THREE from 'https://unpkg.com/three@0.160.1/build/three.module.js';
+//import * as THREE from 'https://unpkg.com/three@0.160.1/build/three.module.js';
 
 const dolnyOffset = 2; 
 
@@ -1789,6 +1792,7 @@ function parseGmshMsh(s) {
     const v = lines.slice(5, 5 + n).map(line => line.trim().split(/\s+/).slice(1, 4).map(parseFloat));
     const m = parseInt(lines[n + 7]);
     const e = lines.slice(n + 8, n + 8 + m).map(line => line.trim().split(/\s+/).slice(5, 9).map(x => parseInt(x) - 1));
+    for (let i=0; i<v.length; i++) { var t=v[i][1]; v[i][1]=v[i][2]; v[i][2]=t;}
     return { type: 'Mesh', vx: v, fx: e };
 }
 function updateBoundsFromMesh(data, bounds) {
@@ -1854,13 +1858,33 @@ function drawMesh(vx, fx, bounds) {
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geometry.setIndex(indices);
     geometry.computeVertexNormals();
+/*
     const meshMaterial = new THREE.MeshBasicMaterial({
         color: 0x000080,
         side: THREE.DoubleSide,
         wireframe: true
     });
     const mesh = new THREE.Mesh(geometry, meshMaterial);
+*/
+
+    const meshMaterial = new THREE.MeshBasicMaterial({
+        color: 0xaabbcc,
+        side: THREE.DoubleSide,
+        polygonOffset: true,      // Włącza przesunięcie wielokątów
+        polygonOffsetFactor: 1,   // Odpycha wypełnienie w głąb sceny
+        polygonOffsetUnits: 1     // Gwarantuje, że linie będą zawsze na wierzchu
+    });
+    const mesh = new THREE.Mesh(geometry, meshMaterial);
+    const wireframeGeometry = new THREE.WireframeGeometry(geometry);
+    const wireframeMaterial = new THREE.LineBasicMaterial({ 
+        color: 0x335577,
+        linewidth: 1 
+    });
+    const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+    mesh.add(wireframe);
+
     mainGroup.add(mesh);
+
     console.log(`[GMSH SUCCESS] ${vx.length} x ${fx.length}`);
 }
 
