@@ -121,10 +121,35 @@ const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerH
 var cm = 0.88;
 camera.position.set(0*cm, -2.6*cm, 4.6*cm);
 camera.lookAt(0*cm, 1.2*cm, -3.6*cm);
-
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+window.addEventListener('click', onPointerDown);
+function onPointerDown(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(mainGroup.children,false);
+    if (intersects.length > 0) {
+      for (let i = 0; i < intersects.length; i++) {
+        const hitObject = intersects[i].object;
+        if (hitObject && hitObject.name === "gmsh_mesh") {
+            console.log("Gmsh_mesh");
+            //hitObject.material.transparent = true;
+            //hitObject.material.opacity = hitObject.material.opacity === 0.5 ? 1.0 : 0.5;
+            //hitObject.material.needsUpdate = true;
+			if(hitObject.dx_container) {
+				hitObject.dx_idx = (hitObject.dx_idx + 1)%hitObject.dx_container.length;
+				updateMeshColors(hitObject, hitObject.dx_container[hitObject.dx_idx].data);
+			}
+            break;
+        }
+	  }
+    }
+}
+
 
 const axesGeometry = new THREE.BufferGeometry();
 const axesVertices = [
@@ -1786,8 +1811,24 @@ function getImageDimensions(file) {
 }
 
 // --- GMSH mesh (.msh) ---
-
 function parseGmshMsh(s) {
+    var lines = s.split('\n');
+    const n = parseInt(lines[4]);
+    const v = lines.slice(5, 5 + n).map(line => line.trim().split(/\s+/).slice(1, 4).map(parseFloat));
+    const m = parseInt(lines[n + 7]);
+    const e = lines.slice(n + 8, n + 8 + m).map(line => line.trim().split(/\s+/).slice(5, 9).map(x => parseInt(x) - 1));
+    for (let i=0; i<v.length; i++) { var t=v[i][1]; v[i][1]=v[i][2]; v[i][2]=t;}
+    const d = []; let nm = n + m + 9; 
+    while (lines[nm] && lines[nm].trim() === '$NodeData') {
+        const dname = lines[nm + 2].replace(/"/g, '').trim();
+        const n = parseInt(lines[nm + 8]);
+        const dv = lines.slice(nm + 9, nm + 9 + n).map(l => l.trim().split(/\s+/).slice(1,2).map(parseFloat));
+        d.push({ name: dname, data: dv });
+        nm += 9 + n + 1;
+    }
+    return {type: 'Mesh',vx: v, fx: e, dx: d };
+}
+function parseGmshMsh0(s) {
     var lines = s.split('\n');
     const n = parseInt(lines[4]);
     const v = lines.slice(5, 5 + n).map(line => line.trim().split(/\s+/).slice(1, 4).map(parseFloat));
@@ -1809,27 +1850,29 @@ function updateBoundsFromMesh(data, bounds) {
         if (p[2] > bounds.maxY) bounds.maxY = p[2];
     }
 }
-function drawMesh(vx, fx, bounds) {
+function drawMesh(vx, fx, dx_container, bounds) {
     if (!vx || vx.length === 0 || !fx || fx.length === 0) return;
-
     const rangeX = bounds.maxX - bounds.minX;
     const rangeZ = bounds.maxZ - bounds.minZ;
-    //const maxRange = Math.max(rangeX, rangeZ) || 1;
     const rangeY = bounds.maxY - bounds.minY;
     const maxRange = Math.max(rangeX, rangeZ, rangeY * 2.0) || 1;
-
     const offsetX = (maxRange - rangeX) / 2;
     const offsetZ = (maxRange - rangeZ) / 2;
-    //const rangeY = bounds.maxY - bounds.minY;
-    //const scaleY = rangeY > 0 ? (2.0 / Math.abs(bounds.minY)) : 1.0;
-    //const rangeY = bounds.maxY - bounds.minY;
     const scaleY = rangeY > 0 ? (2.0 / rangeY) : 1.0;
-
     const globalScale = 4.0 / maxRange;
-
+    let minData = 0;
+    let maxData = 0;
+	let dx = dx_container && dx_container.length>0 ? dx_container[0].data : null;
+    let hasData = dx && dx.length === vx.length;
+    if (hasData) {
+        minData = Math.min(...dx);
+        maxData = Math.max(...dx);
+    }
+    const dataRange = (maxData - minData) || 1;
     const positions = new Float32Array(vx.length * 3);
+    const colors = new Float32Array(vx.length * 3);
     for (let i = 0; i < vx.length; i++) {
-        const p = vx[i]; // [X, Y_geodezyjne, Z_głębokość]
+        const p = vx[i];
         let mappedX = p[0];
         if (rangeX !== 0) {
             mappedX = -2 + (((p[0] - bounds.minX) + offsetX) / maxRange) * 4;
@@ -1838,10 +1881,96 @@ function drawMesh(vx, fx, bounds) {
         if (rangeZ !== 0) {
             mappedZ = -(-2 + (((p[1] - bounds.minZ) + offsetZ) / maxRange) * 4);
         }
-        //const zGeo = p[2] > 0 ? -p[2] : p[2];
-        //const mappedY = zGeo * scaleY;
-        
-        //const mappedY = (p[2] - bounds.maxY) * scaleY;
+        const mappedY = (p[2] - bounds.maxY) * globalScale;
+        positions[i * 3]     = mappedX;
+        positions[i * 3 + 1] = mappedY;
+        positions[i * 3 + 2] = mappedZ;
+        if (hasData) {
+            const norm = (dx[i] - minData) / dataRange;
+            const r = Math.max(0, Math.min(1, 4 * norm - 1.5)); // colormap
+            const g = Math.max(0, Math.min(1, 1.5 - Math.abs(4 * norm - 2)));
+            const b = Math.max(0, Math.min(1, 1.5 - 4 * norm));
+            colors[i * 3]     = r;
+            colors[i * 3 + 1] = g;
+            colors[i * 3 + 2] = b;
+        } else {
+            colors[i * 3]     = 0.7;
+            colors[i * 3 + 1] = 0.7;
+            colors[i * 3 + 2] = 0.7;
+        }
+    }
+    const indices = [];
+    for (let i = 0; i < fx.length; i++) {
+        const face = fx[i];
+        if (face.length >= 3) {
+            indices.push(face[0], face[1], face[2]);
+        }
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+    const meshMaterial = new THREE.MeshBasicMaterial({
+        vertexColors: true,
+        side: THREE.DoubleSide,
+        polygonOffset: true,      
+        polygonOffsetFactor: 1,   
+        polygonOffsetUnits: 1     
+    });
+    const mesh = new THREE.Mesh(geometry, meshMaterial);
+	mesh.name="gmsh_mesh";
+	mesh.dx_container = dx_container;
+	mesh.dx_idx = 0;
+    const wireframeGeometry = new THREE.WireframeGeometry(geometry);
+    const wireframeMaterial = new THREE.LineBasicMaterial({ 
+        color: 0x335577,
+        linewidth: 1 
+    });
+    const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+    mesh.add(wireframe);
+    mainGroup.add(mesh);
+    console.log(`[GMSH SUCCESS] ${vx.length} x ${fx.length}`);
+}
+function updateMeshColors(mesh, newDx) {
+    if (!mesh || !newDx || newDx.length === 0) return;
+    const minData = Math.min(...newDx);
+    const maxData = Math.max(...newDx);
+    const dataRange = (maxData - minData) || 1;
+    const colorAttribute = mesh.geometry.getAttribute('color');
+    if (!colorAttribute) return;
+    for (let i = 0; i < newDx.length; i++) {
+        const norm = (newDx[i] - minData) / dataRange;
+        const r = Math.max(0, Math.min(1, 4 * norm - 1.5));
+        const g = Math.max(0, Math.min(1, 1.5 - Math.abs(4 * norm - 2)));
+        const b = Math.max(0, Math.min(1, 1.5 - 4 * norm));
+        colorAttribute.setXYZ(i, r, g, b);
+    }
+    colorAttribute.needsUpdate = true; // informa three.js
+}
+
+
+function drawMesh0(vx, fx, dx, bounds) {
+    if (!vx || vx.length === 0 || !fx || fx.length === 0) return;
+    const rangeX = bounds.maxX - bounds.minX;
+    const rangeZ = bounds.maxZ - bounds.minZ;
+    const rangeY = bounds.maxY - bounds.minY;
+    const maxRange = Math.max(rangeX, rangeZ, rangeY * 2.0) || 1;
+    const offsetX = (maxRange - rangeX) / 2;
+    const offsetZ = (maxRange - rangeZ) / 2;
+    const scaleY = rangeY > 0 ? (2.0 / rangeY) : 1.0;
+    const globalScale = 4.0 / maxRange;
+    const positions = new Float32Array(vx.length * 3);
+    for (let i = 0; i < vx.length; i++) {
+        const p = vx[i];
+        let mappedX = p[0];
+        if (rangeX !== 0) {
+            mappedX = -2 + (((p[0] - bounds.minX) + offsetX) / maxRange) * 4;
+        }
+        let mappedZ = -p[1];
+        if (rangeZ !== 0) {
+            mappedZ = -(-2 + (((p[1] - bounds.minZ) + offsetZ) / maxRange) * 4);
+        }
         const mappedY = (p[2] - bounds.maxY) * globalScale;
         
         positions[i * 3]     = mappedX;
@@ -1859,15 +1988,6 @@ function drawMesh(vx, fx, bounds) {
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geometry.setIndex(indices);
     geometry.computeVertexNormals();
-/*
-    const meshMaterial = new THREE.MeshBasicMaterial({
-        color: 0x000080,
-        side: THREE.DoubleSide,
-        wireframe: true
-    });
-    const mesh = new THREE.Mesh(geometry, meshMaterial);
-*/
-
     const meshMaterial = new THREE.MeshBasicMaterial({
         color: 0xaabbcc,
         side: THREE.DoubleSide,
@@ -1883,9 +2003,7 @@ function drawMesh(vx, fx, bounds) {
     });
     const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
     mesh.add(wireframe);
-
     mainGroup.add(mesh);
-
     console.log(`[GMSH SUCCESS] ${vx.length} x ${fx.length}`);
 }
 
@@ -2253,7 +2371,7 @@ document.getElementById('imageLoader').addEventListener('change', async function
             if(data.type==='Grid3D') {
                 drawEsriTerrainMesh(data, globalBounds) 
             } else if(data.type==='Mesh') {
-                drawMesh(data.vx, data.fx, globalBounds) 
+                drawMesh(data.vx, data.fx, data.dx, globalBounds) 
             } else {
                 const scaledCurveString=mapCurveStringWithAspectRatio(data.curve,globalBounds);
                 lastLoadedCurveString = scaledCurveString;
