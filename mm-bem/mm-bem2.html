@@ -427,7 +427,10 @@ function on_reduce() {reduce_msh^=1; change();}
 </svg>
 </div>
 <input type=button value="Save to svg" onclick='writeFile(document.getElementById("svg").outerHTML,"mm-bem-polar.svg");' /> 
-<input type=button value="Save to png" style="float:right" onclick='downloadSvgAsPng(document.getElementById("svg"),"mm-bem-polar.png",2);' /> 
+<input type=button value="Save to png" style="float:right"
+onclick='downloadSvgAsPng(document.getElementById("svg"),"mm-bem-polar.png",2);downloadPng(png_data,"mm-bem-["+nf_cx+","+nf_cy+","+nf_cz+","+nf_r2+","+nf_ph+"].png");' /> 
+
+<!-- onclick='downloadSvgAsPng(document.getElementById("svg"),"mm-bem-polar.png",2);'  -->
 
 		</td>
 	</tr>
@@ -819,7 +822,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(24.5.2026)" style="text-align:center">mm-bem v2.62 (2025-2026)</p>
+<p title="(19.6.2026)" style="text-align:center">mm-bem v2.63 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -1948,7 +1951,7 @@ function update_near_field(s) {
 	const data = s.trim().split(/\r?\n/).map(l => l.replace(/#.*/, ''))
 			.filter(l => l).map(l => l.trim().split(/\s+/).map(Number));
 	img_data = logNormalizeMtx(data);
-	png_data = createPolarImage(img_data, nf_r0, nf_r2); // real r1,r2
+	png_data = createPolarImage(img_data, nf_r0, nf_r2, 400,400,255); // real r1,r2
 	if(png_data) {
 		var el = document.getElementById("svgimg");
 		if(el) {
@@ -3851,7 +3854,14 @@ function downloadSvgAsPng(svgElement, filename = "image.png", scale = 1) {
       URL.revokeObjectURL(url);
     };
     img.src = url;
-  }
+}
+
+function downloadPng(dataUrl, fname) {
+	const link = document.createElement("a");
+	link.download = fname;
+	link.href = dataUrl;
+	link.click();
+}
 
 // ---- matrix functions
 
