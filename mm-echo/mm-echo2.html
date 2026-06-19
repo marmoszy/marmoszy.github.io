@@ -45,6 +45,14 @@ or
 -->
 </div>
 
+<!-- tooltip -->
+<div id="msh-tooltip" style="
+    position: absolute; display: none; background: rgba(255, 255, 255, 0.85); color: black;
+    padding: 8px 12px; border-radius: 4px; font-family: sans-serif; font-size: 13px;
+    z-index: 100; box-shadow: 0 4px 6px rgba(0,0,0,0.15); border: 1px solid #335577;
+    pointer-events: none;">
+</div>
+
 
 <script>
 
@@ -114,7 +122,6 @@ function createDataTexture(str) {
 }
 const { texture: dataTexture, numPoints } = createDataTexture(goraPunktyString);
 
-
 const scene = new THREE.Scene();  // Three.js scene
 scene.background = new THREE.Color(0xffffff);
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -149,7 +156,52 @@ function onPointerDown(event) {
 	  }
     }
 }
-
+const tooltip = document.getElementById('msh-tooltip');
+raycaster.params.Mesh.side = THREE.DoubleSide;
+window.addEventListener('mousemove', onPointerMove);
+function onPointerMove(event) {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    mainGroup.updateMatrixWorld(true); 
+    if (typeof clickableMesh !== 'undefined' && clickableMesh) {
+        clickableMesh.updateMatrixWorld(true);
+    }
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(mainGroup.children, true);
+    const validHit = intersects.find(hit => hit.object.type === "Mesh" && hit.object.name === "gmsh_mesh");
+    if (validHit && validHit.object.dx_container && validHit.object.dx_container.length) {
+        const mesh = validHit.object;
+        const face = validHit.face; // triangle with a, b, c fields
+        const geometry = mesh.geometry;
+        const positionAttribute = geometry.attributes.position;
+        const vertexIndices = [face.a, face.b, face.c];
+        let closestVertexIdx = face.a;
+        let minDistance = Infinity;
+        const vertexPos = new THREE.Vector3();
+        vertexIndices.forEach(idx => {
+            vertexPos.fromBufferAttribute(positionAttribute, idx);
+            vertexPos.applyMatrix4(mesh.matrixWorld); 
+            const dist = validHit.point.distanceTo(vertexPos);
+            if (dist < minDistance) {
+                minDistance = dist;
+                closestVertexIdx = idx;
+            }
+        });
+        let nodeValue = "No data";
+		const dname = validHit.object.dx_container[validHit.object.dx_idx].name;
+		const currentDxData = validHit.object.dx_container[validHit.object.dx_idx].data;
+        if (typeof currentDxData !== 'undefined' && currentDxData[closestVertexIdx] !== undefined) {
+            nodeValue = currentDxData[closestVertexIdx][0].toFixed(5);
+        }
+        tooltip.style.display = 'block';
+        tooltip.innerHTML = `${dname}[${closestVertexIdx + 1}]: ${nodeValue}`;
+        tooltip.style.left = (event.clientX + 15) + 'px';
+        tooltip.style.top = (event.clientY + 15) + 'px';
+    } else {
+        tooltip.style.display = 'none';
+    }
+}
+//let currentDxData = null;
 
 const axesGeometry = new THREE.BufferGeometry();
 const axesVertices = [
@@ -1863,6 +1915,7 @@ function drawMesh(vx, fx, dx_container, bounds) {
     let minData = 0;
     let maxData = 0;
 	let dx = dx_container && dx_container.length>0 ? dx_container[0].data : null;
+	//currentDxData = dx
     let hasData = dx && dx.length === vx.length;
     if (hasData) {
         minData = Math.min(...dx);
@@ -1934,6 +1987,7 @@ function drawMesh(vx, fx, dx_container, bounds) {
 }
 function updateMeshColors(mesh, newDx) {
     if (!mesh || !newDx || newDx.length === 0) return;
+	//currentDxData = newDx;
     const minData = Math.min(...newDx);
     const maxData = Math.max(...newDx);
     const dataRange = (maxData - minData) || 1;
@@ -2107,6 +2161,78 @@ function drawEsriTerrainMesh(gridData, bounds) {
     console.log(`[3D SUCCESS] Grid rendered without Z>=0.`);
 }
 
+// ---- draw square image in 3D ----
+
+function parseImageMetadata(filename, globalBounds) {
+    const openBracketIdx = filename.indexOf('[');
+    const closeBracketIdx = filename.indexOf(']');
+    if (openBracketIdx === -1 || closeBracketIdx === -1) {
+        return null;
+    }
+    const numbersString = filename.slice(openBracketIdx + 1, closeBracketIdx);
+    const params = numbersString.split(',').map(parseFloat);
+    if (params.length < 5 || params.some(isNaN)) {
+        return null;
+    }
+    const x = parseFloat(params[0]);
+    const y = parseFloat(params[1]);
+    const z = parseFloat(params[2]);
+    const r = parseFloat(params[3]);
+    const alpha = parseFloat(params[4]*Math.PI/180);
+    const cosA = Math.cos(alpha);
+    const sinA = Math.sin(alpha);
+    const dx = Math.abs(r * cosA);
+    const dz = Math.abs(r * sinA);
+    globalBounds.minX = Math.min(globalBounds.minX, x - dx);
+    globalBounds.maxX = Math.max(globalBounds.maxX, x + dx);
+    globalBounds.minZ = Math.min(globalBounds.minZ, z - dz);
+    globalBounds.maxZ = Math.max(globalBounds.maxZ, z + dz);
+    globalBounds.minY = Math.min(globalBounds.minY, y - r);
+    globalBounds.maxY = Math.max(globalBounds.maxY, y + r);
+    return { x, y, z, r, alpha };
+}
+
+function drawImagePlane(imgBlob, metaData, bounds) {
+    if (!imgBlob || !metaData || !bounds) return;
+    const { x, y, z, r, alpha } = metaData;
+    const rangeX = bounds.maxX - bounds.minX;
+    const rangeZ = bounds.maxZ - bounds.minZ;
+    const rangeY = bounds.maxY - bounds.minY;
+    const maxRange = Math.max(rangeX, rangeZ, rangeY * 2.0) || 1;
+    const offsetX = (maxRange - rangeX) / 2;
+    const offsetZ = (maxRange - rangeZ) / 2;
+    const globalScale = 4.0 / maxRange;
+    let mappedX = x;
+    if (rangeX !== 0) {
+        mappedX = -2 + (((x - bounds.minX) + offsetX) / maxRange) * 4;
+    }
+    let mappedZ = -z;
+    if (rangeZ !== 0) {
+        mappedZ = -(-2 + (((z - bounds.minZ) + offsetZ) / maxRange) * 4);
+    }
+    const mappedY = (y - bounds.maxY) * globalScale;
+    const scaledRadius = r * globalScale;
+    const sideLength = scaledRadius * 2;
+    const objectURL = URL.createObjectURL(imgBlob);
+    const textureLoader = new THREE.TextureLoader();
+    const texture = textureLoader.load(objectURL, () => {
+        URL.revokeObjectURL(objectURL);
+    });
+    const geometry = new THREE.PlaneGeometry(sideLength, sideLength);
+    const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.95,
+        depthWrite: false
+    });
+    const imageMesh = new THREE.Mesh(geometry, material);
+    imageMesh.position.set(mappedX, mappedY, mappedZ);
+    imageMesh.rotation.y = alpha;
+    imageMesh.name = "gmsh_image_plane";
+    mainGroup.add(imageMesh);
+}
+
 // ------- File Loader ---------
 
 document.getElementById('imageLoader').addEventListener('change', async function(e) {
@@ -2116,6 +2242,8 @@ document.getElementById('imageLoader').addEventListener('change', async function
     const worldFiles = new Map();
     const customFiles = [];
     const ek5ProcessedData = new Map(); 
+	const imagesQueue = [];
+//	const processedCores = new Set();
 
     function getNameCore(filepath) {
         const filename = filepath.split('/').pop();
@@ -2182,7 +2310,7 @@ document.getElementById('imageLoader').addEventListener('change', async function
                     worldFiles.set(core, file);
                 } else if (file.type==='text/plain'||file.name.endsWith('.txt')){
                     rawTxtDataMap.set(core, file);
-                } else if (file.type.startsWith('image/')) {
+                } else if (file.type.startsWith('image/')||file.name.endsWith('.png')||file.name.endsWith('.jpg')) {
                     imageFiles.set(core, file);
                 } else {
                     console.warn(`File format not known: ${file.name}.`);
@@ -2341,6 +2469,15 @@ document.getElementById('imageLoader').addEventListener('change', async function
                 }
             }
         }
+        imageFiles.forEach((file, core) => {
+            const metaData = parseImageMetadata(file.name, globalBounds);
+            if (metaData) {
+                imagesQueue.push({blob: file, meta: metaData, core: core});
+                //processedCores.add(core);
+                imageFiles.delete(core);
+            }
+        });
+
         for (const [core, cleanStr] of txtFiles.entries()) {
             const scaledCurveString = mapCurveStringWithAspectRatio(cleanStr, globalBounds);
             const matchingImageBlob = imageFiles.get(core);
@@ -2383,16 +2520,18 @@ document.getElementById('imageLoader').addEventListener('change', async function
             console.log(`[SUCCESS] ${core} loaded`);
         }
         // --- when no pairs ---
+        imagesQueue.forEach(item => {
+            drawImagePlane(item.blob, item.meta, globalBounds);
+        });
         for (const [core, imgBlob] of imageFiles.entries()) {
-            if (!txtFiles.has(core) && !ek5ProcessedData.has(core) && !worldFiles.has(core)) {
-                const defaultStr = "-2," + img_z + ";2," + img_z;
-                img_z += 0.2;
-                lastLoadedCurveString = defaultStr;
-                FileParsers.handleRasterImage(imgBlob, defaultStr);
-                console.log(`[DEFAULT] ${core}: placed at Z: ${img_z - 0.2}`);
+            if (/*!processedCores.has(core) && */ !txtFiles.has(core) && !ek5ProcessedData.has(core) && !worldFiles.has(core)) {
+                    const defaultStr = "-2," + img_z + ";2," + img_z;
+                    img_z += 0.2;
+                    lastLoadedCurveString = defaultStr;
+                    FileParsers.handleRasterImage(imgBlob, defaultStr);
+                    console.log(`[DEFAULT] ${core}: placed at Z: ${img_z - 0.2}`);
             }
         }
-
     } catch (error) {
         console.error("Loader error:", error);
     }
