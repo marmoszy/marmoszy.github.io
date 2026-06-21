@@ -134,7 +134,6 @@ function mercmapproj(phi,lam, lam0) { // phi,lam -> x,y (cartographic param: lam
  	return([x*deg,y*deg]);	
   }
 }
-
 function sinmapproj(phi,lam, lam0) { // phi,lam -> x,y (cartographic param: lam0 )
     const {cos, PI} = Math;
     var deg=180/PI;              
@@ -142,7 +141,6 @@ function sinmapproj(phi,lam, lam0) { // phi,lam -> x,y (cartographic param: lam0
     var x = (l-l0)*cos(p), y=p;
     return([x*deg, y*deg]);	
 }
-
 function albersmapproj(phi,lam, phi0,lam0,phi1,phi2) { // phi,lam -> x,y 
     const {sin, cos, sqrt, PI} = Math;
     const deg=180/PI;              
@@ -153,7 +151,6 @@ function albersmapproj(phi,lam, phi0,lam0,phi1,phi2) { // phi,lam -> x,y
     var x = r*sin(th), y=r0-r*cos(th);
     return([x*deg, y*deg]);	
 }
-
 function bonnemapproj(phi, lam, phi0=45, lam0=0) { // phi,lam -> x,y
     const {sin, cos, tan, PI} = Math;
     const deg = 180/PI;              
@@ -171,10 +168,20 @@ function naturalearthmapproj(phi, lam, lam0=0) {
     const { PI } = Math;
     var deg = 180/PI;              
     var l = lam/deg, p = phi/deg, l0 = lam0/deg;
-    var p2 = p * p, p4 = p2 * p2, p8 = p4 * p4, p10 = p8*p2, p12 = p10*p2;
+    var p2 = p*p, p4 = p2*p2, p6 = p4*p2, p8 = p4*p4, p10 = p8*p2, p12 = p10*p2;
     var l_phi = 0.870700 - 0.131979*p2 - 0.013723*p4 + 0.003971*p10 - 0.001529*p12;
-    var d_phi = p * (1.007226 + 0.015085*p2 - 0.044475*p4 + 0.028874*p8 - 0.005916*p10);
+    var d_phi = p * (1.007226 + 0.015085*p2 - 0.044475*p6 + 0.028874*p8 - 0.005916*p10);
     return ([(l-l0)*l_phi * deg, d_phi * deg]); 
+}
+function equalearthmapproj(phi, lam, lam0=0) {
+    const { PI, sin, cos, sqrt } = Math;
+    var deg = 180 / PI;              
+    var l = lam/deg, p = phi/deg, l0 = lam0/deg;
+    var th = Math.asin(sqrt(3)/2*sin(p));
+    var t2 = th*th, t6 = t2*t2*t2, t8 = t6*t2;
+    var A1 = 1.340264, A2 = -0.081106, A3 = 0.000893, A4 = 0.003796;
+    var den = A1+3*A2*t2+7*A3*t6+9*A4*t8;
+    return [2/sqrt(3)*((l-l0)*cos(th))/den * deg, th*(A1+A2*t2+A3*t6+A4*t8) * deg];
 }
 
 // --- spilhausmapproj ---
@@ -333,8 +340,19 @@ function main() {
 //9	natural earth
 	var id='naturalearth';
 	var proj=function(lon,lat){return(naturalearthmapproj(lat,lon)); }
-	var xmin=-180,xmax=180,ymin=-120,ymax=120,w=900,h=450;
+        var c=81.5/156.7;
+	var xmin=-156.7,xmax=156.7,ymin=c*xmin,ymax=c*xmax,w=900,h=450;
 	var el=document.getElementById('gt9');
+        for (let i=0; i<objs.length; i++) {
+ 	    svg_plot(el, id+'_'+objs[i], colors[i], eval(objs[i]), 
+                  xmin,xmax,ymin,ymax,w,h, proj, i==1?'#00800040':'none');
+        }
+//10	equal earth
+	var id='equalearth';
+	var proj=function(lon,lat){return(equalearthmapproj(lat,lon)); }
+        var c=77.4/153.3;
+	var xmin=-155,xmax=155,ymin=c*xmin,ymax=c*xmax,w=900,h=450;
+	var el=document.getElementById('gt10');
         for (let i=0; i<objs.length; i++) {
  	    svg_plot(el, id+'_'+objs[i], colors[i], eval(objs[i]), 
                   xmin,xmax,ymin,ymax,w,h, proj, i==1?'#00800040':'none');
@@ -427,9 +445,19 @@ function main() {
  </g>
 </svg>
 </p>
+
+<p>
+10. <a href="https://en.wikipedia.org/wiki/Equal_Earth_projection">Equal Earth projection</a><br>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="535" font-family="Times" font-size=14>
+ <g id="gt10" transform="translate(30,30)">
+  <rect width=900 height=450 style="fill:none;stroke:lightgray;stroke-width:1" />
+ </g>
+</svg>
+</p>
+
 <p>
 
-<span title="marek.moszynski@pg.edu.pl">MM 5.6.2026</span>
+<span title="marek.moszynski@pg.edu.pl">MM 21.6.2026</span>
 </p>
 
 <!--<script src="world_110.js"></script> -->
