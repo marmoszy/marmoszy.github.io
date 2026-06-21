@@ -100,7 +100,7 @@ function svg_createpoint(svg,id,s,color) { // building svg circle with coords in
 
 function svg_plot(svg,id,color, xy, xmin,xmax,ymin,ymax,w,h, fun, color2='none') {  // ploting xy data
 	var dx=xmax-xmin,dy=ymax-ymin;
-	for(i=0;i<xy.length;i++) {  // building string of points 
+	for(var i=0;i<xy.length;i++) {  // building string of points 
 		var s='', px, py;
 		for(j=0;j<xy[i].length;j++) {
 			var xo=xy[i][j][0], yo=xy[i][j][1]; 
@@ -125,6 +125,14 @@ function svg_plot(svg,id,color, xy, xmin,xmax,ymin,ymax,w,h, fun, color2='none')
 }
 
 /* ------ projections functions-------- */
+
+function proj_plot(id, w, h, oids, objs, colors, proj) {
+    var a=proj(180,0)[0], b=proj(0,90)[1];
+    var el=document.getElementById(id);
+    for (let i=0; i<objs.length; i++) {
+        svg_plot(el, id+'_'+oids[i], colors[i], objs[i], -a,a,-b,b,w,h, proj, i==1?'#00800040':'none');
+    }
+}
 
 function merc_proj(phi,lam, lam0) { // phi,lam -> x,y (cartographic param: lam0 )
   with(Math) {
@@ -269,104 +277,105 @@ function spilhaus_proj(phi_deg, lam_deg, lam0_deg=66.94970198, aph0_deg=-49.5637
 /* ------ main -------- */
 
 function main() {
-	var phi0=54.4,lam0=18.6;                   // Gdansk lat,lon
-	var phi1=30,lam1=-90;                     // New Orlean
-	var lonlat = read_data(world_data_string); // world coastlines
-	var grid = create_graticule(30,30);        // every 30 degrees
-	var grid2 = create_graticule(30,30,-180,180,-90,90);        // every 30 degrees
-	var rect = create_rect([[-45,-45],[45,-45],[45,45],[-45,45],[-45,-45]]);
-	var circ = create_circle(0,60,10);         // at 60 N, 0 E with radius of 10 degrees
-	var points=[[[lam0,phi0]],[[lam1,phi1]]];
-        var objs=['grid', 'lonlat', 'rect', 'circ', 'points'];
-        var colors=['lightgrey', 'green', 'red', 'blue', 'purple'];
-//1	plate care
-	var id='pcare';
-	var proj=null;
-	var xmin=-180,xmax=180,ymin=-90,ymax=90,w=900,h=450;
-	var el=document.getElementById('gt1');
-        for (let i=0; i<objs.length; i++) {
- 	    svg_plot(el, id+'_'+objs[i], colors[i], eval(objs[i]), 
-                  xmin,xmax,ymin,ymax,w,h, proj, i==1?'#00800040':'none');
-        }
+    var phi0=54.4,lam0=18.6;                   // Gdansk lat,lon
+    var phi1=30,lam1=-90;                     // New Orlean
+    var lonlat = read_data(world_data_string); // world coastlines
+    var grid = create_graticule(30,30,-180,180,-90,90);        // every 30 degrees
+    var rect = create_rect([[-45,-45],[45,-45],[45,45],[-45,45],[-45,-45]]);
+    var circ = create_circle(0,60,10);         // at 60 N, 0 E with radius of 10 degrees
+    var points=[[[lam0,phi0]],[[lam1,phi1]]];
+    var objs = ['grid', 'lonlat', 'rect', 'circ', 'points'];
+    var eval_objs = objs.map(o=>eval(o));  
+    var colors=['lightgrey', 'green', 'red', 'blue', 'purple'];
+
+//1 plate care
+    var id='pcare';
+    var proj=null;
+    var a=180, b=90, w=900, h=450;
+    var el=document.getElementById('gt1');
+    for (let i=0; i<objs.length; i++) {
+        svg_plot(el, id+'_'+objs[i], colors[i], eval(objs[i]), -a,a,-b,b,w,h, proj, i==1?'#00800040':'none');
+    }
 	//svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
 	//svg_plot(el,id+'lonlat','green', lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#00800040');
 	//svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
 	//svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
 	//svg_plot(el,id+'points','purple',points, xmin,xmax,ymin,ymax,w,h, proj);
-//2	mercator
-	var id='merc';
-	var proj = (lon,lat) => merc_proj(lat,lon,0);
-	var xmin=-180,xmax=180,ymin=-180,ymax=180,w=450,h=450;
-	var el=document.getElementById('gt2');
-        for (let i=0; i<objs.length; i++) {
- 	    svg_plot(el, id+'_'+objs[i], i==1?'orange':colors[i], eval(objs[i]), 
-                  xmin,xmax,ymin,ymax,w,h, proj, i==1?'#FFa50040':'none');
-        }
+//2. mercator
+    var id='merc';
+    var proj = (lon,lat) => merc_proj(lat,lon,0);
+    var a=180, b=180, w=450, h=450;
+    var el=document.getElementById('gt2');
+    for (let i=0; i<objs.length; i++) {
+        svg_plot(el, id+'_'+objs[i], i==1?'orange':colors[i], eval(objs[i]), 
+           -a,a,-b,b,w,h, proj, i==1?'#FFa50040':'none');
+    }
 	//svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
 	//svg_plot(el,id+'lonlat','orange',lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#FFa50040');
 	//svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h,  proj);
 	//svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
 	//svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
-//3	sinusoidal
-	var id='sin';
-	var proj=function(lon,lat){return(sin_proj(lat,lon,0)); }
-	var xmin=-180,xmax=180,ymin=-90,ymax=90,w=900,h=450;
-	var el=document.getElementById('gt3');
-	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'lonlat','limegreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#00800040');
-	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
-//4	albers
-	var id='albers';
-	var proj=function(lon,lat){return(albers_proj(lat,lon,0,0,20,50)); }
-	var xmin=-180,xmax=180,ymin=-35,ymax=145,w=900,h=450;
-	var el=document.getElementById('gt4');
-	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, 'none');
-	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
-//5	adamsws2_proj // spilhaus
-	var id='adamsws2';
-	var proj=function(lon,lat){return(adamsws2_proj(lat,lon)); }
-	var xmin=-63,xmax=63,ymin=-63,ymax=63,w=450,h=450;
-	var el=document.getElementById('gt5');
-	svg_plot(el,id+'grid','lightgrey', grid2, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#00800060');
-	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
-//6	spilhaus
-	var id='spilhaus';
-	var proj=function(lon,lat){return(spilhaus_proj(lat,lon)); }
-	var xmin=-63,xmax=63,ymin=-63,ymax=63,w=450,h=450;
-	var el=document.getElementById('gt6');
-	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, 'none');
-	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
-//7	bonne
-	var id='bonne';
-	var proj=function(lon,lat){return(bonne_proj(lat,lon,45,0)); }
-	var xmin=-135,xmax=135,ymin=-150,ymax=120,w=450,h=450;
-	var el=document.getElementById('gt7');
-	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#00800060');
-	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
+//3. sinusoidal
+    var id='sin';
+    var proj=function(lon,lat){return(sin_proj(lat,lon,0)); }
+    var xmin=-180,xmax=180,ymin=-90,ymax=90,w=900,h=450;
+    var el=document.getElementById('gt3');
+    svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'lonlat','limegreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#00800040');
+    svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
+//4 albers
+    var id='albers';
+    var proj=function(lon,lat){return(albers_proj(lat,lon,0,0,20,50)); }
+    var xmin=-180,xmax=180,ymin=-35,ymax=145,w=900,h=450;
+    var el=document.getElementById('gt4');
+    svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, 'none');
+    svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
+//5 adamsws2_proj
+    var id='adamsws2';
+    var proj=function(lon,lat){return(adamsws2_proj(lat,lon)); }
+    var xmin=-63,xmax=63,ymin=-63,ymax=63,w=450,h=450;
+    var el=document.getElementById('gt5');
+    svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#00800060');
+    svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
+//6 spilhaus
+    var id='spilhaus';
+    var proj=function(lon,lat){return(spilhaus_proj(lat,lon)); }
+    var xmin=-63,xmax=63,ymin=-63,ymax=63,w=450,h=450;
+    var el=document.getElementById('gt6');
+    svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, 'none');
+    svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
+//7 bonne
+    var id='bonne';
+    var proj=function(lon,lat){return(bonne_proj(lat,lon,45,0)); }
+    var xmin=-135,xmax=135,ymin=-150,ymax=120,w=450,h=450;
+    var el=document.getElementById('gt7');
+    svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#00800060');
+    svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
 //8. werner
-	var id='werner';
-	var proj=function(lon,lat){return(werner_proj(lat,lon)); }
-	var xmin=-135,xmax=135,ymin=-200,ymax=70,w=450,h=450;
-	var el=document.getElementById('gt8');
-	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#00800060');
-	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
-	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
+    var id='werner';
+    var proj=function(lon,lat){return(werner_proj(lat,lon)); }
+    var xmin=-135,xmax=135,ymin=-200,ymax=70,w=450,h=450;
+    var el=document.getElementById('gt8');
+    svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'lonlat','lightseagreen',lonlat, xmin,xmax,ymin,ymax,w,h, proj, '#00800060');
+    svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
+    svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
+/*
 //9. robinson
     var id='robinson';
     var proj = (lon,lat) => robinson_proj(lat,lon);
@@ -395,13 +404,29 @@ function main() {
             -a,a,-b,b,900,450, proj, i==1?'#00800040':'none');
     }
 //12. equal earth
-    var id='equalearth';
-    var proj = (lon,lat) => equalearth_proj(lat,lon);
+    var id = 'equalearth';
+    var proj = (lon,lat) => eval(id+'_proj(lat,lon)');
     var a=proj(180,0)[0], b=proj(0,90)[1];
     var el=document.getElementById(id);
     for (let i=0; i<objs.length; i++) {
         svg_plot(el, id+'_'+objs[i], colors[i], eval(objs[i]), 
             -a,a,-b,b,900,450, proj, i==1?'#00800040':'none');
+    }
+*/
+
+// 9. 10. 11. 12.
+    var ids = ['robinson', 'winkel3', 'naturalearth', 'equalearth'];
+    for (var id of ids) {
+      var proj = (lon,lat) => eval(id+'_proj(lat,lon)');
+      proj_plot(id, 900, 450, objs, eval_objs, colors, proj);
+/*
+      var a=proj(180,0)[0], b=proj(0,90)[1];
+      var el=document.getElementById(id);
+      for (let i=0; i<objs.length; i++) {
+        svg_plot(el, id+'_'+objs[i], colors[i], eval(objs[i]), 
+            -a,a,-b,b,900,450, proj, i==1?'#00800040':'none');
+      }
+*/
     }
 }
 </script>
