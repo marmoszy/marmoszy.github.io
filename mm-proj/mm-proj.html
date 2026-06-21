@@ -126,7 +126,7 @@ function svg_plot(svg,id,color, xy, xmin,xmax,ymin,ymax,w,h, fun, color2='none')
 
 /* ------ projections functions-------- */
 
-function mercmapproj(phi,lam, lam0) { // phi,lam -> x,y (cartographic param: lam0 )
+function merc_proj(phi,lam, lam0) { // phi,lam -> x,y (cartographic param: lam0 )
   with(Math) {
     var deg=180/PI;              
     var l = lam/deg, p = phi/deg, l0 = lam0/deg;
@@ -134,14 +134,14 @@ function mercmapproj(phi,lam, lam0) { // phi,lam -> x,y (cartographic param: lam
  	return([x*deg,y*deg]);	
   }
 }
-function sinmapproj(phi,lam, lam0) { // phi,lam -> x,y (cartographic param: lam0 )
+function sin_proj(phi,lam, lam0) { // phi,lam -> x,y (cartographic param: lam0 )
     const {cos, PI} = Math;
     var deg=180/PI;              
     var l = lam/deg, p = phi/deg, l0 = lam0/deg;
     var x = (l-l0)*cos(p), y=p;
     return([x*deg, y*deg]);	
 }
-function albersmapproj(phi,lam, phi0,lam0,phi1,phi2) { // phi,lam -> x,y 
+function albers_proj(phi,lam, phi0,lam0,phi1,phi2) { // phi,lam -> x,y 
     const {sin, cos, sqrt, PI} = Math;
     const deg=180/PI;              
     var l = lam/deg, p = phi/deg, l0 = lam0/deg, p0=phi0/deg, p1=phi1/deg, p2=phi2/deg;
@@ -151,7 +151,7 @@ function albersmapproj(phi,lam, phi0,lam0,phi1,phi2) { // phi,lam -> x,y
     var x = r*sin(th), y=r0-r*cos(th);
     return([x*deg, y*deg]);	
 }
-function bonnemapproj(phi, lam, phi0=45, lam0=0) { // phi,lam -> x,y
+function bonne_proj(phi, lam, phi0=45, lam0=0) { // phi,lam -> x,y
     const {sin, cos, tan, PI} = Math;
     const deg = 180/PI;              
     var l = lam/deg, p = phi/deg, l0 = lam0/deg, p0 = phi0/deg;
@@ -161,10 +161,40 @@ function bonnemapproj(phi, lam, phi0=45, lam0=0) { // phi,lam -> x,y
     var x = r0*sin(E), y = cot-r0*cos(E);
     return [x*deg, y*deg];	
 }
-function wernermapproj(phi, lam, lam0=0) { // Heart-shaped projection
-    return bonnemapproj(phi, lam, 90, lam0);
+function werner_proj(phi, lam, lam0=0) { // Heart-shaped projection
+    return bonne_proj(phi, lam, 90, lam0);
 }
-function naturalearthmapproj(phi, lam, lam0=0) {
+function robinson_proj(phi, lam, lam0=0) {
+    const { PI, abs } = Math;
+    var deg = 180 / PI;              
+    var l = lam/deg, p = phi/deg, l0 = lam0/deg;
+    const tab = [
+        [1.0000, 0.0000], [0.9986, 0.0620], [0.9954, 0.1240], [0.9900, 0.1860], [0.9822, 0.2480],
+        [0.9730, 0.3100], [0.9600, 0.3720], [0.9432, 0.4340], [0.9222, 0.4958], [0.8973, 0.5571], 
+        [0.8678, 0.6176], [0.8333, 0.6769], [0.7938, 0.7346], [0.7486, 0.7903], [0.6974, 0.8435], 
+        [0.6391, 0.8936], [0.5724, 0.9394], [0.4956, 0.9761], [0.4329, 1.0000]
+    ];
+    var p_deg = abs(phi);
+    var i = Math.floor(p_deg / 5);
+    if (i >= 18) i = 17;
+    var rem = (p_deg - (i * 5)) / 5;
+    var x = tab[i][0] + rem * (tab[i+1][0] - tab[i][0]);
+    var y = tab[i][1] + rem * (tab[i+1][1] - tab[i][1]);
+    if (phi < 0) y = -y;
+    return [0.8487*(l-l0)*x * deg, 1.3523*y * deg];
+}
+function winkel3_proj(phi, lam, lam0=0) {
+    const { PI, sin, cos, acos, abs } = Math;
+    var deg = 180/PI;              
+    var l = lam/deg, p = phi/deg, l0 = lam0/deg;
+    var cos_phi1 = 2/PI;     // phi1 = 50.467°  cos(phi1) = 2/PI
+    var alpha = acos(cos(p) * cos((l-l0)/2));
+    var sinc_alpha = abs(alpha) > 1e-8 ? sin(alpha) / alpha : 1;
+    var aitoff_x = (2*cos(p)*sin((l-l0)/2)) / sinc_alpha;
+    var aitoff_y = sin(p) / sinc_alpha;
+    return [((l-l0)*cos_phi1+aitoff_x)/2 * deg, (p+aitoff_y)/2 * deg];
+}
+function naturalearth_proj(phi, lam, lam0=0) {
     const { PI } = Math;
     var deg = 180/PI;              
     var l = lam/deg, p = phi/deg, l0 = lam0/deg;
@@ -173,7 +203,7 @@ function naturalearthmapproj(phi, lam, lam0=0) {
     var d_phi = p * (1.007226 + 0.015085*p2 - 0.044475*p6 + 0.028874*p8 - 0.005916*p10);
     return ([(l-l0)*l_phi * deg, d_phi * deg]); 
 }
-function equalearthmapproj(phi, lam, lam0=0) {
+function equalearth_proj(phi, lam, lam0=0) {
     const { PI, sin, cos, sqrt } = Math;
     var deg = 180 / PI;              
     var l = lam/deg, p = phi/deg, l0 = lam0/deg;
@@ -184,7 +214,7 @@ function equalearthmapproj(phi, lam, lam0=0) {
     return [2/sqrt(3)*((l-l0)*cos(th))/den * deg, th*(A1+A2*t2+A3*t6+A4*t8) * deg];
 }
 
-// --- spilhausmapproj ---
+// --- spilhaus_proj ---
 function arcsd_m05(w_re, w_im) {
     const w2 = w_re * w_re + w_im * w_im;
     const K = 1.8540746773013719;
@@ -208,7 +238,7 @@ function arcsd_m05_series(w_re, w_im) {
     }
     return { re: u_re, im: u_im };
 }
-function adamsws2mapproj(phi_deg, lam_deg) {
+function adamsws2_proj(phi_deg, lam_deg) {
     const { sin, cos, log, tan, sinh, cosh, PI, max, min } = Math;
     const deg = 180/PI;
     const phi = max(-89.9999999, min(89.9999999, phi_deg)) /deg;
@@ -219,7 +249,7 @@ function adamsws2mapproj(phi_deg, lam_deg) {
     const z = arcsd_m05(sin(ci)/d, sinh(cr)/d);
     return [z.re * deg, z.im * deg];
 }
-function spilhausmapproj(phi_deg, lam_deg, lam0_deg=66.94970198, aph0_deg=-49.56371678, bet0_deg=40.17823482) {
+function spilhaus_proj(phi_deg, lam_deg, lam0_deg=66.94970198, aph0_deg=-49.56371678, bet0_deg=40.17823482) {
     const { sin, cos, atan2, asin, log, tan, sinh, cosh, PI, abs, max, min } = Math;
     const deg = 180/PI;
     const phi = phi_deg/deg, lam = lam_deg/deg;
@@ -230,7 +260,7 @@ function spilhausmapproj(phi_deg, lam_deg, lam0_deg=66.94970198, aph0_deg=-49.56
     let alam = atan2(cos(phi)*sinlam,(sinaph*cos(phi)*coslam+cosaph*sin(phi)))+bet0;
     while (alam> PI) alam -= 2*PI;
     while (alam<-PI) alam += 2*PI;
-    const z = adamsws2mapproj(aphi*deg, alam*deg);
+    const z = adamsws2_proj(aphi*deg, alam*deg);
     const rot0 = 45.0/deg;
     const cosrot = cos(rot0), sinrot = sin(rot0);
     return [z[0]*cosrot+z[1]*sinrot, -z[0]*sinrot+z[1]*cosrot ];
@@ -265,7 +295,7 @@ function main() {
 	//svg_plot(el,id+'points','purple',points, xmin,xmax,ymin,ymax,w,h, proj);
 //2	mercator
 	var id='merc';
-	var proj = (lon,lat) => mercmapproj(lat,lon,0);
+	var proj = (lon,lat) => merc_proj(lat,lon,0);
 	var xmin=-180,xmax=180,ymin=-180,ymax=180,w=450,h=450;
 	var el=document.getElementById('gt2');
         for (let i=0; i<objs.length; i++) {
@@ -279,7 +309,7 @@ function main() {
 	//svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
 //3	sinusoidal
 	var id='sin';
-	var proj=function(lon,lat){return(sinmapproj(lat,lon,0)); }
+	var proj=function(lon,lat){return(sin_proj(lat,lon,0)); }
 	var xmin=-180,xmax=180,ymin=-90,ymax=90,w=900,h=450;
 	var el=document.getElementById('gt3');
 	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
@@ -289,7 +319,7 @@ function main() {
 	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
 //4	albers
 	var id='albers';
-	var proj=function(lon,lat){return(albersmapproj(lat,lon,0,0,20,50)); }
+	var proj=function(lon,lat){return(albers_proj(lat,lon,0,0,20,50)); }
 	var xmin=-180,xmax=180,ymin=-35,ymax=145,w=900,h=450;
 	var el=document.getElementById('gt4');
 	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
@@ -297,9 +327,9 @@ function main() {
 	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
-//5	adamsws2mapproj // spilhaus
+//5	adamsws2_proj // spilhaus
 	var id='adamsws2';
-	var proj=function(lon,lat){return(adamsws2mapproj(lat,lon)); }
+	var proj=function(lon,lat){return(adamsws2_proj(lat,lon)); }
 	var xmin=-63,xmax=63,ymin=-63,ymax=63,w=450,h=450;
 	var el=document.getElementById('gt5');
 	svg_plot(el,id+'grid','lightgrey', grid2, xmin,xmax,ymin,ymax,w,h, proj);
@@ -309,7 +339,7 @@ function main() {
 	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
 //6	spilhaus
 	var id='spilhaus';
-	var proj=function(lon,lat){return(spilhausmapproj(lat,lon)); }
+	var proj=function(lon,lat){return(spilhaus_proj(lat,lon)); }
 	var xmin=-63,xmax=63,ymin=-63,ymax=63,w=450,h=450;
 	var el=document.getElementById('gt6');
 	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
@@ -319,7 +349,7 @@ function main() {
 	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
 //7	bonne
 	var id='bonne';
-	var proj=function(lon,lat){return(bonnemapproj(lat,lon,45,0)); }
+	var proj=function(lon,lat){return(bonne_proj(lat,lon,45,0)); }
 	var xmin=-135,xmax=135,ymin=-150,ymax=120,w=450,h=450;
 	var el=document.getElementById('gt7');
 	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
@@ -327,9 +357,9 @@ function main() {
 	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
-//8	werner
+//8. werner
 	var id='werner';
-	var proj=function(lon,lat){return(wernermapproj(lat,lon)); }
+	var proj=function(lon,lat){return(werner_proj(lat,lon)); }
 	var xmin=-135,xmax=135,ymin=-200,ymax=70,w=450,h=450;
 	var el=document.getElementById('gt8');
 	svg_plot(el,id+'grid','lightgrey', grid, xmin,xmax,ymin,ymax,w,h, proj);
@@ -337,26 +367,42 @@ function main() {
 	svg_plot(el,id+'rect','red',rect, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'circ','blue',circ, xmin,xmax,ymin,ymax,w,h, proj);
 	svg_plot(el,id+'points','purple',points,xmin,xmax,ymin,ymax,w,h, proj);
-//9	natural earth
-	var id='naturalearth';
-	var proj=function(lon,lat){return(naturalearthmapproj(lat,lon)); }
-        var c=81.5/156.7;
-	var xmin=-156.7,xmax=156.7,ymin=c*xmin,ymax=c*xmax,w=900,h=450;
-	var el=document.getElementById('gt9');
-        for (let i=0; i<objs.length; i++) {
- 	    svg_plot(el, id+'_'+objs[i], colors[i], eval(objs[i]), 
-                  xmin,xmax,ymin,ymax,w,h, proj, i==1?'#00800040':'none');
-        }
-//10	equal earth
-	var id='equalearth';
-	var proj=function(lon,lat){return(equalearthmapproj(lat,lon)); }
-        var c=77.4/153.3;
-	var xmin=-155,xmax=155,ymin=c*xmin,ymax=c*xmax,w=900,h=450;
-	var el=document.getElementById('gt10');
-        for (let i=0; i<objs.length; i++) {
- 	    svg_plot(el, id+'_'+objs[i], colors[i], eval(objs[i]), 
-                  xmin,xmax,ymin,ymax,w,h, proj, i==1?'#00800040':'none');
-        }
+//9. robinson
+    var id='robinson';
+    var proj = (lon,lat) => robinson_proj(lat,lon);
+    var a=proj(180,0)[0], b=proj(0,90)[1];
+    var el=document.getElementById(id);
+    for (let i=0; i<objs.length; i++) {
+        svg_plot(el, id+'_'+objs[i], colors[i], eval(objs[i]),
+            -a,a,-b,b,900,450, proj, i==1?'#00800040':'none');
+    }
+//10. winkel3
+    var id='winkel3';
+    var proj = (lon,lat) => winkel3_proj(lat,lon);
+    var a = proj(180,0)[0], b = proj(0,90)[1];
+    var el = document.getElementById(id);
+    for (let i=0; i<objs.length; i++) {
+        svg_plot(el, id+'_'+objs[i], colors[i], eval(objs[i]), 
+            -a,a,-b,b,900,450, proj, i==1?'#00800040':'none');
+    }
+//11. natural earth
+    var id='naturalearth';
+    var proj = (lon,lat) => naturalearth_proj(lat,lon);
+    var a=proj(180,0)[0], b=proj(0,90)[1];
+    var el=document.getElementById(id);
+    for (let i=0; i<objs.length; i++) {
+        svg_plot(el, id+'_'+objs[i], colors[i], eval(objs[i]), 
+            -a,a,-b,b,900,450, proj, i==1?'#00800040':'none');
+    }
+//12. equal earth
+    var id='equalearth';
+    var proj = (lon,lat) => equalearth_proj(lat,lon);
+    var a=proj(180,0)[0], b=proj(0,90)[1];
+    var el=document.getElementById(id);
+    for (let i=0; i<objs.length; i++) {
+        svg_plot(el, id+'_'+objs[i], colors[i], eval(objs[i]), 
+            -a,a,-b,b,900,450, proj, i==1?'#00800040':'none');
+    }
 }
 </script>
 </head>
@@ -438,22 +484,41 @@ function main() {
 </p>
 
 <p>
-9. <a href="https://en.wikipedia.org/wiki/Natural_Earth_projection">Natural Earth projection</a><br>
+9. <a href="https://en.wikipedia.org/wiki/Robison_projection">Robinson projection</a><br>
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="535" font-family="Times" font-size=14>
- <g id="gt9" transform="translate(30,30)">
+ <g id="robinson" transform="translate(30,30)">
   <rect width=900 height=450 style="fill:none;stroke:lightgray;stroke-width:1" />
  </g>
 </svg>
 </p>
 
 <p>
-10. <a href="https://en.wikipedia.org/wiki/Equal_Earth_projection">Equal Earth projection</a><br>
+10. <a href="https://en.wikipedia.org/wiki/Winkel_tripel_projection">Winkel tripel projection</a><br>
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="535" font-family="Times" font-size=14>
- <g id="gt10" transform="translate(30,30)">
+ <g id="winkel3" transform="translate(30,30)">
   <rect width=900 height=450 style="fill:none;stroke:lightgray;stroke-width:1" />
  </g>
 </svg>
 </p>
+
+<p>
+11. <a href="https://en.wikipedia.org/wiki/Natural_Earth_projection">Natural Earth projection</a><br>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="535" font-family="Times" font-size=14>
+ <g id="naturalearth" transform="translate(30,30)">
+  <rect width=900 height=450 style="fill:none;stroke:lightgray;stroke-width:1" />
+ </g>
+</svg>
+</p>
+
+<p>
+12. <a href="https://en.wikipedia.org/wiki/Equal_Earth_projection">Equal Earth projection</a><br>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="535" font-family="Times" font-size=14>
+ <g id="equalearth" transform="translate(30,30)">
+  <rect width=900 height=450 style="fill:none;stroke:lightgray;stroke-width:1" />
+ </g>
+</svg>
+</p>
+
 
 <p>
 
