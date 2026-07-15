@@ -822,7 +822,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(26.6.2026)" style="text-align:center">mm-bem v2.64 (2025-2026)</p>
+<p title="(15.7.2026)" style="text-align:center">mm-bem v2.65 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -3260,7 +3260,7 @@ function change1() {
 		if(img_onoff) {img_was_on = 1; img_onoff=0; update();}
 		var el = document.getElementById("txt2");
 		if(el && el.value.startsWith("# abs(p_sc)")) {el.value="";}
-		if(fx.length<=(solver==4?21000:solver==3?16000:exp==1?10000:5500)) {
+		if(fx.length<=(solver==4?22250:solver==3?16000:exp==1?10000:5500)) {
 			worker.postMessage(JSON.stringify([lines,th,f0,c0,ph,rr,m,solver,rest]));
 		} else {
 			document.getElementById("txt").value="The mesh too large for BEM inside the browser!"
@@ -3999,7 +3999,7 @@ function msh_join(vx1,fx1,vx2,fx2) {
 	return [[...vx1, ...vx2],[...fx1, ...fx2]];	
 }
 
-function spheres(R = 0.01, N = 4, mmm = [3,3,3], sep = [0.01, 0.01, 0.01]) {
+function spheres0(R = 0.01, N = 4, mmm = [3,3,3], sep = [0.01, 0.01, 0.01]) {
 	var vx1=[],fx1=[];
 	for(var m = -(mmm[2]-1)/2; m<=(mmm[2]-1)/2; m++) {	
 		for(var l = -(mmm[1]-1)/2; l<=(mmm[1]-1)/2; l++) {
@@ -4014,6 +4014,38 @@ function spheres(R = 0.01, N = 4, mmm = [3,3,3], sep = [0.01, 0.01, 0.01]) {
     }
 	return [vx1,fx1];
 }
+function spheres(R = 0.01, N = 4, mmm = [3,3,3], sep = [0.01, 0.01, 0.01]) {
+    var vx1 = [], fx1 = [];
+    const isLensMode = (mmm[0] < 0) + 2 * (mmm[1]<0) + 4 * (mmm[2]<0);
+    const kMax = Math.abs(mmm[0]); // Oś X (głębokość / os propagacji fali)
+    const lMax = Math.abs(mmm[1]); // Oś Y (wysokość poprzeczna)
+    const mMax = Math.abs(mmm[2]); // Oś Z (szerokość poprzeczna)
+    const dx = 2 * R + sep[0];
+    const dy = 2 * R + sep[1];
+    const dz = 2 * R + sep[2];
+    for (var m = -(mMax - 1) / 2; m <= (mMax - 1) / 2; m++) {	
+        for (var k = -(kMax - 1) / 2; k <= (kMax - 1) / 2; k++) {
+            let currentLMax = lMax; 
+            if (isLensMode) {
+                const radiusSq = Math.pow(m, 2) + Math.pow(k, 2);
+                currentLMax = Math.round(lMax - 0.15 * radiusSq);
+                if (currentLMax < 2) currentLMax = 2;
+            }
+	        //for (var l = -(lMax - 1) / 2; l < -(lMax - 1) / 2 + currentLMax; l++) {
+		    for (var l = (lMax - 1) / 2; l > (lMax - 1) / 2 - currentLMax; l--) {
+                var [vx2, fx2] = sphere(R, N);
+                for (var i = 0; i < vx2.length; i++) {
+                    vx2[i][0] += k * dx; 
+                    vx2[i][1] += l * dy; 
+                    vx2[i][2] += m * dz;
+                }
+                [vx1, fx1] = msh_join(vx1, fx1, vx2, fx2);
+            }
+        }
+    }
+    return [vx1, fx1];
+}
+
 
 function sphere0(R = 1, N = 2) {
     let vx = [[0,0,R],[0,0,-R],[-R,0,0],[0,-R,0],[R,0,0],[0,R,0]];
@@ -5006,7 +5038,7 @@ Promise.all([p1, p2]).then(([res1, res2]) => {
 */
 
 onmessage = function(e) {
-  memory = new WebAssembly.Memory({ initial: 1024*16 * 7/2 }); // 1*1024MiB=2*1024*16*64 KiB)
+  memory = new WebAssembly.Memory({ initial: 1024*16 * 15/4 }); // 1*1024MiB=2*1024*16*64 KiB)
   
   //const { instance } = await WebAssembly.instantiateStreaming(
   //	fetch('data:application/wasm;base64,'+gauss2b_wasm), {env: { memory }});
