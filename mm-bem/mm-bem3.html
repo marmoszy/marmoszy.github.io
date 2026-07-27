@@ -823,7 +823,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(27.7.2026)" style="text-align:center">mm-bem v3.00 (2025-2026)</p>
+<p title="(27.7.2026)" style="text-align:center">mm-bem v3.01 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -7242,7 +7242,7 @@ async function gmres(multiplyA, b, x0, restart=50, maxIter=100, tol=1e-3) {
 // --- WebGPU ---
 let gpuCtx = null;
 
-async function webgpu_init(x, k) {
+async function webgpu_init0(x, k) {
   if (!navigator.gpu) {
     console.error("no WebGPU in this browser");
     return null;
@@ -7401,6 +7401,227 @@ async function webgpu_init(x, k) {
   };
 }
 
+async function webgpu_init(x, k) {
+  if (!navigator.gpu) {
+    console.error("No WebGPU in this browser");
+    return null;
+  }
+  const adapter = await navigator.gpu.requestAdapter();
+  const device = await adapter.requestDevice();
+  const m = x.length;
+
+  // --- SHADER 1: Rozwiązanie powierzchniowe (został bez zmian) ---
+  const surfaceShaderCode = \`
+    struct Complex { re: f32, im: f32 }
+    @group(0) @binding(0) var<storage, read> x_f: array<f32>;
+    @group(0) @binding(1) var<storage, read> y_f: array<f32>;
+    @group(0) @binding(2) var<storage, read> z_f: array<f32>;
+    @group(0) @binding(3) var<storage, read> psi: array<Complex>;
+    @group(0) @binding(4) var<storage, read_write> out: array<Complex>;
+    @group(0) @binding(5) var<uniform> params: vec4<f32>;
+
+    @compute @workgroup_size(64)
+    fn main(@builtin(global_invocation_id) id: vec3<u32>) {
+      let i = id.x;
+      let m_val = u32(params.y);
+      if (i >= m_val) { return; }
+      let k_val = params.x;
+      let pi_val = 3.141592653589793;
+      let factor = 1.0 / (4.0 * pi_val);      
+      var sum_re = 0.0;
+      var sum_im = 0.0;      
+      for (var j: u32 = 0; j < m_val; j = j + 1) {
+        let dx = x_f[i] - x_f[j];
+        let dy = y_f[i] - y_f[j];
+        let dz = z_f[i] - z_f[j];
+        let dist = sqrt(dx*dx + dy*dy + dz*dz);        
+        var s_re = 0.0;
+        var s_im = 0.0;
+        if (dist > 1e-9) {
+          let phase = k_val * dist;
+          s_re = cos(phase) * factor / dist;
+          s_im = sin(phase) * factor / dist;
+        } else {
+          s_re = k_val / 4.0;
+          s_im = k_val / (4.0 * pi_val);
+        }        
+        let p_re = psi[j].re;
+        let p_im = psi[j].im;        
+        sum_re = sum_re + (s_re * p_re - s_im * p_im);
+        sum_im = sum_im + (s_im * p_re + s_re * p_im);
+      }
+      out[i].re = sum_re;
+      out[i].im = sum_im;
+    }
+  \`;
+
+  // --- SHADER 2: Pole dalekie uproszczone (webgpu_farField) ---
+  const farFieldShaderCode = \`
+    struct Complex { re: f32, im: f32 }
+    @group(0) @binding(0) var<storage, read> x_f: array<f32>;
+    @group(0) @binding(1) var<storage, read> y_f: array<f32>;
+    @group(0) @binding(2) var<storage, read> z_f: array<f32>;
+    @group(0) @binding(3) var<storage, read> phi_result: array<Complex>;
+    @group(0) @binding(4) var<storage, read_write> psc_out: array<Complex>;
+    @group(0) @binding(5) var<uniform> params: vec4<f32>;
+
+    @compute @workgroup_size(64)
+    fn main(@builtin(global_invocation_id) id: vec3<u32>) {
+      let i = id.x;
+      if (i >= 360) { return; }
+      let k_val = params.x;
+      let m_val = u32(params.y);
+      let pi_val = 3.141592653589793;
+      let factor = 1.0 / (4.0 * pi_val);
+      
+      let angle = f32(i) * pi_val / 180.0 - pi_val;
+      let r_dir_x = cos(angle);
+      let r_dir_y = sin(angle);
+      let r_dir_z = 0.0;
+
+      var sum_re = 0.0;
+      var sum_im = 0.0;
+      for (var j: u32 = 0; j < m_val; j = j + 1) {
+        let dot_product = x_f[j] * r_dir_x + y_f[j] * r_dir_y + z_f[j] * r_dir_z;
+        let phase = -k_val * dot_product;
+        let a_re = cos(phase) * factor;
+        let a_im = sin(phase) * factor;
+        let b_re = phi_result[j].re;
+        let b_im = phi_result[j].im;
+        sum_re = sum_re + (a_re * b_re - a_im * b_im);
+        sum_im = sum_im + (a_re * b_im + a_im * b_re);
+      }
+      psc_out[i].re = sum_re;
+      psc_out[i].im = sum_im;
+    }
+  \`;
+
+  // --- SHADER 3: Pełny wzór całkowy (webgpu_farField2) ---
+  const farFieldFullShaderCode = \`
+    struct Complex { re: f32, im: f32 }
+    @group(0) @binding(0) var<storage, read> x_f: array<f32>;
+    @group(0) @binding(1) var<storage, read> y_f: array<f32>;
+    @group(0) @binding(2) var<storage, read> z_f: array<f32>;
+    @group(0) @binding(3) var<storage, read> phi_result: array<Complex>;
+    @group(0) @binding(4) var<storage, read_write> psc_out: array<Complex>;
+    @group(0) @binding(5) var<uniform> params: vec4<f32>;
+    
+    @group(0) @binding(6) var<storage, read> r1_x: array<f32>;
+    @group(0) @binding(7) var<storage, read> r1_y: array<f32>;
+    @group(0) @binding(8) var<storage, read> r1_z: array<f32>;
+
+    @compute @workgroup_size(64)
+    fn main(@builtin(global_invocation_id) id: vec3<u32>) {
+      let i = id.x;
+      let r1_max = u32(params.z); // dynamiczny limit z params.z
+      if (i >= r1_max) { return; }
+
+      let k_val = params.x;
+      let m_val = u32(params.y);
+      let pi_val = 3.141592653589793;
+      let factor = 1.0 / (4.0 * pi_val);
+      
+      let rx = r1_x[i];
+      let ry = r1_y[i];
+      let rz = r1_z[i];
+
+      var sum_re = 0.0;
+      var sum_im = 0.0;
+      for (var j: u32 = 0; j < m_val; j = j + 1) {
+        let dx = rx - x_f[j];
+        let dy = ry - y_f[j];
+        let dz = rz - z_f[j];
+        let dist = sqrt(dx*dx + dy*dy + dz*dz);
+        
+        var s_re = 0.0;
+        var s_im = 0.0;
+        if (dist > 1e-9) {
+          let phase = k_val * dist;
+          s_re = cos(phase) * factor / dist;
+          s_im = sin(phase) * factor / dist;
+        } else {
+          s_re = k_val / 4.0;
+          s_im = k_val / (4.0 * pi_val);
+        }
+        let b_re = phi_result[j].re;
+        let b_im = phi_result[j].im;
+        sum_re = sum_re + (s_re * b_re - s_im * b_im);
+        sum_im = sum_im + (s_im * b_re + s_re * b_im);
+      }
+      psc_out[i].re = sum_re;
+      psc_out[i].im = sum_im;
+    }
+  \`;
+
+  const createBuffer = (arr, usage) => {
+    const buf = device.createBuffer({ size: arr.byteLength, usage, mappedAtCreation: true });
+    new arr.constructor(buf.getMappedRange()).set(arr);
+    buf.unmap();
+    return buf;
+  };
+
+  const x_arr = new Float32Array(x.map(p => p[0]));
+  const y_arr = new Float32Array(x.map(p => p[1]));
+  const z_arr = new Float32Array(x.map(p => p[2]));
+  const param_arr = new Float32Array([k, m, 360, 0]); // Domyślnie r1_count = 360
+
+  const xBuf = createBuffer(x_arr, GPUBufferUsage.STORAGE);
+  const yBuf = createBuffer(y_arr, GPUBufferUsage.STORAGE);
+  const zBuf = createBuffer(z_arr, GPUBufferUsage.STORAGE);
+  const paramBuf = device.createBuffer({ size: param_arr.byteLength, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  device.queue.writeBuffer(paramBuf, 0, param_arr);
+  
+  // Wspólne stałe struktury wejścia/wyjścia (Recykling pamięci)
+  const psiBuf = device.createBuffer({ size: m * 8, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const outBuf = device.createBuffer({ size: m * 8, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+  const readBuf = device.createBuffer({ size: m * 8, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+
+  // Kompilacja potoku 1 (Powierzchnia)
+  const surfaceModule = device.createShaderModule({ code: surfaceShaderCode });
+  const surfacePipeline = device.createComputePipeline({
+    layout: 'auto', compute: { module: surfaceModule, entryPoint: 'main' }
+  });
+  const surfaceBindGroup = device.createBindGroup({
+    layout: surfacePipeline.getBindGroupLayout(0),
+    entries: [
+      { binding: 0, resource: { buffer: xBuf } }, { binding: 1, resource: { buffer: yBuf } },
+      { binding: 2, resource: { buffer: zBuf } }, { binding: 3, resource: { buffer: psiBuf } },
+      { binding: 4, resource: { buffer: outBuf } }, { binding: 5, resource: { buffer: paramBuf } }
+    ]
+  });
+
+  // Kompilacja potoku 2 (Uproszczone pole dalekie - webgpu_farField)
+  const pscBuf = device.createBuffer({ size: 360 * 8, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+  const pscReadBuf = device.createBuffer({ size: 360 * 8, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+
+  const farFieldModule = device.createShaderModule({ code: farFieldShaderCode });
+  const farFieldPipeline = device.createComputePipeline({
+    layout: 'auto', compute: { module: farFieldModule, entryPoint: 'main' }
+  });
+  const farFieldBindGroup = device.createBindGroup({
+    layout: farFieldPipeline.getBindGroupLayout(0),
+    entries: [
+      { binding: 0, resource: { buffer: xBuf } }, { binding: 1, resource: { buffer: yBuf } },
+      { binding: 2, resource: { buffer: zBuf } }, { binding: 3, resource: { buffer: psiBuf } },
+      { binding: 4, resource: { buffer: pscBuf } }, { binding: 5, resource: { buffer: paramBuf } }
+    ]
+  });
+
+  // Kompilacja potoku 3 (Pełne pole całkowe - webgpu_farField2)
+  const farFieldFullModule = device.createShaderModule({ code: farFieldFullShaderCode });
+  const farFieldFullPipeline = device.createComputePipeline({
+    layout: 'auto', compute: { module: farFieldFullModule, entryPoint: 'main' }
+  });
+
+  // Zwracamy spójny kontekst zawierający referencje dla obu funkcji
+  return {
+    device, m, psiBuf, outBuf, readBuf, pscBuf, pscReadBuf, paramBuf, xBuf, yBuf, zBuf,
+    surfacePipeline, surfaceBindGroup, 
+    farFieldPipeline, farFieldBindGroup,      // Dla funkcji 1
+    farFieldFullPipeline                      // Dla funkcji 2
+  };
+}
+
 async function webgpu_gmres(ctx, gmres, pinc, q0) {
   const psi_cpu_data = new Float32Array(ctx.m * 2);
   
@@ -7463,6 +7684,82 @@ async function webgpu_farField(ctx, q3_result) {
   }
   return p_webgpu_final;
 }
+
+async function webgpu_farField2(ctx, q3_result, r1_javascript, k) {
+  const r1_count = r1_javascript.length; 
+
+  // 1. Wgranie wyniku powierzchniowego q3
+  const phi_cpu_data = new Float32Array(ctx.m * 2);
+  for (let i = 0; i < ctx.m; i++) {
+    phi_cpu_data[i * 2] = q3_result[i].re;
+    phi_cpu_data[i * 2 + 1] = q3_result[i].im;
+  }
+  ctx.device.queue.writeBuffer(ctx.psiBuf, 0, phi_cpu_data);
+
+  // 2. Aktualizacja bufora parametrów na GPU o nowy rozmiar r1_count (params.z)
+  const param_arr = new Float32Array([k, ctx.m, r1_count, 0]);
+  ctx.device.queue.writeBuffer(ctx.paramBuf, 0, param_arr);
+
+  // 3. Dynamiczne tworzenie buforów pod dokładny rozmiar r1_javascript
+  const r1_x_cpu = new Float32Array(r1_count);
+  const r1_y_cpu = new Float32Array(r1_count);
+  const r1_z_cpu = new Float32Array(r1_count);
+  for (let i = 0; i < r1_count; i++) {
+    r1_x_cpu[i] = r1_javascript[i][0];
+    r1_y_cpu[i] = r1_javascript[i][1];
+    r1_z_cpu[i] = r1_javascript[i][2];
+  }
+
+  // Alokacja buforów na GPU pod aktualny rozmiar
+  const r1xBuf = ctx.device.createBuffer({ size: r1_count * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const r1yBuf = ctx.device.createBuffer({ size: r1_count * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const r1zBuf = ctx.device.createBuffer({ size: r1_count * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const pscBuf = ctx.device.createBuffer({ size: r1_count * 8, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+  const pscReadBuf = ctx.device.createBuffer({ size: r1_count * 8, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+
+  ctx.device.queue.writeBuffer(r1xBuf, 0, r1_x_cpu);
+  ctx.device.queue.writeBuffer(r1yBuf, 0, r1_y_cpu);
+  ctx.device.queue.writeBuffer(r1zBuf, 0, r1_z_cpu);
+
+  // 4. Dynamiczny Bind Group dopasowany do nowych buforów
+  const farFieldBindGroup = ctx.device.createBindGroup({
+    layout: ctx.farFieldFullPipeline.getBindGroupLayout(0),
+    entries: [
+      { binding: 0, resource: { buffer: ctx.xBuf } },
+      { binding: 1, resource: { buffer: ctx.yBuf } },
+      { binding: 2, resource: { buffer: ctx.zBuf } },
+      { binding: 3, resource: { buffer: ctx.psiBuf } },
+      { binding: 4, resource: { buffer: pscBuf } },
+      { binding: 5, resource: { buffer: ctx.paramBuf } },
+      { binding: 6, resource: { buffer: r1xBuf } },
+      { binding: 7, resource: { buffer: r1yBuf } },
+      { binding: 8, resource: { buffer: r1zBuf } }
+    ]
+  });
+
+  // 5. Uruchomienie obliczeń dla r1_count wątków
+  const farCommandEncoder = ctx.device.createCommandEncoder();
+  const farPassEncoder = farCommandEncoder.beginComputePass();
+  farPassEncoder.setPipeline(ctx.farFieldFullPipeline);
+  farPassEncoder.setBindGroup(0, farFieldBindGroup);
+  farPassEncoder.dispatchWorkgroups(Math.ceil(r1_count / 64)); // <--- Dynamiczny dispatch
+  farPassEncoder.end();
+  
+  farCommandEncoder.copyBufferToBuffer(pscBuf, 0, pscReadBuf, 0, r1_count * 8);
+  ctx.device.queue.submit([farCommandEncoder.finish()]);
+
+  // 6. Pobranie danych
+  await pscReadBuf.mapAsync(GPUMapMode.READ);
+  const psc_res_array = new Float32Array(pscReadBuf.getMappedRange().slice());
+  pscReadBuf.unmap();
+
+  var p_webgpu_final = new Array(r1_count);
+  for (let i = 0; i < r1_count; i++) {
+    p_webgpu_final[i] = cNew(psc_res_array[i * 2], psc_res_array[i * 2 + 1]);
+  }
+  return p_webgpu_final;
+}
+
 
 `;
 
@@ -7718,7 +8015,8 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
           var ts = targetStrength(v, e, f0, c0, 270 * Math.PI / 180, 0);
         } else if (method == 1 || method == 2) { // BEM || MFS
           if(solver==5) {
-             psc = await webgpu_farField(gpuCtx, phi);
+             //psc = await webgpu_farField(gpuCtx, phi);        // simplified solution
+             psc = await webgpu_farField2(gpuCtx, phi, r1, k);  // full solution
           } else {
             const Sff = r1.map(v => x.map(xj =>
               new Complex(
@@ -7760,6 +8058,38 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
 
         if (thmin == thmax && phmin == phmax && fmin == fmax && method != 3 && method != 4) { // when no in scan mode
           // Near field calculations
+if(solver==5) {
+          // use WebGPU
+          var nn = rest?.nf_n || 5, // co ile stopni
+            NR = rest?.nf_m || 15,
+            NT = 360,
+            r0 = rest?.nf_r0 || 0.004,
+            cx = rest?.nf_cx || 0, cy = rest?.nf_cy || 0, cz = rest?.nf_cz || 0,
+            RR = Array.from({ length: NR }, (_, i) => r0 * (i + 1));
+          
+          s += '## # ' + NR + 'x' + (NT / nn) + ' r=' + (r0) + ':' + (r0 * NR) + ' c=[' + cx + ',' + cy + ',' + cz + ']' + ' ph=' + (ph0) + '\n';
+          s += '\n';
+
+          const points_per_ring = NT / nn;
+
+          for (var j = 0; j < NR; j++) { 
+            // 1. Generowanie współrzędnych punktów siatki polarnej dla j-tego promienia na CPU
+            var grid1 = Array.from({ length: points_per_ring }, (_, i) => {
+              let px = RR[j] * Math.cos(l * i * nn * pi / 180 + pi) + cx;
+              let py = RR[j] * Math.sin(l * i * nn * pi / 180 + pi) + cy;
+              let pz = 0 + cz;
+              let rotated = mul(Ry(ph0), [[px], [py], [pz]]);
+              return [rotated[0][0], rotated[1][0], rotated[2][0]];
+            });
+            var psc1 = await webgpu_farField2(gpuCtx, phi, grid1, k);
+            
+            s += '## ';
+            for (var i = 0; i < psc1.length; i++) {
+              s += Math.sqrt(psc1[i].re ** 2 + psc1[i].im ** 2).toFixed(6) + ' ';
+            }
+            s += '\n';
+          }
+} else {
           var psc1 = [];
           var nn = rest?.nf_n || 5, // every 5 deg
             NR = rest?.nf_m || 15,
@@ -7784,7 +8114,7 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
             }
             s += '\n';
           }
-
+}
           // surface incident pressure and normal velocity
           for (var i = 0; i < phi.length; i++) {
             s += '#' + (i + 1) +
