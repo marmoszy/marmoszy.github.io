@@ -710,13 +710,12 @@ along both direction angles.
 <span id="hsolver" hidden1>
 <label for="solver" style="margin-left:0px">Solver: </label> 
 <select id="solver" onchange="select()" style="background-color:#ffe6e6">
-  <!--
   <option value="1">Gauss</option>
   <option value="2">Blocked LU</option>
-  -->
   <option value="3" selected>ACA-GMRES</option>
   <option value="4">LDLt</option>
   <option value="5" id="webgpu-gmres">WebGPU-GMRES</option>
+  <option value="6" id="webgpu-lsq">WebGPU-LSQ</option>
 </select>
 </span>
 &nbsp;&nbsp;ctrl-shift S
@@ -823,7 +822,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(27.7.2026)" style="text-align:center">mm-bem v3.01 (2025-2026)</p>
+<p title="(22.8.2026)" style="text-align:center">mm-bem v3.02 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -960,10 +959,9 @@ var nf_r0 = 0.004, nf_m = 15, nf_n = 5, nf_ph = 0;  // near field params
 var nf_cx = 0, nf_cy = 0, nf_cz = 0;  // center of annular ring
 var nf_c0 = [nf_cx, nf_cy, nf_cz]; 
 var nf_r1 = nf_r0, nf_r2 = nf_r0*nf_m; // params of annular ring r0:r1:r2
-var krm_ang = 45; // krm off-axis angle
+var krm_ang = 45;  // krm off-axis angle
 var ipa_iter = 5;
-var band = 0;  // band calculation if band nq 0
-
+var band = 0;      // band calculation if band nq 0
 var exp = 0;
 
 //var wh = Math.max(window.innerHeight-150,400);
@@ -1091,7 +1089,7 @@ document.onkeydown = function(e) {
 	e.preventDefault(); var r0=document.getElementById("r0"); var v=parseInt(r0.value); r0.value=v+(v>0?1:-1); select();
   }
   if(e.keyCode==83 && e.ctrlKey && e.shiftKey) { // ctrl-shift S
-	e.preventDefault(); var el=document.getElementById("solver"); var v=parseInt(el.value); el.value=((v-3)+1)%3+3/*(v%4)+1*/; select();
+	e.preventDefault(); var el=document.getElementById("solver"); var v=parseInt(el.value); el.value=/*((v-3)+1)%3+3*/(v%6)+1; select();
   }
   if(e.keyCode==66 && e.ctrlKey && e.shiftKey) { // ctrl-shift B
 	e.preventDefault(); var b0=document.getElementById("b0"); b0.value=parseInt(b0.value)+1; select();
@@ -2305,7 +2303,10 @@ function main() {
   //zoomin();
   init3d();
 
-  if(!navigator.gpu) {document.getElementById("webgpu-gmres").disabled=true;}
+  if(!navigator.gpu) {
+    document.getElementById("webgpu-gmres").disabled=true;
+    document.getElementById("webgpu-lsq").disabled=true;
+  }
 }
 
 var about =`mm-bem web-demo (2025-2026)
@@ -3190,7 +3191,7 @@ function change1() {
 				var s0 = s.match(/^(?!#\d+\s|##).*$/gm);
 				var s1 = s.match(/^#\d+\s.*$/gm);
 				var s2 = s.match(/^##\s.*$/gm);
-				s = '# mm-'+(m==4?'ipa':m==3?'krm':m==2?'mfs':'bem')+((m==4||m==3)?'':sol==1?'-gauss':sol==2?'-blockedLU':sol==3?'-aca-gmres':sol==4?'-ldlt':sol==5?'-webgpu-gmres':'')+': '+ t.toFixed(3) + 's ' + s0.join('\n');
+				s = '# mm-'+(m==4?'ipa':m==3?'krm':m==2?'mfs':'bem')+((m==4||m==3)?'':sol==1?'-gauss':sol==2?'-blockedLU':sol==3?'-aca-gmres':sol==4?'-ldlt':sol==5?'-webgpu-gmres':sol=6?'-webgpu-lsq':'')+': '+ t.toFixed(3) + 's ' + s0.join('\n');
 				document.getElementById("msh").value += elem_data(s1,t,nStep);
 				nStep += 1;
 				document.getElementById("txt").value = s;
@@ -3249,8 +3250,8 @@ function change1() {
 		ph = parseFloat(document.getElementById("ph").value);
 		rr = parseFloat(document.getElementById("r0")?.value) || 0; // point source distance
 		var rest = {nf_r0:nf_r0, nf_m:nf_m, nf_n:nf_n, nf_cx:nf_cx, nf_cy:nf_cy, nf_cz:nf_cz, krm_ang:krm_ang, ipa_iter:ipa_iter, band:band};
-		const m = parseInt(document.getElementById("method").value);
-		const solver = parseInt(document.getElementById("solver")?.value);
+		var m = parseInt(document.getElementById("method").value);
+		var solver = parseInt(document.getElementById("solver")?.value);
 		if(f0<0 || rest.band>0) {
 			scan_str='# mm-'+(m==4?'ipa':m==3?'krm':m==2?'mfs':'bem')+'-scan-mode: '+(-f0/1e3)+'kHz scan\n';
 			if(rest.band>0) { 
@@ -3266,11 +3267,11 @@ function change1() {
                 if(solver<3 && fx.length>10000) solver=3;
                 if(solver==3 && fx.length>12250) solver=4;
                 if(solver==4 && fx.length>22250 && navigator.gpu) solver=5;
-                if(solver==5 && !navigator.gpu) solver=3;
-		if(fx.length<=(solver==5?256000:solver==4?22250:solver==3?12250:exp==1?10000:5500)) {
+                if((solver==5 || solver==6) && !navigator.gpu) solver=3;
+		if(fx.length<=((solver==5||solver==6)?256000:solver==4?22250:solver==3?12250:exp==1?10000:5500)) {
 			worker.postMessage(JSON.stringify([lines,th,f0,c0,ph,rr,m,solver,rest]));
 		} else {
-			document.getElementById("txt").value="The mesh too large for BEM inside the browser!"
+			document.getElementById("txt").value="The mesh too large for this browser solver!"
 		}
 	} else if(eng=="py_soft_worker") {
 		var lines = document.getElementById("msh").value; //.split('\n');
@@ -5023,6 +5024,7 @@ var gaussb_gmresj_aca_wasm="AGFzbQEAAAABWgpgAABgBH9/f38AYAJ/fwBgA39/fwBgEH9/f39/
 
 var ldlt2_wasm="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OQMAIAxBCGoiDCAMKwMAIAqhOQMAIAQgBWohBCAFQRBqIQUgBiEDIAYgAkcNAAtBACEJIAEhDANAIAxBCGoiCyALKwMAIgggACAJQQNqIAlsQQN0aiILKwMAIgqiIAwrAwAiFiALQQhqKwMAIgeioSAKIAqiRKDC6/5LSLQ5oCAHIAeioCIXozkDACAMIAggB6IgFiAKoqAgF6M5AwAgDEEQaiEMIAIgCUEBaiIJRw0AC0EAIRIgAiEEA0AgBCIJQX9qIQREAAAAAAAAAAAhB0QAAAAAAAAAACEKAkAgCSACTg0AIAAgBEEEdGohEUQAAAAAAAAAACEKAkACQCASQQFLDQBEAAAAAAAAAAAhBwwBCyASQX5xIQwgEkH+////B3EhBiAJ/RH9DAAAAAABAAAAAAAAAAAAAAD9rgEhDf0MAAAAAAAAAAAAAAAAAAAAACIOIQ8DQCABIA1BAf2rASIQ/RsBQQN0aiABIBD9GwBBA3Rq/V0DAP1XAwABIhMgESAN/QwBAAAAAQAAAAEAAAABAAAAIhT9rgEgDf21ASIV/RsBQQN0aiILIBEgFf0bAEEDdGoiA/1dAwD9VwMAASIV/fIBIA/98AEgC0EIaiADQQhq/V0DAP1XAwABIhkgASAQIBT9UCIQ/RsBQQN0aiABIBD9GwBBA3Rq/V0DAP1XAwABIhD98gH98QEhDyATIBn98gEgDv3wASAQIBX98gH98AEhDiAN/QwCAAAAAgAAAAIAAAACAAAA/a4BIQ0gDEF+aiIMDQALIA8gDyAN/Q0ICQoLDA0ODwABAgMEBQYH/fAB/SEAIQcgDiAOIA39DQgJCgsMDQ4PAAECAwQFBgf98AH9IQAhCiASIAZGDQEgCSAGaiEJCyABIAlBBHRqIQwDQCAMKwMAIgggESAJQQFqIgsgCWxBA3RqIgkrAwAiFqIgB6AgCUEIaisDACIXIAxBCGorAwAiGKKhIQcgCCAXoiAKoCAYIBaioCEKIAxBEGohDCALIQkgAiALRw0ACwsgASAEQQR0aiIMIAwrAwAgB6E5AwAgDEEIaiIMIAwrAwAgCqE5AwAgEkEBaiISIAJHDQALCwsAYwRuYW1lAAsKbGRsdDIud2FzbQE7AwARX193YXNtX2NhbGxfY3RvcnMBEmdyZWVuX2xkX3RvX3dhc21fYwIRbGRsdF9zb2x2ZV93YXNtX2MHEgEAD19fc3RhY2tfcG9pbnRlcgB/CXByb2R1Y2VycwEMcHJvY2Vzc2VkLWJ5AQVjbGFuZ18yMC4xLjgtd2FzaS1zZGsgKGh0dHBzOi8vZ2l0aHViLmNvbS9sbHZtL2xsdm0tcHJvamVjdCA4N2YwMjI3Y2I2MDE0N2EyNmExZWViNGZiMDZlM2I1MDVlOWM3MjYxKQCdAQ90YXJnZXRfZmVhdHVyZXMJKwtidWxrLW1lbW9yeSsPYnVsay1tZW1vcnktb3B0KxZjYWxsLWluZGlyZWN0LW92ZXJsb25nKwptdWx0aXZhbHVlKw9tdXRhYmxlLWdsb2JhbHMrE25vbnRyYXBwaW5nLWZwdG9pbnQrD3JlZmVyZW5jZS10eXBlcysIc2lnbi1leHQrB3NpbWQxMjg=";
 
+var ldlh2_c_wasm="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AAAAAAAAAAAhD0QAAAAAAAAAACEZAkAgF0IBfCIbIAdZDQAgF0IBhiEVRAAAAAAAAAAAIRkgHCEkIBohJkQAAAAAAAAAACEPA0AgGSABIBtCAXwiGCAbfiAVfKciHUH+////A3FBAnRqKgIAuyIeICYqAgC7Ih+iIAEgHUECdEEEcmoqAgCMuyIgICQqAgC7IiGioKAhGSAPIB4gIaIgICAfoqGgIQ8gJEEEaiEkICZBBGohJiAYIRsgGCAHUw0ACwsgBSAXp0ECdCIkaiImICYqAgC7IA+htjgCACAGICRqIiQgJCoCALsgGaG2OAIAIBxBfGohHCAaQXxqIRogF0IAVSEkIBdCf3whFyAkDQALCwsAgAEEbmFtZQANDGxkbGgyX2Mud2FzbQFWBQARX193YXNtX2NhbGxfY3RvcnMBDnNvbHZlX2xkbGhfc29hAg9zb2x2ZV9sZGxoX3NvYTEDD3NvbHZlX2xkbGhfc29hMAQOc29sdmVfbGRsaF9hb3MHEgEAD19fc3RhY2tfcG9pbnRlcgB/CXByb2R1Y2VycwEMcHJvY2Vzc2VkLWJ5AQVjbGFuZ18yMC4xLjgtd2FzaS1zZGsgKGh0dHBzOi8vZ2l0aHViLmNvbS9sbHZtL2xsdm0tcHJvamVjdCA4N2YwMjI3Y2I2MDE0N2EyNmExZWViNGZiMDZlM2I1MDVlOWM3MjYxKQCdAQ90YXJnZXRfZmVhdHVyZXMJKwtidWxrLW1lbW9yeSsPYnVsay1tZW1vcnktb3B0KxZjYWxsLWluZGlyZWN0LW92ZXJsb25nKwptdWx0aXZhbHVlKw9tdXRhYmxlLWdsb2JhbHMrE25vbnRyYXBwaW5nLWZwdG9pbnQrD3JlZmVyZW5jZS10eXBlcysIc2lnbi1leHQrB3NpbWQxMjg=";
 
 //var gauss, gauss_factor, gauss_factor_opt, gauss_solve, lu_decompose, lu_solve, heap;
 var gauss_factor_opt, gauss_solve, gmres_wasm, gmresj_wasm, jacobi_build, heap;
@@ -5032,6 +5034,7 @@ var run_gauss0,run_gauss1;
 var blocked_lu_soa, blocked_lu_solver_soa;
 var wasm, memory;
 var green_ld_wasm_c, ldlt_solve_wasm_c;
+var solve_ldlh_soa;
 
 /*
 const p1 = fetch(wasm1).then(r => r.arrayBuffer()).then(b => WebAssembly.instantiate(b, {env:{memory}}));
@@ -5084,14 +5087,22 @@ onmessage = function(e) {
 	.then(bytes => WebAssembly.instantiate(bytes,{env:{memory/*,sin:Math.sin,cos:Math.cos*/}}))
 	.then(function(result) {
 
-          green_ld_to_wasm_c = result.instance.exports.green_ld_to_wasm_c; 
-          ldlt_solve_wasm_c = result.instance.exports.ldlt_solve_wasm_c; 
-         
-          [lines,th,f0,c0,ph,rr,method,solver,rest] = JSON.parse(e.data);
-	  var s = wasm_soft_worker(lines,th,f0,c0,ph,rr,method,solver,rest);
-	  // postMessage(JSON.stringify(s));
+            green_ld_to_wasm_c = result.instance.exports.green_ld_to_wasm_c; 
+            ldlt_solve_wasm_c = result.instance.exports.ldlt_solve_wasm_c; 
 
-        })
+            fetch('data:application/wasm;base64,'+ldlh2_c_wasm)
+	    .then(response => response.arrayBuffer())
+	    .then(bytes => WebAssembly.instantiate(bytes,{env:{memory/*,sin:Math.sin,cos:Math.cos*/}}))
+	    .then(function(result) {
+
+                solve_ldlh_soa = result.instance.exports.solve_ldlh_soa; 
+         
+                [lines,th,f0,c0,ph,rr,method,solver,rest] = JSON.parse(e.data);
+	         var s = wasm_soft_worker(lines,th,f0,c0,ph,rr,method,solver,rest);
+                // postMessage(JSON.stringify(s));
+
+            });
+        });
     });
 }
 function dist(x,y) {
@@ -7242,165 +7253,6 @@ async function gmres(multiplyA, b, x0, restart=50, maxIter=100, tol=1e-3) {
 // --- WebGPU ---
 let gpuCtx = null;
 
-async function webgpu_init0(x, k) {
-  if (!navigator.gpu) {
-    console.error("no WebGPU in this browser");
-    return null;
-  }
-  const adapter = await navigator.gpu.requestAdapter();
-  const device = await adapter.requestDevice();
-  const m = x.length;
-
-  // Surface Solution Shader
-  const surfaceShaderCode = \`
-    struct Complex { re: f32, im: f32 }
-    @group(0) @binding(0) var<storage, read> x_f: array<f32>;
-    @group(0) @binding(1) var<storage, read> y_f: array<f32>;
-    @group(0) @binding(2) var<storage, read> z_f: array<f32>;
-    @group(0) @binding(3) var<storage, read> psi: array<Complex>;
-    @group(0) @binding(4) var<storage, read_write> out: array<Complex>;
-    @group(0) @binding(5) var<uniform> params: vec4<f32>;
-
-    @compute @workgroup_size(64)
-    fn main(@builtin(global_invocation_id) id: vec3<u32>) {
-      let i = id.x;
-      let m_val = u32(params.y);
-      if (i >= m_val) { return; }
-      let k_val = params.x;
-      let pi_val = 3.141592653589793;
-      let factor = 1.0 / (4.0 * pi_val);      
-      var sum_re = 0.0;
-      var sum_im = 0.0;      
-      for (var j: u32 = 0; j < m_val; j = j + 1) {
-        let dx = x_f[i] - x_f[j];
-        let dy = y_f[i] - y_f[j];
-        let dz = z_f[i] - z_f[j];
-        let dist = sqrt(dx*dx + dy*dy + dz*dz);        
-        var s_re = 0.0;
-        var s_im = 0.0;
-        if (dist > 1e-9) {
-          let phase = k_val * dist;
-          s_re = cos(phase) * factor / dist;
-          s_im = sin(phase) * factor / dist;
-        } else {
-          s_re = k_val / 4.0;
-          s_im = k_val / (4.0 * pi_val);
-        }        
-        let p_re = psi[j].re;
-        let p_im = psi[j].im;        
-        sum_re = sum_re + (s_re * p_re - s_im * p_im);
-        sum_im = sum_im + (s_im * p_re + s_re * p_im);
-      }
-      out[i].re = sum_re;
-      out[i].im = sum_im;
-    }
-  \`;
-
-  // Far Field Solution Shader  (with -pi translation!!!)
-  const farFieldShaderCode = \`
-    struct Complex { re: f32, im: f32 }
-    @group(0) @binding(0) var<storage, read> x_f: array<f32>;
-    @group(0) @binding(1) var<storage, read> y_f: array<f32>;
-    @group(0) @binding(2) var<storage, read> z_f: array<f32>;
-    @group(0) @binding(3) var<storage, read> phi_result: array<Complex>;
-    @group(0) @binding(4) var<storage, read_write> psc_out: array<Complex>;
-    @group(0) @binding(5) var<uniform> params: vec4<f32>;
-
-    @compute @workgroup_size(64)
-    fn main(@builtin(global_invocation_id) id: vec3<u32>) {
-      let i = id.x;
-      if (i >= 360) { return; }
-      let k_val = params.x;
-      let m_val = u32(params.y);
-      let pi_val = 3.141592653589793;
-      let factor = 1.0 / (4.0 * pi_val);
-      
-      let angle = f32(i) * pi_val / 180.0 - pi_val;
-      let r_dir_x = cos(angle);
-      let r_dir_y = sin(angle);
-      let r_dir_z = 0.0;
-
-      var sum_re = 0.0;
-      var sum_im = 0.0;
-      for (var j: u32 = 0; j < m_val; j = j + 1) {
-        let dot_product = x_f[j] * r_dir_x + y_f[j] * r_dir_y + z_f[j] * r_dir_z;
-        let phase = -k_val * dot_product;
-        let a_re = cos(phase) * factor;
-        let a_im = sin(phase) * factor;
-        let b_re = phi_result[j].re;
-        let b_im = phi_result[j].im;
-        sum_re = sum_re + (a_re * b_re - a_im * b_im);
-        sum_im = sum_im + (a_re * b_im + a_im * b_re);
-      }
-      psc_out[i].re = sum_re;
-      psc_out[i].im = sum_im;
-    }
-  \`;
-
-  const createBuffer = (arr, usage) => {
-    const buf = device.createBuffer({ size: arr.byteLength, usage, mappedAtCreation: true });
-    new arr.constructor(buf.getMappedRange()).set(arr);
-    buf.unmap();
-    return buf;
-  };
-
-  const x_arr = new Float32Array(x.map(p => p[0]));
-  const y_arr = new Float32Array(x.map(p => p[1]));
-  const z_arr = new Float32Array(x.map(p => p[2]));
-  const param_arr = new Float32Array([k, m, 0, 0]);
-
-  const xBuf = createBuffer(x_arr, GPUBufferUsage.STORAGE);
-  const yBuf = createBuffer(y_arr, GPUBufferUsage.STORAGE);
-  const zBuf = createBuffer(z_arr, GPUBufferUsage.STORAGE);
-  const paramBuf = createBuffer(param_arr, GPUBufferUsage.UNIFORM);
-  
-  // buffer allocation
-  const psiBuf = device.createBuffer({ size: m * 8, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
-  const outBuf = device.createBuffer({ size: m * 8, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
-  const readBuf = device.createBuffer({ size: m * 8, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
-  
-  const pscBuf = device.createBuffer({ size: 360 * 8, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
-  const pscReadBuf = device.createBuffer({ size: 360 * 8, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
-
-  // surface field pipeline construction
-  const surfaceModule = device.createShaderModule({ code: surfaceShaderCode });
-  const surfacePipeline = device.createComputePipeline({
-    layout: 'auto', compute: { module: surfaceModule, entryPoint: 'main' }
-  });
-  const surfaceBindGroup = device.createBindGroup({
-    layout: surfacePipeline.getBindGroupLayout(0),
-    entries: [
-      { binding: 0, resource: { buffer: xBuf } },
-      { binding: 1, resource: { buffer: yBuf } },
-      { binding: 2, resource: { buffer: zBuf } },
-      { binding: 3, resource: { buffer: psiBuf } },
-      { binding: 4, resource: { buffer: outBuf } },
-      { binding: 5, resource: { buffer: paramBuf } }
-    ]
-  });
-
-  // far field pipline construction
-  const farFieldModule = device.createShaderModule({ code: farFieldShaderCode });
-  const farFieldPipeline = device.createComputePipeline({
-    layout: 'auto', compute: { module: farFieldModule, entryPoint: 'main' }
-  });
-  const farFieldBindGroup = device.createBindGroup({
-    layout: farFieldPipeline.getBindGroupLayout(0),
-    entries: [
-      { binding: 0, resource: { buffer: xBuf } },
-      { binding: 1, resource: { buffer: yBuf } },
-      { binding: 2, resource: { buffer: zBuf } },
-      { binding: 3, resource: { buffer: psiBuf } }, 
-      { binding: 4, resource: { buffer: pscBuf } },
-      { binding: 5, resource: { buffer: paramBuf } }
-    ]
-  });
-  return {
-    device, m, psiBuf, outBuf, readBuf, pscBuf, pscReadBuf,
-    surfacePipeline, surfaceBindGroup, farFieldPipeline, farFieldBindGroup
-  };
-}
-
 async function webgpu_init(x, k) {
   if (!navigator.gpu) {
     console.error("No WebGPU in this browser");
@@ -7410,7 +7262,7 @@ async function webgpu_init(x, k) {
   const device = await adapter.requestDevice();
   const m = x.length;
 
-  // --- SHADER 1: Rozwiązanie powierzchniowe (został bez zmian) ---
+  // --- Surface Solution shader ---
   const surfaceShaderCode = \`
     struct Complex { re: f32, im: f32 }
     @group(0) @binding(0) var<storage, read> x_f: array<f32>;
@@ -7455,7 +7307,7 @@ async function webgpu_init(x, k) {
     }
   \`;
 
-  // --- SHADER 2: Pole dalekie uproszczone (webgpu_farField) ---
+  // --- approx farField shader (webgpu_farField) ---
   const farFieldShaderCode = \`
     struct Complex { re: f32, im: f32 }
     @group(0) @binding(0) var<storage, read> x_f: array<f32>;
@@ -7496,7 +7348,7 @@ async function webgpu_init(x, k) {
     }
   \`;
 
-  // --- SHADER 3: Pełny wzór całkowy (webgpu_farField2) ---
+  // --- full farField shader (webgpu_farField2) ---
   const farFieldFullShaderCode = \`
     struct Complex { re: f32, im: f32 }
     @group(0) @binding(0) var<storage, read> x_f: array<f32>;
@@ -7622,7 +7474,7 @@ async function webgpu_init(x, k) {
   };
 }
 
-async function webgpu_gmres(ctx, gmres, pinc, q0) {
+async function webgpu_gmres0(ctx, gmres, pinc, q0, k) {
   const psi_cpu_data = new Float32Array(ctx.m * 2);
   
   const multiply_webgpu = async function(v_vec) {   // gmres multiplier
@@ -7655,6 +7507,60 @@ async function webgpu_gmres(ctx, gmres, pinc, q0) {
   return await gmres(multiply_webgpu, pinc, q0, 50, 100, 2e-3);
 }
 
+async function webgpu_gmres(ctx, gmres, pinc, q0, k) {
+  const psi_cpu_data = new Float32Array(ctx.m * 2);
+  
+  // --- preconditiner M^-1 ---
+  const s_diag_re = k / 4.0;
+  const s_diag_im = k / (4.0 * Math.PI);
+  const denom = s_diag_re * s_diag_re + s_diag_im * s_diag_im;
+  const inv_diag_re = s_diag_re / denom;
+  const inv_diag_im = -s_diag_im / denom;
+
+  // --- Preconditioning (pinc_prec = M^-1 * pinc) ---
+  var pinc_prec = new Array(ctx.m);
+  for (let i = 0; i < ctx.m; i++) {
+    let b_re = pinc[i].re;
+    let b_im = pinc[i].im;
+    // Mnożenie zespolone: (b_re + i*b_im) * (inv_diag_re + i*inv_diag_im)
+    let prec_b_re = b_re * inv_diag_re - b_im * inv_diag_im;
+    let prec_b_im = b_re * inv_diag_im + b_im * inv_diag_re;
+    pinc_prec[i] = cNew(prec_b_re, prec_b_im);
+  }
+  const multiply_webgpu = async function(v_vec) {   // GMRES mutiplier
+    for (let i = 0; i < ctx.m; i++) {
+      psi_cpu_data[i * 2] = v_vec[i].re;
+      psi_cpu_data[i * 2 + 1] = v_vec[i].im;
+    }
+    ctx.device.queue.writeBuffer(ctx.psiBuf, 0, psi_cpu_data);
+
+    const commandEncoder = ctx.device.createCommandEncoder();
+    const passEncoder = commandEncoder.beginComputePass();
+    passEncoder.setPipeline(ctx.surfacePipeline);
+    passEncoder.setBindGroup(0, ctx.surfaceBindGroup);
+    passEncoder.dispatchWorkgroups(Math.ceil(ctx.m / 64));
+    passEncoder.end();
+    
+    commandEncoder.copyBufferToBuffer(ctx.outBuf, 0, ctx.readBuf, 0, ctx.m * 8);
+    ctx.device.queue.submit([commandEncoder.finish()]);
+
+    await ctx.readBuf.mapAsync(GPUMapMode.READ);
+    const res_array = new Float32Array(ctx.readBuf.getMappedRange().slice());
+    ctx.readBuf.unmap();
+    // --- Preconditioning  (out = M^-1 * A * psi) ---
+    var out_complex = new Array(ctx.m);
+    for (let i = 0; i < ctx.m; i++) {
+      let y_re = res_array[i * 2];
+      let y_im = res_array[i * 2 + 1];
+      let prec_y_re = y_re * inv_diag_re - y_im * inv_diag_im;
+      let prec_y_im = y_re * inv_diag_im + y_im * inv_diag_re;
+      out_complex[i] = cNew(prec_y_re, prec_y_im);
+    }
+    return out_complex;
+  };
+  return await gmres(multiply_webgpu, pinc_prec, q0, 50, 100, 2e-3);
+}
+
 async function webgpu_farField(ctx, q3_result) {
   const phi_cpu_data = new Float32Array(ctx.m * 2);
   for (let i = 0; i < ctx.m; i++) {
@@ -7684,6 +7590,8 @@ async function webgpu_farField(ctx, q3_result) {
   }
   return p_webgpu_final;
 }
+
+
 
 async function webgpu_farField2(ctx, q3_result, r1_javascript, k) {
   const r1_count = r1_javascript.length; 
@@ -7760,6 +7668,535 @@ async function webgpu_farField2(ctx, q3_result, r1_javascript, k) {
   return p_webgpu_final;
 }
 
+// from lsq4
+
+async function lsq2_webgpu(x, x2, pinc, k) {
+
+const shader1_wgsl = \`
+struct Complex { re: f32, im: f32 }
+struct Point3D { x: f32, y: f32, z: f32, pad: f32 }
+struct Uniforms { k: f32, N: u32, M: u32, offset_i: u32, offset_j: u32, pad1:u32, pad2:u32, pad3:u32 }
+@group(0) @binding(0) var<uniform> config : Uniforms;
+@group(0) @binding(1) var<storage, read> x_points : array<Point3D>;
+@group(0) @binding(2) var<storage, read> x2_points : array<Point3D>;
+@group(0) @binding(3) var<storage, read_write> A_half : array<Complex>;
+
+fn green_fun(p1: Point3D, p2: Point3D, k: f32) -> Complex {
+    let dx = p1.x - p2.x; let dy = p1.y - p2.y; let dz = p1.z - p2.z;
+    let r2 = dx*dx + dy*dy + dz*dz;
+    if (r2 == 0) { 
+        return Complex(k / 4.0, k / 4.0 / 3.14159265359);
+    }
+    let inv_r = inverseSqrt(r2);
+    let kr = k * r2 * inv_r; // r = r^2 * (1/r) = r 
+    let factor = inv_r * 0.07957747154; // 1.0 / (4.0 * 3.14159265359)
+    return Complex(cos(kr) * factor, sin(kr) * factor);
+}
+
+@compute @workgroup_size(16, 16)
+fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
+    let i = global_id.x + config.offset_i; 
+    let j = global_id.y + config.offset_j;
+    let M = config.M; let N = config.N; let k = config.k;
+    if (i >= M || j >= M) { return; }
+    if (j > i) { return; }
+    let p_i = x2_points[i];
+    let p_j = x2_points[j];
+    var sum_re = 0.0; var sum_im = 0.0;
+    for (var r = 0u; r < N; r = r + 1u) {
+        let p_r = x_points[r];
+        let G_ri = green_fun(p_r, p_i, k);
+        let G_rj = green_fun(p_r, p_j, k);
+        sum_re = sum_re + (G_ri.re * G_rj.re + G_ri.im * G_rj.im);
+        sum_im = sum_im + (G_ri.re * G_rj.im - G_ri.im * G_rj.re);
+    }
+    let flat_idx = (i * (i + 1u)) / 2u + j;
+    A_half[flat_idx] = Complex(sum_re, sum_im);
+}
+\`;
+
+// Shader2: b generator (no tiling)
+const shader_b_wgsl = \`
+struct Complex { re: f32, im: f32 }
+struct Point3D { x: f32, y: f32, z: f32, pad: f32 }
+struct Uniforms { k: f32, N: u32, M: u32, pad0:u32 }
+
+@group(0) @binding(0) var<uniform> config : Uniforms;
+@group(0) @binding(1) var<storage, read> x_points : array<Point3D>;
+@group(0) @binding(2) var<storage, read> x2_points : array<Point3D>;
+@group(0) @binding(3) var<storage, read> pinc : array<Complex>;
+@group(0) @binding(4) var<storage, read_write> b : array<Complex>;
+
+fn green_fun(p1: Point3D, p2: Point3D, k: f32) -> Complex {
+    let dx = p1.x - p2.x; let dy = p1.y - p2.y; let dz = p1.z - p2.z;
+    let r2 = dx*dx + dy*dy + dz*dz;
+    if (r2 == 0) { 
+        return Complex(k / 4.0, k / 4.0 / 3.14159265359);
+    }
+    let inv_r = inverseSqrt(r2);
+    let kr = k * r2 * inv_r; // r = r^2 * (1/r) = r 
+    let factor = inv_r * 0.07957747154; // 1.0 / (4.0 * 3.14159265359)
+    return Complex(cos(kr) * factor, sin(kr) * factor);
+}
+
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
+    let i = global_id.x;
+    let M = config.M; let N = config.N; let k = config.k;
+    if (i >= M) { return; }
+    let p_i = x2_points[i];
+    var b_re = 0.0; var b_im = 0.0;
+    for (var r = 0u; r < N; r = r + 1u) {
+        let p_r = x_points[r];
+        let G_ri = green_fun(p_r, p_i, k);
+        let p_r_inc = pinc[r];
+        b_re = b_re + (G_ri.re * p_r_inc.re + G_ri.im * p_r_inc.im);
+        b_im = b_im + (G_ri.re * p_r_inc.im - G_ri.im * p_r_inc.re);
+    }
+    b[i] = Complex(b_re, b_im);
+}
+\`;
+
+    if (!navigator.gpu) {throw new Error("WebGPU not supported");}
+    const adapter = await navigator.gpu.requestAdapter();
+    if (!adapter) {throw new Error("No WebGPU adapter");}
+    const requiredLimits = {};
+    if (adapter.limits.maxStorageBufferBindingSize) {
+        requiredLimits.maxStorageBufferBindingSize = adapter.limits.maxStorageBufferBindingSize;
+    }
+    if (adapter.limits.maxBufferSize) {
+        requiredLimits.maxBufferSize = adapter.limits.maxBufferSize;
+    }
+    const device = await adapter.requestDevice({ requiredLimits });
+
+    const N = x.length;
+    const M = x2.length;
+    const halfSize = (M * (M + 1)) / 2;
+
+	console.log("Max storage:", adapter.limits.maxStorageBufferBindingSize / (1024 * 1024), "MB");
+	console.log("Sizes:", M, N, halfSize, ",",(halfSize * 8) / (1024 * 1024), "MB");
+
+ 	const t_gpu_start = performance.now();
+   
+    // --- 3. flatting to floats for WGSL ---
+    const xFloat = new Float32Array(N * 4);
+    for (let r = 0; r < N; r++) { xFloat[r * 4] = x[r][0]; xFloat[r * 4 + 1] = x[r][1]; xFloat[r * 4 + 2] = x[r][2]; }
+    const x2Float = new Float32Array(M * 4);
+    for (let i = 0; i < M; i++) { x2Float[i * 4] = x2[i][0]; x2Float[i * 4 + 1] = x2[i][1]; x2Float[i * 4 + 2] = x2[i][2]; }
+    const pincFloat = new Float32Array(N * 2);
+    for (let r = 0; r < N; r++) { pincFloat[r * 2] = pinc[r].re; pincFloat[r * 2 + 1] = pinc[r].im; }
+    // --- 4. Buffers for GPU ---
+    // uBuffer: 20 bytes (k: f32, N: u32, M: u32, offset_i: u32, offset_j: u32)
+    const uBuffer = device.createBuffer({ size: 32, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+    const uBufferB = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+    const xBuffer = device.createBuffer({ size: xFloat.byteLength, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+    const x2Buffer = device.createBuffer({ size: x2Float.byteLength, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+    const pBuffer = device.createBuffer({ size: pincFloat.byteLength, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+    const aHalfBuffer = device.createBuffer({ size: halfSize * 8, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+    const bBuffer = device.createBuffer({ size: M * 8, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+    const aHalfReadBuffer = device.createBuffer({ size: halfSize * 8, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+    const bReadBuffer = device.createBuffer({ size: M * 8, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+    // copying RAM to VRAM
+    device.queue.writeBuffer(uBufferB, 0, new Float32Array([k]));
+    device.queue.writeBuffer(uBufferB, 4, new Uint32Array([N, M, 0])); 
+    device.queue.writeBuffer(uBuffer, 0, new Float32Array([k]));
+    device.queue.writeBuffer(uBuffer, 4, new Uint32Array([N, M, 0, 0, 0, 0, 0 ]));
+    device.queue.writeBuffer(xBuffer, 0, xFloat);
+    device.queue.writeBuffer(x2Buffer, 0, x2Float);
+    device.queue.writeBuffer(pBuffer, 0, pincFloat);
+    // --- 5. Builfing pipelines ---
+    const mod1 = device.createShaderModule({ code: shader1_wgsl });
+    const modB = device.createShaderModule({ code: shader_b_wgsl });
+    const pipe1 = device.createComputePipeline({ layout: 'auto', compute: { module: mod1, entryPoint: 'main' } });
+    const pipeB = device.createComputePipeline({ layout: 'auto', compute: { module: modB, entryPoint: 'main' } });
+    // BindGroup for A^H * A
+    const bg1 = device.createBindGroup({
+        layout: pipe1.getBindGroupLayout(0),
+        entries: [
+            { binding: 0, resource: { buffer: uBuffer } },
+            { binding: 1, resource: { buffer: xBuffer } },
+            { binding: 2, resource: { buffer: x2Buffer } },
+            { binding: 3, resource: { buffer: aHalfBuffer } }
+        ]});
+    // BindGroup for b
+    const bgB = device.createBindGroup({
+        layout: pipeB.getBindGroupLayout(0),
+        entries: [
+            { binding: 0, resource: { buffer: uBufferB } },
+            { binding: 1, resource: { buffer: xBuffer } },
+            { binding: 2, resource: { buffer: x2Buffer } },
+            { binding: 3, resource: { buffer: pBuffer } },
+            { binding: 4, resource: { buffer: bBuffer } }
+        ]});
+
+    // --- 6. GPU TRUE PARALLEL CALCULATIONS ---
+	
+    const TILE_SIZE = 512; 
+    const encoderB = device.createCommandEncoder();
+    const passB = encoderB.beginComputePass();
+    passB.setPipeline(pipeB);
+    passB.setBindGroup(0, bgB);
+    passB.dispatchWorkgroups(Math.ceil(M / 256));
+    passB.end();
+    device.queue.submit([encoderB.finish()]);
+	
+    for (let offset_i = 0; offset_i < M; offset_i += TILE_SIZE) {
+        for (let offset_j = 0; offset_j <= offset_i; offset_j += TILE_SIZE) {
+            device.queue.writeBuffer(uBuffer, 12, new Uint32Array([offset_i, offset_j, 0, 0, 0]));
+            const current_tile_w = Math.min(TILE_SIZE, M - offset_i);
+            const current_tile_h = Math.min(TILE_SIZE, M - offset_j);
+            const dispatch_x = Math.ceil(current_tile_w / 16);
+            const dispatch_y = Math.ceil(current_tile_h / 16);
+            const encoderA = device.createCommandEncoder();
+            const passA = encoderA.beginComputePass();
+            passA.setPipeline(pipe1);
+            passA.setBindGroup(0, bg1);
+            passA.dispatchWorkgroups(dispatch_x, dispatch_y);
+            passA.end();
+            device.queue.submit([encoderA.finish()]);
+        }
+    }
+    device.queue.submit([]); 
+    await device.queue.onSubmittedWorkDone(); // Wait for BOTH vector b and matrix to finish
+    const encoderCopy = device.createCommandEncoder();
+    encoderCopy.copyBufferToBuffer(aHalfBuffer, 0, aHalfReadBuffer, 0, halfSize * 8);
+    encoderCopy.copyBufferToBuffer(bBuffer, 0, bReadBuffer, 0, M * 8);
+    device.queue.submit([encoderCopy.finish()]);
+
+    // --- 7. RAM Transfer ---
+    await Promise.all([
+        aHalfReadBuffer.mapAsync(GPUMapMode.READ),
+        bReadBuffer.mapAsync(GPUMapMode.READ)
+    ]);
+
+    const cpu_A_half = new Float32Array(aHalfReadBuffer.getMappedRange().slice());
+    const cpu_b = new Float32Array(bReadBuffer.getMappedRange().slice());
+
+    aHalfReadBuffer.unmap();
+    bReadBuffer.unmap();
+    device.destroy();
+	
+    // --- 8. LDL^H CPU ---
+    const t_solver_start = performance.now();
+
+     //const q_result = solve_ldlh_on_cpu(cpu_A_half, cpu_b);
+     //const q_result = solve_gmres_on_cpu(cpu_A_half, cpu_b);
+     //const q_result = await solve_ldlh_soa_js(cpu_A_half, cpu_b);
+     const q_result = await solve_ldlh_aos_js(cpu_A_half, cpu_b);
+
+    return q_result;
+}
+
+async function webgpu_farField3(x3, q3, r, k) {
+  // 1. Inicjalizacja WebGPU (Adapter i Urządzenie z podniesionymi limitami)
+  if (!navigator.gpu) { throw new Error("WebGPU nie jest obsługiwane w tej przeglądarce"); }
+  const adapter = await navigator.gpu.requestAdapter();
+  if (!adapter) { throw new Error("Nie znaleziono adaptera WebGPU"); }
+  
+  // Pobieramy maksymalne limity karty dla stabilności dużych siatek
+  const requiredLimits = {};
+  if (adapter.limits.maxStorageBufferBindingSize) {
+    requiredLimits.maxStorageBufferBindingSize = adapter.limits.maxStorageBufferBindingSize;
+  }
+  if (adapter.limits.maxBufferSize) {
+    requiredLimits.maxBufferSize = adapter.limits.maxBufferSize;
+  }
+  const device = await adapter.requestDevice({ requiredLimits });
+
+  const m_count = q3.length; // Liczba punktów źródłowych na powierzchni
+  const r_count = r.length;   // Liczba punktów obserwacyjnych w polu dalekim
+
+  // 2. Definicja dedykowanego kodu shadera WGSL (Wzór Greena / Monopol)
+  const shaderCode = \`
+    struct Complex { re: f32, im: f32 }
+    
+    @group(0) @binding(0) var<storage, read> x_f: array<f32>;
+    @group(0) @binding(1) var<storage, read> y_f: array<f32>;
+    @group(0) @binding(2) var<storage, read> z_f: array<f32>;
+    @group(0) @binding(3) var<storage, read> phi_result: array<Complex>;
+    @group(0) @binding(4) var<storage, read_write> psc_out: array<Complex>;
+    @group(0) @binding(5) var<uniform> params: vec4<f32>;
+    
+    @group(0) @binding(6) var<storage, read> r1_x: array<f32>;
+    @group(0) @binding(7) var<storage, read> r1_y: array<f32>;
+    @group(0) @binding(8) var<storage, read> r1_z: array<f32>;
+
+    @compute @workgroup_size(64)
+    fn main(@builtin(global_invocation_id) id: vec3<u32>) {
+      let i = id.x;
+      let r1_max = u32(params.z); 
+      if (i >= r1_max) { return; }
+
+      let k_val = params.x;
+      let m_val = u32(params.y);
+      let pi_val = 3.141592653589793;
+      let factor = 1.0 / (4.0 * pi_val);
+      
+      let rx = r1_x[i];
+      let ry = r1_y[i];
+      let rz = r1_z[i];
+
+      var sum_re = 0.0;
+      var sum_im = 0.0;
+      
+      for (var j: u32 = 0; j < m_val; j = j + 1) {
+        let dx = rx - x_f[j];
+        let dy = ry - y_f[j];
+        let dz = rz - z_f[j];
+        let dist = sqrt(dx*dx + dy*dy + dz*dz);
+        
+        var s_re = 0.0;
+        var s_im = 0.0;
+        if (dist > 1e-9) {
+          let phase = k_val * dist;
+          s_re = cos(phase) * factor / dist;
+          s_im = sin(phase) * factor / dist;
+        } else {
+          s_re = k_val / 4.0;
+          s_im = k_val / (4.0 * pi_val);
+        }
+        
+        let b_re = phi_result[j].re;
+        let b_im = phi_result[j].im;
+        sum_re = sum_re + (s_re * b_re - s_im * b_im);
+        sum_im = sum_im + (s_im * b_re + s_re * b_im);
+      }
+      psc_out[i].re = sum_re;
+      psc_out[i].im = sum_im;
+    }
+  \`;
+
+  // 3. Kompilacja Shadera i utworzenie Pipeline (w locie)
+  const shaderModule = device.createShaderModule({ code: shaderCode });
+  const computePipeline = device.createComputePipeline({
+    layout: 'auto',
+    compute: { module: shaderModule, entryPoint: 'main' }
+  });
+
+  // 4. Przygotowanie struktur danych CPU (Rozbicie na format SoA dla WebGPU)
+  const x_surf = new Float32Array(m_count);
+  const y_surf = new Float32Array(m_count);
+  const z_surf = new Float32Array(m_count);
+  const phi_data = new Float32Array(m_count * 2);
+
+  for (let i = 0; i < m_count; i++) {
+    x_surf[i] = x3[i][0];
+    y_surf[i] = x3[i][1];
+    z_surf[i] = x3[i][2];
+    phi_data[i * 2] = q3[i].re;
+    phi_data[i * 2 + 1] = q3[i].im;
+  }
+
+  const r_x = new Float32Array(r_count);
+  const r_y = new Float32Array(r_count);
+  const r_z = new Float32Array(r_count);
+  for (let i = 0; i < r_count; i++) {
+    r_x[i] = r[i][0];
+    r_y[i] = r[i][1];
+    r_z[i] = r[i][2];
+  }
+
+  // Safe Uniform Array (Idealne wyrównanie 16-bajtowe)
+  const param_data = new Float32Array([k, m_count, r_count, 0.0]);
+
+  // 5. Alokacja buforów pamięci bezpośrednio na GPU
+  const surfXBuf = device.createBuffer({ size: m_count * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const surfYBuf = device.createBuffer({ size: m_count * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const surfZBuf = device.createBuffer({ size: m_count * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const psiBuf   = device.createBuffer({ size: phi_data.byteLength, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const paramBuf = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  
+  const rXBuf    = device.createBuffer({ size: r_count * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const rYBuf    = device.createBuffer({ size: r_count * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const rZBuf    = device.createBuffer({ size: r_count * 4, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  const pscBuf   = device.createBuffer({ size: r_count * 8, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+  const pscRead  = device.createBuffer({ size: r_count * 8, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+
+  // Wgranie danych do buforów GPU za pomocą kolejki komend
+  device.queue.writeBuffer(surfXBuf, 0, x_surf);
+  device.queue.writeBuffer(surfYBuf, 0, y_surf);
+  device.queue.writeBuffer(surfZBuf, 0, z_surf);
+  device.queue.writeBuffer(psiBuf, 0, phi_data);
+  device.queue.writeBuffer(paramBuf, 0, param_data, 0, 4);
+  device.queue.writeBuffer(rXBuf, 0, r_x);
+  device.queue.writeBuffer(rYBuf, 0, r_y);
+  device.queue.writeBuffer(rZBuf, 0, r_z);
+
+  // 6. Utworzenie Bind Group dla potoku obliczeniowego
+  const bindGroup = device.createBindGroup({
+    layout: computePipeline.getBindGroupLayout(0),
+    entries: [
+      { binding: 0, resource: { buffer: surfXBuf } },
+      { binding: 1, resource: { buffer: surfYBuf } },
+      { binding: 2, resource: { buffer: surfZBuf } },
+      { binding: 3, resource: { buffer: psiBuf } },
+      { binding: 4, resource: { buffer: pscBuf } },
+      { binding: 5, resource: { buffer: paramBuf } },
+      { binding: 6, resource: { buffer: rXBuf } },
+      { binding: 7, resource: { buffer: rYBuf } },
+      { binding: 8, resource: { buffer: rZBuf } }
+    ]
+  });
+
+  // 7. Enkodowanie poleceń i wykonanie passu obliczeniowego (Compute Pass)
+  const commandEncoder = device.createCommandEncoder();
+  const passEncoder = commandEncoder.beginComputePass();
+  passEncoder.setPipeline(computePipeline);
+  passEncoder.setBindGroup(0, bindGroup);
+  passEncoder.dispatchWorkgroups(Math.ceil(r_count / 64));
+  passEncoder.end();
+  
+  // Kopiowanie wyniku do bufora odczytu CPU
+  commandEncoder.copyBufferToBuffer(pscBuf, 0, pscRead, 0, r_count * 8);
+  device.queue.submit([commandEncoder.finish()]);
+
+  // 8. Pobranie zmapowanych wyników z GPU z powrotem do JavaScript
+  await pscRead.mapAsync(GPUMapMode.READ);
+  const rawResult = new Float32Array(pscRead.getMappedRange().slice());
+  pscRead.unmap();
+
+  // --- KROK 9: ABSOLUTNE CZYSZCZENIE VRAM (Zapobiega jakimkolwiek wyciekom) ---
+  surfXBuf.destroy(); surfYBuf.destroy(); surfZBuf.destroy(); psiBuf.destroy();
+  paramBuf.destroy(); rXBuf.destroy(); rYBuf.destroy(); rZBuf.destroy();
+  pscBuf.destroy(); pscRead.destroy();
+  device.destroy(); // Niszczymy lokalną instancję urządzenia deweloperskiego
+
+  // 10. Konwersja końcowa do tablicy obiektów strukturalnych {re, im}
+  const final_far_field = new Array(r_count);
+  for (let i = 0; i < r_count; i++) {
+    final_far_field[i] = {
+      re: rawResult[i * 2],
+      im: rawResult[i * 2 + 1]
+    };
+  }
+
+  return final_far_field;
+}
+
+async function solve_ldlh_aos_js(cpu_A_half, cpu_b) {
+    const response = await fetch('data:application/wasm;base64,' + ldlh2_c_wasm);
+    const bytes = await response.arrayBuffer();
+    
+    const M = cpu_b.length / 2; 
+    const halfSize = (M * (M + 1)) / 2;
+
+    const baseOffset = 0; 
+
+    // Wskaźniki AoS: Macierz A jest w jednym kawałku (Interleaved)
+    const ptr_A = baseOffset;
+    const ptr_b_re = ptr_A + halfSize * 2 * 4; 
+    const ptr_b_im = ptr_b_re + M * 4;
+    const ptr_D    = ptr_b_im + M * 4;
+    const ptr_q_re = ptr_D    + M * 4; 
+    const ptr_q_im = ptr_q_re + M * 4;
+
+    const memory = new WebAssembly.Memory({ 
+        initial: 60800, 
+        maximum: 60800 
+    });
+    
+    const wasmModule = await WebAssembly.instantiate(bytes, { env: { memory } });
+    const wasm = wasmModule.instance.exports;
+
+    const wasmFloat32View = new Float32Array(memory.buffer);
+
+    // Kopiowanie blokowe (AoS do AoS)
+    wasmFloat32View.set(cpu_A_half, ptr_A / 4);
+
+    // Przepakowanie wektorów b do SoA
+    const wasm_b_re_idx = ptr_b_re / 4;
+    const wasm_b_im_idx = ptr_b_im / 4;
+    for (let k = 0; k < M; k++) {
+        wasmFloat32View[wasm_b_re_idx + k] = cpu_b[k * 2];
+        wasmFloat32View[wasm_b_im_idx + k] = cpu_b[k * 2 + 1];
+    }
+
+    // NAPRAWIONO: Wywołanie funkcji ze zmienioną nazwą eksportu
+    wasm.solve_ldlh_aos(
+        M,
+        ptr_A,
+        ptr_b_re, ptr_b_im,
+        ptr_D,
+        ptr_q_re, ptr_q_im
+    );
+
+    const q_result = Array(M).fill(null).map(() => ({ re: 0, im: 0 }));
+    const wasm_q_re_idx = ptr_q_re / 4;
+    const wasm_q_im_idx = ptr_q_im / 4;
+
+    for (let i = 0; i < M; i++) {
+        q_result[i].re = wasmFloat32View[wasm_q_re_idx + i];
+        q_result[i].im = wasmFloat32View[wasm_q_im_idx + i];
+    }
+  
+    return q_result;
+}
+
+async function solve_ldlh_soa_js(cpu_A_half, cpu_b) {
+    const response = await fetch('data:application/wasm;base64,' + ldlh2_c_wasm);
+    const bytes = await response.arrayBuffer();
+    
+    const M = cpu_b.length / 2; 
+    const halfSize = (M * (M + 1)) / 2;
+
+    const baseOffset = 0; 
+
+    // NAPRAWIONE WSKAŹNIKI: Każdy segment SoA ma precyzyjnie wydzielone i niezależne miejsce
+    const ptr_A_re = baseOffset;
+    const ptr_A_im = ptr_A_re + halfSize * 4;
+    const ptr_b_re = ptr_A_im + halfSize * 4;
+    const ptr_b_im = ptr_b_re + M * 4;
+    const ptr_D    = ptr_b_im + M * 4;
+    const ptr_q_re = ptr_D    + M * 4; 
+    const ptr_q_im = ptr_q_re + M * 4;
+
+    // Sztywne, stabilne 3.8 GB pamięci WASM (60800 stron)
+    const memory = new WebAssembly.Memory({ 
+        initial: 60800, 
+        maximum: 60800 
+    });
+    
+    const wasmModule = await WebAssembly.instantiate(bytes, { env: { memory } });
+    const wasm = wasmModule.instance.exports;
+
+    const wasmFloat32View = new Float32Array(memory.buffer);
+
+    // Kopiowanie danych wejściowych z formatu Interleaved do czystego formatu SoA
+    const wasm_A_re_idx = ptr_A_re / 4;
+    const wasm_A_im_idx = ptr_A_im / 4;
+    for (let k = 0; k < halfSize; k++) {
+        wasmFloat32View[wasm_A_re_idx + k] = cpu_A_half[k * 2];
+        wasmFloat32View[wasm_A_im_idx + k] = cpu_A_half[k * 2 + 1];
+    }
+
+    const wasm_b_re_idx = ptr_b_re / 4;
+    const wasm_b_im_idx = ptr_b_im / 4;
+    for (let k = 0; k < M; k++) {
+        wasmFloat32View[wasm_b_re_idx + k] = cpu_b[k * 2];
+        wasmFloat32View[wasm_b_im_idx + k] = cpu_b[k * 2 + 1];
+    }
+
+    // Wywołanie z poprawnymi, nienakładającymi się adresami bajtowymi
+    solve_ldlh_soa(
+        M,
+        ptr_A_re, ptr_A_im,
+        ptr_b_re, ptr_b_im,
+        ptr_D,
+        ptr_q_re, ptr_q_im
+    );
+
+    // Odbiór wyników końcowych
+    const q_result = Array(M).fill(null).map(() => ({ re: 0, im: 0 }));
+    const wasm_q_re_idx = ptr_q_re / 4;
+    const wasm_q_im_idx = ptr_q_im / 4;
+
+    for (let i = 0; i < M; i++) {
+        q_result[i].re = wasmFloat32View[wasm_q_re_idx + i];
+        q_result[i].im = wasmFloat32View[wasm_q_im_idx + i];
+    }
+  
+    return q_result;
+}
 
 `;
 
@@ -7826,7 +8263,7 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
 
     var S;
     if (solver != 3) {
-      if (solver != 4 && solver != 5) {
+      if (solver != 4 && solver != 5 && solver!=6) {
         S = new Array(m);
         if (method == 3) { // KRM
 
@@ -7879,7 +8316,7 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
             }
           }
         }
-      } // not if solver==4 (LDLt) or solver==5 (webgpu-gmres)
+      } // not if solver==4 (LDLt) or solver==5 (webgpu-gmres) or solver==6 (webgpu-lsq)
 
       if (method != 3 && method != 4) {
         if (solver == 1) {
@@ -7901,7 +8338,11 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
         } else if (solver == 5) { // webgpu_gmres
           postMessage("[ WebGPU-gmres (1) solver]");
           gpuCtx = await webgpu_init(x, k);
-          postMessage("[ WebGPU-gmres (2) solver]");
+          //postMessage("[ WebGPU-gmres (2) solver]");
+        } else if (solver == 6) { // webgpu_lsq
+          postMessage("[ WebGPU-lsq (1) solver]");
+          //gpuCtx = await webgpu_init(x, k);
+          //postMessage("[ WebGPU-lsq (2) solver]");
         } else {
           postMessage("[ gmres0 wasm solver]");
           gmres0Wasm(S);
@@ -7956,7 +8397,7 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
           } else {
             f = x.map(p => new Complex(-Math.cos(k * dot3(p, d)), -Math.sin(k * dot3(p, d))));
           }
-        } else if (method == 2) { // MFS
+        } else if (method == 2 || solver == 6) { // MFS || ESM
           f = x2.map(p => new Complex(-Math.cos(k * dot3(p, d)), -Math.sin(k * dot3(p, d))));
         } else { // KRM and IPA
 
@@ -7974,7 +8415,16 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
             phi = ldlt1Wasm(f);
           } else if (solver == 5) {
             var q0 = kirchhoff(v, e, k, d, f);
-            phi = await webgpu_gmres(gpuCtx, gmres, f, q0);
+            phi = await webgpu_gmres(gpuCtx, gmres, f, q0, k);
+          } else if (solver == 6) {
+            //var q0 = kirchhoff(v, e, k, d, f);
+            var {x, x2} = generateMfsPoints(v, e, c0/f0/20);
+            var esm_div = 2;   // default reduction factor for ESM method
+            if(x2.length>8192) {
+               esm_div = Math.max(2,1+Math.ceil(x2.length/8192));
+            }
+            x2 = x2.filter((_, index) => (index % esm_div) === 0);
+            phi = await lsq2_webgpu(x, x2, f, k);
           } else {
             phi = gmres1Wasm(f);
           }
@@ -8017,6 +8467,12 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
           if(solver==5) {
              //psc = await webgpu_farField(gpuCtx, phi);        // simplified solution
              psc = await webgpu_farField2(gpuCtx, phi, r1, k);  // full solution
+          } else if(solver==6) {
+             function greenFar(r1, x, k, q) { 
+                return r1.map(ri=>cdot(x.map(xi=>{var kd=k*dot(xi,ri),c=1/4/Math.PI; return {re:Math.cos(kd)*c,im:-Math.sin(kd)*c}}), q)); 
+             }
+             //psc = greenFar(r1, x2, k, phi);
+             psc = await webgpu_farField3(x2, phi, r1, k);  // full solution
           } else {
             const Sff = r1.map(v => x.map(xj =>
               new Complex(
@@ -8058,7 +8514,7 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
 
         if (thmin == thmax && phmin == phmax && fmin == fmax && method != 3 && method != 4) { // when no in scan mode
           // Near field calculations
-if(solver==5) {
+if(solver==5 || solver==6) {
           // use WebGPU
           var nn = rest?.nf_n || 5, // co ile stopni
             NR = rest?.nf_m || 15,
@@ -8081,8 +8537,11 @@ if(solver==5) {
               let rotated = mul(Ry(ph0), [[px], [py], [pz]]);
               return [rotated[0][0], rotated[1][0], rotated[2][0]];
             });
-            var psc1 = await webgpu_farField2(gpuCtx, phi, grid1, k);
-            
+            if(solver==5) {
+              var psc1 = await webgpu_farField2(gpuCtx, phi, grid1, k);
+            } else {
+              var psc1 = await webgpu_farField3(x2, phi, grid1, k);
+            }
             s += '## ';
             for (var i = 0; i < psc1.length; i++) {
               s += Math.sqrt(psc1[i].re ** 2 + psc1[i].im ** 2).toFixed(6) + ' ';
