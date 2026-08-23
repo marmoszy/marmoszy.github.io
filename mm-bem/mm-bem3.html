@@ -712,9 +712,9 @@ along both direction angles.
 <select id="solver" onchange="select()" style="background-color:#ffe6e6">
   <option value="1">Gauss</option>
   <option value="2">Blocked LU</option>
-  <option value="3" selected>ACA-GMRES</option>
+  <option value="3">ACA-GMRES</option>
   <option value="4">LDLt</option>
-  <option value="5" id="webgpu-gmres">WebGPU-GMRES</option>
+  <option value="5" id="webgpu-gmres" selected>WebGPU-GMRES</option>
   <option value="6" id="webgpu-lsq">WebGPU-LSQ</option>
 </select>
 </span>
@@ -2306,6 +2306,7 @@ function main() {
   if(!navigator.gpu) {
     document.getElementById("webgpu-gmres").disabled=true;
     document.getElementById("webgpu-lsq").disabled=true;
+    document.getElementById("solver").value = 3;
   }
 }
 
@@ -3265,8 +3266,9 @@ function change1() {
 		var el = document.getElementById("txt2");
 		if(el && el.value.startsWith("# abs(p_sc)")) {el.value="";}
                 if(solver<3 && fx.length>10000) solver=3;
-                if(solver==3 && fx.length>12250) solver=5;
+                if(solver==3 && fx.length>12250) solver=(navigator.gpu)?5:4;
                 if(solver==4 && fx.length>22250 && navigator.gpu) solver=5;
+                if(method==2 && fx.length>10000 && navigator.gpu) solver=6;
                 if((solver==5 || solver==6) && !navigator.gpu) solver=3;
 		if(fx.length<=((solver==5||solver==6)?256000:solver==4?22250:solver==3?12250:10000)) {
 			worker.postMessage(JSON.stringify([lines,th,f0,c0,ph,rr,m,solver,rest]));
@@ -8419,9 +8421,11 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
           } else if (solver == 6) {
             //var q0 = kirchhoff(v, e, k, d, f);
             var {x, x2} = generateMfsPoints(v, e, c0/f0/20);
-            var esm_div = 2;   // default reduction factor for ESM method
-            if(x2.length>8192) {
-               esm_div = Math.max(2,1+Math.ceil(x2.length/8192));
+            if(method==1) x2=x; // if BEM
+            var esm_div = 2;    // default reduction factor (ESM with lsq method)
+            var esm_max = 5000; // default max size (ESM with lsq method)
+            if(x2.length>esm_max) {
+               esm_div = Math.max(2,1+Math.ceil(x2.length/esm_max));
             }
             x2 = x2.filter((_, index) => (index % esm_div) === 0);
             phi = await lsq2_webgpu(x, x2, f, k);
@@ -8773,7 +8777,7 @@ var th = 270;
 var ph = 0;
 var engine = 'wasm_soft_worker'; // 'py_soft_worker';
 var method = 1;
-var solver = 3;
+var solver = 5;
 
 url_params();
 
