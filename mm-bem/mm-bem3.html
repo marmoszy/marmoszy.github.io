@@ -114,16 +114,20 @@ Full mm-bem package contains source codes in different programming languages for
 <select id="target" onchange="select0();select();" style="background-color:#e6fff2;max-width:360px;">
 <optgroup id="prevmesh" label="Generated 3D backscattering length">
 </optgroup>
-<optgroup label="Spheres">
+<optgroup label="Sphere">
   <option value="[sphere(0.01905,4),[0,0,0]]" selected>Low resolution sphere</option>
   <option value="[sphere(0.01905,6),[0,0,0]]">Medium resolution sphere</option>
   <option value="[sphere(0.01905,8),[0,0,0]]">High resolution sphere</option>
   <option value="soft_sphere(0.01905)">Exact sphere (theory)*</option>
   <option value="[sphere(0.01905,6),[0,0,0],mul(Rz(-22),Sxyz(3,0.3,1))]">Scaled sphere</option>
+</optgroup>
+<optgroup label="Multiple spheres">
   <option value="[sphere(0.005),[-0.01,0,0]],|[sphere(0.005),[0.01,0,0]]">Two spheres</option>
   <option value="[sphere(0.005),[-0.01,0,0]],|[sphere(0.005),[0.01,0,0]],|[sphere(0.005),[0,-0.01,0]],|[sphere(0.005),[0,0.01,0]]">Four spheres</option>
   <option value="[sphere(0.005),[-0.01,0,-0.01]],|[sphere(0.005),[0.01,0,-0.01]],|[sphere(0.005),[0,-0.01, -0.01]],|[sphere(0.005),[0, 0.01, -0.01]],|[sphere(0.005),[-0.01,0,0.01]],|[sphere(0.005),[0.01,0,0.01]],|[sphere(0.005), [0,-0.01,0.01]],|[sphere(0.005),[0,0.01,0.01]]">Eight spheres</option>
-  <option value="[spheres(0.0055,4,[3,3,3],[0.004,0.004,0.004])]">Multiple spheres</option>
+  <option value="[spheres(0.0055,4,[3,3,3],[0.004,0.004,0.004])]">3x3x3 cube lattice</option>
+  <option value="[spheres(0.0055,4,[10,5,10],[0.004,0.004,0.004])]">10x5x10 rectangular lattice</option>
+  <option value="[spheres(0.0055,4,[10,-5,10],[0.004,0.004,0.004])]">10x5x10 lens lattice</option>
 </optgroup>
 <optgroup label="Swimmbladder examples">
   <option value="[msh(YFT_752x1500_sb)]">Yellowfin_Tuna_752x1500_sb</option>
@@ -714,8 +718,8 @@ along both direction angles.
   <option value="2">Blocked LU</option>
   <option value="3">ACA-GMRES</option>
   <option value="4">LDLt</option>
-  <option value="5" id="webgpu-gmres" selected>WebGPU-GMRES</option>
   <option value="6" id="webgpu-lsq">WebGPU-LSQ</option>
+  <option value="5" id="webgpu-gmres" selected>WebGPU-GMRES</option>
 </select>
 </span>
 &nbsp;&nbsp;ctrl-shift S
