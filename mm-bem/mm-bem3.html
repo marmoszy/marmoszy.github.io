@@ -822,7 +822,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(22.8.2026)" style="text-align:center">mm-bem v3.02 (2025-2026)</p>
+<p title="(23.8.2026)" style="text-align:center">mm-bem v3.03 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -3265,10 +3265,10 @@ function change1() {
 		var el = document.getElementById("txt2");
 		if(el && el.value.startsWith("# abs(p_sc)")) {el.value="";}
                 if(solver<3 && fx.length>10000) solver=3;
-                if(solver==3 && fx.length>12250) solver=4;
+                if(solver==3 && fx.length>12250) solver=5;
                 if(solver==4 && fx.length>22250 && navigator.gpu) solver=5;
                 if((solver==5 || solver==6) && !navigator.gpu) solver=3;
-		if(fx.length<=((solver==5||solver==6)?256000:solver==4?22250:solver==3?12250:exp==1?10000:5500)) {
+		if(fx.length<=((solver==5||solver==6)?256000:solver==4?22250:solver==3?12250:10000)) {
 			worker.postMessage(JSON.stringify([lines,th,f0,c0,ph,rr,m,solver,rest]));
 		} else {
 			document.getElementById("txt").value="The mesh too large for this browser solver!"
