@@ -8481,11 +8481,11 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
           gpuCtx = await webgpu_init(x, k);
           //postMessage("[ WebGPU-gmres (2) solver]");
         } else if (solver == 6) { // webgpu_lsq
-          postMessage("[ WebGPU-lsq (1) solver]");
+          postMessage("[ WebGPU-lsq-ldlh (1) solver]");
           //gpuCtx = await webgpu_init(x, k);
           //postMessage("[ WebGPU-lsq (2) solver]");
         } else if (solver == 7) { // webgpu_lsq_gmres
-          postMessage("[ WebGPU-lsq=gmres (1) solver]");
+          postMessage("[ WebGPU-lsq-gmres (1) solver]");
           //gpuCtx = await webgpu_init(x, k);
           //postMessage("[ WebGPU-lsq (2) solver]");
         } else {
