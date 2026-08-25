@@ -793,7 +793,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <input type="number" step="0.1" min="0.2" id="r2" title=
 "r2 - near field distance"
 onchange="nf_r2=parseFloat(this.value);nf_m=nf_r2/nf_r0;select3();" value="0.4" style="width:48px"/>
-&nbsp;
+&nbsp;ctrl-shift F
 <br><br>
 </span>
 
@@ -1085,6 +1085,12 @@ document.onkeydown = function(e) {
   }
   if(e.keyCode==72 && e.ctrlKey && !e.shiftKey) { // ctrl H
 	  e.preventDefault(); alert(about);
+  }
+  if(e.keyCode==70 && e.ctrlKey && e.shiftKey) { // ctrl-shift F
+	e.preventDefault(); var e=document.getElementById("r2"); 
+        var d=parseFloat(e.value)+0.1;
+        if(d.toFixed(3)==1) d=0.2; e.value=nf_r2=d; nf_m=nf_r2/nf_r0;
+        select();
   }
   if(e.keyCode==73 && e.ctrlKey && e.shiftKey) { // ctrl-shift I
 	e.preventDefault(); var m=document.getElementById("method"); m.value=(m.value!=4)?4:1; select();
@@ -2919,7 +2925,7 @@ function soft_sphere(aa, f00, c00, th00, ph00, r00, b00) { // 360 angles, return
 	var rmin = 0.004, rmax=rmin*NR;
 	var RR = Array.from({length:NR},(_,i)=>rmin*(i+1)); // the same code as in calculation worker
 	//console.log("soft_sphere:",2*Math.PI*f0/c0,a,RR)
-	s += '## # '+(NR)+'x'+(NT/nn)+' r='+(rmin)+':'+(rmax)+' c=[0,0,0] ph='+(ph0)+'\\n';
+	s += '## # '+(NR)+'x'+(NT/nn)+' r='+(rmin)+':'+(rmax).toFixed(3)+' c=[0,0,0] ph='+(ph0)+'\\n';
 	for(var j=0;j<RR.length;j++) {
 		s += '## ';
 		for(var i=0;i<=NT;i+=nn) {
@@ -8684,7 +8690,7 @@ if(solver==5 || solver==6 || solver==7) {
             cx = rest?.nf_cx || 0, cy = rest?.nf_cy || 0, cz = rest?.nf_cz || 0,
             RR = Array.from({ length: NR }, (_, i) => r0 * (i + 1));
           
-          s += '## # ' + NR + 'x' + (NT / nn) + ' r=' + (r0) + ':' + (r0 * NR) + ' c=[' + cx + ',' + cy + ',' + cz + ']' + ' ph=' + (ph0) + '\n';
+          s += '## # ' + parseFloat(NR.toPrecision(5)).toString() + 'x' + (NT / nn) + ' r=' + (r0) + ':' + parseFloat((r0 * NR).toPrecision(3)).toString() + ' c=[' + cx + ',' + cy + ',' + cz + ']' + ' ph=' + (ph0) + '\n';
           s += '\n';
 
           const points_per_ring = NT / nn;
