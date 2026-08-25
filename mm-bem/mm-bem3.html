@@ -788,6 +788,15 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <br><br>
 </span>
 
+<span id="hr2" hidden1>
+<label for="r2">Near field distance: <i>r<sub>2</sub></i> =</label> 
+<input type="number" step="0.1" min="0.2" id="r2" title=
+"r2 - near field distance"
+onchange="nf_r2=parseFloat(this.value);nf_m=nf_r2/nf_r0;select3();" value="0.4" style="width:48px"/>
+&nbsp;
+<br><br>
+</span>
+
 <span id="connect">
 <label for="echoSMs_url" title="EchoSMs WEB API URL"><a href="https://ices-tools-dev.github.io/echoSMs/datastore_API/">EchoSMs anatomical data store</a> endpoint URL<a href="mm-echosms2.html" style="text-decoration:none" title="All specimens preview">*</a>:</label>
 <br><input id="echoSMs_url" type="text" value="" style="width:440px;background-color:#e6fff2;"/>
