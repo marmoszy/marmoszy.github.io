@@ -961,7 +961,7 @@ var mshcolor2 = "rgba(11,34,174,0.25)";
 var axes_onoff = 1, box_onoff = 1, circle_onoff = 1; mesh_onoff = 2; grid_onoff = 1;
 var img_onoff = 0, img_was_on = 0; 
 
-var nf_r0 = 0.005, nf_m = 50, nf_n = 5, nf_ph = 0;  // near field params
+var nf_r0 = 0.005, nf_m = 80, nf_n = 5, nf_ph = 0;  // near field params
 var nf_cx = 0, nf_cy = 0, nf_cz = 0;  // center of annular ring
 var nf_c0 = [nf_cx, nf_cy, nf_cz]; 
 var nf_r1 = nf_r0, nf_r2 = nf_r0*nf_m; // params of annular ring r0:r1:r2
@@ -969,6 +969,7 @@ var krm_ang = 45;  // krm off-axis angle
 var ipa_iter = 5;
 var band = 0;      // band calculation if band nq 0
 var exp = 0;
+var red_lvl = 1.1;
 
 //var wh = Math.max(window.innerHeight-150,400);
 var wh = document.getElementById("svg1").getAttribute("width")-0;
@@ -1830,6 +1831,7 @@ var colormap = [ // Matlab colormap
 ];
 function cmapMatlab() {
  return function(v) {
+  if(v>red_lvl) {return [255,0,0];}
   var n=6.4;
   v = 3*Math.floor(n*Math.floor(64/n*(v>0.9999?0.9999:v<0?0:v)));
   return [colormap[v],colormap[v+1],colormap[v+2]];
