@@ -828,7 +828,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(24.8.2026)" style="text-align:center">mm-bem v3.04 (2025-2026)</p>
+<p title="(25.8.2026)" style="text-align:center">mm-bem v3.05 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -961,7 +961,7 @@ var mshcolor2 = "rgba(11,34,174,0.25)";
 var axes_onoff = 1, box_onoff = 1, circle_onoff = 1; mesh_onoff = 2; grid_onoff = 1;
 var img_onoff = 0, img_was_on = 0; 
 
-var nf_r0 = 0.004, nf_m = 15, nf_n = 5, nf_ph = 0;  // near field params
+var nf_r0 = 0.005, nf_m = 50, nf_n = 5, nf_ph = 0;  // near field params
 var nf_cx = 0, nf_cy = 0, nf_cz = 0;  // center of annular ring
 var nf_c0 = [nf_cx, nf_cy, nf_cz]; 
 var nf_r1 = nf_r0, nf_r2 = nf_r0*nf_m; // params of annular ring r0:r1:r2
@@ -8664,7 +8664,7 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
 
         if (thmin == thmax && phmin == phmax && fmin == fmax && method != 3 && method != 4) { // when no in scan mode
           // Near field calculations
-if(solver==5 || solver==6) {
+if(solver==5 || solver==6 || solver==7) {
           // use WebGPU
           var nn = rest?.nf_n || 5, // co ile stopni
             NR = rest?.nf_m || 15,
