@@ -837,7 +837,7 @@ onchange="nf_r2=parseFloat(this.value);nf_m=nf_r2/nf_r0;select3();" value="0.4" 
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es"></a>
-<p title="(25.8.2026)" style="text-align:center">mm-bem v3.05 (2025-2026)</p>
+<p title="(26.8.2026)" style="text-align:center">mm-bem v3.06 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -968,7 +968,7 @@ var axcolors = ["red", "green", "blue"];
 var mshcolor = "#0b22ae";
 var mshcolor2 = "rgba(11,34,174,0.25)";
 var axes_onoff = 1, box_onoff = 1, circle_onoff = 1; mesh_onoff = 2; grid_onoff = 1;
-var img_onoff = 0, img_was_on = 0; 
+var img_onoff = 2, img_was_on = 1; 
 
 var nf_r0 = 0.005, nf_m = 80, nf_n = 5, nf_ph = 0;  // near field params
 var nf_cx = 0, nf_cy = 0, nf_cz = 0;  // center of annular ring
@@ -2965,7 +2965,7 @@ function js_soft_sphere() {
 			var el=document.getElementById("txt2");
 			if(el.value.length==0 || el.value.startsWith("# re(p_i)") || el.value.startsWith("# abs(p_sc)")) {
 				if(s2) {
-					if(img_was_on) {img_onoff = 1; imag_was_on = 0; } // cancel flag;
+					if(img_was_on) {img_onoff = 2; imag_was_on = 0; } // cancel flag;
 					var s2a = s2.map(s=>s.slice(3)).join('\n'); // skip "## "
 					document.getElementById("txt2").value = "# abs(p_sc)\n"+s2a;
 					update_near_field(s2a);
@@ -3224,7 +3224,7 @@ function change1() {
 					//document.getElementById("txt2").value = "# re(p_i) im(p_i) re(v_n) im(v_n)\n"+
 					//	s1.map(s=>s.slice(1)).join('\n');
 					if(s2) {
-						if(img_was_on) {img_onoff = 1; imag_was_on = 0; } // cancel flag;
+						if(img_was_on) {img_onoff = 2; imag_was_on = 0; } // cancel flag;
 						var s2a = s2.map(s=>s.slice(3)).join('\n'); // skip "## "
 						document.getElementById("txt2").value = "# abs(p_sc)\n"+s2a;
 						update_near_field(s2a);
@@ -3285,7 +3285,7 @@ function change1() {
 		plot("P","#");			 	// clear calculation plot
 		var el = document.getElementById("svgimg");
 		if(el) {el.setAttribute("href","data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=")} // clear image
-		if(img_onoff) {img_was_on = 1; img_onoff=0; update();}
+		if(img_onoff) {img_was_on = 2; img_onoff=0; update();}
 		var el = document.getElementById("txt2");
 		if(el && el.value.startsWith("# abs(p_sc)")) {el.value="";}
                 if(solver<3 && fx.length>10000) solver=3;
