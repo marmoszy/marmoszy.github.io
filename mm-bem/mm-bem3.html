@@ -2339,6 +2339,7 @@ const mshname="YFT_swimbladder_origin.msh";
 async function init_msh_file() {
   try {
      const resp = await fetch(mshname);
+     if (!resp.ok) return;
      YFT_7502x15000_sb = await resp.text();
      const select = document.getElementById("Swimmbladder_examples");
      if(select) {
