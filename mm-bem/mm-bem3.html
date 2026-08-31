@@ -130,7 +130,7 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="[spheres(0.0055,4,[10,5,10],[0.004,0.004,0.004])]">10x5x10 rectangular lattice</option>
   <option value="[spheres(0.0055,4,[10,-5,10],[0.004,0.004,0.004])]">10x5x10 lens lattice</option>
 </optgroup>
-<optgroup label="Swimmbladder examples">
+<optgroup id="Swimmbladder_examples" label="Swimmbladder examples">
   <option value="[msh(YFT_752x1500_sb)]">Yellowfin_Tuna_752x1500_sb</option>
   <option value="[msh(YFT_1502x3000_sb)]">Yellowfin_Tuna_1502x3000_sb</option>
   <option value="[msh(Atun_B314_sb)]">Atlantic_Bluefin_Tuna_1322_2640_sb</option>
@@ -2340,7 +2340,7 @@ async function init_msh_file() {
   try {
      const resp = await fetch(mshname);
      YFT_7502x15000_sb = await resp.text();
-     const select = document.getElementById("");
+     const select = document.getElementById("Swimmbladder_examples");
      if(select) {
        const option = document.createElement("option");
        option.value = "[msh(YFT_7502x15000_sb)]";
