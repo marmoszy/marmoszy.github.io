@@ -394,6 +394,7 @@ function on_reduce() {reduce_msh^=1; change();}
 <circle name="axis2d" cx="200" cy="200" r="105" stroke="gray" fill="none" stroke-dasharray="1,1"/>	
 <circle name="axis2d" cx="200" cy="200" r="152.5" stroke="gray" fill="none" stroke-dasharray="1,1"/>	
 <circle name="axis2d" cx="200" cy="200" r="200" stroke="black" fill="none"/>
+<text id="nf_r2" x="205" y="14" fill="white">0.4</text>
 <text name="axis2d" x="205" y="215">-60</text>
 <text name="axis2d" x="245" y="215">-50</text>
 <text name="axis2d" x="295" y="215">-40</text>
@@ -792,7 +793,7 @@ onchange="select3()" value="1" style="width:48px"/> &lambda;
 <label for="r2">Near field distance: <i>r<sub>2</sub></i> =</label> 
 <input type="number" step="0.1" min="0.2" id="r2" title=
 "r2 - near field distance"
-onchange="nf_r2=parseFloat(this.value);nf_m=nf_r2/nf_r0;select3();" value="0.4" style="width:48px"/>
+onchange="nf_r2=parseFloat(this.value);document.getElementById('nf_r2').textContent=nf_r2;nf_m=nf_r2/nf_r0;select3();" value="0.4" style="width:48px"/>
 &nbsp;ctrl-shift F
 <br><br>
 </span>
@@ -1089,7 +1090,8 @@ document.onkeydown = function(e) {
   if(e.keyCode==70 && e.ctrlKey && e.shiftKey) { // ctrl-shift F
 	e.preventDefault(); var e=document.getElementById("r2"); 
         var d=parseFloat(e.value)+0.1;
-        if(d.toFixed(3)==1) d=0.2; e.value=nf_r2=d; nf_m=nf_r2/nf_r0;
+        if(d.toFixed(3)==1) d=0.2; e.value=nf_r2=Number(d.toFixed(3)); nf_m=nf_r2/nf_r0;
+        document.getElementById("nf_r2").textContent=nf_r2;
         select();
   }
   if(e.keyCode==73 && e.ctrlKey && e.shiftKey) { // ctrl-shift I
