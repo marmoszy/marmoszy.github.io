@@ -394,12 +394,12 @@ function on_reduce() {reduce_msh^=1; change();}
 <circle name="axis2d" cx="200" cy="200" r="105" stroke="gray" fill="none" stroke-dasharray="1,1"/>	
 <circle name="axis2d" cx="200" cy="200" r="152.5" stroke="gray" fill="none" stroke-dasharray="1,1"/>	
 <circle name="axis2d" cx="200" cy="200" r="200" stroke="black" fill="none"/>
-<text id="nf_r2" x="205" y="14" fill="white">0.4</text>
-<text name="axis2d" x="205" y="215">-60</text>
-<text name="axis2d" x="245" y="215">-50</text>
-<text name="axis2d" x="295" y="215">-40</text>
-<text name="axis2d" x="342" y="215">-30</text>
-<text name="axis2d" x="380" y="215">-20</text>
+<text id="nf_r2" x="205" y="14" fill="white">0.4<title>Near field image range r₂</title></text>
+<text name="axis2d_r" x="205" y="215">-60</text>
+<text name="axis2d_r" x="245" y="215">-50</text>
+<text name="axis2d_r" x="295" y="215">-40</text>
+<text name="axis2d_r" x="342" y="215">-30</text>
+<text name="axis2d_r" x="380" y="215">-20</text>
 <text name="axis2d" x="405" y="205">0</text>
 <g transform="rotate(-30,200,200)"><text name="axis2d" x="405" y="205">30</text></g>
 <g transform="rotate(-60,200,200)"><text name="axis2d" x="405" y="205">60</text></g>
@@ -838,7 +838,7 @@ onchange="nf_r2=parseFloat(this.value);document.getElementById('nf_r2').textCont
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es" onerror="this.style.display='none';"></a>
-<p title="(30.8.2026)" style="text-align:center">mm-bem v3.08 (2025-2026)</p>
+<p title="(1.9.2026)" style="text-align:center">mm-bem v3.09 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -1983,6 +1983,10 @@ function update_near_field(s) {
 			if(!img_onoff) el.style.opacity=0;
 		}
 	}
+
+  var els = document.querySelectorAll('[name="axis2d_r"]');
+  els.forEach(el => el.setAttribute("fill", (img_onoff)?"#ff6633":"black"));
+
 }
 
 // ---- update functions
@@ -2029,7 +2033,9 @@ function update_axes() {
   for(var i=0;i<els.length;i++) {
 	  els[i].style.visibility = grid_onoff?"":"hidden";
   }
-
+  console.log("update_axes:","img_onoff =",img_onoff,"img_was_on",img_was_on);
+  var els = document.querySelectorAll('[name="axis2d_r"]');
+  els.forEach(el => el.setAttribute("fill", (img_onoff)?"#ff6633":"black"));
 }
 
 function update_wave_direction(svg,th,ph,f0,c0) { // using global r0max!
@@ -3313,7 +3319,7 @@ function change1() {
 		plot("P","#");			 	// clear calculation plot
 		var el = document.getElementById("svgimg");
 		if(el) {el.setAttribute("href","data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=")} // clear image
-		if(img_onoff) {img_was_on = 2; img_onoff=0; update();}
+		if(img_onoff) {img_was_on = 2; img_onoff = 0; update();}
 		var el = document.getElementById("txt2");
 		if(el && el.value.startsWith("# abs(p_sc)")) {el.value="";}
                 if(solver<3 && fx.length>10000) solver=3;
