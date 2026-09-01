@@ -2343,12 +2343,12 @@ async function init_msh_file() {
      if (!resp.ok) return;
      const encoding = resp.headers.get("content-encoding");
      if(encoding && encoding.includes("gzip")) {
+       YFT_7502x15000_sb = await resp.text();
+     } else {
        const compressedStream = resp.body;
        const decompressor = new DecompressionStream("gzip");
        const decompressedStream = compressedStream.pipeThrough(decompressor);
        YFT_7502x15000_sb = await new Response(decompressedStream).text();
-     } else {
-       YFT_7502x15000_sb = await resp.text();
      }
      const select = document.getElementById("Swimmbladder_examples");
      if(select) {
