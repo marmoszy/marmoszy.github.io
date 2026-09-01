@@ -2328,7 +2328,8 @@ function main() {
 
   if(!navigator.gpu) {
     document.getElementById("webgpu-gmres").disabled=true;
-    document.getElementById("webgpu-lsq").disabled=true;
+    document.getElementById("webgpu-lsq-ldlh").disabled=true;
+    document.getElementById("webgpu-lsq-gmres").disabled=true;
     document.getElementById("solver").value = 3;
   }
   init_msh_file();
@@ -2340,7 +2341,15 @@ async function init_msh_file() {
   try {
      const resp = await fetch(mshname);
      if (!resp.ok) return;
-     YFT_7502x15000_sb = await resp.text();
+     const encoding = resp.headers.get("content-encoding");
+     if(encoding && encoding.includes("gzip")) {
+       const compressedStream = resp.body;
+       const decompressor = new DecompressionStream("gzip");
+       const decompressedStream = compressedStream.pipeThrough(decompressor);
+       YFT_7502x15000_sb = await new Response(decompressedStream).text();
+     } else {
+       YFT_7502x15000_sb = await resp.text();
+     }
      const select = document.getElementById("Swimmbladder_examples");
      if(select) {
        const option = document.createElement("option");
