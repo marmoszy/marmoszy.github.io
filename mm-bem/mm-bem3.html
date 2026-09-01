@@ -181,7 +181,7 @@ Full mm-bem package contains source codes in different programming languages for
 var reduce_msh=0;
 function on_reduce() {reduce_msh^=1; change();}
 </script>
-<br><span style="margin-left:32px"></span> or <input accept=".msh,.stl,.json,.tsv" id="openfile" title="Load from msh (2.0), stl or echoSMs json" type="file" onchange="readFile(this);" multiple/>
+<br><span style="margin-left:32px"></span> or <input accept=".msh,.stl,.json,.tsv,.gz" id="openfile" title="Load from msh (2.0), stl or echoSMs json" type="file" onchange="readFile(this);" multiple/>
 
 <textarea id="obj" style="width:438;height:92" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905,4),[0,0,0]]</textarea>
 
@@ -2636,23 +2636,29 @@ function readFile(e) {  // local file reader
 	let obj_old=document.getElementById("obj").value;
 	let msh_old=document.getElementById("msh").value;
 	for(var i=0; i<N; i++) {
-		var file = e.files[i];
+		let file = e.files[i];
 		if (!file) return;
 		if(i==0) {
 			document.getElementById("obj").value="";
 			document.getElementById("msh").value="";
 		}
 		var reader = new FileReader();
-		reader.onload = function(e) {
+		reader.onload = async function(e) {
 			//let result = e.target.result;
-			const buffer = e.target.result;
-			const bytes = new Uint8Array(buffer);
+			var buffer = e.target.result;
+			var bytes = new Uint8Array(buffer);
+                        console.log("reader.onload:",file.name,bytes[0],bytes[1]);
+                        if(bytes.length >= 2 && bytes[0] === 0x1F && bytes[1] === 0x8B) {
+                           const stream = new Blob([buffer]).stream().pipeThrough(new DecompressionStream('gzip'));
+                           buffer = await new Response(stream).arrayBuffer(); 
+			   bytes = new Uint8Array(buffer);
+                        }
 			let result = "";
 			for (let i = 0; i < bytes.length; i++) {
 				result += String.fromCharCode(bytes[i]);
 			}
 			k++;
-			if(file.name.endsWith(".stl")) {
+			if(file.name.endsWith(".stl")||file.name.endsWith(".stl.gz")) {
 				if(result.substring(0,5)=="solid") {  // console.log("STL ascii file");
 					document.getElementById("msh").value += stla2msh(result);
 				} else {                              // console.log("STL binary file");
@@ -2684,8 +2690,8 @@ function readFile(e) {  // local file reader
 			}
 			if(k==N) change(); // start calculations after reading
 		};
-		if(file.name.endsWith(".msh")||file.name.endsWith(".stl")||file.name.endsWith(".json")||file.name.endsWith(".tsv")) {
-			document.getElementById("obj").value += ' '+file.name;
+		if(file.name.endsWith(".msh")||file.name.endsWith(".stl")||file.name.endsWith(".json")||file.name.endsWith(".tsv")||file.name.endsWith(".msh.gz")||file.name.endsWith(".stl.gz")) {
+			document.getElementById("obj").value += ' '+file.name.replace(/\.gz$/,'');
 			//reader.readAsText(file);
 			reader.readAsArrayBuffer(file);
 		} else {
