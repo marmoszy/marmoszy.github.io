@@ -1,0 +1,224 @@
+// Piezoelectric cylindrical disk 3.8cm x 1.41cm 
+// matching layers, cork backing and water with sonic crystals
+// MM 30.03.2020, 9.8.2024, 15.10.2024, 10.3.2025
+//     z ^ 
+//       |-------15--------o15-o--------15-------
+//       |                 |   |                 |
+//   T5  4      water(5)   0(5)0       (5)       15
+//       |                 |   |                 |
+//      -o--------5--------o-5-o--------0--------|
+//   T2  4    EL217C(2)    2(2)9       (5)       15
+//      -o--------3--------o-0-o--------0--------|
+//       |                 |   |                 |
+//   T1  4    PIC255(1)    2(2)9       (5)       15
+//       |                 |   |                 |           x
+//    0 -o--------1--------o-0-o--------0--------|---------->
+//   T3  4    TD1049(3)    2(2)9       (5)       15
+//      -o--------6--------o-6-o--------0--------|
+//   T4  4    EL217C(2)    2(2)9       (5)       15
+//      -o--------8--------o-8-o--------0--------|
+//       |                 |   |                 |
+//   T5  4     water(5)    0(5)0       (5)       15
+//       |                 |   |                 |
+//       |--------15-------o15-o-------15-------- 
+//       '      R1=D/2     ' R4'       R5      '
+//
+verbosity=0; func Pn=P2; real C=1*20e3;  // Pn-finite element type, C-display coef
+int sonic=0;                             // sonic crystal form: 0-none, 1-steel, 2-air
+// ------ Frequencies ------
+//real ffmin= 40e3, ffmax=160e3, ffstep=0.5e3; // freq range (resonances: 47e3, 85.5e3, 126e3)
+real ffmin=126e3, ffmax=ffmin, ffstep=0.5e3; // one freq  
+// ------ Geometry -------   ML         Bk        MLx       MLz      Wx         Wz
+real R1=0.019, T1=0.0141, T2=0.003, T3=0.0065, R4=0.003, T4=0.02,  R5=0.055, T5=0.15; // dimensions
+real Mx1=14,   Mz1=14,    Mz2=1*8,  Mz3=1*14,  Mx4=1*2, Mz4=1*20, Mx5=1*16, Mz5=4*14; // grid divs
+// ------ Sonic crystals configuration
+real dx6=R1/2,dy6=R1/2,r6=0.0016,T6=T1+(Mz2>0)*T2+dy6;  // steel crystals position
+int nx6=8,ny6=8,n6=1*nx6*ny6;                           // number of steel crystals
+int lw16=16;                                            // label for water steel contact edges
+// ------ Material -------
+complex                           // PIC255(1)
+    c11 = 122.9070e9*(1+1i/58.6), //  elastic
+    c12 =  76.6089e9*(1+1i/58.6),       
+    c13 =  71.1780e9*(1+1i/80),  
+    c33 =  97.0560e9*(1+1i/145), 
+    c44 =  23.5000e9*(1+1i/117),  
+    e31 =  -7.8417,               //  piezoelectric
+    e33 =  13.5583,  
+    e15 =  12.2440,
+    epsS11 = 8.234e-9*(1-1i/50),  //  dielectric
+    epsS33 = 7.580e-9*(1-1i/50);
+complex                           // EL217C(2)
+    a11=2.34476e9*(1+1i/45.61),   //  elastic
+    a12=1.82727e9*(1+1i/45.61), 
+    a44=0.258748e9*(1+1i/45.61); 
+complex                           // TD1049(3)
+    b11=0.401375e9*(1+1i/39.7),   //  elastic
+    b12=0.267948e9*(1+1i/39.7),
+    b44=0.0667138e9*(1+1i/39.7);
+complex                           // ABS(4)
+    d11=5.21438e9*(1+1i/72.52),   //  elastic
+    d12=2.60719e9*(1+1i/72.52),
+    d44=1.30359e9*(1+1i/72.52); 
+real                              // density
+    rho1=7800,                    //  PIC255(1)
+    rho2=1100,                    //  EL217C(2)
+    rho3= 950,                    //  TD1049(3)
+    rho4=1030,                    //  ABS(4)
+    rho5=1000,                    //  water(5)
+	rho6=7800;                    //  steel(6)
+real cf = 1500, // sqrt(2.25e9/rho5); // water(5)
+	 cs = 4530; // sqrt(160e9/rho6);  // steel(6)
+
+// ------- Mesh -----------
+int lw1 = 3+2*(Mz2>0),lw2=1+5*(Mz3>0)+2*(Mz4>0),lw3=2+7*(Mx4>0);  // labels of water contact edges
+int[int] l1=[1,2,3,4],l2=[3,2,lw1,4],l3=[6,2,1,4],l4=[lw2,2,6,4]; // labels of elastic contact edges
+cout << lw1 << "," << lw2 << "," << lw3 << "," << endl;
+mesh Th = square(Mx1,Mz1,[R1*x,T1*y],label=l1,region=1,flags=3),Th0=Th,Th5=Th;     //PIC255
+if (Mz2>0) Th = Th + square(Mx1,Mz2,[R1*x, T1+T2*y],label=l2,region=2,flags=3);    //EL217C
+if (Mz3>0) Th = Th + square(Mx1,Mz3,[R1*x,-T3+T3*y],label=l3,region=3,flags=3);    //TD1049
+if (Mz4>0) Th = Th + square(Mx1,Mz4,[R1*x,-T3-T4+T4*y],label=l4,region=3,flags=3); //EL217C
+
+if (Mz5>0) {                                                                     //water
+  int[int] l15=[lw1,0,15,4], l15a=[lw2,0,15,4], l15b=[0,15,15,0], l15c=[0,15,0,lw3]; 
+  Th5 = square(Mx1,Mz5,[R1*x,T1+T2*(Mz2>0)+T5*y],label=l15,region=5,flags=3);           //1
+
+  if(sonic) { // ------------ MM new - sonic crystals MM 10.3.2025
+    // square(Mx1,Mz5,[R1*x,T1+T2*(Mz2>0)+T5*y],label=l15,region=5,flags=3);
+	border b0(t=0,1) {x=R1*t; y=T1+T2*(Mz2>0)+T5*0; label=l15[0]; } // Th5 equivalent
+    border b1(t=0,1) {x=R1*1; y=T1+T2*(Mz2>0)+T5*t; label=l15[1]; }
+    border b2(t=1,0) {x=R1*t; y=T1+T2*(Mz2>0)+T5*1; label=l15[2]; }
+    border b3(t=1,0) {x=R1*0; y=T1+T2*(Mz2>0)+T5*t; label=l15[3]; }
+	int[int] l15d0=[lw1,0,15,0];
+	// square(Mx4,Mz5,[R1+R4*x,T1+T2*(Mz2>0)+T5*y],label=l15d1,region=5,flags=3)
+    border b10(t=0,1) {x=R1+R4*t; y=T1+T2*(Mz2>0)+T5*0; label=l15d0[0]; }
+    border b11(t=0,1) {x=R1+R4*1; y=T1+T2*(Mz2>0)+T5*t; label=l15d0[1]; }
+    border b12(t=1,0) {x=R1+R4*t; y=T1+T2*(Mz2>0)+T5*1; label=l15d0[2]; }
+	// square(Mx5,Mz5,[R1+R4*(Mx4>0)+R5*x,T1+T2*(Mz2>0)+T5*y],label=l15b
+    border b110(t=0,1) {x=R1+R4*(Mx4>0)+R5*t; y=T1+T2*(Mz2>0)+T5*0; label=l15b[0]; }
+    border b111(t=0,1) {x=R1+R4*(Mx4>0)+R5*1; y=T1+T2*(Mz2>0)+T5*t; label=l15b[1]; }
+    border b112(t=1,0) {x=R1+R4*(Mx4>0)+R5*t; y=T1+T2*(Mz2>0)+T5*1; label=l15b[2]; }
+    
+    int[int] nc(n6); // array for number of crystal border points, negative when empty (16|-16)
+	for(int i=0;i<n6;i++) {nc[i]=(sonic==2?-16:16);} 
+    border cc16(t=0,2*pi;i){x=r6*cos(t)+dx6/2+int(i/ny6)*dx6;y=r6*sin(t)+T6+(i%ny6)*dy6;label=lw16;}
+    //mesh Th55 = buildmesh(b0(Mx1)+b1(Mz5)+b2(Mx1)+b3(Mz5)+cc16(nc),fixedborder=true);
+    //mesh Th55 = buildmesh(b0(Mx1)+b10(Mx4)+b11(Mz5)+b12(Mx4)+ b2(Mx1)+b3(Mz5)+cc16(nc),fixedborder=true); // merging 2 squares 
+	mesh Th55 = buildmesh(b0(Mx1) + (b10(Mx4)+(b110(Mx5)+b111(Mz5)+b112(Mx5))+b12(Mx4)) +
+        b2(Mx1)+b3(Mz5)+cc16(nc),fixedborder=true);             // merging 3 squares 
+	if(sonic==1) {        // steel crystals
+    	int[int] regs(2*n6+2); regs[2*n6]=n6; regs[2*n6+1]=5;   // 5 - water region
+    	for(int i=0;i<n6;i++) {regs[2*i]=i; regs[2*i+1]=6;}     // 6 - steel region
+		Th55 = change(Th55,region=regs);                        // changing all region numbers
+	} else {  // air crystals
+		int[int] regs2=[0,5]; Th55 = change(Th55,region=regs2); // changing region to water
+	}  	// plot(Th5,Th55,dim=2,wait=1);
+    Th5 = Th55; 
+  }       // ------------ MM new
+    
+  Th5 = Th5 + square(Mx5,Mz5,
+	  [R1*x,-T3*(Mz3>0)-T4*(Mz4>0)-T5*y],label=l15a,region=5,flags=3);//2
+  if(!sonic) Th5 = Th5 + square(Mx5,Mz5,
+	  [R1+R4*(Mx4>0)+R5*x,T1+T2*(Mz2>0)+T5*y],label=l15b,region=5,flags=3);//3
+  Th5 = Th5 + square(Mx5,Mz5,
+	  [R1+R4*(Mx4>0)+R5*x, -T3*(Mz3>0)-T4*(Mz4>0)-T5*y],label=l15b,region=5,flags=3);
+  Th5 = Th5 + square(Mx5,Mz1,[R1+R4*(Mx4>0)+R5*x,T1*y],label=l15c,region=5,flags=3); //5
+  if(Mz2>0) Th5 = Th5 + square(Mx5,Mz2,
+	  [R1+R4*(Mx4>0)+R5*x,  T1+T2*y],label=l15c,region=5,flags=3);//6   
+  if(Mz3>0) Th5 = Th5 + square(Mx5,Mz3,
+	  [R1+R4*(Mx4>0)+R5*x, -T3+T3*y],label=l15c,region=5,flags=3);//7
+  if(Mz4>0) Th5 = Th5 + square(Mx5,Mz4,
+	  [R1+R4*(Mx4>0)+R5*x, -T3-T4+T4*y],label=l15c,region=5,flags=3);//8
+}
+if (Mx4>0) {
+  int[int] l15d1=[lw1,0,15,0],l15d2=[lw2,0,15,0];
+  if(!sonic) Th5 = Th5 + square(Mx4,Mz5,[R1+R4*x,T1+T2*(Mz2>0)+T5*y],label=l15d1,region=5,flags=3);
+  Th5 = Th5 + square(Mx4,Mz5,[R1+R4*x,-T3*(Mz3>0)-T4*(Mz4>0)-T5*y],label=l15d2,region=5,flags=3);
+  int[int] l15e=[0,9,0,2],l15f=[0,9,lw1,2],l15g=[6,9,0,2],l15h=[8,9,0,0];
+  Th = Th + square(Mx4,Mz1,[R1+R4*x,  T1*y ],label=l15e,region=2,flags=3); 
+  if(Mz2>0) Th = Th + square(Mx4,Mz2,[R1+R4*x,   T1+T2*y],label=l15f,region=2,flags=3); 
+  if(Mz3>0) Th = Th + square(Mx4,Mz3,[R1+R4*x,  -T3+T3*y],label=l15g,region=2,flags=3); 
+  if(Mz4>0) Th = Th + square(Mx4,Mz4,[R1+R4*x,  -T3-T4+T4*y],label=l15h,region=2,flags=3); 
+}
+if(Mz5>0 || Mx4>0) Th = Th + Th5;
+
+//int[int] lab = labels(Th5); cout << lab << endl;
+//varf onG(u, v) = on(lab, u = label); fespace Vhl(Th, P1); Vhl ul; ul[] = onG(0, Vhl, tgv = -1);
+//plot(ul,wait=1,bb=[[0,-3*T3],[3*R1,2*(T1+T2)]]);
+
+//plot(Th,wait=1,dim=2);//,ps="po3_mesh.eps"); // load "medit"; medit("m",Th);
+fespace Vh00(Th,Pn); Vh00 reg=region; 
+plot(Th,reg,fill=0,wait=0,bb=[[0,-T4-1.5*T3],[4*R1,T1+T2+T5/2]],pdf="Th.pdf");
+// ------- coefficient matrices -----
+func D1 =1*(Th(x,y).region==1) * [[c11, c12, c13, 0  ,  0  , e31],  // PIC255
+                                  [c12, c11, c13, 0  ,  0  , e31],
+                                  [c13, c13, c33, 0  ,  0  , e33],
+                                  [0  , 0  , 0  , c44, e15,    0],
+                                  [0  , 0  , 0  , e15,-epsS11, 0],
+                                  [e31, e31, e33, 0  ,  0  ,-epsS33]];
+func D2 =1*(Th(x,y).region==2) * [[a11,a12,a12, 0],                 // EL217C
+                                  [a12,a11,a12, 0],
+                                  [a12,a12,a11, 0],
+                                  [ 0,  0,  0,a44]]
+        +1*(Th(x,y).region==3) * [[b11,b12,b12, 0],                 // TD1049
+                                  [b12,b11,b12, 0],
+                                  [b12,b12,b11, 0],
+                                  [ 0,  0,  0,b44]]
+        +1*(Th(x,y).region==4) * [[d11,d12,d12,0],                  // ABS
+                                  [d12,d11,d12, 0],
+                                  [d12,d12,d11, 0],
+                                  [ 0,  0,  0,d44]];
+func rho = (Th(x,y).region==1) * rho1
+         + (Th(x,y).region==2) * rho2
+         + (Th(x,y).region==3) * rho3
+         + (Th(x,y).region==4) * rho4
+         + (Th(x,y).region==5) * rho5 
+         + (Th(x,y).region==6) * rho6; 
+func c = (Th(x,y).region==5) * cf 
+       + (Th(x,y).region==6) * cs; 
+// ------ Problem --------
+macro B1(u,v,p) [dx(u), u/x, dy(v), dy(u)+dx(v), dx(p),dy(p)]//EOM
+macro B2(u,v) [dx(u), u/x, dy(v), dy(u)+dx(v)]//EOM
+macro B5(p) [dx(p), dy(p)]//EOM
+fespace Vh(Th,[Pn,Pn,Pn,Pn]), Vh0(Th0,[Pn,Pn,Pn,Pn]), Vh1(Th,Pn), Vh10(Th0,Pn), Vh15(Th5,Pn); 
+Vh<complex> [ur,uz,phi,psi], [vur,vuz,vphi,vpsi];
+real[int] ff(ffmin:ffstep:ffmax), yy(ff.n); real f0; func w = 2*pi*f0;
+string fname="Y"+Mx1+"+"+Mx5+"x"+Mz1+"+"+Mz2+"+"+Mz3+"+"+Mz5+".csv";
+{ ofstream fout(fname); fout << "# f\tRe(Y)\tIm(Y)" << endl;
+  problem PiezoAx2D([ur,uz,phi,psi],[vur,vuz,vphi,vpsi]) =
+        - int2d(Th,1,2,3,4)( x * rho * w*w  * [ur,uz]'*[vur,vuz]  ) // everywhere except water
+        + int2d(Th,1)( x * B1(vur,vuz,vphi)' * D1 * B1(ur,uz,phi) ) // piezo
+        + int2d(Th,2,3,4)( x * B2(vur,vuz)' * D2 * B2(ur,uz) )      // elastics
+        + int2d(Th,5,6)( x * rho * w*w / (c*c) * vpsi*psi )         // water rho5
+        - int2d(Th,5,6)( x * rho * B5(vpsi)' * B5(psi) )            // water rho5
+        + int2d(Th,2,3,4,5,6)( 1e-30 * vphi*phi )                   // zero except piezo
+        + int2d(Th,1,2,3,4)( 1e-30 * vpsi*psi )                     // zero except water
+        + int2d(Th,5,6)( 1e-30 * (vur*ur+vuz*uz) )                  // zero in water
+        + on(1,phi=1)                                               // piezo bottom - 1V
+        + on(3,phi=0)                                               // piezo top - 0V
+        + on(4,ur=0)                                                // left - axis of symmetry
+        - int1d(Th,lw1,lw2,lw3)(x * rho * 1i*w * (vpsi*(ur*N.x+uz*N.y)+(vur*N.x+vuz*N.y)*psi))
+        - int1d(Th,15)( x * rho5 * 1i * w/cf * vpsi*psi );          // Sommerfeld BC
+  for(int ii=0; ii<ff.n; ii++) { f0=ff(ii);  
+    PiezoAx2D; // calls w(f0)!
+    Vh0<complex> [ur0,uz0,phi0,psi0]=[ur,uz,phi,psi]; // variables for fields in piezo
+    Vh0<complex> [Srr,Stt,Szz,Srz] = [dx(ur0),ur0/(x+1e-30),dy(uz0),dy(ur0)+dx(uz0)];
+    Vh10<complex> Er = -dx(phi0), Ez = -dy(phi0);
+    Vh10<complex> Dr = e15*Srz + epsS11*Er, Dz = e31*Srr + e31*Stt + e33*Szz + epsS33*Ez;
+    complex I1 = -2*pi*1i*w*int1d(Th0,1)(x*(Dr*N.x+Dz*N.y));  // electric current throu edge 1
+    complex I3 =  2*pi*1i*w*int1d(Th0,3)(x*(Dr*N.x+Dz*N.y));  // electric current throu edge 3
+    yy(ii) = real(I1); Vh10 rphi0 = real(phi0);
+    Vh15<complex> p = 1i*w*rho5*psi;  Vh15 rpsi = real(psi), rp = abs(p); //rp = 20*log10(rp);
+    mesh Th2 = movemesh(Th, [x+C*real(ur), y+C*real(uz)]);
+    real[int] ffii=ff(0:ii), yyii=yy(0:ii); ffii /= (3*160e3); yyii *= 1e2;
+    cout <<f0<<"\t"<<real(I1)<<"\t"<<imag(I1)<<"\t"<<real(I3)<<"\t"<<imag(I3)<<endl;
+    fout <<f0<<"\t"<<real(I1)<<"\t"<<imag(I1)<<"\t"<<real(I3)<<"\t"<<imag(I3)<<endl;
+	int nviso=20+1;real vmin=0,vmax=1000; //20*log10(10000);
+	real[int] viso(nviso);
+	for(int j=0;j<nviso;j++) {viso[j]=vmin+j*(vmax-vmin)/(nviso-1);}
+    plot(Th, Th2, rp, [ffii, yyii], cmm="f0 = "+f0+" ",fill=1,value=1,wait=(ffmin==ffmax),viso=viso);
+  } // end for
+} // close file
+if(ffmin!=ffmax) { 
+    ;//system("gnuplot -e 'se g;f=\""+fname+"\";p f u 1:2 w l;se te pdfc;se o f.\".pdf\";rep'");
+}
+

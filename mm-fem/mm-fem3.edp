@@ -1,0 +1,115 @@
+// Piezoelectricity 3D - circular disk
+load "msh3"
+
+//      .------.
+//     /        \
+//     \    6   /|
+//     |'------'5/
+//     \|   5  |/
+//      '------'
+//          4
+
+
+// ----- Geometry ------
+real r=0.038/2, l=0.0141;
+border cc(t=0,2*pi) {x=r*cos(t); y=r*sin(t); label=1;}
+mesh Baseh = buildmesh(cc(40));
+int[int] rup=[0,6], rdown=[0,4], rmid=[1,5]; int nlayer=15;
+mesh3 Th=buildlayers(Baseh,nlayer,coef= 1., zbound=[0,l],
+  labelmid=rmid, reffaceup = rup, reffacelow = rdown);
+
+load "medit"
+medit("piezo3D", Th); 
+
+// ------ Consts -------
+real V0=0, V1=1;                             // potentials
+real coef = 0.7e6/V1;
+real f0=126e3, w0=2*pi*f0;                   // frequency
+real rho = 7750;  	                         // density
+/*
+real e31 = -5.4,  e33 = 15.8,  e15 = 12.3,   // piezoelectric
+     eps11S = 8.1e-9,  eps33S = 7.3e-9,      // dielectric
+     c11=120e9, c12=75.2e9, c13=75.1e9,      // elastic
+     c33=110e9, c44=21.1e9, c66=(c11-c12)/2; // c66=22.6e9;    
+*/
+complex                           // PIC255(1)
+     c11 = 122.90e9*(1+1i/58.6),   //  elastic
+     c12 = 76.6089e9*(1+1i/58.6),       
+     c13 = 71.178e9*(1+1i/80),
+     c33 = 97.056e9*(1+1i/145),
+     c44 = 23.500e9*(1+1i/117),
+	 c66 = (c11-c12)/2,
+     e31 = -7.8417,                //  piezoelectric
+     e33 = 13.5583,  
+     e15 = 12.244,
+     epsS11 = 8.234e-9*(1-1i/50),  //  dielectric
+     epsS33 = 7.580e-9*(1-1i/50);	
+func C = [[c11, c12, c13,  0 ,  0 ,  0 ,   0 ,  0  ,-e31 ],
+          [c12, c11, c13,  0 ,  0 ,  0 ,   0 ,  0  ,-e31 ],
+          [c13, c13, c33,  0 ,  0 ,  0 ,   0 ,  0  ,-e33 ],
+          [ 0 ,  0 ,  0 , c44,  0 ,  0 ,   0 ,-e15 ,  0  ],
+          [ 0 ,  0 ,  0 ,  0 , c44,  0 , -e15,  0  ,  0  ],
+          [ 0 ,  0 ,  0 ,  0 ,  0 , c66,   0 ,  0  ,  0  ],
+          [ 0 ,  0 ,  0 ,  0 , e15,  0 ,epsS11, 0  ,  0  ],
+          [ 0 ,  0 ,  0 , e15,  0 ,  0 ,   0 ,epsS11, 0  ],
+          [e31, e31, e33,  0 ,  0 ,  0 ,   0 ,   0 ,epsS33]];
+
+// ------ Macros -------
+macro L(u1,u2,u3,p) [dx(u1), dy(u2), dz(u3),
+  (dz(u2)+dy(u3)), (dz(u1)+dx(u3)), (dy(u1)+dx(u2)), -dx(p), -dy(p), -dz(p)] // EOM
+
+// ------ Problem ------
+fespace Vh(Th,[P1,P1,P1,P1]);
+Vh<complex> [ux,uy,uz,phi], [vx,vy,vz,w];
+solve Piezo3D([ux,uy,uz,phi],[vx,vy,vz,w]) 
+  = int3d(Th)( L(vx,vy,vz,w)' * C * L(ux,uy,uz,phi) )
+  - int3d(Th)( rho*w0^2 * [vx,vy,vz]'*[ux,uy,uz] ) 
+  + on(4, phi=V0)  
+  + on(6, phi=V1)
+  ; 
+
+int[int] llabs = [4, 5, 6];
+meshS ThS = extract(Th,label=llabs);
+ThS = OrientNormal(ThS,unbounded=1);
+fespace Vh1(ThS,P1);
+//Vh1<complex> vn;
+macro vn(ux,uy,uz) 1i*w0*uz  // EOM (ux*N.x + uy*N.y + uz*N.z)
+//macro vn(ux,uy,uz) 1i*w0*(Th(x,y,z).region==4)*(-uz) + (Th(x,y,z).region==5)*(sqrt(ux*ux+uy*uy)) + (Th(x,y,z).region==6)*(uz) // EOM
+
+// ------ Plot ---------
+mesh3 Th2 = movemesh3(Th,transfo=[x+real(ux)*coef,y+real(uy)*coef,z+real(uz)*coef]);
+load "medit"
+medit("piezo3D", Th2);
+ 
+//Vh1 ruz = real(vn(ux,uy,uz));
+//medit("piezo3D", ThS, real(vn)); 
+
+/*
+load "bem"
+ThS = OrientNormal(ThS,unbounded=1);
+real rho2=1000,c2=1500;
+
+// BEM 
+fespace Uh(ThS,P1); Uh<complex> p, b; Uh pr;
+varf vSL(u,v) = int2dx2d(ThS)(ThS)(BEM(BemKernel("SL",k=w0/c2),u,v));
+HMatrix<complex> H = vSL(Uh,Uh);
+
+// Incident wave 
+func pinc = rho2*c2*vn(ux,uy,uz); //exp(-1i*k*z);   // plane wave from up 
+varf vrhs(u,v) = -int2d(ThS)(pinc*v);
+b[] = vrhs(0,Uh);
+
+//real un = 1;
+//varf vDL(u,v)=int2dx2d(ThS)(ThS)(BEM(BemKernel("DL",k=k),u,v))-int2d(ThS)(0.5*u*v) ;
+//HMatrix<complex> H2 = vDL(Uh,Uh,eta=10,eps=1e-3,minclustersize=10,maxblocksize=1000000);
+//varf vrhs2(u,v) = 1i*w*rho0*un*vSL(u,v);
+//b2[] = vrhs2(0,Uh);
+
+// Solution
+p[] = H^-1 * b[];
+pr =real(p);
+
+// Plot
+load "medit"
+medit("pr",ThS,pr);
+*/
