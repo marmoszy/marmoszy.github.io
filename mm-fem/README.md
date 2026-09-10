@@ -18,5 +18,5 @@ The minimalistic FEM code in html+wasm, python+numpy and freefem for the calcula
 
 There is also code for axisymmetric transducer design prepared in freefem:
 
-- circular disk design **(mm-fem2.5a.edp)**
-- circular dick with sonic crystals **(mm-fem2.5b.edp)**
+- circular disk design: **[mm-fem2.5a.edp](mm-fem2.5a.edp)**
+- circular dick with sonic crystals: **[mm-fem2.5b.edp](mm-fem2.5b.edp)**
