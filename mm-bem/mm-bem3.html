@@ -184,9 +184,13 @@ function on_reduce() {reduce_msh^=1; change();}
 <br><span style="margin-left:32px"></span> or <input accept=".msh,.stl,.json,.tsv,.gz" id="openfile" title="Load from msh (2.0), stl or echoSMs json" type="file" onchange="readFile(this);" multiple/>
 
 <textarea id="obj" style="width:408px; height:92px; vertical-align: top;" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905,4),[0,0,0]]</textarea>
-<div style="display: inline-flex; flex-direction: column; vertical-align: top; gap: 2px;">
+<div style="display: inline-flex; flex-direction: column; vertical-align: top; gap: 0px;">
+    <div style="margin-top: -12px;">
     <input type="button" title="increase target size" value="+" onclick="changeSize(document.getElementById('obj'),0.1)">
+    </div>
     <input type="button" title="decrease target size" value="-" onclick="changeSize(document.getElementById('obj'),-0.1)">
+    <input type="button" title="rotate target right" value="r" onclick="changeOrientation(document.getElementById('obj'),-1)">
+    <input type="button" title="rotate target left" value="l" onclick="changeOrientation(document.getElementById('obj'),1)">
 </div>
 <script>
 function changeSize(e, v) {
@@ -195,20 +199,51 @@ function changeSize(e, v) {
   var s2 = s1.split(/,(?![^()[\]]*[)\]])/);
   if (s2.length === 1) s2.push('[0,0,0]');
   if (s2.length === 2) s2.push('Sxyz(1,1,1)');
-  var _2= s2.length-1;
-  let match = s2[_2].trim().match(/Sxyz\(([^)]+)\)/);
+  if (s2.length>3) s2[2] = s2.slice(2).join(',')
+  s1 = s2.slice(0,3).join(',');
+  let match = s1.trim().match(/Sxyz\(([^)]+)\)/);
   if (!match) {
-    s2[_2] = 'mul('+s2[_2]+',Sxyz(1,1,1))';
-    match = s2[_2].trim().match(/Sxyz\(([^)]+)\)/);
+    s2 = s1.split(/,(?![^()[\]]*[)\]])/);
+    if (s2.length>3) s2[2] = s2.slice(2).join(',')
+    s2[2] = 'mul('+s2[2]+',Sxyz(1,1,1))';
+    s1 = s2.slice(0,3).join(',');
+    match = s2[2].trim().match(/Sxyz\(([^)]+)\)/);
   }
   const p = match[1].split(',').map(Number);
   p[0] = parseFloat((v + p[0]).toPrecision(6));
   p[1] = parseFloat((v + p[1]).toPrecision(6));
   p[2] = parseFloat((v + p[2]).toPrecision(6));
   if(p[0]!=0 && p[1]!=0 && p[2] !=0) {
-    s2[_2] = s2[_2].replace(match[0], 'Sxyz(' + p.join(',') + ')');
+    s1 = s1.replace(match[0], 'Sxyz(' + p.join(',') + ')');
   }
-  s = `[${s2.join(',')}]`;
+  s = '['+s1+']';
+  if(e.value != s) {
+    e.value = s;
+    change(s);
+  }
+}
+function changeOrientation(e, v) {
+  var s = e.value;
+  var s1 = s.trim().slice(1, -1);
+  var s2 = s1.split(/,(?![^()[\]]*[)\]])/);
+  if (s2.length === 1) s2.push('[0,0,0]');
+  if (s2.length === 2) s2.push('Rz(0)');
+  if (s2.length>3) s2[2] = s2.slice(2).join(',')
+  s1 = s2.slice(0,3).join(',');
+  let match = s1.match(/Rz\(([^)]+)\)/);
+  if (!match) {
+    var s2 = s1.split(/,(?![^()[\]]*[)\]])/);
+    if (s2.length>3) s2[2] = s2.slice(2).join(',')
+    s2[2] = 'mul('+s2[2]+',Rz(0))';
+    s1 = s2.slice(0,3).join(',');
+    match = s2[2].trim().match(/Rz\(([^)]+)\)/);
+  }
+  const p = match[1].split(',').map(Number);
+  p[0] = parseFloat((v + p[0]).toPrecision(6));
+  //if(p[0]!=0) {
+    s1 = s1.replace(match[0], 'Rz(' + p.join(',') + ')');
+  //}
+  s = '['+s1+']';
   if(e.value != s) {
     e.value = s;
     change(s);
