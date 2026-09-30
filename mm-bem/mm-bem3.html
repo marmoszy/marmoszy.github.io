@@ -183,8 +183,38 @@ function on_reduce() {reduce_msh^=1; change();}
 </script>
 <br><span style="margin-left:32px"></span> or <input accept=".msh,.stl,.json,.tsv,.gz" id="openfile" title="Load from msh (2.0), stl or echoSMs json" type="file" onchange="readFile(this);" multiple/>
 
-<textarea id="obj" style="width:438;height:92" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905,4),[0,0,0]]</textarea>
-
+<textarea id="obj" style="width:408px; height:92px; vertical-align: top;" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905,4),[0,0,0]]</textarea>
+<div style="display: inline-flex; flex-direction: column; vertical-align: top; gap: 2px;">
+    <input type="button" title="increase target size" value="+" onclick="changeSize(document.getElementById('obj'),0.1)">
+    <input type="button" title="decrease target size" value="-" onclick="changeSize(document.getElementById('obj'),-0.1)">
+</div>
+<script>
+function changeSize(e, v) {
+  var s = e.value;
+  var s1 = s.trim().slice(1, -1);
+  var s2 = s1.split(/,(?![^()[\]]*[)\]])/);
+  if (s2.length === 1) s2.push('[0,0,0]');
+  if (s2.length === 2) s2.push('Sxyz(1,1,1)');
+  var _2= s2.length-1;
+  let match = s2[_2].trim().match(/Sxyz\(([^)]+)\)/);
+  if (!match) {
+    s2[_2] = 'mul('+s2[_2]+',Sxyz(1,1,1))';
+    match = s2[_2].trim().match(/Sxyz\(([^)]+)\)/);
+  }
+  const p = match[1].split(',').map(Number);
+  p[0] = parseFloat((v + p[0]).toPrecision(6));
+  p[1] = parseFloat((v + p[1]).toPrecision(6));
+  p[2] = parseFloat((v + p[2]).toPrecision(6));
+  if(p[0]!=0 && p[1]!=0 && p[2] !=0) {
+    s2[_2] = s2[_2].replace(match[0], 'Sxyz(' + p.join(',') + ')');
+  }
+  s = `[${s2.join(',')}]`;
+  if(e.value != s) {
+    e.value = s;
+    change(s);
+  }
+}
+</script>
 </div>
 
 		</td>
@@ -375,7 +405,7 @@ function on_reduce() {reduce_msh^=1; change();}
 <text x="10" y="10" id="title" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
 <text x="280" y="10" id="title2" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
 <text x="340" y="432" id="title3" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
-<text x="10"  y="432" id="title4" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
+<text x="10"  y="432" id="title4" font-family="New Computer Modern Math, Cambria Math, DejaVu Sans, serif" font-style="italic" style="fill1:#ff6633;stroke:none"></text>
 <g id="svg0" transform="translate(20,20)">
 <line name="axis2d" x1="210" y1="200" x2="400" y2="200" stroke="gray"/>
 <line name="axis2d" x1="210" y1="200" x2="400" y2="200" stroke="gray" transform ="rotate(30 200 200)" stroke-dasharray="1,1"/>
@@ -867,7 +897,7 @@ onchange="nf_r2=parseFloat(this.value);document.getElementById('nf_r2').textCont
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es" onerror="this.style.display='none';"></a>
-<p title="(1.9.2026)" style="text-align:center">mm-bem v3.09 (2025-2026)</p>
+<p title="(30.9.2026)" style="text-align:center">mm-bem v3.10 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -2813,6 +2843,7 @@ const cmath = { // Complex math functions
   sub: (a, b) => ({re: a.re - b.re, im: a.im - b.im}),
   abs: (c) => Math.sqrt(c.re * c.re + c.im * c.im),
   mul: (a, b) => ({re: a.re * b.re - a.im * b.im,im: a.re * b.im + a.im * b.re}),
+  mulReal: (a, b) => ({re: a.re * b, im: a.im * b}),
   div: (a, b) => {const denom = b.re * b.re + b.im * b.im;
     return {re: (a.re * b.re + a.im * b.im) / denom,im: (a.im * b.re - a.re * b.im) / denom};
   }
@@ -2964,6 +2995,153 @@ function pistonCoeffs(k, b, z0, Nmax) {
   }
   return A; // array of complex coefficients A[n]
 }
+
+// ----------------- begin of not tested and not used yet -------------------
+// MM 29.9.2026
+
+// Zwraca dwuwymiarową tablicę P[n][m] dla zadanego x = cos(theta)
+function ALP_series(Nmax, x) {
+  let P = new Array(Nmax + 1).fill(0).map(() => new Array(Nmax + 1).fill(0));
+  const somx2 = Math.sqrt(Math.max(0.0, 1.0 - x * x)); // sin(theta)
+  P[0][0] = 1.0; // Warunek początkowy P(0,0)
+  // Wypełnienie przekątnej m = n (szereg rzędu m)
+  let pmm = 1.0;
+  let fact = 1.0;
+  for (let m = 1; m <= Nmax; m++) {
+    pmm *= -fact * somx2;
+    fact += 2.0;
+    P[m][m] = pmm;
+  }
+  // Wypełnienie linii tuż nad przekątną n = m + 1
+  for (let m = 0; m <= Nmax - 1; m++) {
+    P[m + 1][m] = x * (2 * m + 1) * P[m][m];
+  }
+  // Stabilna rekurencja po stopniach n dla ustalonego rzędu m
+  for (let m = 0; m <= Nmax; m++) {
+    for (let n = m + 2; n <= Nmax; n++) {
+      P[n][m] = ((2 * n - 1) * x * P[n - 1][m] - (n + m - 1) * P[n - 2][m]) / (n - m);
+    }
+  }
+  return P;
+}
+
+// Oblicza uogólnione macierzowe współczynniki harmoniczne A[n][m] tłoka
+// x0, y0, z0 - środek tłoka; theta0, phi0 - kierunek świecenia tłoka
+function generalPistonCoeffs(k, b, x0, y0, z0, theta0, phi0, Nmax) {
+  const Nint = 200; // liczba kroków integracji na promieniu tłoka
+  const dr = b / Nint;
+  // Definicja wektora normalnego tłoka n0 (kierunek osi lokalnej tłoka)
+  const n0x = Math.sin(theta0) * Math.cos(phi0);
+  const n0y = Math.sin(theta0) * Math.sin(phi0);
+  const n0z = Math.cos(theta0);
+  // Inicjalizacja macierzy współczynników A[n][m] jako liczb zespolonych
+  // m rozważamy od 0 do n (symetryczne ujemne m odtwarza się w fazie pola rozproszonego)
+  let A = new Array(Nmax + 1).fill(0).map((_, n) => 
+    new Array(n + 1).fill(0).map(() => cmath.cplx(0, 0))
+  );
+  // Pętla całkowa po promieniu tłoka r'
+  for (let i = 0; i <= Nint; i++) {
+    const rprime = i * dr;    
+    // Obliczamy efektywną odległość geometryczną od osi sfery do elementów pierścienia.
+    // Dla uogólnienia pozycji, R to odległość środka tego pierścienia od środka sfery (0,0,0)
+    // Położenie środka pierścienia w przestrzeni globalnej (wersor u dla osi lokalnej X tłoka):
+    const ux = -Math.sin(phi0);
+    const uy = Math.cos(phi0);
+    const uz = 0;
+    const xs = x0 + rprime * ux;
+    const ys = y0 + rprime * uy;
+    const zs = z0 + rprime * uz;
+    const R = Math.sqrt(xs * xs + ys * ys + zs * zs);
+    const cos_th = zs / R;
+    const phi_s = Math.atan2(ys, xs); // Kąt azymutalny położenia elementu źródła
+    const j_kR = j_series(Nmax, k * R);     // sferyczne funkcje Bessela j_n(kR)
+    const P = ALP_series(Nmax, cos_th);     // MAClERZ stowarzyszonych wielomianów P_n^m(cos theta)
+    const w = (rprime / R) * dr;            // waga różniczkowa r'/R * dr
+    for (let n = 0; n <= Nmax; n++) {
+      for (let m = 0; m <= n; m++) {
+        // Obliczamy czynnik normalizacji silni dla stowarzyszonych wielomianów Legendre'a
+        let norm = 1.0;
+        if (m > 0) {
+          let num = 1;
+          let den = 1;
+          for (let f = 1; f <= (n - m); f++) num *= f;
+          for (let f = 1; f <= (n + m); f++) den *= f;
+          norm = num / den; // (n-m)! / (n+m)!
+        }
+        // Rdzeń całki rozszerzony o przesunięcie fazy kąta azymutalnego źródła (e^(-i * m * phi_s))
+        const core_amplitude = j_kR[n] * P[n][m] * norm * w;        
+        // e^(-i * m * phi_s) = cos(m * phi_s) - i * sin(m * phi_s)
+        const term = cmath.cplx(
+          core_amplitude * Math.cos(m * phi_s), 
+          -core_amplitude * Math.sin(m * phi_s)
+        );
+
+        A[n][m] = cmath.add(A[n][m], term);
+      }
+    }
+  }
+  // Aplikacja akustycznego prefactoru (identycznie jak w Twoim kodzie)
+  const rho0 = 1000, c0 = 1480;
+  const omega = c0 * k;
+  const u0 = 5e-11;
+  const v0 = cmath.cplx(0, omega * u0); // i * omega * u0
+  const base = cmath.cplx(0, 2 * Math.PI * k * rho0 * c0); 
+  const pref = cmath.mul(base, v0);                      
+  for (let n = 0; n <= Nmax; n++) {
+    for (let m = 0; m <= n; m++) {
+      A[n][m] = cmath.mul(pref, A[n][m]);
+    }
+  }
+  return A; // Zwraca kompletną macierz zespoloną A[n][m]
+}
+
+// Oblicza rzeczywiste ciśnienie fali padającej p_i w DOWOLNYM punkcie przestrzeni (xi, yi, zi)
+// Generowane przez osiowosymetryczny tłok o promieniu b, umieszczony w (x0, y0, z0) i skręcony o (theta0, phi0)
+function computeIncidentField(xi, yi, zi, k, b, x0, y0, z0, theta0, phi0) {
+  const Nrings = 200; // liczba pierścieni (przedziałów M), na które dzielimy promień tłoka
+  const ds = b / Nrings;  
+  // Definicja bazy ortonormalnej tłoka (zgodnie z u-v z Twojego układu geometrycznego)
+  const ux = -Math.sin(phi0), uy = Math.cos(phi0), uz = 0;
+  const vx = -Math.cos(theta0) * Math.cos(phi0), vy = -Math.cos(theta0) * Math.sin(phi0), vz = Math.sin(theta0);  
+  const rho0 = 1000;      // gęstość [kg/m^3]. // Parametry fizyczne medium i źródła
+  const c0 = 1480;        // prędkość dźwięku [m/s]
+  const omega = c0 * k;   // częstotliwość kołowa
+  const u0 = 5e-11;       // amplituda przesunięcia
+  const v0 = cmath.cplx(0, omega * u0);   // v_0 = i * omega * u_0 (zespolona prędkość tłoka)
+  const prefactor = cmath.cplx(0, -omega * rho0);  // współczynnik przed sumą: -i * omega * rho0
+  let p_i = cmath.cplx(0, 0);  
+  for (let m = 0; m < Nrings; m++) {   // Pętla po pierścieniach m od 0 do M-1
+    const s_m = (m + 0.5) * ds; // promień środka m-tego pierścienia (węzeł)    
+    // Dokładne pole powierzchni pierścienia dS_m = pi * (s_{m+1}^2 - s_m^2)
+    // Zastępuje uproszczone 2 * pi * s_m * ds, eliminując błędy numeryczne blisko środka
+    const s_inner = m * ds;
+    const s_outer = (m + 1) * ds;
+    const dS_m = Math.PI * (s_outer * s_outer - s_inner * s_inner);    
+    // Współrzędne kartezjańskie punktu źródłowego na tłoku dla danego pierścienia
+    const xs = x0 + s_m * ux;
+    const ys = y0 + s_m * uy;
+    const zs = z0 + s_m * uz;    
+    // R_im - odległość od m-tego pierścienia tłoka do punktu ewaluacji (węzła BEM)
+    const R_im = Math.sqrt((xi - xs) * (xi - xs) + (yi - ys) * (yi - ys) + (zi - zs) * (zi - zs));   
+    // Obliczenie wkładu fali kulistej: e^(i * k * R_im) / (2 * pi * R_im)
+    const phase = k * R_im;
+    const green_core = cmath.cplx(Math.cos(phase) / (2 * Math.PI * R_im), Math.sin(phase) / (2 * Math.PI * R_im));   
+    let term = cmath.mulReal(green_core, dS_m);     // Integrand elementu: v_0 * dS_m * Green
+    term = cmath.mul(v0, term);    
+    p_i = cmath.add(p_i, term);    // Dodanie do sumy całkowitej
+  }  
+  return cmath.mul(prefactor, p_i);
+}
+
+/*
+// Odtworzenie identycznego wyniku starej funkcji za pomocą nowego algorytmu:
+const A_uogolnione = generalPistonCoeffs(k, b, 0, 0, z0, 0, 0, Nmax);
+// Stary współczynnik A[n] to po prostu nowa wartość dla m = 0:
+// A_stare[n] == A_uogolnione[n][0]
+*/
+
+// ----------------- end of not tested and not used yet -------------------
+
 
 function soft_sphere(aa, f00, c00, th00, ph00, r00, b00) { // 360 angles, returning two-column string
 	var r1 = 1;    // far field distance
