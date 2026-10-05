@@ -14,8 +14,8 @@
     </style>
 </head>
 
-<script src="three.min.js" onerror='document.write("<script src=\"https://unpkg.com/three@0.160.1/build/three.min.js\"><\/script>");'></script>
-<!--<script src="https://unpkg.com/three@0.160.1/build/three.min.js"></script>-->
+<script src="https://unpkg.com/three@0.160.1/build/three.min.js" onerror='document.write("<script src=\"three.min.js\"><\/script>");'></script>
+<!--<script src="three.min.js"></script>-->
 
 <script src="ll2utm.js" defer></script> 
 
@@ -36,21 +36,13 @@ url_params();
 <body onload="if(loadBlob)openBlob();">
 
 <div id="upload" style="">
-    <b style="font-size:1.15em;">mm-echo2 - <span title="Select .dgx, .ek5, .raw, .all, .dt4, .s7k, .png+.txt .jpg+.jgw .asc .msh file(s) or its tgz archive">3D echogram viewer:</span>&nbsp;</b>
-    <input type="file" id="imageLoader" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw, .all, .s7k, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9, .dt4, .jgw, .pgw, .asc, .msh"  multiple> or
+    <b style="font-size:1.15em;">mm-echo2 - <span title="Select .dgx, .ek5, .raw, .all, .dt4, .s7k, .png+.txt, .jpg+.jgw, .asc, .msh, .obj file(s) or its tgz archive">3D echogram viewer:</span>&nbsp;</b>
+    <input type="file" id="imageLoader" accept="image/*, text/plain, .tar.gz, .tgz, .ek5, .raw, .all, .s7k, .dg0,.dg1,.dg2,.dg3,.dg4,.dg5,.dg6,.dg7,.dg8,.dg9, .dt4, .jgw, .pgw, .asc, .msh, .obj"  multiple> or
 	<input type=button id="loadExample" onclick="loadTgzFromUrl('dat/20070525_145116.dt4.tgz');" value="Load example"/>
 <!-- 
 or 
 	<span style="text-align:right" title="Download and then open">download it: <a href="dat/20020714.ek5.png.tgz">20020714.ek5.png.tgz</a></span> 
 -->
-</div>
-
-<!-- tooltip -->
-<div id="msh-tooltip" style="
-    position: absolute; display: none; background: rgba(255, 255, 255, 0.85); color: black;
-    padding: 8px 12px; border-radius: 4px; font-family: sans-serif; font-size: 13px;
-    z-index: 100; box-shadow: 0 4px 6px rgba(0,0,0,0.15); border: 1px solid #335577;
-    pointer-events: none;">
 </div>
 
 
@@ -122,86 +114,17 @@ function createDataTexture(str) {
 }
 const { texture: dataTexture, numPoints } = createDataTexture(goraPunktyString);
 
+
 const scene = new THREE.Scene();  // Three.js scene
 scene.background = new THREE.Color(0xffffff);
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
 var cm = 0.88;
 camera.position.set(0*cm, -2.6*cm, 4.6*cm);
 camera.lookAt(0*cm, 1.2*cm, -3.6*cm);
+
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-window.addEventListener('click', onPointerDown);
-function onPointerDown(event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(mainGroup.children,false);
-    if (intersects.length > 0) {
-      for (let i = 0; i < intersects.length; i++) {
-        const hitObject = intersects[i].object;
-        if (hitObject && hitObject.name === "gmsh_mesh") {
-            console.log("Gmsh_mesh");
-            //hitObject.material.transparent = true;
-            //hitObject.material.opacity = hitObject.material.opacity === 0.5 ? 1.0 : 0.5;
-            //hitObject.material.needsUpdate = true;
-			if(hitObject.dx_container) {
-				hitObject.dx_idx = (hitObject.dx_idx + 1)%hitObject.dx_container.length;
-				updateMeshColors(hitObject, hitObject.dx_container[hitObject.dx_idx].data);
-			}
-            break;
-        }
-	  }
-    }
-}
-const tooltip = document.getElementById('msh-tooltip');
-raycaster.params.Mesh.side = THREE.DoubleSide;
-window.addEventListener('mousemove', onPointerMove);
-function onPointerMove(event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    mainGroup.updateMatrixWorld(true); 
-    if (typeof clickableMesh !== 'undefined' && clickableMesh) {
-        clickableMesh.updateMatrixWorld(true);
-    }
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(mainGroup.children, true);
-    const validHit = intersects.find(hit => hit.object.type === "Mesh" && hit.object.name === "gmsh_mesh");
-    if (validHit && validHit.object.dx_container && validHit.object.dx_container.length) {
-        const mesh = validHit.object;
-        const face = validHit.face; // triangle with a, b, c fields
-        const geometry = mesh.geometry;
-        const positionAttribute = geometry.attributes.position;
-        const vertexIndices = [face.a, face.b, face.c];
-        let closestVertexIdx = face.a;
-        let minDistance = Infinity;
-        const vertexPos = new THREE.Vector3();
-        vertexIndices.forEach(idx => {
-            vertexPos.fromBufferAttribute(positionAttribute, idx);
-            vertexPos.applyMatrix4(mesh.matrixWorld); 
-            const dist = validHit.point.distanceTo(vertexPos);
-            if (dist < minDistance) {
-                minDistance = dist;
-                closestVertexIdx = idx;
-            }
-        });
-        let nodeValue = "No data";
-		const dname = validHit.object.dx_container[validHit.object.dx_idx].name;
-		const currentDxData = validHit.object.dx_container[validHit.object.dx_idx].data;
-        if (typeof currentDxData !== 'undefined' && currentDxData[closestVertexIdx] !== undefined) {
-            nodeValue = currentDxData[closestVertexIdx][0].toFixed(5);
-        }
-        tooltip.style.display = 'block';
-        tooltip.innerHTML = `${dname}[${closestVertexIdx + 1}]: ${nodeValue}`;
-        tooltip.style.left = (event.clientX + 15) + 'px';
-        tooltip.style.top = (event.clientY + 15) + 'px';
-    } else {
-        tooltip.style.display = 'none';
-    }
-}
-//let currentDxData = null;
 
 const axesGeometry = new THREE.BufferGeometry();
 const axesVertices = [
@@ -1863,24 +1786,8 @@ function getImageDimensions(file) {
 }
 
 // --- GMSH mesh (.msh) ---
+
 function parseGmshMsh(s) {
-    var lines = s.split('\n');
-    const n = parseInt(lines[4]);
-    const v = lines.slice(5, 5 + n).map(line => line.trim().split(/\s+/).slice(1, 4).map(parseFloat));
-    const m = parseInt(lines[n + 7]);
-    const e = lines.slice(n + 8, n + 8 + m).map(line => line.trim().split(/\s+/).slice(5, 9).map(x => parseInt(x) - 1));
-    for (let i=0; i<v.length; i++) { var t=v[i][1]; v[i][1]=v[i][2]; v[i][2]=t;}
-    const d = []; let nm = n + m + 9; 
-    while (lines[nm] && lines[nm].trim() === '$NodeData') {
-        const dname = lines[nm + 2].replace(/"/g, '').trim();
-        const n = parseInt(lines[nm + 8]);
-        const dv = lines.slice(nm + 9, nm + 9 + n).map(l => l.trim().split(/\s+/).slice(1,2).map(parseFloat));
-        d.push({ name: dname, data: dv });
-        nm += 9 + n + 1;
-    }
-    return {type: 'Mesh',vx: v, fx: e, dx: d };
-}
-function parseGmshMsh0(s) {
     var lines = s.split('\n');
     const n = parseInt(lines[4]);
     const v = lines.slice(5, 5 + n).map(line => line.trim().split(/\s+/).slice(1, 4).map(parseFloat));
@@ -1889,6 +1796,193 @@ function parseGmshMsh0(s) {
     for (let i=0; i<v.length; i++) { var t=v[i][1]; v[i][1]=v[i][2]; v[i][2]=t;}
     return { type: 'Mesh', vx: v, fx: e };
 }
+/*
+function parseObj0(s) {
+    const lines = s.split('\n').map(line => line.trim().split(/\s+/));
+    const v = lines.filter(t => t[0] === 'v').map(t => t.slice(1, 4).map(parseFloat));
+    const e = lines.filter(t => t[0] === 'f').map(t => t.slice(1, 4).map(x => parseInt(x.split('/')[0]) - 1));
+    const surf = lines.filter(t => t[0] === 'surf').map(t => t.slice(5).map(x => parseInt(x) - 1));
+    for (let i=0; i<v.length; i++) { var t=v[i][1]; v[i][1]=v[i][2]; v[i][2]=t;}
+    return { type: 'Mesh', vx: v, fx: e };
+}
+*/
+function parseObj(s) {
+    const lines = s.split('\n').map(line => line.trim().split(/\s+/));
+    var v = lines.filter(t => t[0] === 'v').map(t => t.slice(1, 4).map(parseFloat));
+    const f = lines.filter(t => t[0] === 'f').map(t => t.slice(1, 4).map(x => parseInt(x.split('/')[0]) - 1));
+    const surf = lines.filter(t => t[0] === 'surf');
+    var s_fx = surf.map(t => t.slice(5).map(x => parseInt(x) - 1));
+
+    var mesh = nsphere(r=0.01905);
+    var s_fx = mesh.s_fx;    
+    var v = mesh.vx;
+	
+    for (let i=0; i<v.length; i++) { var t=v[i][1]; v[i][1]=v[i][2]; v[i][2]=t; }
+
+    //s_fx = surf_divide(s_fx, v); // Double patch resolution
+    //s_fx = surf_divide(s_fx, v); // Double patch resolution
+    console.log(exportToObjString({vx:v, s_fx:s_fx}));
+    
+    const generated = surf2tri(s_fx, v, 4); // Convert surfaces to triangles
+    v.push(...generated.newVertices);
+    f.push(...generated.newFaces);
+    return { type: 'Mesh', vx: v, fx: f };
+}
+function surf2tri(s_fx, vx, n = 8) {
+    let newVertices = [];
+    let newFaces = [];    
+    s_fx.forEach(patch => {
+        // Map 9 indices to a 3x3 control point grid of actual 3D coordinates
+        const cp = [
+            [vx[patch[0]], vx[patch[1]], vx[patch[2]]],
+            [vx[patch[3]], vx[patch[4]], vx[patch[5]]],
+            [vx[patch[6]], vx[patch[7]], vx[patch[8]]]
+        ];       
+        const startVIdx = vx.length + newVertices.length;
+        // 1. Generate (n+1)x(n+1) grid of interpolated vertices using Biquadratic Bezier logic
+        for (let i = 0; i <= n; i++) {
+            let u = i / n;
+            let bU = [ (1-u)*(1-u), 2*(1-u)*u, u*u ]; // Quadratic Bernstein polynomials            
+            for (let j = 0; j <= n; j++) {
+                let v = j / n;
+                let bV = [ (1-v)*(1-v), 2*(1-v)*v, v*v ];                
+                let pt = [0, 0, 0];
+                for (let r = 0; r < 3; r++) {
+                    for (let c = 0; c < 3; c++) {
+                        let weight = bU[r] * bV[c];
+                        pt[0] += weight * cp[r][c][0];
+                        pt[1] += weight * cp[r][c][1];
+                        pt[2] += weight * cp[r][c][2];
+                    }
+                }
+                newVertices.push(pt);
+            }
+        }
+        // 2. Split into n x n rectangles, then into 2 triangles each
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                let row1 = startVIdx + i * (n + 1);
+                let row2 = startVIdx + (i + 1) * (n + 1);                
+                let p0 = row1 + j;
+                let p1 = row1 + j + 1;
+                let p2 = row2 + j;
+                let p3 = row2 + j + 1;
+                // Two triangles per rectangle cell
+                newFaces.push([p0, p1, p2]);
+                newFaces.push([p1, p3, p2]);
+            }
+        }
+    });    
+    return { newVertices, newFaces };
+}
+function surf_divide(s_fx, vx) {
+    let new_s_fx = [];
+    // Obliczamy promień sfery na podstawie pierwszego wierzchołka
+    const r_sphere = Math.sqrt(vx[0][0]**2 + vx[0][1]**2 + vx[0][2]**2);
+    function projectToSphere(pt) {
+        let len = Math.sqrt(pt[0]*pt[0] + pt[1]*pt[1] + pt[2]*pt[2]);
+        if (len === 0) return pt;
+        return [ (pt[0] / len) * r_sphere, (pt[1] / len) * r_sphere, (pt[2] / len) * r_sphere ];
+    }
+    // Pomocnicza funkcja do podziału 3 punktów (krzywej kwadratowej Beziera) w połowie (t=0.5)
+    function split3(p0, p1, p2) {
+        let m01 = p0.map((x, i) => (x + p1[i]) * 0.5);
+        let m12 = p1.map((x, i) => (x + p2[i]) * 0.5);
+        let m012 = m01.map((x, i) => (x + m12[i]) * 0.5);
+        return {
+            left: [p0, m01, m012],
+            right: [m012, m12, p2]
+        };
+    }
+    s_fx.forEach(patch => { 
+        let grid = [ //  3x3 from 9 indices
+            [vx[patch[0]], vx[patch[1]], vx[patch[2]]],
+            [vx[patch[3]], vx[patch[4]], vx[patch[5]]],
+            [vx[patch[6]], vx[patch[7]], vx[patch[8]]]
+        ];        
+        // Step 1: Podział poziomy (każdego wiersza wzdłuż osi U)
+        let rows_L = [], rows_R = [];
+        for (let r = 0; r < 3; r++) {
+            let s = split3(grid[r][0], grid[r][1], grid[r][2]);
+            rows_L.push(s.left);
+            rows_R.push(s.right);
+        }
+        // Step 2: Podział pionowy (każdej kolumny wzdłuż osi V dla lewej i prawej strony)
+        function splitVertical(half_grid) {
+            let cols = [];
+            for (let c = 0; c < 3; c++) {
+                let s = split3(half_grid[0][c], half_grid[1][c], half_grid[2][c]);
+                cols.push(s); // zawiera .left (góra) i .right (dół)
+            }
+            // Budujemy płat Górny (Top) oraz Dolny (Bottom) z powrotem do formatu wierszy
+            let patch_T = [
+                cols[0].left[0], cols[1].left[0], cols[2].left[0], // wiersz 0
+                cols[0].left[1], cols[1].left[1], cols[2].left[1], // wiersz 1
+                cols[0].left[2], cols[1].left[2], cols[2].left[2]  // wiersz 2
+            ];
+            let patch_B = [
+                cols[0].right[0], cols[1].right[0], cols[2].right[0], // wiersz 0
+                cols[0].right[1], cols[1].right[1], cols[2].right[1], // wiersz 1
+                cols[0].right[2], cols[1].right[2], cols[2].right[2]  // wiersz 2
+            ];            
+            return [patch_T, patch_B];
+        }        
+        // Otrzymujemy 4 równe podobiekty (płaty 3x3)
+        let [patch_LT, patch_LB] = splitVertical(rows_L);
+        let [patch_RT, patch_RB] = splitVertical(rows_R);
+        let child_patches = [patch_LT, patch_LB, patch_RT, patch_RB];        
+        // Rejestracja nowych, rzutowanych na sferę punktów w globalnej tablicy wierzchołków
+        child_patches.forEach(sp => {
+            let indices = [];
+            sp.forEach(pt => {
+                let projectedPt = projectToSphere(pt);
+                indices.push(vx.length);
+                vx.push(projectedPt);
+            });
+            new_s_fx.push(indices);
+        });
+    });    
+    return new_s_fx;
+}
+function nsphere(r) {
+    let raw_vertices = [     // 1. 26 unique vertices on a sphere (cube based)
+        [-1, -1, -1], [-1, -1,  0], [-1, -1,  1], // Środek i narożniki ścian dla x, y, z
+        [-1,  0, -1], [-1,  0,  0], [-1,  0,  1],
+        [-1,  1, -1], [-1,  1,  0], [-1,  1,  1],
+        [ 0, -1, -1], [ 0, -1,  0], [ 0, -1,  1],
+        [ 0,  0, -1],               [ 0,  0,  1], // (0,0,0) pomijamy, nie ma go na powierzchni
+        [ 0,  1, -1], [ 0,  1,  0], [ 0,  1,  1],
+        [ 1, -1, -1], [ 1, -1,  0], [ 1, -1,  1],
+        [ 1,  0, -1], [ 1,  0,  0], [ 1,  0,  1],
+        [ 1,  1, -1], [ 1,  1,  0], [ 1,  1,  1]
+    ];
+    let vx = raw_vertices.map(pt => { // casting to r
+        let len = Math.sqrt(pt[0]*pt[0] + pt[1]*pt[1] + pt[2]*pt[2]);
+        return [ (pt[0] / len) * r, (pt[1] / len) * r, (pt[2] / len) * r ];
+    });
+    let s_fx = [ // 0-base indices
+        [ 0,  1,  2,  3,  4,  5,  6,  7,  8 ],  // 1:  X = -1 (Tył)
+        [ 17, 18, 19, 20, 21, 22, 23, 24, 25 ], // 2:  X =  1 (Przód)
+        [ 0,  1,  2,  9, 10, 11, 17, 18, 19 ],  // 3:  Y = -1 (Dół)
+        [ 6,  7,  8, 14, 15, 16, 23, 24, 25 ],  // 4:  Y =  1 (Góra)
+        [ 0,  3,  6,  9, 12, 14, 17, 20, 23 ],  // 5:  Z = -1 (Lewo)
+        [ 2,  5,  8, 11, 13, 16, 19, 22, 25 ]   // 6:  Z =  1 (Prawo)
+    ];
+    return { type: 'Mesh', vx: vx, s_fx: s_fx, fx: [] };
+}
+function exportToObjString(mesh) {
+    let out = "# 6-Patch Sphere\n";
+    mesh.vx.forEach(v => {
+        out += `v ${v[0].toFixed(6)} ${v[1].toFixed(6)} ${v[2].toFixed(6)}\n`;
+    });
+    mesh.s_fx.forEach(surf => {
+        let indices = surf.map(idx => idx + 1).join(" ");
+        out += `surf 0.0 1.0 0.0 1.0 ${indices}\n`;
+    });
+    return out;
+}
+
+
 function updateBoundsFromMesh(data, bounds) {
     const vx = data.vx;
     if (!vx || vx.length === 0) return;
@@ -1902,30 +1996,27 @@ function updateBoundsFromMesh(data, bounds) {
         if (p[2] > bounds.maxY) bounds.maxY = p[2];
     }
 }
-function drawMesh(vx, fx, dx_container, bounds) {
+function drawMesh(vx, fx, bounds) {
     if (!vx || vx.length === 0 || !fx || fx.length === 0) return;
+
     const rangeX = bounds.maxX - bounds.minX;
     const rangeZ = bounds.maxZ - bounds.minZ;
+    //const maxRange = Math.max(rangeX, rangeZ) || 1;
     const rangeY = bounds.maxY - bounds.minY;
     const maxRange = Math.max(rangeX, rangeZ, rangeY * 2.0) || 1;
+
     const offsetX = (maxRange - rangeX) / 2;
     const offsetZ = (maxRange - rangeZ) / 2;
+    //const rangeY = bounds.maxY - bounds.minY;
+    //const scaleY = rangeY > 0 ? (2.0 / Math.abs(bounds.minY)) : 1.0;
+    //const rangeY = bounds.maxY - bounds.minY;
     const scaleY = rangeY > 0 ? (2.0 / rangeY) : 1.0;
+
     const globalScale = 4.0 / maxRange;
-    let minData = 0;
-    let maxData = 0;
-	let dx = dx_container && dx_container.length>0 ? dx_container[0].data : null;
-	//currentDxData = dx
-    let hasData = dx && dx.length === vx.length;
-    if (hasData) {
-        minData = Math.min(...dx);
-        maxData = Math.max(...dx);
-    }
-    const dataRange = (maxData - minData) || 1;
+
     const positions = new Float32Array(vx.length * 3);
-    const colors = new Float32Array(vx.length * 3);
     for (let i = 0; i < vx.length; i++) {
-        const p = vx[i];
+        const p = vx[i]; // [X, Y_geodezyjne, Z_głębokość]
         let mappedX = p[0];
         if (rangeX !== 0) {
             mappedX = -2 + (((p[0] - bounds.minX) + offsetX) / maxRange) * 4;
@@ -1934,97 +2025,10 @@ function drawMesh(vx, fx, dx_container, bounds) {
         if (rangeZ !== 0) {
             mappedZ = -(-2 + (((p[1] - bounds.minZ) + offsetZ) / maxRange) * 4);
         }
-        const mappedY = (p[2] - bounds.maxY) * globalScale;
-        positions[i * 3]     = mappedX;
-        positions[i * 3 + 1] = mappedY;
-        positions[i * 3 + 2] = mappedZ;
-        if (hasData) {
-            const norm = (dx[i] - minData) / dataRange;
-            const r = Math.max(0, Math.min(1, 4 * norm - 1.5)); // colormap
-            const g = Math.max(0, Math.min(1, 1.5 - Math.abs(4 * norm - 2)));
-            const b = Math.max(0, Math.min(1, 1.5 - 4 * norm));
-            colors[i * 3]     = r;
-            colors[i * 3 + 1] = g;
-            colors[i * 3 + 2] = b;
-        } else {
-            colors[i * 3]     = 0.7;
-            colors[i * 3 + 1] = 0.7;
-            colors[i * 3 + 2] = 0.7;
-        }
-    }
-    const indices = [];
-    for (let i = 0; i < fx.length; i++) {
-        const face = fx[i];
-        if (face.length >= 3) {
-            indices.push(face[0], face[1], face[2]);
-        }
-    }
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    geometry.setIndex(indices);
-    geometry.computeVertexNormals();
-    const meshMaterial = new THREE.MeshBasicMaterial({
-        vertexColors: true,
-        side: THREE.DoubleSide,
-        polygonOffset: true,      
-        polygonOffsetFactor: 1,   
-        polygonOffsetUnits: 1     
-    });
-    const mesh = new THREE.Mesh(geometry, meshMaterial);
-	mesh.name="gmsh_mesh";
-	mesh.dx_container = dx_container;
-	mesh.dx_idx = 0;
-    const wireframeGeometry = new THREE.WireframeGeometry(geometry);
-    const wireframeMaterial = new THREE.LineBasicMaterial({ 
-        color: 0x335577,
-        linewidth: 1 
-    });
-    const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
-    mesh.add(wireframe);
-    mainGroup.add(mesh);
-    console.log(`[GMSH SUCCESS] ${vx.length} x ${fx.length}`);
-}
-function updateMeshColors(mesh, newDx) {
-    if (!mesh || !newDx || newDx.length === 0) return;
-	//currentDxData = newDx;
-    const minData = Math.min(...newDx);
-    const maxData = Math.max(...newDx);
-    const dataRange = (maxData - minData) || 1;
-    const colorAttribute = mesh.geometry.getAttribute('color');
-    if (!colorAttribute) return;
-    for (let i = 0; i < newDx.length; i++) {
-        const norm = (newDx[i] - minData) / dataRange;
-        const r = Math.max(0, Math.min(1, 4 * norm - 1.5));
-        const g = Math.max(0, Math.min(1, 1.5 - Math.abs(4 * norm - 2)));
-        const b = Math.max(0, Math.min(1, 1.5 - 4 * norm));
-        colorAttribute.setXYZ(i, r, g, b);
-    }
-    colorAttribute.needsUpdate = true; // informa three.js
-}
-
-
-function drawMesh0(vx, fx, dx, bounds) {
-    if (!vx || vx.length === 0 || !fx || fx.length === 0) return;
-    const rangeX = bounds.maxX - bounds.minX;
-    const rangeZ = bounds.maxZ - bounds.minZ;
-    const rangeY = bounds.maxY - bounds.minY;
-    const maxRange = Math.max(rangeX, rangeZ, rangeY * 2.0) || 1;
-    const offsetX = (maxRange - rangeX) / 2;
-    const offsetZ = (maxRange - rangeZ) / 2;
-    const scaleY = rangeY > 0 ? (2.0 / rangeY) : 1.0;
-    const globalScale = 4.0 / maxRange;
-    const positions = new Float32Array(vx.length * 3);
-    for (let i = 0; i < vx.length; i++) {
-        const p = vx[i];
-        let mappedX = p[0];
-        if (rangeX !== 0) {
-            mappedX = -2 + (((p[0] - bounds.minX) + offsetX) / maxRange) * 4;
-        }
-        let mappedZ = -p[1];
-        if (rangeZ !== 0) {
-            mappedZ = -(-2 + (((p[1] - bounds.minZ) + offsetZ) / maxRange) * 4);
-        }
+        //const zGeo = p[2] > 0 ? -p[2] : p[2];
+        //const mappedY = zGeo * scaleY;
+        
+        //const mappedY = (p[2] - bounds.maxY) * scaleY;
         const mappedY = (p[2] - bounds.maxY) * globalScale;
         
         positions[i * 3]     = mappedX;
@@ -2042,6 +2046,15 @@ function drawMesh0(vx, fx, dx, bounds) {
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     geometry.setIndex(indices);
     geometry.computeVertexNormals();
+/*
+    const meshMaterial = new THREE.MeshBasicMaterial({
+        color: 0x000080,
+        side: THREE.DoubleSide,
+        wireframe: true
+    });
+    const mesh = new THREE.Mesh(geometry, meshMaterial);
+*/
+
     const meshMaterial = new THREE.MeshBasicMaterial({
         color: 0xaabbcc,
         side: THREE.DoubleSide,
@@ -2057,7 +2070,9 @@ function drawMesh0(vx, fx, dx, bounds) {
     });
     const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
     mesh.add(wireframe);
+
     mainGroup.add(mesh);
+
     console.log(`[GMSH SUCCESS] ${vx.length} x ${fx.length}`);
 }
 
@@ -2161,78 +2176,6 @@ function drawEsriTerrainMesh(gridData, bounds) {
     console.log(`[3D SUCCESS] Grid rendered without Z>=0.`);
 }
 
-// ---- draw square image in 3D ----
-
-function parseImageMetadata(filename, globalBounds) {
-    const openBracketIdx = filename.indexOf('[');
-    const closeBracketIdx = filename.indexOf(']');
-    if (openBracketIdx === -1 || closeBracketIdx === -1) {
-        return null;
-    }
-    const numbersString = filename.slice(openBracketIdx + 1, closeBracketIdx);
-    const params = numbersString.split(',').map(parseFloat);
-    if (params.length < 5 || params.some(isNaN)) {
-        return null;
-    }
-    const x = parseFloat(params[0]);
-    const y = parseFloat(params[1]);
-    const z = parseFloat(params[2]);
-    const r = parseFloat(params[3]);
-    const alpha = parseFloat(params[4]*Math.PI/180);
-    const cosA = Math.cos(alpha);
-    const sinA = Math.sin(alpha);
-    const dx = Math.abs(r * cosA);
-    const dz = Math.abs(r * sinA);
-    globalBounds.minX = Math.min(globalBounds.minX, x - dx);
-    globalBounds.maxX = Math.max(globalBounds.maxX, x + dx);
-    globalBounds.minZ = Math.min(globalBounds.minZ, z - dz);
-    globalBounds.maxZ = Math.max(globalBounds.maxZ, z + dz);
-    globalBounds.minY = Math.min(globalBounds.minY, y - r);
-    globalBounds.maxY = Math.max(globalBounds.maxY, y + r);
-    return { x, y, z, r, alpha };
-}
-
-function drawImagePlane(imgBlob, metaData, bounds) {
-    if (!imgBlob || !metaData || !bounds) return;
-    const { x, y, z, r, alpha } = metaData;
-    const rangeX = bounds.maxX - bounds.minX;
-    const rangeZ = bounds.maxZ - bounds.minZ;
-    const rangeY = bounds.maxY - bounds.minY;
-    const maxRange = Math.max(rangeX, rangeZ, rangeY * 2.0) || 1;
-    const offsetX = (maxRange - rangeX) / 2;
-    const offsetZ = (maxRange - rangeZ) / 2;
-    const globalScale = 4.0 / maxRange;
-    let mappedX = x;
-    if (rangeX !== 0) {
-        mappedX = -2 + (((x - bounds.minX) + offsetX) / maxRange) * 4;
-    }
-    let mappedZ = -z;
-    if (rangeZ !== 0) {
-        mappedZ = -(-2 + (((z - bounds.minZ) + offsetZ) / maxRange) * 4);
-    }
-    const mappedY = (y - bounds.maxY) * globalScale;
-    const scaledRadius = r * globalScale;
-    const sideLength = scaledRadius * 2;
-    const objectURL = URL.createObjectURL(imgBlob);
-    const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load(objectURL, () => {
-        URL.revokeObjectURL(objectURL);
-    });
-    const geometry = new THREE.PlaneGeometry(sideLength, sideLength);
-    const material = new THREE.MeshBasicMaterial({
-        map: texture,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.95,
-        depthWrite: false
-    });
-    const imageMesh = new THREE.Mesh(geometry, material);
-    imageMesh.position.set(mappedX, mappedY, mappedZ);
-    imageMesh.rotation.y = alpha;
-    imageMesh.name = "gmsh_image_plane";
-    mainGroup.add(imageMesh);
-}
-
 // ------- File Loader ---------
 
 document.getElementById('imageLoader').addEventListener('change', async function(e) {
@@ -2242,8 +2185,6 @@ document.getElementById('imageLoader').addEventListener('change', async function
     const worldFiles = new Map();
     const customFiles = [];
     const ek5ProcessedData = new Map(); 
-	const imagesQueue = [];
-//	const processedCores = new Set();
 
     function getNameCore(filepath) {
         const filename = filepath.split('/').pop();
@@ -2304,13 +2245,14 @@ document.getElementById('imageLoader').addEventListener('change', async function
                   file.name.toLowerCase().endsWith('.s7k')||
                   file.name.toLowerCase().endsWith('.dt4')||
                   file.name.toLowerCase().endsWith('.msh')||
+                  file.name.toLowerCase().endsWith('.obj')||
                   file.name.toLowerCase().endsWith('.asc')){
                     customFiles.push(file); // for async processing
                 } else if (isWorldFile) {
                     worldFiles.set(core, file);
                 } else if (file.type==='text/plain'||file.name.endsWith('.txt')){
                     rawTxtDataMap.set(core, file);
-                } else if (file.type.startsWith('image/')||file.name.endsWith('.png')||file.name.endsWith('.jpg')) {
+                } else if (file.type.startsWith('image/')) {
                     imageFiles.set(core, file);
                 } else {
                     console.warn(`File format not known: ${file.name}.`);
@@ -2327,6 +2269,9 @@ document.getElementById('imageLoader').addEventListener('change', async function
                         } else if (file.name.toLowerCase().endsWith('.msh')) {
                             const textContent = await file.text();
                             result = parseGmshMsh(textContent);
+                        } else if (file.name.toLowerCase().endsWith('.obj')) {
+                            const textContent = await file.text();
+                            result = parseObj(textContent);
                         } else {
                             result = await FileParsers.handleCustomFormat(file);
                         }
@@ -2469,15 +2414,6 @@ document.getElementById('imageLoader').addEventListener('change', async function
                 }
             }
         }
-        imageFiles.forEach((file, core) => {
-            const metaData = parseImageMetadata(file.name, globalBounds);
-            if (metaData) {
-                imagesQueue.push({blob: file, meta: metaData, core: core});
-                //processedCores.add(core);
-                imageFiles.delete(core);
-            }
-        });
-
         for (const [core, cleanStr] of txtFiles.entries()) {
             const scaledCurveString = mapCurveStringWithAspectRatio(cleanStr, globalBounds);
             const matchingImageBlob = imageFiles.get(core);
@@ -2508,7 +2444,7 @@ document.getElementById('imageLoader').addEventListener('change', async function
             if(data.type==='Grid3D') {
                 drawEsriTerrainMesh(data, globalBounds) 
             } else if(data.type==='Mesh') {
-                drawMesh(data.vx, data.fx, data.dx, globalBounds) 
+                drawMesh(data.vx, data.fx, globalBounds) 
             } else {
                 const scaledCurveString=mapCurveStringWithAspectRatio(data.curve,globalBounds);
                 lastLoadedCurveString = scaledCurveString;
@@ -2520,18 +2456,16 @@ document.getElementById('imageLoader').addEventListener('change', async function
             console.log(`[SUCCESS] ${core} loaded`);
         }
         // --- when no pairs ---
-        imagesQueue.forEach(item => {
-            drawImagePlane(item.blob, item.meta, globalBounds);
-        });
         for (const [core, imgBlob] of imageFiles.entries()) {
-            if (/*!processedCores.has(core) && */ !txtFiles.has(core) && !ek5ProcessedData.has(core) && !worldFiles.has(core)) {
-                    const defaultStr = "-2," + img_z + ";2," + img_z;
-                    img_z += 0.2;
-                    lastLoadedCurveString = defaultStr;
-                    FileParsers.handleRasterImage(imgBlob, defaultStr);
-                    console.log(`[DEFAULT] ${core}: placed at Z: ${img_z - 0.2}`);
+            if (!txtFiles.has(core) && !ek5ProcessedData.has(core) && !worldFiles.has(core)) {
+                const defaultStr = "-2," + img_z + ";2," + img_z;
+                img_z += 0.2;
+                lastLoadedCurveString = defaultStr;
+                FileParsers.handleRasterImage(imgBlob, defaultStr);
+                console.log(`[DEFAULT] ${core}: placed at Z: ${img_z - 0.2}`);
             }
         }
+
     } catch (error) {
         console.error("Loader error:", error);
     }
