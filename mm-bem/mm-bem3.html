@@ -181,7 +181,7 @@ Full mm-bem package contains source codes in different programming languages for
 var reduce_msh=0;
 function on_reduce() {reduce_msh^=1; change();}
 </script>
-<br><span style="margin-left:32px"></span> or <input accept=".msh,.stl,.json,.tsv,.gz" id="openfile" title="Load from msh (2.0), stl or echoSMs json" type="file" onchange="readFile(this);" multiple/>
+<br><span style="margin-left:32px"></span> or <input accept=".msh,.stl,.obj,.json,.tsv,.gz" id="openfile" title="Load from msh (2.0), stl, obj or echoSMs-json" type="file" onchange="readFile(this);" multiple/>
 
 <textarea id="obj" style="width:408px; height:92px; vertical-align: top;" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905,4),[0,0,0]]</textarea>
 <div style="display: inline-flex; flex-direction: column; vertical-align: top; gap: 0px;">
@@ -932,7 +932,7 @@ onchange="nf_r2=parseFloat(this.value);document.getElementById('nf_r2').textCont
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es" onerror="this.style.display='none';"></a>
-<p title="(30.9.2026)" style="text-align:center">mm-bem v3.10 (2025-2026)</p>
+<p title="(4.10.2026)" style="text-align:center">mm-bem v3.11 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -2502,6 +2502,206 @@ function select() {
     change();
 }
 
+// --- obj ---
+
+function parseObj(s) {
+    const lines = s.split('\n').map(line => line.trim().split(/\s+/));
+    var v = lines.filter(t => t[0] === 'v').map(t => t.slice(1, 4).map(parseFloat));
+    const f = lines.filter(t => t[0] === 'f').map(t => t.slice(1, 4).map(x => parseInt(x.split('/')[0]) - 1));
+    const surf = lines.filter(t => t[0] === 'surf');
+    var s_fx = surf.map(t => t.slice(5).map(x => parseInt(x) - 1));
+
+    //var mesh = nsphere(r=0.01905);
+    //var s_fx = mesh.s_fx;    
+    //var v = mesh.vx;
+	
+    //for (let i=0; i<v.length; i++) { var t=v[i][1]; v[i][1]=v[i][2]; v[i][2]=t; }
+
+    //s_fx = surf_divide(s_fx, v); // Double patch resolution
+    //s_fx = surf_divide(s_fx, v); // Double patch resolution
+    //console.log(exportToObjString({vx:v, s_fx:s_fx}));
+    
+    const generated = surf2tri(s_fx, v, 4); // Convert surfaces to triangles
+    v.push(...generated.newVertices);
+    f.push(...generated.newFaces);
+    return { type: 'Mesh', vx: v, fx: f };
+}
+function surf2tri(s_fx, vx, n = 8) {
+    let newVertices = [];
+    let newFaces = [];    
+    s_fx.forEach(patch => {
+        // Map 9 indices to a 3x3 control point grid of actual 3D coordinates
+        const cp = [
+            [vx[patch[0]], vx[patch[1]], vx[patch[2]]],
+            [vx[patch[3]], vx[patch[4]], vx[patch[5]]],
+            [vx[patch[6]], vx[patch[7]], vx[patch[8]]]
+        ];       
+        const startVIdx = vx.length + newVertices.length;
+        // 1. Generate (n+1)x(n+1) grid of interpolated vertices using Biquadratic Bezier logic
+        for (let i = 0; i <= n; i++) {
+            let u = i / n;
+            let bU = [ (1-u)*(1-u), 2*(1-u)*u, u*u ]; // Quadratic Bernstein polynomials            
+            for (let j = 0; j <= n; j++) {
+                let v = j / n;
+                let bV = [ (1-v)*(1-v), 2*(1-v)*v, v*v ];                
+                let pt = [0, 0, 0];
+                for (let r = 0; r < 3; r++) {
+                    for (let c = 0; c < 3; c++) {
+                        let weight = bU[r] * bV[c];
+                        pt[0] += weight * cp[r][c][0];
+                        pt[1] += weight * cp[r][c][1];
+                        pt[2] += weight * cp[r][c][2];
+                    }
+                }
+                newVertices.push(pt);
+            }
+        }
+        // 2. Split into n x n rectangles, then into 2 triangles each
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                let row1 = startVIdx + i * (n + 1);
+                let row2 = startVIdx + (i + 1) * (n + 1);                
+                let p0 = row1 + j;
+                let p1 = row1 + j + 1;
+                let p2 = row2 + j;
+                let p3 = row2 + j + 1;
+                // Two triangles per rectangle cell
+                newFaces.push([p0, p1, p2]);
+                newFaces.push([p1, p3, p2]);
+            }
+        }
+    });    
+    return { newVertices, newFaces };
+}
+function surf_divide(s_fx, vx) {
+    let new_s_fx = [];
+    // Obliczamy promień sfery na podstawie pierwszego wierzchołka
+    const r_sphere = Math.sqrt(vx[0][0]**2 + vx[0][1]**2 + vx[0][2]**2);
+    function projectToSphere(pt) {
+        let len = Math.sqrt(pt[0]*pt[0] + pt[1]*pt[1] + pt[2]*pt[2]);
+        if (len === 0) return pt;
+        return [ (pt[0] / len) * r_sphere, (pt[1] / len) * r_sphere, (pt[2] / len) * r_sphere ];
+    }
+    // Pomocnicza funkcja do podziału 3 punktów (krzywej kwadratowej Beziera) w połowie (t=0.5)
+    function split3(p0, p1, p2) {
+        let m01 = p0.map((x, i) => (x + p1[i]) * 0.5);
+        let m12 = p1.map((x, i) => (x + p2[i]) * 0.5);
+        let m012 = m01.map((x, i) => (x + m12[i]) * 0.5);
+        return {
+            left: [p0, m01, m012],
+            right: [m012, m12, p2]
+        };
+    }
+    s_fx.forEach(patch => { 
+        let grid = [ //  3x3 from 9 indices
+            [vx[patch[0]], vx[patch[1]], vx[patch[2]]],
+            [vx[patch[3]], vx[patch[4]], vx[patch[5]]],
+            [vx[patch[6]], vx[patch[7]], vx[patch[8]]]
+        ];        
+        // Step 1: Podział poziomy (każdego wiersza wzdłuż osi U)
+        let rows_L = [], rows_R = [];
+        for (let r = 0; r < 3; r++) {
+            let s = split3(grid[r][0], grid[r][1], grid[r][2]);
+            rows_L.push(s.left);
+            rows_R.push(s.right);
+        }
+        // Step 2: Podział pionowy (każdej kolumny wzdłuż osi V dla lewej i prawej strony)
+        function splitVertical(half_grid) {
+            let cols = [];
+            for (let c = 0; c < 3; c++) {
+                let s = split3(half_grid[0][c], half_grid[1][c], half_grid[2][c]);
+                cols.push(s); // zawiera .left (góra) i .right (dół)
+            }
+            // Budujemy płat Górny (Top) oraz Dolny (Bottom) z powrotem do formatu wierszy
+            let patch_T = [
+                cols[0].left[0], cols[1].left[0], cols[2].left[0], // wiersz 0
+                cols[0].left[1], cols[1].left[1], cols[2].left[1], // wiersz 1
+                cols[0].left[2], cols[1].left[2], cols[2].left[2]  // wiersz 2
+            ];
+            let patch_B = [
+                cols[0].right[0], cols[1].right[0], cols[2].right[0], // wiersz 0
+                cols[0].right[1], cols[1].right[1], cols[2].right[1], // wiersz 1
+                cols[0].right[2], cols[1].right[2], cols[2].right[2]  // wiersz 2
+            ];            
+            return [patch_T, patch_B];
+        }        
+        // Otrzymujemy 4 równe podobiekty (płaty 3x3)
+        let [patch_LT, patch_LB] = splitVertical(rows_L);
+        let [patch_RT, patch_RB] = splitVertical(rows_R);
+        let child_patches = [patch_LT, patch_LB, patch_RT, patch_RB];        
+        // Rejestracja nowych, rzutowanych na sferę punktów w globalnej tablicy wierzchołków
+        child_patches.forEach(sp => {
+            let indices = [];
+            sp.forEach(pt => {
+                let projectedPt = projectToSphere(pt);
+                indices.push(vx.length);
+                vx.push(projectedPt);
+            });
+            new_s_fx.push(indices);
+        });
+    });    
+    return new_s_fx;
+}
+function nsphere(r, n=1) {
+  var fx = [];
+  var nurbs = nurbs_sphere(r);
+  var vx = nurbs.vx;
+  var s_fx = nurbs.s_fx;
+  for(var i=0; i<n; i++) {
+    s_fx = surf_divide(s_fx, vx);
+  }
+  const generated = surf2tri(s_fx, vx, 1); // Convert surfaces to triangles
+  vx.push(...generated.newVertices);
+  fx.push(...generated.newFaces);
+  return [vx, fx];
+}
+function nurbs_sphere(r) {
+    let raw_vertices = [     // 1. 26 unique vertices on a sphere (cube based)
+        [-1, -1, -1], [-1, -1,  0], [-1, -1,  1], // Środek i narożniki ścian dla x, y, z
+        [-1,  0, -1], [-1,  0,  0], [-1,  0,  1],
+        [-1,  1, -1], [-1,  1,  0], [-1,  1,  1],
+        [ 0, -1, -1], [ 0, -1,  0], [ 0, -1,  1],
+        [ 0,  0, -1],               [ 0,  0,  1], // (0,0,0) pomijamy, nie ma go na powierzchni
+        [ 0,  1, -1], [ 0,  1,  0], [ 0,  1,  1],
+        [ 1, -1, -1], [ 1, -1,  0], [ 1, -1,  1],
+        [ 1,  0, -1], [ 1,  0,  0], [ 1,  0,  1],
+        [ 1,  1, -1], [ 1,  1,  0], [ 1,  1,  1]
+    ];
+    let vx = raw_vertices.map(pt => { // casting to r
+        let len = Math.sqrt(pt[0]*pt[0] + pt[1]*pt[1] + pt[2]*pt[2]);
+        return [ (pt[0] / len) * r, (pt[1] / len) * r, (pt[2] / len) * r ];
+    });
+    let s_fx = [ // 0-base indices
+        [ 0,  1,  2,  3,  4,  5,  6,  7,  8 ],  // 1:  X = -1 (Tył)
+        [ 17, 18, 19, 20, 21, 22, 23, 24, 25 ], // 2:  X =  1 (Przód)
+        [ 0,  1,  2,  9, 10, 11, 17, 18, 19 ],  // 3:  Y = -1 (Dół)
+        [ 6,  7,  8, 14, 15, 16, 23, 24, 25 ],  // 4:  Y =  1 (Góra)
+        [ 0,  3,  6,  9, 12, 14, 17, 20, 23 ],  // 5:  Z = -1 (Lewo)
+        [ 2,  5,  8, 11, 13, 16, 19, 22, 25 ]   // 6:  Z =  1 (Prawo)
+    ];
+    return { type: 'Mesh', vx: vx, s_fx: s_fx, fx: [] };
+}
+function exportToObjString(mesh) {
+    let out = "# 6-Patch Sphere\n";
+    mesh.vx.forEach(v => {
+        out += `v ${v[0].toFixed(6)} ${v[1].toFixed(6)} ${v[2].toFixed(6)}\n`;
+    });
+    mesh.s_fx.forEach(surf => {
+        let indices = surf.map(idx => idx + 1).join(" ");
+        out += `surf 0.0 1.0 0.0 1.0 ${indices}\n`;
+    });
+    return out;
+}
+
+function obj2msh(s) {
+        var mesh = parseObj(s);
+        var v = mesh.vx;
+        var f = mesh.fx;
+	msh_str([deduplicate(v,f)]);
+	return(msh_flush());
+}
+
+// --- stl ---
 function stla2msh(s) {
 	const p = /^\s*vertex\s+([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s+([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)\s+([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)/;
 	const v = s.split('\n').map(l => {const match = l.match(p); return match ? match.slice(1).map(Number) : null;}).filter(Boolean);
@@ -2723,7 +2923,9 @@ function readFile(e) {  // local file reader
 				result += String.fromCharCode(bytes[i]);
 			}
 			k++;
-			if(file.name.endsWith(".stl")||file.name.endsWith(".stl.gz")) {
+			if(file.name.endsWith(".obj")||file.name.endsWith(".obj.gz")) {
+				document.getElementById("msh").value += obj2msh(result);
+                        } else if(file.name.endsWith(".stl")||file.name.endsWith(".stl.gz")) {
 				if(result.substring(0,5)=="solid") {  // console.log("STL ascii file");
 					document.getElementById("msh").value += stla2msh(result);
 				} else {                              // console.log("STL binary file");
@@ -2755,12 +2957,12 @@ function readFile(e) {  // local file reader
 			}
 			if(k==N) change(); // start calculations after reading
 		};
-		if(file.name.endsWith(".msh")||file.name.endsWith(".stl")||file.name.endsWith(".json")||file.name.endsWith(".tsv")||file.name.endsWith(".msh.gz")||file.name.endsWith(".stl.gz")) {
+		if(file.name.endsWith(".msh")||file.name.endsWith(".stl")||file.name.endsWith(".obj")||file.name.endsWith(".json")||file.name.endsWith(".tsv")||file.name.endsWith(".msh.gz")||file.name.endsWith(".stl.gz")||file.name.endsWith(".obj.gz")) {
 			document.getElementById("obj").value += ' '+file.name.replace(/\.gz$/,'');
 			//reader.readAsText(file);
 			reader.readAsArrayBuffer(file);
 		} else {
-			alert("Only msh (ascii 2.0), stl or json files allowed") 
+			alert("Only msh (ascii 2.0), stl, obj or json files allowed") 
 		}
 	}
 }
@@ -3343,7 +3545,7 @@ function change1() {
 		O = eval('['+obj+']');
 		O.forEach(o => msh_str(o));
 		document.getElementById("msh").value=msh_flush();
-	} else if(obj.endsWith(".msh")||obj.endsWith(".stl")||obj.endsWith(".tsv")) {
+	} else if(obj.endsWith(".msh")||obj.endsWith(".stl")||obj.endsWith(".obj")||obj.endsWith(".tsv")) {
 		// document.getElementById("msh").value='[already inplace]'; 
 	} else if(obj.startsWith("lbs:") ) {
 		document.getElementById("msh").value=prevs0[obj]; 
