@@ -2536,7 +2536,10 @@ function select() {
 
 function parseObj(s) {
     const lines = s.split('\n').map(line => line.trim().split(/\s+/));
-    var v = lines.filter(t => t[0] === 'v').map(t => t.slice(1, 4).map(parseFloat));
+
+console.log("parseObj(1):",lines)
+    const v = lines.filter(t => t[0] === 'v').map(t => t.slice(1, 5).map(parseFloat));
+console.log("parseObj(2):",v);
     const f = lines.filter(t => t[0] === 'f').map(t => t.slice(1, 4).map(x => parseInt(x.split('/')[0]) - 1));
     const surf = lines.filter(t => t[0] === 'surf');
     var s_fx = surf.map(t => t.slice(5).map(x => parseInt(x) - 1));
@@ -2550,13 +2553,15 @@ function parseObj(s) {
     //s_fx = surf_divide(s_fx, v); // Double patch resolution
     //s_fx = surf_divide(s_fx, v); // Double patch resolution
     //console.log(exportToObjString({vx:v, s_fx:s_fx}));
+
+console.log("parseObj(2):",v);
     
-    const generated = surf2tri(s_fx, v, 4); // Convert surfaces to triangles
+    const generated = surf2tri(s_fx, v, 2); // Convert surfaces to triangles
     v.push(...generated.newVertices);
     f.push(...generated.newFaces);
     return { type: 'Mesh', vx: v, fx: f };
 }
-function surf2tri(s_fx, vx, n = 8) {
+function surf2tri0(s_fx, vx, n = 8) {
     let newVertices = [];
     let newFaces = [];    
     s_fx.forEach(patch => {
@@ -2603,6 +2608,73 @@ function surf2tri(s_fx, vx, n = 8) {
     });    
     return { newVertices, newFaces };
 }
+function surf2tri(s_fx, vx, n = 8) {
+    let newVertices = [];
+    let newFaces = [];
+console.log("surf2tri(1):",vx);     
+    s_fx.forEach(p => {
+        const cp = [
+            [
+                [vx[p[0]][0], vx[p[0]][1], vx[p[0]][2], vx[p[0]][3]!==undefined?vx[p[0]][3]:1],
+                [vx[p[1]][0], vx[p[1]][1], vx[p[1]][2], vx[p[1]][3]!==undefined?vx[p[1]][3]:1],
+                [vx[p[2]][0], vx[p[2]][1], vx[p[2]][2], vx[p[2]][3]!==undefined?vx[p[2]][3]:1]
+            ],
+            [
+                [vx[p[3]][0], vx[p[3]][1], vx[p[3]][2], vx[p[3]][3]!==undefined?vx[p[3]][3]:1],
+                [vx[p[4]][0], vx[p[4]][1], vx[p[4]][2], vx[p[4]][3]!==undefined?vx[p[4]][3]:1],
+                [vx[p[5]][0], vx[p[5]][1], vx[p[5]][2], vx[p[5]][3]!==undefined?vx[p[5]][3]:1]
+            ],
+            [
+                [vx[p[6]][0], vx[p[6]][1], vx[p[6]][2], vx[p[6]][3]!==undefined?vx[p[6]][3]:1],
+                [vx[p[7]][0], vx[p[7]][1], vx[p[7]][2], vx[p[7]][3]!==undefined?vx[p[7]][3]:1],
+                [vx[p[8]][0], vx[p[8]][1], vx[p[8]][2], vx[p[8]][3]!==undefined?vx[p[8]][3]:1]
+            ]
+        ];
+console.log("surf2tri(2):",cp);       
+        const startVIdx = vx.length + newVertices.length;
+        for (let i = 0; i <= n; i++) {
+            let u = i / n;
+            let bU = [ (1-u)*(1-u), 2*(1-u)*u, u*u ];           
+            for (let j = 0; j <= n; j++) {
+                let v = j / n;
+                let bV = [ (1-v)*(1-v), 2*(1-v)*v, v*v ];                
+                // Inicjalizujemy akumulator dla przestrzeni 4D: [X*W, Y*W, Z*W, W]
+                let pt4D = [0,0,0,0];
+                for (let r = 0; r < 3; r++) {
+                    for (let c = 0; c < 3; c++) {
+                        let weight = bU[r] * bV[c];
+                        let wControl = cp[r][c][3]; // Waga punktu kontrolnego
+                        pt4D[0] += weight * (cp[r][c][0] * wControl);
+                        pt4D[1] += weight * (cp[r][c][1] * wControl);
+                        pt4D[2] += weight * (cp[r][c][2] * wControl);
+                        pt4D[3] += weight * wControl; // Interpolujemy samą wagę W
+                    }
+                }
+                let finalW = pt4D[3];
+                let pt3D = [
+                    pt4D[0] / finalW,
+                    pt4D[1] / finalW,
+                    pt4D[2] / finalW
+                ];
+                newVertices.push(pt3D);
+            }
+        }
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                let row1 = startVIdx + i * (n + 1);
+                let row2 = startVIdx + (i + 1) * (n + 1);                
+                let p0 = row1 + j;
+                let p1 = row1 + j + 1;
+                let p2 = row2 + j;
+                let p3 = row2 + j + 1;
+                newFaces.push([p0, p1, p2]);
+                newFaces.push([p1, p3, p2]);
+            }
+        }
+    });    
+    return { newVertices, newFaces };
+}
+
 function surf_divide(s_fx, vx) {
     let new_s_fx = [];
     // Obliczamy promień sfery na podstawie pierwszego wierzchołka
@@ -3790,7 +3862,7 @@ function change1() {
 		c0 = parseFloat(document.getElementById("c0").value);
 		ph = parseFloat(document.getElementById("ph").value);
 		rr = parseFloat(document.getElementById("r0")?.value) || 0; // point source distance
-		var rest = {nf_r0:nf_r0, nf_m:nf_m, nf_n:nf_n, nf_cx:nf_cx, nf_cy:nf_cy, nf_cz:nf_cz, krm_ang:krm_ang, ipa_iter:ipa_iter, band:band};
+		var rest = {nf_r0:nf_r0, nf_m:nf_m, nf_n:nf_n, nf_cx:nf_cx, nf_cy:nf_cy, nf_cz:nf_cz, krm_ang:krm_ang, ipa_iter:ipa_iter, band:band, reduce_msh:reduce_msh};
 		var m = parseInt(document.getElementById("method").value);
 		var solver = parseInt(document.getElementById("solver")?.value);
 		if(f0<0 || rest.band>0) {
@@ -8892,7 +8964,7 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
 
   const n = parseInt(lines[4]);
   const v = lines.slice(5, 5 + n).map(line => line.trim().split(/\s+/).slice(1, 4).map(parseFloat));
-  const m = parseInt(lines[n + 7]);
+  var m = parseInt(lines[n + 7]);
   const e = lines.slice(n + 8, n + 8 + m).map(line =>
     line.trim().split(/\s+/).slice(5, 9).map(x => parseInt(x) - 1)  // 0-based indexing
   );
@@ -8900,6 +8972,8 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
   // Triangle centers
 
   var x = [], x2 = [];
+ //if(rest.reduce_msh) {for (var i = 0; i < n; i++) {x.push([v[i][0],v[i][1],v[i][2]]);} } else 
+ {
   for (var i = 0; i < m; i++) {
     //if(e[i].length!=4) {
       x.push([
@@ -8915,6 +8989,7 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
       ]);
     }*/
   }
+ }
   x2 = x; // for LDLt & BEM
 
   //var {x, x2} = generateMfsPoints(v, e, 0)
