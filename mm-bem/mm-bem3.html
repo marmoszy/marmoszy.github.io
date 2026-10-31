@@ -414,7 +414,7 @@ function changeOrientation(e, v) {
     <button  style="border:none;color:white;background-color:#0080FF;border-radius:12px;width:24px;height:24px;font-size:14px"
 		onclick="zoomin();update();" title="zoomin" id="zoomin"><b>&plus;</b></button>
    <br>     
-	<svg xmlns="http://www.w3.org/2000/svg" id="svg1" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
+	<svg xmlns="http://www.w3.org/2000/svg" id="svg1" viewBox="0 0 440 440" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
 		<defs>
 			<marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto" fill="black"> <polygon points="0 0, 10 3.5, 0 7"/>
 			</marker>
@@ -433,7 +433,7 @@ function changeOrientation(e, v) {
 
 <!------------ svg plot2D -------------->
 <div style="width:440;height:440;border-width:1;border-style:solid;padding:20px;display:block;background-color:#fafcff;white;#F5EDEA;#eee">
-<svg xmlns="http://www.w3.org/2000/svg" id="svg" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
+<svg xmlns="http://www.w3.org/2000/svg" id="svg" viewBox="0 0 440 440" width="440" height="440" font-family="Times" font-size=14 oncopy="svg_copy(this);">
 <image id="svgimg" x="20" y="20" width="400" height="400" onclick="imgclick(this);" style="pointer-events:all" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=">
 	<title>click to turn on/off near field</title>
 </image>
@@ -869,7 +869,7 @@ function select3() {select();}
 r>0 - point source
 r<0 - circular piston"
 onchange="select3()" value="0" style="width:48px"/> &lambda;
-&nbsp;ctrl-shift P, ctrl-shift R
+&nbsp;ctrl-shift S, ctrl-shift R
 <br><br>
 </span>
 
@@ -932,7 +932,7 @@ onchange="nf_r2=parseFloat(this.value);document.getElementById('nf_r2').textCont
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es" onerror="this.style.display='none';"></a>
-<p title="(4.10.2026)" style="text-align:center">mm-bem v3.11 (2025-2026)</p>
+<p title="(31.10.2026)" style="text-align:center">mm-bem v3.12 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -1202,12 +1202,42 @@ document.onkeydown = function(e) {
 	  e.preventDefault(); imgclick(document.getElementById('svgimg'));
   }
   if(e.keyCode==80 && e.ctrlKey && e.shiftKey) { // ctrl-shift P
+    e.preventDefault();
+    var s1 = document.getElementById('svg1').outerHTML;
+    var s2 = document.getElementById('svg').outerHTML;
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+    const doc = iframe.contentWindow.document;
+    doc.charset = "UTF-8";
+    iframe.srcdoc = `
+        <!DOCTYPE html><html><head><meta charset="UTF-8"><title>mm-bem</title><style>
+        @page {size:192mm 192mm; margin:0!important;}
+        html, body {margin:0!important; padding:0!important; 
+           width:192mm!important; height:192mm!important;}
+        div {width:192mm;height:192mm;display:flex;justify-content:center;align-items:center;
+           page-break-after:always; break-after:page;box-sizing:border-box;}
+        svg {width:192mm!important;height:192mm!important;display:block;}
+        svg path, svg line, svg polyline, svg polygon, svg circle {
+           vector-effect: non-scaling-stroke !important;
+        }
+        </style></head><body><div>${s1}</div><div>${s2}</div></body></html>`;
+    setTimeout(() => {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        document.body.removeChild(iframe);
+    }, 50);
+  }
+  if(e.keyCode==83 && e.ctrlKey && e.shiftKey) { // ctrl-shift S
 	e.preventDefault(); var r0=document.getElementById("r0"); r0.value=(r0.value==0)?1:r0.value>0?-r0.value:0; select();
   }
   if(e.keyCode==82 && e.ctrlKey && e.shiftKey) { // ctrl-shift R
 	e.preventDefault(); var r0=document.getElementById("r0"); var v=parseInt(r0.value); r0.value=v+(v>0?1:-1); select();
   }
-  if(e.keyCode==83 && e.ctrlKey && e.shiftKey) { // ctrl-shift S
+  if(e.keyCode==86 && e.ctrlKey && e.shiftKey) { // ctrl-shift V
 	e.preventDefault(); var el=document.getElementById("solver"); var v=parseInt(el.value); el.value=/*((v-3)+1)%3+3*/(v%7)+1; select();
   }
   if(e.keyCode==66 && e.ctrlKey && e.shiftKey) { // ctrl-shift B
@@ -2467,7 +2497,7 @@ async function init_msh_file() {
   }
 }
 
-var about =`mm-bem web-demo (2025-2026):
+var about =`mm-bem web-demo marek.moszynski@pg.edu.pl (2025-2026):
 click on 2D - Near field on/off
 click on 3D - set the view to scattering plane
 ctrl A - Axes on/off (axes colors: 1-red, 2-green, 3-blue)
@@ -2487,10 +2517,10 @@ ctrl-shift I - IPA method on/off
 ctrl-shift K - KRM method on/off 
 ctrl-shift M - MFS method on/off
 ctrl-shift N - Near field on/off
-ctrl-shift P - Plane wave/Point/Piston switch 
+ctrl-shift P - Print mesh and polar chart
 ctrl-shift R - point and piston distance (R0 [])
-ctrl-shift S - change Solver 
-marek.moszynski@pg.edu.pl`;
+ctrl-shift S - plane wave/point/piston Source 
+ctrl-shift V - change solVer`;
 
 function select0() {
     var d = document.getElementById("target").value.replaceAll('|','\n');
