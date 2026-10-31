@@ -2537,30 +2537,18 @@ function select() {
 function parseObj(s) {
     const lines = s.split('\n').map(line => line.trim().split(/\s+/));
 
-console.log("parseObj(1):",lines)
     const v = lines.filter(t => t[0] === 'v').map(t => t.slice(1, 5).map(parseFloat));
-console.log("parseObj(2):",v);
     const f = lines.filter(t => t[0] === 'f').map(t => t.slice(1, 4).map(x => parseInt(x.split('/')[0]) - 1));
     const surf = lines.filter(t => t[0] === 'surf');
     var s_fx = surf.map(t => t.slice(5).map(x => parseInt(x) - 1));
-
-    //var mesh = nsphere(r=0.01905);
-    //var s_fx = mesh.s_fx;    
-    //var v = mesh.vx;
-	
-    //for (let i=0; i<v.length; i++) { var t=v[i][1]; v[i][1]=v[i][2]; v[i][2]=t; }
-
-    //s_fx = surf_divide(s_fx, v); // Double patch resolution
-    //s_fx = surf_divide(s_fx, v); // Double patch resolution
-    //console.log(exportToObjString({vx:v, s_fx:s_fx}));
-
-console.log("parseObj(2):",v);
     
     const generated = surf2tri(s_fx, v, 2); // Convert surfaces to triangles
-    v.push(...generated.newVertices);
-    f.push(...generated.newFaces);
-    return { type: 'Mesh', vx: v, fx: f };
+    //v.push(...generated.newVertices);
+    //f.push(...generated.newFaces);
+    //return { type: 'Mesh', vx: v, fx: f };
+    return { type: 'Mesh', vx: generated.newVertices, fx: generated.newFaces };
 }
+
 function surf2tri0(s_fx, vx, n = 8) {
     let newVertices = [];
     let newFaces = [];    
@@ -2571,7 +2559,7 @@ function surf2tri0(s_fx, vx, n = 8) {
             [vx[patch[3]], vx[patch[4]], vx[patch[5]]],
             [vx[patch[6]], vx[patch[7]], vx[patch[8]]]
         ];       
-        const startVIdx = vx.length + newVertices.length;
+        const startVIdx = newVertices.length + vx.length;
         // 1. Generate (n+1)x(n+1) grid of interpolated vertices using Biquadratic Bezier logic
         for (let i = 0; i <= n; i++) {
             let u = i / n;
@@ -2611,7 +2599,7 @@ function surf2tri0(s_fx, vx, n = 8) {
 function surf2tri(s_fx, vx, n = 8) {
     let newVertices = [];
     let newFaces = [];
-console.log("surf2tri(1):",vx);     
+//console.log("surf2tri(1):",vx);     
     s_fx.forEach(p => {
         const cp = [
             [
@@ -2630,8 +2618,8 @@ console.log("surf2tri(1):",vx);
                 [vx[p[8]][0], vx[p[8]][1], vx[p[8]][2], vx[p[8]][3]!==undefined?vx[p[8]][3]:1]
             ]
         ];
-console.log("surf2tri(2):",cp);       
-        const startVIdx = vx.length + newVertices.length;
+//console.log("surf2tri(2):",cp);       
+        const startVIdx = newVertices.length;// + vx.length;
         for (let i = 0; i <= n; i++) {
             let u = i / n;
             let bU = [ (1-u)*(1-u), 2*(1-u)*u, u*u ];           
