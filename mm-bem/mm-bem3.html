@@ -1075,6 +1075,7 @@ var band = 0;      // band calculation if band nq 0
 var exp = 0;
 var red_lvl = 1.1;
 var mesh_pair = 1;
+var pdf_size = 192; // size in mm of pdf when printing two charts (ctrl-shift P)
 
 //var wh = Math.max(window.innerHeight-150,400);
 var wh = document.getElementById("svg1").getAttribute("width")-0;
@@ -1205,6 +1206,7 @@ document.onkeydown = function(e) {
     e.preventDefault();
     var s1 = document.getElementById('svg1').outerHTML;
     var s2 = document.getElementById('svg').outerHTML;
+    var sz = pdf_size;
     const iframe = document.createElement('iframe');
     iframe.style.position = 'fixed';
     iframe.style.width = '0';
@@ -1215,12 +1217,12 @@ document.onkeydown = function(e) {
     doc.charset = "UTF-8";
     iframe.srcdoc = `
         <!DOCTYPE html><html><head><meta charset="UTF-8"><title>mm-bem</title><style>
-        @page {size:192mm 192mm; margin:0!important;}
+        @page {size:${sz}mm ${sz}mm; margin:0!important;}
         html, body {margin:0!important; padding:0!important; 
-           width:192mm!important; height:192mm!important;}
-        div {width:192mm;height:192mm;display:flex;justify-content:center;align-items:center;
+           width:${sz}mm!important; height:${sz}mm!important;}
+        div {width:${sz}mm;height:${sz}mm;display:flex;justify-content:center;align-items:center;
            page-break-after:always; break-after:page;box-sizing:border-box;}
-        svg {width:192mm!important;height:192mm!important;display:block;}
+        svg {width:${sz}mm!important;height:${sz}mm!important;display:block;}
         svg path, svg line, svg polyline, svg polygon, svg circle {
            vector-effect: non-scaling-stroke !important;
         }
@@ -2540,13 +2542,16 @@ function parseObj(s) {
     const v = lines.filter(t => t[0] === 'v').map(t => t.slice(1, 5).map(parseFloat));
     const f = lines.filter(t => t[0] === 'f').map(t => t.slice(1, 4).map(x => parseInt(x.split('/')[0]) - 1));
     const surf = lines.filter(t => t[0] === 'surf');
-    var s_fx = surf.map(t => t.slice(5).map(x => parseInt(x) - 1));
-    
-    const generated = surf2tri(s_fx, v, 2); // Convert surfaces to triangles
+    var s_fx = surf.map(t => t.slice(5).map(x => parseInt(x) - 1));   
+    if(s_fx.length>0) {
+       const generated = surf2tri(s_fx, v, 2); // Convert surfaces to triangles
+       return { type: 'Mesh', vx: generated.newVertices, fx: generated.newFaces };
+    } else {
+       return { type: 'Mesh', vx: v, fx: f };
+    }
+
     //v.push(...generated.newVertices);
     //f.push(...generated.newFaces);
-    //return { type: 'Mesh', vx: v, fx: f };
-    return { type: 'Mesh', vx: generated.newVertices, fx: generated.newFaces };
 }
 
 function surf2tri0(s_fx, vx, n = 8) {
