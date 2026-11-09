@@ -932,7 +932,7 @@ onchange="nf_r2=parseFloat(this.value);document.getElementById('nf_r2').textCont
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es" onerror="this.style.display='none';"></a>
-<p title="(31.10.2026)" style="text-align:center">mm-bem v3.12 (2025-2026)</p>
+<p title="(9.11.2026)" style="text-align:center">mm-bem v3.13 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -2984,6 +2984,20 @@ function outline2msh2(s,nn) {
 	return mfrustum(resample(w.map(wi=>wi/2),n),resample(h.map(hi=>hi/2),n),resample(x,n),resample(y,n),resample(z,n));
 }
 
+function osphere(a, n=7, b, c) {
+	var x=[];
+	b = b||a;
+        c = c||b;
+	for(i=0; i<n; i++) {
+		x.push([-a*Math.cos(i*Math.PI/(n-1)),0,0,
+			2*b*Math.sin(i*Math.PI/(n-1)),2*c*Math.sin(i*Math.PI/(n-1))])
+	}
+	s=""
+	for(i=0;i<n;i++) {
+		s += x[i][0]+'\t'+x[i][1]+'\t'+x[i][2]+'\t'+x[i][3]+'\t'+x[i][4]+'\n'
+	}
+	return outline2msh2(s);
+}
 
 files = {};
 function file(s) {return files[s];}
