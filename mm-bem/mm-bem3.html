@@ -2983,17 +2983,82 @@ function outline2msh2(s,nn) {
 	var n = nn||x.length;
 	return mfrustum(resample(w.map(wi=>wi/2),n),resample(h.map(hi=>hi/2),n),resample(x,n),resample(y,n),resample(z,n));
 }
-
-function osphere(r, n=7) {
+function outline2msh2(s, nn) {
+    const lines = s.trim().split("\n").filter(line => line.trim() !== "" && !line.trim().startsWith("#"));
+    const rows = lines.map(line => line.trim().split(/[\s,;]+/).map(Number));
+    const numCols = rows[0].length;
+    const columns = Array.from({length: numCols}, (_, j) => rows.map(row => row[j]));
+    let x = columns[0];
+    let z = columns[1];
+    let y = columns[2];
+    let h = columns[3]; 
+    let w = columns[4];
+    let e1 = numCols > 5 ? columns[5] : Array(x.length).fill(1);
+    let e2 = numCols > 6 ? columns[6] : numCols>5 ? [...e1] : Array(x.length).fill(1);
+    e1 = e1.map(val => (isNaN(val) || val === undefined) ? 1 : val);
+    e2 = e2.map(val => (isNaN(val) || val === undefined) ? 1 : val);
+    const xoff = (Math.min(...x) + Math.max(...x)) / 2;
+    x = x.map(xi => xoff - xi); 
+    const n = nn || x.length;
+    return mfrustum2(
+        resample(w.map(wi => wi / 2), n),
+        resample(h.map(hi => hi / 2), n),
+        resample(x, n),
+        resample(y, n),
+        resample(z, n),
+        resample(e1, n),
+        resample(e2, n)
+    );
+}
+// --- outline generator functions ---
+/*
+function getRadAngle(param, i, totalSteps) {
+        if (!Array.isArray(param)) {return (param * Math.PI) / 180;}
+        if (param.length === 0) return 0;
+        if (param.length === 1) return (param[0] * Math.PI) / 180;
+        if (param.length === totalSteps) {return (param[i] * Math.PI) / 180;}
+        const progress = 1 - (i / (totalSteps - 1)); // Wartość od 0.0 do 1.0
+        const exactIndex = progress * (param.length - 1);
+        const indexLow = Math.floor(exactIndex);
+        const indexHigh = Math.min(indexLow + 1, param.length - 1);
+        const weight = exactIndex - indexLow;
+        const interpolatedAngle = param[indexLow] * (1-weight) + param[indexHigh] * weight;
+        return (interpolatedAngle * Math.PI) / 180;
+}
+*/
+function getDynamicParam(param, i, totalSteps, defaultValue = 1) {
+        if (!Array.isArray(param)) return param;
+        if (param.length === 0) return defaultValue;
+        if (param.length === 1) return param[0];
+        const progress = 1 - (i / (totalSteps - 1)); 
+        const exactIndex = progress * (param.length - 1);
+        const indexLow = Math.floor(exactIndex);
+        const indexHigh = Math.min(indexLow + 1, param.length - 1);
+        const weight = exactIndex - indexLow;
+        return param[indexLow] * (1 - weight) + param[indexHigh] * weight;
+}
+// --- [osphere([0.01905,0.01905/3,0.01905/7],15,[20,20,10,10,10]),[0,0,0]]
+function osphere(r, n=7, alpha=0, beta=0, e1=1, e2=undefined) {
 	var x=[], a=r, b=r, c=r;
         if(Array.isArray(r)) {a=r[0]; b=r.length>1?r[1]:a; c=r.length>2?r[2]:b;}
+        if(n<3) {n=3;}
+	if(e2===undefined) e2 = e1;
 	for(i=0; i<n; i++) {
-		x.push([-a*Math.cos(i*Math.PI/(n-1)), 0, 0,
-			2*b*Math.sin(i*Math.PI/(n-1)), 2*c*Math.sin(i*Math.PI/(n-1))])
+	        const radA = (getDynamicParam(alpha, i, n, 0) * Math.PI) / 180;
+        	const radB = (getDynamicParam(beta, i, n, 0) * Math.PI) / 180;
+	        const curE1 = getDynamicParam(e1, i, n, 1);
+        	const curE2 = getDynamicParam(e2, i, n, 1);
+		const baseX = -a*Math.cos(i*Math.PI/(n-1))
+		x.push([ baseX*Math.cos(radA)*Math.cos(radB), 
+			 baseX*Math.sin(radB), 
+			 baseX*Math.sin(radA),
+			 2*b*Math.sin(i*Math.PI/(n-1)), 
+			 2*c*Math.sin(i*Math.PI/(n-1)),
+			 curE1,curE2]);
 	}
 	s=""
 	for(i=0;i<n;i++) {
-		s += x[i][0]+'\t'+x[i][1]+'\t'+x[i][2]+'\t'+x[i][3]+'\t'+x[i][4]+'\n'
+		s += x[i].join('\t')+'\n';
 	}
 	return outline2msh2(s);
 }
@@ -4617,6 +4682,50 @@ function mfrustum(ww = [1,1,1], hh = [1,1,1], xx=[0,0,0], yy=[0,0,0], zz = [3,3,
 	    n += 2*N + 2;
 	}
     return [vx,fx];
+}
+function mfrustum2(ww=[1,1,1], hh=[1,1,1], xx=[0,0,0], yy=[0,0,0], zz=[3,3,3], ee1=[], ee2=[], N=24, W=1) {
+    var vx=[], fx=[];
+    var n=0, nW=W||1;
+    var w = every(ww,nW);
+    var h = every(hh,nW);
+    var x = every(xx,nW);
+    var y = every(yy,nW);
+    var z = every(zz,nW);
+    var e1 = ee1.length > 0 ? every(ee1, nW) : Array(w.length).fill(1);
+    var e2 = ee2.length > 0 ? every(ee2, nW) : Array(w.length).fill(1);
+    for(var j=0; j<w.length; j+=1) {
+        if(w[j]==0) {w[j]=0.0001; console.log('Warning: w['+j+']==0');}
+        if(h[j]==0) {h[j]=0.0001; console.log('Warning: h['+j+']==0');}
+        if(j==0) continue; 
+        var mode = 0;
+        if(j==1) mode|=1;
+        if(j==w.length-1) mode|=2;
+        for(var i=0; i<N; i++) {
+            var angle = 2 * Math.PI * i / N;
+            var sinA = Math.sin(angle);
+            var cosA = Math.cos(angle);
+            for(var k=j-1; k<=j; k+=1) {  // two times
+                var pow1 = e1[k];
+                var pow2 = e2[k];
+                var superSin = Math.sign(sinA) * Math.pow(Math.abs(sinA), pow1);
+                var superCos = Math.sign(cosA) * Math.pow(Math.abs(cosA), pow2);
+                var a = 0;
+                var b = w[k] * superSin;
+                var c = h[k] * superCos;
+                vx.push([a+x[k], b+y[k], c+z[k]]);
+            } 
+        }
+        vx.push([x[j-1], y[j-1], z[j-1]]); 
+        vx.push([x[j], y[j], z[j]]);
+        for(var i=0; i<N; i++) {
+            fx.push([n+2*i, n+2*i+1, n+(2*i+2)%(2*N)]); 
+            fx.push([n+(2*i+2)%(2*N), n+2*i+1, n+(2*i+3)%(2*N)]);
+            if(mode&1) fx.push([n+2*i, n+(2*i+2)%(2*N), n+2*N]); 
+            if(mode&2) fx.push([n+2*i+1, n+2*N+1, n+(2*i+3)%(2*N)]);
+        }
+        n += 2*N + 2;
+    }
+    return [vx, fx];
 }
 
 function msh_join(vx1,fx1,vx2,fx2) {
