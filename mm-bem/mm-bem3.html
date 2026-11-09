@@ -2984,13 +2984,12 @@ function outline2msh2(s,nn) {
 	return mfrustum(resample(w.map(wi=>wi/2),n),resample(h.map(hi=>hi/2),n),resample(x,n),resample(y,n),resample(z,n));
 }
 
-function osphere(a, n=7, b, c) {
-	var x=[];
-	b = b||a;
-        c = c||b;
+function osphere(r, n=7) {
+	var x=[], a=r, b=r, c=r;
+        if(Array.isArray(r)) {a=r[0]; b=r.length>1?r[1]:a; c=r.length>2?r[2]:b;}
 	for(i=0; i<n; i++) {
-		x.push([-a*Math.cos(i*Math.PI/(n-1)),0,0,
-			2*b*Math.sin(i*Math.PI/(n-1)),2*c*Math.sin(i*Math.PI/(n-1))])
+		x.push([-a*Math.cos(i*Math.PI/(n-1)), 0, 0,
+			2*b*Math.sin(i*Math.PI/(n-1)), 2*c*Math.sin(i*Math.PI/(n-1))])
 	}
 	s=""
 	for(i=0;i<n;i++) {
