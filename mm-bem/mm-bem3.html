@@ -4713,7 +4713,7 @@ function mfrustum2a(ww=[1,1,1], hh=[1,1,1], xx=[0,0,0], yy=[0,0,0], zz=[3,3,3], 
     return [vx, fx];
 }
 // --- outline conversion ---
-function mfrustum2(ww,hh,xx,yy,zz,ee1,ee2, N = 24, W = 1) {
+function mfrustum2(ww, hh, xx, yy, zz, ee1=[], ee2=[], N = 24, W = 1) {
     const vx = [], fx = [];
     const nW = W || 1;
     const x = every(xx, nW);
@@ -4725,7 +4725,7 @@ function mfrustum2(ww,hh,xx,yy,zz,ee1,ee2, N = 24, W = 1) {
     const e1 = ee1.length > 0 ? every(ee1, nW) : ones;
     const e2 = ee2.length > 0 ? every(ee2, nW) : ones;
     for (let i = 0; i < w.length; i++) {
-        w[i] /= 2.0; h[i] /= 2.0;
+        // w[i] /= 2.0; h[i] /= 2.0;
     }
     const sin_a = new Array(N);
     const cos_a = new Array(N);
