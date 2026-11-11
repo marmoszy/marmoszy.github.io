@@ -932,7 +932,7 @@ onchange="nf_r2=parseFloat(this.value);document.getElementById('nf_r2').textCont
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es" onerror="this.style.display='none';"></a>
-<p title="(9.11.2026)" style="text-align:center">mm-bem v3.13 (2025-2026)</p>
+<p title="(11.11.2026)" style="text-align:center">mm-bem v3.14 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -2967,7 +2967,7 @@ function outline2msh(s,nn) {
 	return msh_flush();	
 }
 
-function outline2msh2(s,nn) {
+function outline2msh2old(s,nn) {
 	const lines = s.trim().split("\n").filter(line => line.trim() !== "" && !line.trim().startsWith("#"));
 	const rows = lines.map(line => line.trim().split(/[\s,;]+/).map(Number));
 	const numCols = rows[0].length;
@@ -3011,27 +3011,12 @@ function outline2msh2(s, nn) {
     );
 }
 // --- outline generator functions ---
-/*
-function getRadAngle(param, i, totalSteps) {
-        if (!Array.isArray(param)) {return (param * Math.PI) / 180;}
-        if (param.length === 0) return 0;
-        if (param.length === 1) return (param[0] * Math.PI) / 180;
-        if (param.length === totalSteps) {return (param[i] * Math.PI) / 180;}
-        const progress = 1 - (i / (totalSteps - 1)); // Wartość od 0.0 do 1.0
-        const exactIndex = progress * (param.length - 1);
-        const indexLow = Math.floor(exactIndex);
-        const indexHigh = Math.min(indexLow + 1, param.length - 1);
-        const weight = exactIndex - indexLow;
-        const interpolatedAngle = param[indexLow] * (1-weight) + param[indexHigh] * weight;
-        return (interpolatedAngle * Math.PI) / 180;
-}
-*/
 function getDynamicParam(param, i, totalSteps, defaultValue = 1) {
         if (!Array.isArray(param)) return param;
         if (param.length === 0) return defaultValue;
         if (param.length === 1) return param[0];
-        const progress = 1 - (i / (totalSteps - 1)); 
-        const exactIndex = progress * (param.length - 1);
+        const progress = 1 - (i/(totalSteps-1)); 
+        const exactIndex = progress * (param.length-1);
         const indexLow = Math.floor(exactIndex);
         const indexHigh = Math.min(indexLow + 1, param.length - 1);
         const weight = exactIndex - indexLow;
@@ -4683,7 +4668,7 @@ function mfrustum(ww = [1,1,1], hh = [1,1,1], xx=[0,0,0], yy=[0,0,0], zz = [3,3,
 	}
     return [vx,fx];
 }
-function mfrustum2(ww=[1,1,1], hh=[1,1,1], xx=[0,0,0], yy=[0,0,0], zz=[3,3,3], ee1=[], ee2=[], N=24, W=1) {
+function mfrustum2a(ww=[1,1,1], hh=[1,1,1], xx=[0,0,0], yy=[0,0,0], zz=[3,3,3], ee1=[], ee2=[], N=24, W=1) {
     var vx=[], fx=[];
     var n=0, nW=W||1;
     var w = every(ww,nW);
@@ -4724,6 +4709,88 @@ function mfrustum2(ww=[1,1,1], hh=[1,1,1], xx=[0,0,0], yy=[0,0,0], zz=[3,3,3], e
             if(mode&2) fx.push([n+2*i+1, n+2*N+1, n+(2*i+3)%(2*N)]);
         }
         n += 2*N + 2;
+    }
+    return [vx, fx];
+}
+// --- outline conversion ---
+function mfrustum2(ww,hh,xx,yy,zz,ee1,ee2, N = 24, W = 1) {
+    const vx = [], fx = [];
+    const nW = W || 1;
+    const x = every(xx, nW);
+    const z = every(zz, nW);
+    const y = every(yy, nW);
+    const h = every(hh, nW);
+    const w = every(ww, nW);
+    const ones = w.map(() => 1.0);
+    const e1 = ee1.length > 0 ? every(ee1, nW) : ones;
+    const e2 = ee2.length > 0 ? every(ee2, nW) : ones;
+    for (let i = 0; i < w.length; i++) {
+        w[i] /= 2.0; h[i] /= 2.0;
+    }
+    const sin_a = new Array(N);
+    const cos_a = new Array(N);
+    for (let i = 0; i < N; i++) {
+        sin_a[i] = Math.sin((2 * Math.PI * i) / N);
+        cos_a[i] = Math.cos((2 * Math.PI * i) / N);
+    }
+    const isZeroRadius = (idx) => {
+        return Math.abs(w[idx]) < 1e-9 && Math.abs(h[idx]) < 1e-9;
+    };
+    const addRing = (k) => {
+        const startIdx = vx.length;
+        for (let i = 0; i < N; i++) {
+            const ss = Math.sign(sin_a[i]) * Math.pow(Math.abs(sin_a[i]), e1[k]);
+            const sc = Math.sign(cos_a[i]) * Math.pow(Math.abs(cos_a[i]), e2[k]);
+            vx.push([x[k], w[k] * ss + y[k], h[k] * sc + z[k]]);
+        }
+        return startIdx;
+    };
+    const numSections = w.length;
+    if (numSections < 2) {
+        return [vx, fx];
+    }
+    const first = 0;
+    let prevIsPole = isZeroRadius(first);
+    let prevIdx;
+    if (prevIsPole) {
+        vx.push([x[first], y[first], z[first]]);
+        prevIdx = 0;
+    } else {
+        prevIdx = addRing(first);
+    }
+    for (let j = 1; j < numSections; j++) {
+        const currIsPole = isZeroRadius(j);
+        let currIdx;
+        if (currIsPole) {
+            currIdx = vx.length;
+            vx.push([x[j], y[j], z[j]]);
+            if (!prevIsPole) {
+                for (let i = 0; i < N; i++) {
+                    const iNext = (i + 1) % N;
+                    fx.push([prevIdx + i, currIdx, prevIdx + iNext]);
+                }
+            }
+        } else {
+            currIdx = addRing(j);
+            if (prevIsPole) {
+                for (let i = 0; i < N; i++) {
+                    const iNext = (i + 1) % N;
+                    fx.push([prevIdx, currIdx + i, currIdx + iNext]);
+                }
+            } else {
+                for (let i = 0; i < N; i++) {
+                    const iNext = (i + 1) % N;
+                    const p0 = prevIdx + i;
+                    const p1 = currIdx + i;
+                    const p2 = prevIdx + iNext;
+                    const p3 = currIdx + iNext;
+                    fx.push([p0, p1, p2]);
+                    fx.push([p2, p1, p3]);
+                }
+            }
+        }
+        prevIdx = currIdx;
+        prevIsPole = currIsPole;
     }
     return [vx, fx];
 }
