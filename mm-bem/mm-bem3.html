@@ -115,10 +115,10 @@ Full mm-bem package contains source codes in different programming languages for
 <optgroup id="prevmesh" label="Generated 3D backscattering length">
 </optgroup>
 <optgroup label="Sphere">
-  <option value="[sphere(0.01905,4),[0,0,0]]" selected>Low resolution sphere</option>
-  <option value="[sphere(0.01905,6),[0,0,0]]">Medium resolution sphere</option>
-  <option value="[sphere(0.01905,8),[0,0,0]]">High resolution sphere</option>
-  <option value="[sphere(0.01905,10),[0,0,0]]">Very high resolution sphere</option>
+  <option value="[sphere(0.01905,4)]" selected>Low resolution sphere</option>
+  <option value="[sphere(0.01905,6)]">Medium resolution sphere</option>
+  <option value="[sphere(0.01905,8)]">High resolution sphere</option>
+  <option value="[sphere(0.01905,10)]">Very high resolution sphere</option>
   <option value="soft_sphere(0.01905)">Exact sphere (theory)*</option>
   <option value="[sphere(0.01905,6),[0,0,0],mul(Rz(-22),Sxyz(3,0.3,1))]">Scaled sphere</option>
 </optgroup>
@@ -173,6 +173,7 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="[mfrustum([0.007,0.0115,0.0088,0.007,0.0053,0.0035,0.0008],[0.0018,0.0053,0.008,0.0062,0.0044,0.0026,0.0008],[0.0487,0.0532,0.0621,0.0709,0.0798,0.0887,0.0958],[0,0,0,0,0,0,0],[-0.0026,-0.00175,0.0005,0.0023,0.0049,0.0067,0.00679]), [-0.07, 0, 0]]">Shifted multiple frustum</option>
 -->
   <option value="[mfrustum([0.002,0.005,0.005,0.005,0.002],[0.002,0.0075,0.0075,0.0075,0.002],[-2*0.01905,-0.01905,0,0.01905,2*0.01905],[0,0,0,0,0],[0.02,0.01,0.005,0.0025,0]),[0,0,0]]">Multiple frustums</option>
+  <option value="[osphere([0.01905,0.01905/3,0.01905/7],14,[20,20,10,10],[0,0,0,0],0.5,0.5)]" title="osphere([el_a,el_b,el_c],n_crosssections,[y_angles],[z-angles],w_power,h_power)">Outline generator</option>
 </optgroup>
 <optgroup id="files" label="Opened files">
 </optgroup>
@@ -183,7 +184,7 @@ function on_reduce() {reduce_msh^=1; change();}
 </script>
 <br><span style="margin-left:32px"></span> or <input accept=".msh,.stl,.obj,.json,.tsv,.gz" id="openfile" title="Load from msh (2.0), stl, obj or echoSMs-json" type="file" onchange="readFile(this);" multiple/>
 
-<textarea id="obj" style="width:408px; height:92px; vertical-align: top;" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905,4),[0,0,0]]</textarea>
+<textarea id="obj" style="width:408px; height:92px; vertical-align: top;" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905,4)]</textarea>
 <div style="display: inline-flex; flex-direction: column; vertical-align: top; gap: 0px;">
     <div style="margin-top: -12px;">
     <input type="button" title="increase target size" value="+" onclick="changeSize(document.getElementById('obj'),0.1)">
