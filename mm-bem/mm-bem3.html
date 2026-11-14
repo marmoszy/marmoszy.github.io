@@ -173,7 +173,8 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="[mfrustum([0.007,0.0115,0.0088,0.007,0.0053,0.0035,0.0008],[0.0018,0.0053,0.008,0.0062,0.0044,0.0026,0.0008],[0.0487,0.0532,0.0621,0.0709,0.0798,0.0887,0.0958],[0,0,0,0,0,0,0],[-0.0026,-0.00175,0.0005,0.0023,0.0049,0.0067,0.00679]), [-0.07, 0, 0]]">Shifted multiple frustum</option>
 -->
   <option value="[mfrustum([0.002,0.005,0.005,0.005,0.002],[0.002,0.0075,0.0075,0.0075,0.002],[-2*0.01905,-0.01905,0,0.01905,2*0.01905],[0,0,0,0,0],[0.02,0.01,0.005,0.0025,0]),[0,0,0]]">Multiple frustums</option>
-  <option value="[osphere([0.01905,0.01905/3,0.01905/7],14,[20,20,10,10],[0,0,0,0],0.5,0.5)]" title="osphere([el_a,el_b,el_c],n_crosssections,[y_angles],[z-angles],w_power,h_power)">Outline generator</option>
+  <option value="[osphere([0.01905,0.01905/3,0.01905/7],14,[20,20,10,10],[0,0,0,0],0.5,0.5)]" title="outline sphere: osphere([el_a,el_b,el_c],n_crosssections,[y_angles],[z-angles],w_power,h_power)">Outline generator</option>
+  <option value="[nsphere(0.01905,1)]" title="nurbs sphere: nsphere(radius,n_divisions)">Nurbs sphere</option>
 </optgroup>
 <optgroup id="files" label="Opened files">
 </optgroup>
@@ -184,7 +185,7 @@ function on_reduce() {reduce_msh^=1; change();}
 </script>
 <br><span style="margin-left:32px"></span> or <input accept=".msh,.stl,.obj,.json,.tsv,.gz" id="openfile" title="Load from msh (2.0), stl, obj or echoSMs-json" type="file" onchange="readFile(this);" multiple/>
 
-<textarea id="obj" style="width:408px; height:92px; vertical-align: top;" onchange="change(this.value)" title="You can modify the values and click outside to update">[sphere(0.01905,4)]</textarea>
+<textarea id="obj" style="width:408px; height:92px; vertical-align: top;" onchange="change(this.value)" title="You can modify the values and click outside to update (or ^Enter)" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();this.dispatchEvent(new Event('change'));}">[sphere(0.01905,4)]</textarea>
 <div style="display: inline-flex; flex-direction: column; vertical-align: top; gap: 0px;">
     <div style="margin-top: -12px;">
     <input type="button" title="increase target size" value="+" onclick="changeSize(document.getElementById('obj'),0.1)">
@@ -946,6 +947,25 @@ anlave@doctor.upv.es" onerror="this.style.display='none';"></a>
 
 <script>
 var echoSMs_url = "https://echosms-data-store-app-ogogm.ondigitalocean.app/v2/";
+
+function U(mean, range=0) {return mean + (Math.random() - 0.5) * range;}
+function N(mean, range=0) {
+  const stdDev = range / 6; // 99.7% in [mean-range/2, mean+range/2]
+  const min = mean-range/2, max = mean+range/2;
+  while (true) {
+    let u1 = 0, u2 = 0;
+    while (u1 === 0) u1 = Math.random(); // avoid log(0)
+    u2 = Math.random(); // Box-Muller (two uniform random variables) 
+    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    const val = mean + z0 * stdDev;
+    if (val >= min && val <= max) { // rejection sampling
+      return val;
+    }
+  }
+}
+function round(x) {return Math.round(x);}
+function floor(x) {return Math.floor(x);}
+function ceil(x) {return Math.ceil(x);}
 
 /*
 function loadJSON(path,fun) {
