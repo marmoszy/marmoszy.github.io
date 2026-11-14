@@ -172,7 +172,7 @@ Full mm-bem package contains source codes in different programming languages for
 [frustum([0.006,0.0021],[0.01,0.002],0.01905,24,2), [0, 0, 0.01905]]">Three elliptical frustums</option>
   <option value="[mfrustum([0.007,0.0115,0.0088,0.007,0.0053,0.0035,0.0008],[0.0018,0.0053,0.008,0.0062,0.0044,0.0026,0.0008],[0.0487,0.0532,0.0621,0.0709,0.0798,0.0887,0.0958],[0,0,0,0,0,0,0],[-0.0026,-0.00175,0.0005,0.0023,0.0049,0.0067,0.00679]), [-0.07, 0, 0]]">Shifted multiple frustum</option>
 -->
-  <option value="[mfrustum([0.002,0.005,0.005,0.005,0.002],[0.002,0.0075,0.0075,0.0075,0.002],[-2*0.01905,-0.01905,0,0.01905,2*0.01905],[0,0,0,0,0],[0.02,0.01,0.005,0.0025,0]),[0,0,0]]">Multiple frustums</option>
+  <option value="[mfrustum([0.002,0.005,0.005,0.005,0.002],[0.002,0.0075,0.0075,0.0075,0.002],[-2*0.01905,-0.01905,0,0.01905,2*0.01905],[0,0,0,0,0],[0.02,0.01,0.005,0.0025,0]),[0,0,0]]" title="multiple frustums: mfrustum(w[],h[],x[],y[],z[])">Multiple frustums</option>
   <option value="[osphere([0.01905,0.01905/3,0.01905/7],14,[20,20,10,10],[0,0,0,0],0.5,0.5)]" title="outline sphere: osphere([el_a,el_b,el_c],n_crosssections,[y_angles],[z-angles],w_power,h_power)">Outline generator</option>
   <option value="[nsphere(0.01905,1)]" title="nurbs sphere: nsphere(radius,n_divisions)">Nurbs sphere</option>
 </optgroup>
@@ -948,8 +948,12 @@ anlave@doctor.upv.es" onerror="this.style.display='none';"></a>
 <script>
 var echoSMs_url = "https://echosms-data-store-app-ogogm.ondigitalocean.app/v2/";
 
-function U(mean, range=0) {return mean + (Math.random() - 0.5) * range;}
+function U(mean, range=0) {
+  range = (typeof range==='string')?(parseFloat(range)*(range.includes('%')?(0.01*mean):1)):range;  
+  return mean + (Math.random() - 0.5) * range;
+}
 function N(mean, range=0) {
+  range = (typeof range==='string')?(parseFloat(range)*(range.includes('%')?(0.01*mean):1)):range;  
   const stdDev = range / 6; // 99.7% in [mean-range/2, mean+range/2]
   const min = mean-range/2, max = mean+range/2;
   while (true) {
@@ -3757,7 +3761,7 @@ function change1() {
 	} 	
 */
 	if(obj[0]=='[') {
-		O = eval('['+obj+']');
+		O = eval('['+obj.replace(/\d+(?:\.\d+)?%/g, '"$&"')+']');
 		O.forEach(o => msh_str(o));
 		document.getElementById("msh").value=msh_flush();
 	} else if(obj.endsWith(".msh")||obj.endsWith(".stl")||obj.endsWith(".obj")||obj.endsWith(".tsv")) {
