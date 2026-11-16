@@ -521,7 +521,8 @@ onclick='downloadSvgAsPng(document.getElementById("svg"),"mm-bem-polar.png",2);i
 <table style="padding:0">	
 	<tr>
 		<td>
-<textarea id="msh" style="width:480px;height:440px;background-color:#B0D2A2;#e6fff2">
+<textarea id="msh" style="width:480px;height:440px;background-color:#B0D2A2;#e6fff2" 
+onkeydown="if(event.ctrlKey&&event.key==='Enter'){event.preventDefault();change3();}">
 </textarea>
 <br>
 <input type=button title="Save surface model to GMSH msh v2.2 ASCII file"value="Save to msh" onclick='writeFile(document.getElementById("msh").value,"mm-bem.msh");' /> 
@@ -934,7 +935,7 @@ onchange="nf_r2=parseFloat(this.value);document.getElementById('nf_r2').textCont
 <a href="https://www.upv.es/en"><img style="height:52px;float:right" src="marca_UPV_espacio_reducido.svg" title="iparjona@upvnet.upv.es
 vespinos@fis.upv.es
 anlave@doctor.upv.es" onerror="this.style.display='none';"></a>
-<p title="(14.11.2026)" style="text-align:center">mm-bem v3.15 (2025-2026)</p>
+<p title="(16.11.2026)" style="text-align:center">mm-bem v3.16 (2025-2026)</p>
 
 		</td>
 	</tr>
@@ -3842,7 +3843,14 @@ function change1() {
 	if(document.getElementById("obj").value.startsWith("lbs:")) {
 		return;
 	}
-// start calc
+	calculate();
+}
+
+function change3() {
+	calculate();
+}
+
+function calculate() {  // start calculations
 	var eng = document.getElementById("rule").value;
 	document.getElementById("txt").value="Calculating ...\n";
 	let start = Date.now()/1000; 
@@ -9205,12 +9213,29 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
   }
   var LBS2 = [];
 
-  const n = parseInt(lines[4]);
-  const v = lines.slice(5, 5 + n).map(line => line.trim().split(/\s+/).slice(1, 4).map(parseFloat));
-  var m = parseInt(lines[n + 7]);
-  const e = lines.slice(n + 8, n + 8 + m).map(line =>
-    line.trim().split(/\s+/).slice(5, 9).map(x => parseInt(x) - 1)  // 0-based indexing
-  );
+// ---- meshes parser ----
+  var meshes = [], l = 0;
+  var v, e, m, n;
+  while(l < lines.length) {
+    if(lines[l].trim() == '$MeshFormat') { 
+console.log("wasm_soft_worker: ",lines[l].trim(),lines[l].trim() == '$MeshFormat')
+      n = parseInt(lines[l+4]);
+      v = lines.slice(l+5, l+5+n).map(line => line.trim().split(/\s+/).slice(1, 4).map(parseFloat));
+      m = parseInt(lines[l+n+7]);
+      e = lines.slice(l+n+8, l+n+8+m).map(line =>
+    line.trim().split(/\s+/).slice(5, 9).map(x => parseInt(x)-1));  // 0-based indexing 
+      l += n + m + 9;
+      meshes.push( {v, e} )
+     } else {
+      l+=1;
+     }
+  }
+  if(meshes.length<1) return;
+// ---- mesh loop ----
+var s=''; // string result
+for(var mi=0; mi< meshes.length; mi++) {
+  var {v, e} = meshes[mi];
+  var n = v.length, m = e.length;
 
   // Triangle centers
 
@@ -9505,7 +9530,7 @@ async function wasm_soft_worker(lines, th, f0, c0, ph, rr, method, solver, rest)
         var lbs = Math.sqrt(clbs.re**2+clbs.im**2); // clbs.abs();
 
         // Return results
-        var s = '# th0=' + th0 + ' ph0=' + ph0 + ' f0=' + f0 + ' c0=' + c0 + ' lbs=' + lbs.toFixed(6);
+        s += '# th0=' + th0 + ' ph0=' + ph0 + ' f0=' + f0 + ' c0=' + c0 + ' lbs=' + lbs.toFixed(6);
         s += ' (' + clbs.re.toFixed(6) + ',' + clbs.im.toFixed(6) + ')\n';
         for (let i = 0; i < psc.length; i++) {
           s += l * i + ' ' + Math.sqrt(psc[i].re**2+psc[i].im**2).toFixed(6) + '\n';
@@ -9612,6 +9637,8 @@ if(solver==5 || solver==6 || solver==7) {
     }
     postMessage(JSON.stringify(s));
   }
+
+} // end for meshes
 
   return s;
 }
