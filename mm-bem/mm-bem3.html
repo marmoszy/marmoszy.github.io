@@ -3753,14 +3753,18 @@ var scan_str='';
 
 function change() {change1();}
 function change1() {
-//console.log("change");
-	var obj = document.getElementById("obj").value;
+    //console.log("change");
+    var obj = document.getElementById("obj").value;
 /*
 	if((obj=="generated_mesh") && (generated_mesh=='')) {
 		alert('Mesh not generated yet!\nTo generated mesh, please select both plane wave direction angles to one of its scanning option. It will finally generate 3D mesh of backscattering length.');
 		return;
 	} 	
 */
+    const blocks = obj.match(/\{[\s\S]*?\}/g)?.map(b=>b.slice(1,-1)) || [obj];
+    console.log("blocks:",blocks.length)
+    for(var bi=0; bi<blocks.length; bi++) { obj = blocks[bi];
+
 	if(obj[0]=='[') {
 		O = eval('['+obj.replace(/\d+(?:\.\d+)?%/g, '"$&"')+']');
 		O.forEach(o => msh_str(o));
@@ -3844,6 +3848,7 @@ function change1() {
 		return;
 	}
 	calculate();
+    } // end of blocks
 }
 
 function change3() {
