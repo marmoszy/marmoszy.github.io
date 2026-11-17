@@ -175,6 +175,9 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="[mfrustum([0.002,0.005,0.005,0.005,0.002],[0.002,0.0075,0.0075,0.0075,0.002],[-2*0.01905,-0.01905,0,0.01905,2*0.01905],[0,0,0,0,0],[0.02,0.01,0.005,0.0025,0]),[0,0,0]]" title="multiple frustums: mfrustum(w[],h[],x[],y[],z[])">Multiple frustums</option>
   <option value="[osphere([0.01905,0.01905/3,0.01905/7],14,[20,20,10,10],[0,0,0,0],0.5,0.5)]" title="outline sphere: osphere([el_a,el_b,el_c],n_crosssections,[y_angles],[z-angles],w_power,h_power)">Outline generator</option>
   <option value="[nsphere(0.01905,1)]" title="nurbs sphere: nsphere(radius,n_divisions)">Nurbs sphere</option>
+
+  <option value="{[osphere([0.01905,0.01905/3,0.01905/7],14,[20,10])]},{[osphere([0.01905,0.01905/3,0.01905/7],14,[20,10]),[0,0,0],Rz(-10)]},{[osphere([0.01905,0.01905/3,0.01905/7],14,[20,10]),[0,0,0],Rz(-20)]},{[osphere([0.01905,0.01905/3,0.01905/7],14,[20,10]),[0,0,0],Rz(-30)]},{[osphere([0.01905,0.01905/3,0.01905/7],14,[20,10]),[0,0,0],Rz(-40)]}" title="sequential calculations format: {object1_def},{object2_def},{object3_def},...">Sequential calculations example</option>
+
 </optgroup>
 <optgroup id="files" label="Opened files">
 </optgroup>
@@ -3752,7 +3755,7 @@ postMessage('[Soft sphere exact solution: ...]');
 var scan_str='';
 
 function change() {change1();}
-function change1() {
+async function change1() {
     //console.log("change");
     var obj = document.getElementById("obj").value;
 /*
@@ -3763,8 +3766,11 @@ function change1() {
 */
     const blocks = obj.match(/\{[\s\S]*?\}/g)?.map(b=>b.slice(1,-1)) || [obj];
     console.log("blocks:",blocks.length)
-    for(var bi=0; bi<blocks.length; bi++) { obj = blocks[bi];
-
+    if(blocks.length>1 && !confirm("Do you want to calculate sequentially "+blocks.length+" tasks?"))
+        return;
+    for(var bi=0; bi<blocks.length; bi++) { 
+	document.getElementById("plots").innerHTML = "Data visualisation ("+(bi+1)+")";
+        obj = blocks[bi];
 	if(obj[0]=='[') {
 		O = eval('['+obj.replace(/\d+(?:\.\d+)?%/g, '"$&"')+']');
 		O.forEach(o => msh_str(o));
@@ -3847,8 +3853,14 @@ function change1() {
 	if(document.getElementById("obj").value.startsWith("lbs:")) {
 		return;
 	}
-	calculate();
+        if(blocks.length>1 && bi<blocks.length-1) {
+		await calculate();
+		await new Promise(resolve => setTimeout(resolve, 1000));
+	} else {
+		calculate();
+	}
     } // end of blocks
+    document.getElementById("plots").innerHTML = "Data visualisation";
 }
 
 function change3() {
@@ -3856,6 +3868,7 @@ function change3() {
 }
 
 function calculate() {  // start calculations
+    return new Promise((resolve, reject) => {
 	var eng = document.getElementById("rule").value;
 	document.getElementById("txt").value="Calculating ...\n";
 	let start = Date.now()/1000; 
@@ -3925,7 +3938,11 @@ function calculate() {  // start calculations
 		worker.onmessage = function(event) {
 			var s = event.data;
 			if(s.startsWith('[') && s.endsWith(']')) {
-				document.getElementById("txt").value += s.slice(1,-1)+'\n';
+      				if(s=="[]") {
+				  resolve(event.data);   // return fullfiled promise
+				} else {
+				  document.getElementById("txt").value += s.slice(1,-1)+'\n';
+                                }
 			} else {
 				var m = parseInt(document.getElementById("method").value);
 				var sol = parseInt(document.getElementById("solver")?.value);
@@ -4031,6 +4048,7 @@ function calculate() {  // start calculations
 		document.getElementById("txt").value="";
 		plot();
 	}
+    }); // end of promise
 }
 
 function p0ToP1_area(vx, fx, vn) { //_area
@@ -9235,7 +9253,8 @@ console.log("wasm_soft_worker: ",lines[l].trim(),lines[l].trim() == '$MeshFormat
       l+=1;
      }
   }
-  if(meshes.length<1) return;
+  if(meshes.length<1) {postMessage("[]"); return;}
+
 // ---- mesh loop ----
 var s=''; // string result
 for(var mi=0; mi< meshes.length; mi++) {
@@ -9596,7 +9615,7 @@ if(solver==5 || solver==6 || solver==7) {
               [[RR[j] * Math.cos(l * i * nn * pi / 180 + pi) + cx], [RR[j] * Math.sin(l * i * nn * pi / 180 + pi) + cy], [0 + cz]]));
             const Sff1 = grid1.map(v => x.map(xj => {
               const r = dist(xj, v);
-              return new Complex(Math.cos(k * r) / (4 * pi * r), Math.sin(k * r) / (4 * pi * r));
+              return new Complex(Math.cos(k*r)/(4*pi*r), Math.sin(k*r)/(4*pi*r));
             }));
             psc1 = multiplyMatrixVector(Sff1, phi);
             s += '## ';
@@ -9645,6 +9664,7 @@ if(solver==5 || solver==6 || solver==7) {
 
 } // end for meshes
 
+  postMessage("[]"); /* MM 17.11.2026: worker finished */
   return s;
 }
 
