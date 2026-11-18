@@ -3276,10 +3276,11 @@ var prevs={},prevs0={};
 function psave(pname) {
 	var v = document.getElementById("out2").value;
 	var el = document.getElementById("prevcalc");
+        var n = document.querySelector("#prevcalc").querySelectorAll("option").length+1;
 	if(el) {
 		prevs[pname] = document.getElementById("txt").value;
 //		el.innerHTML =  '<option value="prevs[\''+pname+'\']" title="'+pname+'">'+pname.slice(0,40)+'' + '</option>' + el.innerHTML;
-		el.innerHTML =  '<option value="'+prevs[pname]+'" title="'+pname+'">'+pname.slice(0,40)+'' + '</option>' + el.innerHTML;
+		el.innerHTML =  '<option value="'+prevs[pname]+'" title="'+pname+'">'+n+". "+pname.slice(0,40)+'' + '</option>' + el.innerHTML;
 		var a = el.innerHTML.match(/<option\b[^>]*>[\s\S]*?<\/option>/gi)
 		a = [...new Set(a)];
 		el.innerHTML = a.join("");
@@ -3773,7 +3774,7 @@ function expandAll(obj) {
 	a=parseFloat(a); b=parseFloat(b); step=parseFloat(step);
 	if(step==0) step=1;
 	if((step<0 && a<b) || (step>0 && a>b)) step=-step;
-	obj = Array.from({length:Math.floor((b-a)/step)+1},(_,i) => obj.replace(m,+a+i*step));
+	obj = Array.from({length:Math.floor((b-a)/step)+1},(_,i) => obj.replace(m,Number((+a+i*step).toFixed(8))));
         return obj.flatMap(expandAll);
   } else {
 	return [obj];
@@ -3785,25 +3786,29 @@ var txtContent=[];
 function change() {change1();}
 async function change1() {
     //console.log("change");
-    var obj = document.getElementById("obj").value;
+    var objString = document.getElementById("obj").value;
 /*
 	if((obj=="generated_mesh") && (generated_mesh=='')) {
 		alert('Mesh not generated yet!\nTo generated mesh, please select both plane wave direction angles to one of its scanning option. It will finally generate 3D mesh of backscattering length.');
 		return;
 	} 	
 */
-    var obj = expandAll(obj);
+    var obj = expandAll(objString);
     if(Array.isArray(obj)) { obj = "{"+obj.join("},{")+"}";}
     if(obj[0]=='{' && obj[1]=='{') {obj=obj.slice(1,-1);}
     const blocks = obj.match(/\{[\s\S]*?\}/g)?.map(b=>b.slice(1,-1)) || [obj];
     console.log("blocks:",blocks.length)
     if(blocks.length>1 && !confirm("Do you want to calculate sequentially "+blocks.length+" objects?"))
         return;
+
+    if(/[\:\<]/.test(objString)) {
+	document.getElementById("plots").textContent = "Data visualisation: "+objString;
+    }
     txtContent = [];
     //if(blocks.length>1) alert(blocks);
     for(var bi=0; bi<blocks.length; bi++) { 
         obj = blocks[bi];
-	document.getElementById("plots").innerHTML = ""+(bi+1)+". "+obj;
+        document.getElementById("obj").value = obj;
 	if(obj[0]=='[') {
 		O = eval('['+obj.replace(/\d+(?:\.\d+)?%/g, '"$&"')+']');
 		O.forEach(o => msh_str(o));
@@ -3886,7 +3891,7 @@ async function change1() {
 	if(document.getElementById("obj").value.startsWith("lbs:")) {
 		return;
 	}
-        if(blocks.length>1 && bi<blocks.length-1) {
+        if(blocks.length>1 /*&& bi<blocks.length-1*/) {
 		await calculate();
 		await new Promise(resolve => setTimeout(resolve, 1000));
 	} else {
@@ -3894,10 +3899,14 @@ async function change1() {
 	}
 	txtContent.push(document.getElementById("txt").value);
     } // end of blocks
-    document.getElementById("plots").innerHTML = "Data visualisation";
+    if(blocks.length>1) {
+	console.log("Finishing: txtContent = "+txtContent.length);
+    }
     if(txtContent.length>1) {
        document.getElementById("txt").value = txtContent.join('\n');
     }
+    document.getElementById("obj").value = objString;
+    document.getElementById("plots").innerHTML = "Data visualisation";
 }
 
 function change3() {
