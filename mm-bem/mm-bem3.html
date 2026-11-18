@@ -192,7 +192,7 @@ function on_reduce() {reduce_msh^=1; change();}
 </script>
 <br><span style="margin-left:32px"></span> or <input accept=".msh,.stl,.obj,.json,.tsv,.gz" id="openfile" title="Load from msh (2.0), stl, obj or echoSMs-json" type="file" onchange="readFile(this);" multiple/>
 
-<textarea id="obj" style="width:408px; height:92px; vertical-align: top;" onchange="if(this.value==this._v)return;this._v=this.value;change(this.value)" title="You can modify the values and click outside to update (or ^Enter)" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();this.dispatchEvent(new Event('change'));}">[sphere(0.01905,4)]</textarea>
+<textarea id="obj" style="width:408px; height:92px; vertical-align: top;" onchange="if(this.value==this._v)return;this._v=this.value;change(this.value)" title="You can modify the values and click outside to update (or ^Enter)" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();this.blur();}">[sphere(0.01905,4)]</textarea>
 <div style="display: inline-flex; flex-direction: column; vertical-align: top; gap: 0px;">
     <div style="margin-top: -12px;">
     <input type="button" title="increase target size" value="+" onclick="changeSize(document.getElementById('obj'),0.1)">
@@ -3798,12 +3798,9 @@ async function change1() {
     if(obj[0]=='{' && obj[1]=='{') {obj=obj.slice(1,-1);}
     const blocks = obj.match(/\{[\s\S]*?\}/g)?.map(b=>b.slice(1,-1)) || [obj];
     console.log("blocks:",blocks.length)
-    if(blocks.length>1 && !confirm("Do you want to calculate sequentially "+blocks.length+" objects?"))
+    if(blocks.length>1 && !confirm("Do you want to calculate sequentially "+blocks.length+" objects?\n"+"{"+blocks.join("},{")+"}"))
         return;
 
-    if(/[\:\<]/.test(objString)) {
-	document.getElementById("plots").textContent = "Data visualisation: "+objString;
-    }
     txtContent = [];
     //if(blocks.length>1) alert(blocks);
     for(var bi=0; bi<blocks.length; bi++) { 
@@ -3904,6 +3901,7 @@ async function change1() {
     }
     if(txtContent.length>1) {
        document.getElementById("txt").value = txtContent.join('\n');
+       plot();
     }
     document.getElementById("obj").value = objString;
     document.getElementById("plots").innerHTML = "Data visualisation";
