@@ -3767,7 +3767,8 @@ var scan_str='';
 function expandAll(obj) {
   var [l, list] = obj.match(/<([^>]+)>/) || [];
   if (l) return ((list[0]=='N'||list[0]=='U')?eval(list):list).split(',').flatMap(v => expandAll(obj.replace(l, v)));
-  var [m, a, b, step=1] = obj.match(/(-?\d+):(-?\d+)(?::(-?\d+))?/) || [];
+  //var [m, a, b, step=1] = obj.match(/(-?\d+):(-?\d+)(?::(-?\d+))?/) || [];
+  var [m, a, b, step=1] = obj.match(/(-?\d+(?:\.\d+)?):(-?\d+(?:\.\d+)?)(?::(-?\d+(?:\.\d+)?))?/) || [];
   if(m) { 
 	a=parseFloat(a); b=parseFloat(b); step=parseFloat(step);
 	if(step==0) step=1;
@@ -3779,7 +3780,7 @@ function expandAll(obj) {
   }
 }
 
-var outContent=[];
+var txtContent=[];
 
 function change() {change1();}
 async function change1() {
@@ -3798,7 +3799,8 @@ async function change1() {
     console.log("blocks:",blocks.length)
     if(blocks.length>1 && !confirm("Do you want to calculate sequentially "+blocks.length+" objects?"))
         return;
-    outContent = [];
+    txtContent = [];
+    //if(blocks.length>1) alert(blocks);
     for(var bi=0; bi<blocks.length; bi++) { 
         obj = blocks[bi];
 	document.getElementById("plots").innerHTML = ""+(bi+1)+". "+obj;
@@ -3890,11 +3892,11 @@ async function change1() {
 	} else {
 		calculate();
 	}
-	outContent.push(document.getElementById("txt").value);
+	txtContent.push(document.getElementById("txt").value);
     } // end of blocks
     document.getElementById("plots").innerHTML = "Data visualisation";
-    if(outContent.length>1) {
-       document.getElementById("txt").value = outContent.join('\n');
+    if(txtContent.length>1) {
+       document.getElementById("txt").value = txtContent.join('\n');
     }
 }
 
