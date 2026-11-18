@@ -180,6 +180,7 @@ Full mm-bem package contains source codes in different programming languages for
   <option value="{[krm(0,1,5),[-0.105,0,0],Rx(-90)]},{[krm(1,1,5),[-0.166,0,0],Rx(-90)]},{[krm(2,1,20),[-0.256,0,0],Rx(-90)]},{[krm(3,1,10),[-0.156,0,0],Rx(-90)]},{[krm(5,1,15),[-0.156,0,0],Rx(-90)]},{[krm(7,1,15),[-0.11,0,0],Rx(-90)]},{[krm(9,1,15),[-0.145,0,0],Rx(-90)]},{[krm(11,1,15),[-0.135,0,0],Rx(-90)]}" title="batch calculations format: {object1_def},{object2_def},{object3_def},...">Target Set</option>
   <option value="[osphere([0.01905,0.01905/3,0.01905/7],14,[20,10]),[0,0,0],Rz(-30:30:5)]" title="Slice defined set: using start:end:step as param" >Slice-defined targets</option>
   <option value="[sphere(0.01905,<4,5,6,7,8>)]" title="List defined set: using <par1,par2,par3,...> as different parameters" >List-defined targets</option>
+  <option value="[sphere(<U(0.01905,0.01,10)>,6)]" title="Random function defined set: using <U(mean,range,list_size> as different parameters">Random function-defined targets</option>
 </optgroup>
 
 <optgroup id="files" label="Opened files">
@@ -191,7 +192,7 @@ function on_reduce() {reduce_msh^=1; change();}
 </script>
 <br><span style="margin-left:32px"></span> or <input accept=".msh,.stl,.obj,.json,.tsv,.gz" id="openfile" title="Load from msh (2.0), stl, obj or echoSMs-json" type="file" onchange="readFile(this);" multiple/>
 
-<textarea id="obj" style="width:408px; height:92px; vertical-align: top;" onchange="change(this.value)" title="You can modify the values and click outside to update (or ^Enter)" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();this.dispatchEvent(new Event('change'));}">[sphere(0.01905,4)]</textarea>
+<textarea id="obj" style="width:408px; height:92px; vertical-align: top;" onchange="if(this.value==this._v)return;this._v=this.value;change(this.value)" title="You can modify the values and click outside to update (or ^Enter)" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();this.dispatchEvent(new Event('change'));}">[sphere(0.01905,4)]</textarea>
 <div style="display: inline-flex; flex-direction: column; vertical-align: top; gap: 0px;">
     <div style="margin-top: -12px;">
     <input type="button" title="increase target size" value="+" onclick="changeSize(document.getElementById('obj'),0.1)">
@@ -955,31 +956,31 @@ anlave@doctor.upv.es" onerror="this.style.display='none';"></a>
 <script>
 var echoSMs_url = "https://echosms-data-store-app-ogogm.ondigitalocean.app/v2/";
 
-function U1(mean, range=0) {
-  range = (typeof range==='string')?(parseFloat(range)*(range.includes('%')?(0.01*mean):1)):range;  
-  return mean + (Math.random() - 0.5) * range;
-}
+// --- random functions
 function U(mean, range=0, len=1) {
-  range = (typeof range==='string') ? (parseFloat(range)*(range.includes('%')?(0.01*mean):1)) : range;
+  if (Array.isArray(mean)) return mean.flatMap(m => U(m, range, len)).join(',');
+  range=(typeof range==='string')?(parseFloat(range)*(range.includes('%')?(0.01*mean):1)):range;
   const gen = () => mean + (Math.random() - 0.5) * range;
-  return len > 1 ? Array.from({length: len}, gen) : gen();
+  return len > 1 ? Array.from({length: len}, gen).join(',') : gen();
+}
+function N(mean, range=0, len=1) {
+  if (Array.isArray(mean)) return mean.flatMap(m => N(m, range, len)).join(',');
+  range = (typeof range==='string') ? (parseFloat(range)*(range.includes('%')?(0.01*mean):1)) : range;  
+  const stdDev = range / 6;    // 99.7% in [mean-range/2, mean+range/2]
+  const min = mean - range/2, max = mean + range/2;
+  const gen = () => {
+    while (true) {
+      let u1 = 0, u2 = 0;
+      while (u1 === 0) u1 = Math.random(); // avoid log(0)
+      u2 = Math.random();
+      const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+      const val = mean + z0 * stdDev;
+      if (val >= min && val <= max) return val; // rejection sampling
+    }
+  };
+  return len > 1 ? Array.from({length: len}, gen).flat().join(',') : gen();
 }
 
-function N(mean, range=0) {
-  range = (typeof range==='string')?(parseFloat(range)*(range.includes('%')?(0.01*mean):1)):range;  
-  const stdDev = range / 6; // 99.7% in [mean-range/2, mean+range/2]
-  const min = mean-range/2, max = mean+range/2;
-  while (true) {
-    let u1 = 0, u2 = 0;
-    while (u1 === 0) u1 = Math.random(); // avoid log(0)
-    u2 = Math.random(); // Box-Muller (two uniform random variables) 
-    const z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
-    const val = mean + z0 * stdDev;
-    if (val >= min && val <= max) { // rejection sampling
-      return val;
-    }
-  }
-}
 function round(x) {return Math.round(x);}
 function floor(x) {return Math.floor(x);}
 function ceil(x) {return Math.ceil(x);}
@@ -3765,7 +3766,7 @@ var scan_str='';
 
 function expandAll(obj) {
   var [l, list] = obj.match(/<([^>]+)>/) || [];
-  if (l) return list.split(',').flatMap(v => expandAll(obj.replace(l, v)));
+  if (l) return ((list[0]=='N'||list[0]=='U')?eval(list):list).split(',').flatMap(v => expandAll(obj.replace(l, v)));
   var [m, a, b, step=1] = obj.match(/(-?\d+):(-?\d+)(?::(-?\d+))?/) || [];
   if(m) { 
 	a=parseFloat(a); b=parseFloat(b); step=parseFloat(step);
@@ -3777,6 +3778,8 @@ function expandAll(obj) {
 	return [obj];
   }
 }
+
+var outContent=[];
 
 function change() {change1();}
 async function change1() {
@@ -3795,6 +3798,7 @@ async function change1() {
     console.log("blocks:",blocks.length)
     if(blocks.length>1 && !confirm("Do you want to calculate sequentially "+blocks.length+" objects?"))
         return;
+    outContent = [];
     for(var bi=0; bi<blocks.length; bi++) { 
         obj = blocks[bi];
 	document.getElementById("plots").innerHTML = ""+(bi+1)+". "+obj;
@@ -3886,8 +3890,12 @@ async function change1() {
 	} else {
 		calculate();
 	}
+	outContent.push(document.getElementById("txt").value);
     } // end of blocks
     document.getElementById("plots").innerHTML = "Data visualisation";
+    if(outContent.length>1) {
+       document.getElementById("txt").value = outContent.join('\n');
+    }
 }
 
 function change3() {
